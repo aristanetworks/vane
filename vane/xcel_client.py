@@ -82,14 +82,14 @@ class XcelClient:
                 try:
                     yaml_data = yaml.safe_load(input_yaml)
                     logging.info(
-                        f"Inputed the following yaml: " f"{yaml_data}")
+                        f"Inputed the following yaml: {yaml_data}")
                     return yaml_data
                 except yaml.YAMLError as err_data:
                     logging.error(f"Error in YAML file. {err_data}")
                     sys.exit(1)
         except OSError as err_data:
             logging.error(
-                f"Defintions file: {yaml_file} not " f"found. {err_data}"
+                f"Defintions file: {yaml_file} not found. {err_data}"
             )
             sys.exit(1)
 
@@ -122,7 +122,7 @@ class XcelClient:
         """Use excel definitioins to parse informations from spreadsheet"""
 
         logging.info(
-            "Use excel definitioins to parse informations from " "spreadsheet"
+            "Use excel definitioins to parse informations from spreadsheet"
         )
         worksheet = self._return_worksheet("HostnameMgmt")
         self._parse_host_tab(worksheet)

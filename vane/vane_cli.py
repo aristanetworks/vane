@@ -216,7 +216,7 @@ def create_duts_from_topo(topology_file):
     try:
         with open(topology_file, 'r') as file:
             topology = yaml.safe_load(file)
-    except:
+    except FileNotFoundError:
         print("No valid topology file provided.")
         return
 

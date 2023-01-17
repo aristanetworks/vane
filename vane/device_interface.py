@@ -83,6 +83,8 @@ class CommandError(Exception):
         return trace
 
 class DeviceConn:
+    """ Base class for connecting to Arista devices """
+
     def set_conn_params(self, conf_file):
         """Set the Device connection parameters"""
         pass
@@ -108,42 +110,56 @@ class DeviceConn:
         pass
 
 class PyeapiConn(DeviceConn):
+    """ PyeapiConn connects to Arista devices using PyEAPI """
+
     def connection(self):
+        """ returns the connection object """
         return self._connection
 
     def set_conn_params(self, conf_file):
+        """ sets the config using eapi conf_file """
         pyeapi.load_config(conf_file)
 
     def set_up_conn(self, device_name):
+        """ connects to device using pyeapi """
         self._connection = pyeapi.connect_to(device_name)
 
     def run_commands(self, cmds, encoding='json', send_enable=True, **kwargs):
+        """ wrapper around pyeapi run_commands func """
         output = self._connection.run_commands(cmds, encoding, send_enable)
         return output
 
     def get_config(self, config='running-config', params=None,
                    as_string=False):
+        """ wrapper around pyeapi get_config func """
         output = self._connection.get_config(config, params, as_string)
         return output
 
     def enable(self, commands, encoding='json', strict=False,
                send_enable=True, **kwargs):
+       """ wrapper around pyeapi enable func """
        output = self._connection.enable(commands, encoding, strict, send_enable, **kwargs)
        return output
 
     def config(self, commands, **kwargs):
+       """ wrapper around pyeapi config func """
        output = self._connection.config(commands, **kwargs)
        return output
 
 class NetmikoConn(DeviceConn):
+    """ NetmikoConn connects to Arista devices using ssh conn """
+
     def connection(self):
+        """ returns the connection object """
         return self._connection
 
     def set_conn_params(self, conf_file):
+        """ Sets the connection params specified in conf_file """
         self._config = configparser.ConfigParser()
         self._config.read(conf_file)
 
     def set_up_conn(self, device_name):
+        """ sets up conn to device using _config params """
         name = 'connection:{}'.format(device_name)
         if not self._config.has_section(name):
             raise AttributeError('connection profile not found')
@@ -163,63 +179,98 @@ class NetmikoConn(DeviceConn):
             remote_device['device_type'] = guesser.autodetect()
         self._connection = Netmiko(**remote_device)
 
-    def run_commands(self, cmds, encoding='json', send_enable=True, **kwargs):
-        output = ''
-        local_cmds = []
-        if send_enable:
-            self._connection.enable()
-        if encoding == 'json':
-            """for json encoding, lets try to run cmds
-            using |json"""
-            if type(cmds) is list:
-                local_cmds = cmds.copy()
-                for i, cmd in enumerate(local_cmds):
-                    local_cmds[i] = cmd + ' | json'
-            elif type(cmds) is str:
-                cmds = cmds + ' | json'
-        elif encoding == 'text':
-            if type(cmds) is list:
-                local_cmds = cmds.copy()
-        cmds_op = []
-        if type(cmds) is list:
-            for i, cmd in enumerate(local_cmds):
-                output = self._connection.send_command(cmd)
-                if output not in error_responses:
-                    if encoding == 'json':
-                        output = json.loads(output)
-                else:
-                    err_msg = ('Could not execute %s. '
-                               'Got error: %s' % (cmds[i], output))
-                    raise CommandError(err_msg, cmds)
 
-                if encoding == 'text':
-                    """ for text encoding, creating the
-                    format similar to one returned by
-                    eapi format"""
-                    text_ob = {"output": output}
-                    cmds_op.append(text_ob)
-                else:
-                    cmds_op.append(output)
+    def get_cmds(self, cmds):
+        """ get_cmds: converts cmds to json cmds
+        cmds can be a list of commands or just one command (str)
+        """
+        pipe_json = ' | json'
+
+        if type(cmds) is list:
+            local_cmds = cmds.copy()
+            for i, cmd in enumerate(local_cmds):
+                local_cmds[i] = cmd + pipe_json
+
         elif type(cmds) is str:
-            output = self._connection.send_command(cmds)
-            if output not in error_responses :
-                if encoding == 'json':
-                    output = json.loads(output)
+            cmds = cmds + pipe_json
+        return cmds, local_cmds
+    
+    def send_list_cmds(self, cmds, local_cmds, cmds_op, encoding='json'):
+        """ send_list_cmds: sends the list of commands to device conn 
+        and collects the output as list """
+
+        for i, cmd in enumerate(local_cmds):
+            output = self._connection.send_command(cmd)
+            if output not in error_responses and encoding == 'json':
+                output = json.loads(output)
             else:
                 err_msg = ('Could not execute %s. '
-                           'Got error: %s' % (cmds[i], output))
+                            'Got error: %s' % (cmds[i], output))
                 raise CommandError(err_msg, cmds)
 
             if encoding == 'text':
+                """ for text encoding, creating the
+                format similar to one returned by
+                eapi format"""
                 text_ob = {"output": output}
                 cmds_op.append(text_ob)
             else:
                 cmds_op.append(output)
 
+    def send_str_cmds(self, cmds, cmds_op, encoding='json'):
+        """ send_str_cmds: sends one command to device conn """
+        output = self._connection.send_command(cmds)
+
+        if output not in error_responses and encoding == 'json':
+            output = json.loads(output)
+        else:
+            err_msg = ('Could not execute %s. '
+                        'Got error: %s' % (cmds, output))
+            raise CommandError(err_msg, cmds)
+
+        if encoding == 'text':
+            text_ob = {"output": output}
+            cmds_op.append(text_ob)
+        else:
+            cmds_op.append(output)
+        
+        return cmds_op
+
+
+    def run_commands(self, cmds, encoding='json', send_enable=True, **kwargs):
+        """ This function is added to make sure both PyeapiConn and NetmikoConn
+        support same functions. This will help the code to work seemlessly 
+        between two drivers.
+        run_commands: sends a command or list of commands over the device conn 
+        """
+        local_cmds = []
+
+        if send_enable:
+            self._connection.enable()
+
+        if encoding == 'json':
+            """for json encoding, lets try to run cmds
+            using | json"""
+            cmds, local_cmds = self.get_cmds(cmds=cmds)
+
+        elif encoding == 'text' and type(cmds) is list:
+            local_cmds = cmds.copy()
+
+        cmds_op = []
+        if type(cmds) is list:
+            cmds_op = self.send_list_cmds(cmds=cmds, local_cmds=local_cmds, cmds_op=cmds_op)
+        elif type(cmds) is str:
+            cmds_op = self.send_str_cmds(cmds=cmds, cmds_op=cmds_op)
+
         return cmds_op
 
     def get_config(self, config='running-config', params=None,
                    as_string=False):
+        """ Retrieves the config from the node.
+        This method will retrieve the config from the node as 
+        either a string or a list object. The config to retrieve
+        can be specified as either the startup-config or the running-config.
+        """
         if config not in ['startup-config', 'running-config']:
             raise TypeError('invalid config name specified')
         command = 'show %s' % config
@@ -234,6 +285,12 @@ class NetmikoConn(DeviceConn):
 
     def enable(self, commands, encoding='json', strict=False,
                send_enable=True, **kwargs):
+        """ Sends the array of commands to the node in enable mode
+            This method will send the commands to the node and 
+            evaluate the results. If a command fails due to an
+            encoding error, then the command set will be re-issued
+            individual with text encoding.
+        """
         commands = make_iterable(commands)
 
         if 'configure' in commands:
@@ -277,6 +334,12 @@ class NetmikoConn(DeviceConn):
         return results
 
     def config(self, commands, **kwargs):
+        """ Configures the node with the specified commands.
+            This method is used to send configuration commands
+            to the node. It will take either a string or a list and
+            prepend the necessary commands to put the session into
+            config mode.
+        """
         commands = make_iterable(commands)
         commands = list(commands)
 

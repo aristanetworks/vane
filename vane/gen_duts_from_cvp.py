@@ -47,9 +47,14 @@ ssl._create_default_https_context = ssl._create_unverified_context
 import urllib3
 urllib3.disable_warnings()
 import yaml
-import getpass
 import pyeapi
 import sys
+
+username = '<devices username>'
+password = 'devices password'
+cvp_instance = '<cvp ip address>'
+cvp_username = '<cvp username>'
+cvp_password = '<cvp password>'
 
 def main():
     """
@@ -60,14 +65,6 @@ def main():
         (3) Iterates through device inventory, collects neighbor
         information and then generates duts file
     """
-
-    username = input("Please enter the username: ")
-    password = getpass.getpass('Please enter the password: ')
-
-    # cvp access credentials, enter appropriate credentials
-    cvp_instance = '<cvp ip address>'
-    cvp_username = '<cvp username>'
-    cvp_password = '<cvp password>'
 
     try:
         clnt = CvpClient()

@@ -41,7 +41,6 @@
 
     - Excel report: Tabular representation of results. """
 
-# from pprint import pprint
 import stat
 import os
 import sys
@@ -108,9 +107,44 @@ class TestsClient:
                     sys.exit(1)
         except OSError as err_data:
             logging.error(
-                f"Defintions file: {yaml_file} not " f"found. {err_data}"
+                f"Defintions file: {yaml_file} not " + f"found. {err_data}"
             )
             sys.exit(1)
+
+
+    def write_test_def_file(self, template_definitions, master_definitions, test_dir, test_definitions):
+        """ Reads templates and creates test definitions using master definitions 
+            Args:
+            template_definitions: template test definition file name 
+            master_definitions: master schema to used to render template
+            test_dir: the directory for which test definitons need to be generated
+            test_definitions: name of the test defnition file to be created
+        """ 
+
+        # Traverses given test directory
+        for root, dirs, files in os.walk(test_dir):
+            # Iterates over files in a given dir and checks if they
+            # are a template test definition file
+
+            for file in files:
+                if file == template_definitions:
+                    # Inputs template yaml data
+                    template_file = open(os.path.join(root, file), 'r').read()
+                    
+                    # Uses Jinja2 templating to generate new test definition
+                    # file and replace the given templates
+                    test_template = Template(str(template_file), undefined=NullUndefined)
+                    master_template = Template(str(master_definitions), undefined=NullUndefined)
+                    replace_data = yaml.safe_load(master_template.render())
+
+                    new = test_template.render(replace_data)
+                    yaml_new = yaml.safe_load(new)
+
+                    new_file = os.path.join(root, test_definitions)
+                    with open(new_file, 'w') as file:
+                        yaml.safe_dump(yaml_new, file, sort_keys=False)
+                    logging.info('Regenerared test definition files')
+
 
     def generate_test_definitions(self):
         """
@@ -131,28 +165,8 @@ class TestsClient:
 
                 # Iterates through test directories
                 for test_dir in definitions["test_dirs"]:
-                    # Traverses given test directory
-                    for root, dirs, files in os.walk(test_dir):
-                        # Iterates over files in a given dir and checks if they
-                        # are a template test definition file
-                        for file in files:
-                            if file == template_definitions:
-                                # Inputs template yaml data
-                                template_file = self._import_yaml(os.path.join(root, file))
-                                
-                                # Uses Jinja2 templating to generate new test definition
-                                # file and replace the given templates
-                                test_template = Template(str(template_file), undefined=NullUndefined)
-                                master_template = Template(str(master_definitions), undefined=NullUndefined)
-                                replace_data = yaml.safe_load(master_template.render())
-
-                                new = test_template.render(replace_data)
-                                yaml_new = yaml.safe_load(new)
-
-                                new_file = os.path.join(root, test_definitions)
-                                with open(new_file, 'w') as file:
-                                    yaml.safe_dump(yaml_new, file, sort_keys=False)
-                                logging.info('Regenerared test definition files')
+                    self.write_test_def_file(template_definitions=template_definitions, master_definitions=master_definitions, \
+                        test_dir=test_dir, test_definitions=test_definitions)
         except OSError:
             print('Unable to regenerate test definition files.')
                                 
@@ -240,9 +254,9 @@ class TestsClient:
 
         logging.info(f"Run the following tests: {test_cases}")
         if test_cases == "All":
-            pass
+            logging.info("Running All test cases.")
         elif not test_cases:
-            pass
+            logging.info("Could not find test cases.")
         else:
             self.test_parameters.append(f"-k {test_cases}")
 
@@ -383,7 +397,7 @@ class TestsClient:
                     f"render {eapi_file} file with parameters {duts}"
                 )
                 resource_file = (
-                    jinja2.Environment()
+                    jinja2.Environment(autoescape=True)
                     .from_string(jinja_template)
                     .render(duts=duts)
                 )

@@ -286,7 +286,7 @@ def import_yaml(yaml_file):
         with open(yaml_file, "r") as input_yaml:
             try:
                 yaml_data = yaml.safe_load(input_yaml)
-                logging.info(f"Inputed the following yaml: " f"{yaml_data}")
+                logging.info(f"Inputed the following yaml: " + f"{yaml_data}")
                 return yaml_data
             except yaml.YAMLError as err:
                 print(">>> ERROR IN YAML FILE")
@@ -295,7 +295,7 @@ def import_yaml(yaml_file):
                 sys.exit(1)
     except OSError as err:
         print(f">>> {yaml_file} YAML FILE MISSING")
-        logging.error(f"ERROR YAML FILE: {yaml_file} NOT " f"FOUND. {err}")
+        logging.error(f"ERROR YAML FILE: {yaml_file} NOT " + f"FOUND. {err}")
         logging.error("EXITING TEST RUNNER")
         sys.exit(1)
     sys.exit(1)
@@ -453,9 +453,8 @@ def remove_cmd(e, show_cmds):
     logging.info(f"remove_cmd show_cmds list: {show_cmds}")
     longest_matching_cmd = ""
     for show_cmd in show_cmds:
-        if show_cmd in str(e):
-            if longest_matching_cmd in show_cmd:
-                longest_matching_cmd = show_cmd
+        if show_cmd in str(e) and longest_matching_cmd in show_cmd:
+            longest_matching_cmd = show_cmd
 
     """longest_matching_cmd is the one in error string,
     lets bump it out
@@ -497,7 +496,7 @@ def dut_worker(dut, show_cmds, test_parameters):
     for show_cmd in show_cmds:
         function_def = f'test_{("_").join(show_cmd.split())}'
         logging.info(
-            f"Executing show command: {show_cmd} for test " f"{function_def}"
+            f"Executing show command: {show_cmd} for test " + f"{function_def}"
         )
 
         logging.info(f"Adding output of {show_cmd} to duts data structure")
@@ -571,7 +570,7 @@ def return_show_cmd(show_cmd, dut, test_name, test_parameters):
         logging.error(f"new value of show_output_text  {show_output_text}")
         raw_text = show_output_text[0]["output"]
     logging.info(
-        f"Raw text output of {show_cmd} on dut {name}: " f"{show_output}"
+        f"Raw text output of {show_cmd} on dut {name}: " + f"{show_output}"
     )
 
     export_logs(test_name, name, raw_text, test_parameters)
@@ -635,7 +634,7 @@ def export_logs(test_name, hostname, output, test_parameters):
 
     try:
         logging.info(
-            f"Opening file {show_log} and append show output: " f"{output}"
+            f"Opening file {show_log} and append show output: " + f"{output}"
         )
         with open(show_log, "a") as log_file:
             log_file.write(f"\ntest_suite::{test_name}[{hostname}]:\n{output}")
@@ -696,11 +695,11 @@ def verify_show_cmd(show_cmd, dut):
 
     if show_cmd in dut["output"]:
         logging.info(
-            f"Verified output for show command |{show_cmd}| on " f"{dut_name}"
+            f"Verified output for show command |{show_cmd}| on " + f"{dut_name}"
         )
     else:
         logging.critical(
-            f"Show command |{show_cmd}| not executed on " f"{dut_name}"
+            f"Show command |{show_cmd}| not executed on " + f"{dut_name}"
         )
         assert False
 
@@ -718,7 +717,7 @@ def verify_tacacs(dut):
     tacacs = dut["output"][show_cmd]["json"]["tacacsServers"]
     tacacs_servers = len(tacacs)
     logging.info(
-        f"Verify if tacacs server(s) are configured " f"on {dut_name} dut"
+        f"Verify if tacacs server(s) are configured " + f"on {dut_name} dut"
     )
 
     if tacacs_servers == 0:
@@ -744,7 +743,7 @@ def verify_veos(dut):
     veos_bool = False
     veos = dut["output"][show_cmd]["json"]["modelName"]
     logging.info(
-        f"Verify if {dut_name} DUT is a VEOS instance. " f"Model is {veos}"
+        f"Verify if {dut_name} DUT is a VEOS instance. " + f"Model is {veos}"
     )
 
     if veos == "vEOS":
@@ -753,7 +752,7 @@ def verify_veos(dut):
         logging.info(f"{dut_name} is a VEOS instance so test NOT valid")
     else:
         logging.info(
-            f"{dut_name} is not a VEOS instance so returning " f"{veos_bool}"
+            f"{dut_name} is not a VEOS instance so returning " + f"{veos_bool}"
         )
 
     return veos_bool
@@ -830,10 +829,10 @@ def return_show_cmds(test_parameters):
             else:
                 test_show_cmds = test_case.get("show_cmds", [])
                 logging.info(f"Found show commands {test_show_cmds}")
-                for show_cmd in test_show_cmds:
-                    if show_cmd not in show_cmds :
-                        logging.info(f"Adding Show commands {show_cmd}")
-                        show_cmds.append(show_cmd)
+
+                for show_cmd in (show_cmd for show_cmd in test_show_cmds if show_cmd not in show_cmds):
+                    logging.info(f"Adding Show commands {show_cmd}")
+                    show_cmds.append(show_cmd)
 
 
     logging.info(
@@ -884,7 +883,7 @@ def export_yaml(yaml_file, yaml_data):
     try:
         with open(yaml_file, "w") as yaml_out:
             try:
-                logging.info(f"Output the following yaml: " f"{yaml_data}")
+                logging.info(f"Output the following yaml: " + f"{yaml_data}")
                 yaml.dump(yaml_data, yaml_out, default_flow_style=False)
             except yaml.YAMLError as err:
                 print(">>> ERROR IN YAML FILE")
@@ -893,7 +892,7 @@ def export_yaml(yaml_file, yaml_data):
                 sys.exit(1)
     except OSError as err:
         print(f">>> {yaml_file} YAML FILE MISSING")
-        logging.error(f"ERROR YAML FILE: {yaml_file} NOT " f"FOUND. {err}")
+        logging.error(f"ERROR YAML FILE: {yaml_file} NOT " + f"FOUND. {err}")
         logging.error("EXITING TEST RUNNER")
         sys.exit(1)
 
@@ -943,8 +942,8 @@ def generate_duts_file(dut, file, username, password):
                 ]
         if dut_dict:
             yaml.dump(dut_dict, file)
-    except:
-        print("DUTs creation for " + file + " failed.")
+    except yaml.YAMLError as err:
+        print(f"DUTs creation for {file} failed due to exception {err}")
 
 
 def create_duts_file(topology_file, inventory_file):
@@ -988,8 +987,6 @@ def create_duts_file(topology_file, inventory_file):
             with open(config.DUTS_FILE, "w") as yamlfile:
                 yaml.dump(dut_file, yamlfile, sort_keys=False)
                 return config.DUTS_FILE
-        else:
-            raise Exception
     except Exception as excep:
         logging.error("Error occured while creating DUTs file: %s",
                       str(excep))
@@ -1069,7 +1066,7 @@ class TestOps:
                 )
             else:
                 logging.critical(
-                    f"Show command |{show_cmd}| not executed on " f"{dut_name}"
+                    f"Show command |{show_cmd}| not executed on " + f"{dut_name}"
                 )
                 assert False
 

@@ -91,7 +91,7 @@ class TestStepClient:
                     sys.exit(1)
         except OSError as err_data:
             logging.error(
-                f"Defintions file: {yaml_file} not " f"found. {err_data}"
+                f"Defintions file: {yaml_file} not " + f"found. {err_data}"
             )
             sys.exit(1)
 
@@ -143,12 +143,11 @@ class TestStepClient:
             test_steps_list = []
             for step in steps:
                 # Create Title for Test Definition
-                if step.startswith('TD:'):
-                    if test_steps_list:
+                if step.startswith('TD:') and test_steps_list:
                         # Add Test steps to Document where
                         # there are more than one TD
-                        mdFile.new_list(test_steps_list, marked_with='1')
-                        test_steps_list = []
+                    mdFile.new_list(test_steps_list, marked_with='1')
+                    test_steps_list = []
                     mdFile.new_header(level=1, title=step.lstrip('TD:'))
                 # Add Test steps to list to be added to file
                 elif step.startswith('TS:'):

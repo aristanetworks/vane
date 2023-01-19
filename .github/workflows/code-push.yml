@@ -17,7 +17,7 @@ jobs:
     - run: pip install -r requirements.txt
     - run: pwd
     - run: ls
-    # - run: pylint vane
+    - run: pylint vane
 
 
 

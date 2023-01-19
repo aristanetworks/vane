@@ -1,0 +1,24 @@
+---
+# Action runs each time code is pushed to the repository
+name: Code Push
+run-name: ${{ github.actor }} pushed code
+on: [push]
+jobs:
+  # Stage: Setup a Python environment for testing
+  setup_env:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+        cache: 'pip'
+    - run: pip install -r requirements.txt
+
+
+
+#  lint-code:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v1
+

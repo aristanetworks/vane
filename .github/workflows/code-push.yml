@@ -1,6 +1,6 @@
 ---
 # Action runs each time code is pushed to the repository
-name: Code Push
+name: Development Pipeline for code pushes
 run-name: ${{ github.actor }} pushed code
 on: [push]
 jobs:
@@ -8,9 +8,11 @@ jobs:
   setup_env:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+    - name: Check latest version of Vane
+      uses: actions/checkout@v1
     # https://github.com/marketplace/actions/setup-python
-    - uses: actions/setup-python@v4
+    - name: Create a Python Environment to execute Vane
+      uses: actions/setup-python@v4
       with:
         python-version: '3.9'
         cache: 'pip'

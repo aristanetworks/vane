@@ -8,7 +8,7 @@ jobs:
   setup_env:
     runs-on: ubuntu-latest
     steps:
-    - name: Check latest version of Vane
+    - name: Check out latest version of Vane
       uses: actions/checkout@v1
     # https://github.com/marketplace/actions/setup-python
     - name: Create a Python Environment to execute Vane
@@ -19,12 +19,8 @@ jobs:
     - run: pip install -r requirements.txt
     - run: pwd
     - run: ls
-    - run: pylint vane
-
-
-
-#  lint-code:
-#    runs-on: ubuntu-latest
-#    steps:
-#      - uses: actions/checkout@v1
-
+    # Lint functions
+    - name: Lint code and verify code quality using pylint
+      run: pylint vane
+    - name: Lint code and verify code quality using flake8
+      run: flake8 vane

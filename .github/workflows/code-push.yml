@@ -16,11 +16,11 @@ jobs:
       with:
         python-version: '3.9'
         cache: 'pip'
-    - run: pip install -r requirements.txt
-    - run: pwd
-    - run: ls
+    - name: Install Vane Python modules
+      run: pip install -r requirements.txt
     # Lint functions
-    - name: Lint code and verify code quality using pylint
-      run: pylint vane
     - name: Lint code and verify code quality using flake8
       run: flake8 vane
+    - name: Lint code and verify code quality using pylint
+      run: pylint vane
+

@@ -66,14 +66,6 @@ class ZTPTests:
             f"mode: |{tops.actual_output}| correct mode is "
             f"|{tops.expected_output}|\n"
         )
-        tops.comment += (
-            f"TEST is ZTP disabled on |{tops.dut_name}|.\n"
-            f"GIVEN ZTP state is |{tops.expected_output}|.\n"
-            f"WHEN ZTP state is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is :"
-            f"\n\n{tops.show_cmd_txt}"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.post_testcase()
@@ -96,17 +88,6 @@ class ZTPTests:
             f"On router |{tops.dut_name}|: ZTP configuration "
             f"file is on flash: is |{tops.actual_output}|, "
             f" correct state is |{tops.expected_output}|\n"
-        )
-        tops.comment += (
-            "TEST is ZTP configuration file on "
-            f"|{tops.dut_name}|.\n"
-            "GIVEN ZTP configuration file is "
-            f"|{tops.expected_output}|.\n"
-            "WHEN ZTP configuration file is "
-            f"|{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is :"
-            f"\n\n{tops.show_cmd_txt}"
         )
         print(f"{tops.output_msg}\n{tops.comment}")
 

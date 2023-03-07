@@ -74,17 +74,6 @@ class ExtensionsTests:
                 f"|{tops.actual_output}|, correct status is "
                 f"|{tops.expected_output}|.\n"
             )
-            tops.comment += (
-                f"TEST is {extension} extension installed on "
-                f" |{tops.dut_name}|.\n"
-                f"GIVEN {extension} extenstion installation state is "
-                f"|{tops.expected_output}|.\n"
-                f"WHEN {extension} extenstion installation state is "
-                f"|{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{tops.show_cmd}| is:\n{tops.show_cmd_txt}"
-                ".\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
@@ -125,19 +114,6 @@ class ExtensionsTests:
             )
 
             tops.test_result = tops.actual_output == tops.expected_output
-
-            tops.comment += (
-                f"TEST is {extension} extension not erroring on "
-                f" |{tops.dut_name}|.\n"
-                f"GIVEN {extension} extenstion error state is "
-                f"|{tops.expected_output}|.\n"
-                f"WHEN {extension} extenstion error state is "
-                f"|{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{tops.show_cmd}| is:\n{tops.show_cmd_txt}"
-                ".\n"
-            )
-
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 

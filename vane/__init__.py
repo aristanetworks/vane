@@ -30,5 +30,5 @@
 ''' vane - Network Certification Tool
 '''
 
-__version__ = '0.5'
+__version__ = '0.6'
 __author__ = 'Arista Networks, Inc.'

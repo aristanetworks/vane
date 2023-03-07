@@ -72,14 +72,6 @@ class EnvironmentTests:
                 f"is |{tops.actual_output}| and should be "
                 f"|{tops.expected_output}|"
             )
-            tops.comment = (
-                f"TEST is |{tops.dut_name}| system termperature "
-                "environmentals functioning within spec.\n"
-                f"GIVEN expected temperature state is |{tops.expected_output}|.\n"
-                f"WHEN actual temperature state is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{tops.show_cmd}| is:\n\n{tops.show_cmd_txt}"
-            )
         else:
             tops.test_result, tops.actual_output, tops.expected_output = (
                 True,
@@ -88,10 +80,6 @@ class EnvironmentTests:
             )
 
             tops.output_msg += (
-                "INVALID TEST: CloudEOS router "
-                f"|{tops.dut_name}| doesnt require cooling.\n"
-            )
-            tops.comment += (
                 "INVALID TEST: CloudEOS router "
                 f"|{tops.dut_name}| doesnt require cooling.\n"
             )
@@ -134,20 +122,10 @@ class EnvironmentTests:
                             f"is |{tops.actual_output}| and should be "
                             f"|{tops.expected_output}|.\n"
                         )
-                        tops.comment += (
-                            f"TEST is |{tops.dut_name}| {sensor_name} sensor |{sensor}| termperature "
-                            "environmentals functioning within spec.\n"
-                            f"GIVEN expected alert status is |{tops.expected_output}|.\n"
-                            f"WHEN actual alert status is |{tops.actual_output}|.\n"
-                            f"THEN test case result is |{tops.test_result}|.\n\n"
-                        )
 
                         tops.actual_results.append(tops.actual_output)
                         tops.expected_results.append(tops.expected_output)
 
-            tops.comment += (
-                f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-            )
             tops.actual_output, tops.expected_output = (
                 tops.actual_results,
                 tops.expected_results,
@@ -162,10 +140,6 @@ class EnvironmentTests:
             tops.actual_results, tops.expected_results = [], []
 
             tops.output_msg += (
-                "INVALID TEST: CloudEOS router "
-                f"|{tops.dut_name}| doesnt require cooling.\n"
-            )
-            tops.comment += (
                 "INVALID TEST: CloudEOS router "
                 f"|{tops.dut_name}| doesnt require cooling.\n"
             )
@@ -199,30 +173,14 @@ class EnvironmentTests:
                     f"|{tops.actual_output}|, should be in "
                     f"|{tops.expected_output}|.\n"
                 )
-                tops.comment += (
-                    f"TEST is power-supply |{powersupply}| "
-                    "functioning within spec.\n"
-                    f"GIVEN power state is |{tops.expected_output}|.\n"
-                    f"WHEN power state is |{tops.actual_output}|.\n"
-                    f"THEN test case result is |{tops.test_result}|.\n\n"
-                )
 
                 tops.actual_results.append(tops.actual_output)
                 tops.expected_results.append(tops.expected_output)
-
-            tops.comment += (
-                f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-            )
 
         else:
             tops.test_result = True
 
             tops.output_msg += (
-                "INVALID TEST: CloudEOS router "
-                f"|{tops.dut_name}| doesnt have "
-                "power-supplies.\n"
-            )
-            tops.comment += (
                 "INVALID TEST: CloudEOS router "
                 f"|{tops.dut_name}| doesnt have "
                 "power-supplies.\n"
@@ -261,14 +219,6 @@ class EnvironmentTests:
                 f"is |{tops.actual_output}| and should be "
                 f"|{tops.expected_output}|"
             )
-            tops.comment = (
-                f"TEST is |{tops.dut_name}| system cooling "
-                "environmentals functioning within spec.\n"
-                f"GIVEN cooling state is |{tops.expected_output}|.\n"
-                f"WHEN cooling state is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{tops.show_cmd}| is:\n\n{tops.show_cmd_txt}"
-            )
 
         else:
             tops.test_result, tops.actual_output, tops.expected_output = (
@@ -281,10 +231,7 @@ class EnvironmentTests:
                 "INVALID TEST: CloudEOS router "
                 f"|{tops.dut_name}| doesnt require cooling.\n"
             )
-            tops.comment += (
-                "INVALID TEST: CloudEOS router "
-                f"|{tops.dut_name}| doesnt require cooling.\n"
-            )
+
 
         print(f"{tops.output_msg}\n{tops.comment}")
         tops.post_testcase()
@@ -322,19 +269,12 @@ class EnvironmentTests:
                             f"is |{tops.actual_output}| and should be "
                             f"|{tops.expected_output}|.\n"
                         )
-                        tops.comment += (
-                            f"TEST is |{fan_name}| operating correctly.\n"
-                            f"GIVEN fan status is |{tops.expected_output}|.\n"
-                            f"WHEN fan status is |{tops.actual_output}|.\n"
-                            f"THEN test case result is |{tops.test_result}|.\n\n"
-                        )
+
 
                         tops.actual_results.append(tops.actual_output)
                         tops.expected_results.append(tops.expected_output)
 
-            tops.comment += (
-                f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-            )
+
             tops.actual_output, tops.expected_output = (
                 tops.actual_results,
                 tops.expected_results,
@@ -352,10 +292,7 @@ class EnvironmentTests:
                 "INVALID TEST: CloudEOS router "
                 f"|{tops.dut_name}| doesnt require fans.\n"
             )
-            tops.comment += (
-                "INVALID TEST: CloudEOS router "
-                f"|{tops.dut_name}| doesnt require fans.\n"
-            )
+
 
         print(f"{tops.output_msg}\n{tops.comment}")
         tops.post_testcase()

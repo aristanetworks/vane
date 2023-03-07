@@ -28,6 +28,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
+# pylint: disable=too-many-lines
 
 """Utilities for using PyTest in network testing"""
 
@@ -39,8 +40,10 @@ import os
 import re
 import yaml
 import docx
-from docx.oxml.ns import qn
-from docx.oxml import OxmlElement
+from docx.oxml.ns import qn, nsdecls
+from docx.oxml import OxmlElement, parse_xml
+from docx.shared import Inches, Pt, RGBColor
+from vane.report_templates import REPORT_TEMPLATES
 
 FORMAT = "[%(asctime)s %(filename)s->%(funcName)s():%(lineno)s]%(levelname)s: %(message)s"
 logging.basicConfig(
@@ -70,8 +73,7 @@ class ReportClient:
         logging.info("Convert yaml data-model to a python data structure")
         self.data_model = self._import_yaml(test_definition)
         logging.info(
-            "Internal test data-model initialized with value: "
-            f"{self.data_model}"
+            f"Internal test data-model initialized with value: {self.data_model}"
         )
         self._summary_results = self._compile_test_results()
         logging.info(f"Test Results: {self._summary_results}")
@@ -95,9 +97,7 @@ class ReportClient:
             yaml_file ([type]): [description]
         """
 
-        logging.info(
-            f"yaml directory is {yaml_dir}\n"
-            f"yaml output file is {yaml_file}")
+        logging.info(f"yaml directory is {yaml_dir}\nyaml output file is {yaml_file}")
         yaml_files = os.listdir(yaml_dir)
         logging.info(f"yaml input files are {yaml_files}")
 
@@ -139,9 +139,7 @@ class ReportClient:
             f"{dut_name}\n\n\r"
         )
         logging.info(self._results_datamodel["test_suites"])
-        test_suites = [
-            param["name"] for param in self._results_datamodel["test_suites"]
-        ]
+        test_suites = [param["name"] for param in self._results_datamodel["test_suites"]]
 
         if test_suite in test_suites:
             suite_index = test_suites.index(test_suite)
@@ -155,34 +153,25 @@ class ReportClient:
             self._results_datamodel["test_suites"].append(suite_stub)
             suite_index = len(self._results_datamodel["test_suites"]) - 1
 
-        logging.info(
-            f"Find Index for test case: {test_case} on duts {dut_name}")
+        logging.info(f"Find Index for test case: {test_case} on duts {dut_name}")
         test_cases = [
             param["name"]
-            for param in self._results_datamodel["test_suites"][suite_index][
-                "test_cases"
-            ]
+            for param in self._results_datamodel["test_suites"][suite_index]["test_cases"]
         ]
 
         if test_case in test_cases:
             test_index = test_cases.index(test_case)
             logging.info(
-                f"Test case {test_case} exists in results file at index "
-                f"{test_index}"
+                f"Test case {test_case} exists in results file at index " f"{test_index}"
             )
         else:
             logging.info(f"Create test case {test_case} in results file")
             test_stub = {"name": test_case, "duts": []}
-            self._results_datamodel["test_suites"][suite_index][
-                "test_cases"
-            ].append(test_stub)
+            self._results_datamodel["test_suites"][suite_index]["test_cases"].append(
+                test_stub
+            )
             test_index = (
-                len(
-                    self._results_datamodel["test_suites"][suite_index][
-                        "test_cases"
-                    ]
-                )
-                - 1
+                len(self._results_datamodel["test_suites"][suite_index]["test_cases"]) - 1
             )
 
         logging.info(f"Find Index for dut {dut_name}")
@@ -210,20 +199,17 @@ class ReportClient:
 
         logging.info(f"Opening {yaml_file} for read")
         try:
+            # pylint: disable-next=unspecified-encoding
             with open(yaml_file, "r") as input_yaml:
                 try:
                     yaml_data = yaml.safe_load(input_yaml)
-                    logging.info(
-                        f"Inputed the following yaml: "
-                        f"{yaml_data}")
+                    logging.info(f"Inputted the following yaml: {yaml_data}")
                     return yaml_data
                 except yaml.YAMLError as err_data:
                     logging.error(f"Error in YAML file. {err_data}")
                     sys.exit(1)
         except OSError as err_data:
-            logging.error(
-                f"Defintions file: {yaml_file} not " + f"found. {err_data}"
-            )
+            logging.error(f"Defintions file: {yaml_file} not found. {err_data}")
             sys.exit(1)
 
     def write_result_doc(self):
@@ -239,7 +225,7 @@ class ReportClient:
         _, file_date = self._return_date()
         reports_dir = self._reports_dir
         file_name = f"{reports_dir}/report_{file_date}.docx"
-        logging.info("Writing docx report to file: %s" % (file_name))
+        logging.info(f"Writing docx report to file: {file_name}")
         self._document.save(file_name)
 
     def _return_date(self):
@@ -261,6 +247,7 @@ class ReportClient:
         format_date, _ = self._return_date()
         self._document.add_heading("Test Report", 0)
         paragraph = self._document.add_paragraph(f"{format_date}")
+        # pylint: disable-next=no-member
         paragraph.alignment = docx.enum.text.WD_ALIGN_PARAGRAPH.RIGHT
         self._document.add_page_break()
 
@@ -286,6 +273,7 @@ class ReportClient:
         fld_char4 = OxmlElement(w_fldchar)
         fld_char4.set(qn(w_fldchar_type), "end")
 
+        # pylint: disable-next=protected-access
         r_element = run._r
         r_element.append(fld_char)
         r_element.append(instr_text)
@@ -297,9 +285,7 @@ class ReportClient:
     def _write_summary_report(self):
         """Write summary reports"""
 
-        self._document.add_heading(
-            f"{self._major_section}. Test Results " "Summary", 1
-        )
+        self._document.add_heading(f"{self._major_section}. Test Results Summary", 1)
         self._write_summary_results()
         self._write_dut_summary_results()
         self._write_suite_summary_results()
@@ -311,9 +297,7 @@ class ReportClient:
         """Write summary results section"""
 
         logging.info("Create summary results table")
-        self._document.add_heading(
-            f"{self._major_section}.1 Summary " "Results", 2
-        )
+        self._document.add_heading(f"{self._major_section}.1 Summary Results", 2)
         table = self._document.add_table(rows=1, cols=6)
         table.style = TABLE_GRID
 
@@ -346,8 +330,7 @@ class ReportClient:
 
         logging.info("Create DUT summary results table")
         self._document.add_heading(
-            f"{self._major_section }.2 Summary Totals "
-            "for Devices Under Tests",
+            f"{self._major_section }.2 Summary Totals for Devices Under Tests",
             2,
         )
 
@@ -420,10 +403,9 @@ class ReportClient:
         json_report = self.data_model["parameters"]["json_report"]
         json_report = f"{json_report}.json"
         test_results = {}
-        logging.info(
-            f"Opening JSON file {json_report} to parse for summary " "results"
-        )
+        logging.info(f"Opening JSON file {json_report} to parse for summary results")
 
+        # pylint: disable-next=unspecified-encoding
         with open(json_report, "r") as json_file:
             logging.info(f"Raw json report is {json_file}")
             test_data = json.load(json_file)
@@ -552,9 +534,7 @@ class ReportClient:
                 dut_section = 1
 
                 for dut in test_case["duts"]:
-                    self._write_detail_dut_section(
-                        dut, minor_section, dut_section
-                    )
+                    self._write_detail_dut_section(dut, minor_section, dut_section)
                     dut_section += 1
 
                 minor_section += 1
@@ -570,8 +550,7 @@ class ReportClient:
 
         ts_name = self._format_ts_name(test_suite["name"])
         self._document.add_heading(
-            f"{self._major_section}. Detailed Test "
-            f"Suite Results: {ts_name}",
+            f"{self._major_section}. Detailed Test Suite Results: {ts_name}",
             1,
         )
 
@@ -586,8 +565,8 @@ class ReportClient:
         tc_name = self._format_tc_name(test_case["name"])
 
         self._document.add_heading(
-            f"{self._major_section}.{minor_section} "
-            f"Test Case: {tc_name}", 2)
+            f"{self._major_section}.{minor_section} Test Case: {tc_name}", 2
+        )
 
     def _write_detail_dut_section(self, dut, minor_section, dut_section):
         """[summary]
@@ -602,11 +581,28 @@ class ReportClient:
         dut_name = dut_name.upper()
         logging.info(f"DUT name is {dut_name}")
         self._document.add_heading(
-            f"{self._major_section}.{minor_section}."
-            f"{dut_section} DUT: {dut_name}",
+            f"{self._major_section}.{minor_section}. {dut_section} DUT: {dut_name}",
             3,
         )
 
+        report_styles = REPORT_TEMPLATES.keys()
+        logging.info(f"Inputted the following report styles {report_styles}")
+
+        if "report_style" in dut:
+            if dut["report_style"] == 1:
+                logging.info(f"Report_style is set: {dut['report_style']}, default")
+                self._write_default_detail_dut_section(dut)
+            elif dut["report_style"] in report_styles:
+                logging.info(f"Report_style is set: {dut['report_style']}, custom")
+                self._write_custom_detail_dut_section(dut)
+            else:
+                logging.info("Report_style is incorrect")
+                self._write_default_detail_dut_section(dut)
+        else:
+            logging.info("Report_style is not set")
+            self._write_default_detail_dut_section(dut)
+
+    def _write_default_detail_dut_section(self, dut):
         table = self._document.add_table(rows=1, cols=2)
         table.style = TABLE_GRID
 
@@ -625,6 +621,250 @@ class ReportClient:
         self._add_dut_table_row("test_result", dut, table)
         self._add_dut_table_row("fail_or_skip_reason", dut, table)
         self._add_dut_table_row("comment", dut, table)
+
+    def _write_custom_detail_dut_section(self, dut):
+        """Method for writing a custom detailed DUT section within report
+            Uses report_template data structure to describe reporting
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+        """
+
+        report_style = dut["report_style"]
+        report_template = REPORT_TEMPLATES[report_style]
+
+        missing_fields = self._required_template_fields(dut, report_template)
+
+        if missing_fields:
+            logging.info("Required report fields are NOT in test definitions")
+            para = self._document.add_paragraph()
+            out_msg = (
+                f"The following required fields are missing: {missing_fields}, ",
+                "Please update test definition file with this information ",
+                "so test case report can be generated.",
+            )
+            run = para.add_run(out_msg)
+            run.font.color.rgb = RGBColor(255, 0, 0)
+            run.font.bold = True
+        else:
+            logging.info("Required report fields are in test definitions")
+            self._write_custom_paragraph(dut, report_template)
+
+    def _required_template_fields(self, dut, report_template):
+        """Uses report template to verify dut data structure has required
+            fields
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            report_template (dict): Data structure describing reports fields
+
+        Returns:
+            set: Required fields missing from dut data struct
+        """
+        required_fields = {k for (k, v) in report_template.items() if v["required"]}
+        logging.info(f"The following fields are required: {required_fields}")
+        logging.info(f"DUT keys are {dut.keys()}")
+        missing_fields = required_fields.difference(dut.keys())
+        logging.info(f"The following required fields are missing: {missing_fields}")
+
+        return missing_fields
+
+    def _write_custom_paragraph(self, dut, report_template):
+        """Writes section of detailed dut report based on field's format
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            report_template (dict): Data structure describing reports fields
+        """
+
+        for report_field in report_template:
+            para = self._write_output_name(report_template, report_field)
+
+            if report_field not in dut:
+                self._set_default_value(report_field, report_template, dut)
+
+            if "format" in report_template[report_field]:
+                report_format = report_template[report_field]["format"]
+            else:
+                report_format = "missing"
+
+            logging.info(f"Format for {report_field} is set to {report_format}")
+
+            if report_format == "string":
+                self._write_string(dut, para, report_field)
+            elif report_format == "bulleted_list":
+                self._write_bulleted_list(dut, report_field)
+            elif report_format == "numbered_list":
+                self._write_numbered_list(dut, report_field)
+            elif report_format == "dict_string":
+                self._write_dict_string(dut, report_field)
+            elif report_format == "config_list":
+                self._write_config_list(dut, report_field)
+            elif report_format == "config_term":
+                self._write_config_term(dut, report_field)
+            elif report_format == "test_result":
+                self._write_test_result(dut, para, report_field)
+            else:
+                run = para.add_run(
+                    "Please correctly set format in report template for "
+                    f"{report_field} field. Output cannot be displayed "
+                    "without this."
+                )
+                run.font.color.rgb = RGBColor(255, 0, 0)
+
+    def _set_default_value(self, report_field, report_template, dut):
+        """Uses default value in report template and sets it in dut
+
+        Args:
+            report_field (dict): Data Struct describing a reports field
+            dut (dict): Data structure with DUT specific data
+            report_template (dict): Data structure describing reports fields
+        """
+        default_value = report_template[report_field]["default"]
+        dut[report_field] = default_value
+
+    def _write_output_name(self, report_template, report_field):
+        """Writes an output section in detailed dut section
+
+        Args:
+            report_template (dict): Data structure describing reports fields
+            report_field (string): Name of report field in dut to write
+
+        Returns:
+            obj: Current word paragraph object
+        """
+        para = self._document.add_paragraph()
+        if "output_name" in report_template[report_field]:
+            output_name = report_template[report_field]["output_name"]
+        else:
+            output_name = report_field
+
+        para.add_run(f"{output_name.upper()}: ").bold = True
+
+        return para
+
+    def _write_string(self, dut, para, report_field):
+        """Write a generic string to Word doc
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            para (obj): Current Word paragraph object
+            report_field (string): Name of report field in dut to write
+        """
+        if report_field in dut:
+            report_value = dut[report_field]
+            para.add_run(f"{report_value}")
+
+    def _write_bulleted_list(self, dut, report_field):
+        """Write a generic bulleted list to Word doc
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            report_field (string): Name of report field in dut to write
+        """
+
+        if report_field in dut:
+            report_value = dut[report_field]
+            self._document.add_paragraph(report_value, style="List Bullet 2")
+
+    def _write_numbered_list(self, dut, report_field):
+        """Write a generic numbered list to Word doc
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            report_field (string): Name of report field in dut to write
+        """
+
+        if report_field in dut:
+            report_values = dut[report_field]
+            for report_value in report_values:
+                self._document.add_paragraph(report_value, style="List Number 2")
+
+    def _write_dict_string(self, dut, report_field):
+        """Write a dictionary in YAML format to Word doc
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            report_field (string): Name of report field in dut to write
+        """
+
+        if report_field in dut:
+            report_value = dut[report_field]
+            formatted_data = yaml.dump(report_value)
+            logging.info(f"Data formatted to YAML: {formatted_data}")
+            para = self._document.add_paragraph()
+            para.add_run(formatted_data.strip())
+            para.paragraph_format.left_indent = Inches(0.25)
+
+    def _write_test_result(self, dut, para, report_field):
+        """Write test result string to Word doc with formatting
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            para (obj): Current Word paragraph object
+            report_field (string): Name of report field in dut to write
+        """
+
+        if report_field in dut:
+            report_value = dut[report_field]
+            if report_value:
+                run = para.add_run("PASS")
+                run.font.color.rgb = RGBColor(0, 255, 0)
+                run.font.bold = True
+            else:
+                run = para.add_run("FAIL")
+                run.font.color.rgb = RGBColor(255, 0, 0)
+                run.font.bold = True
+
+    def _write_config_list(self, dut, report_field):
+        """Write list of EOS configurations to Word doc with formatting
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            report_field (string): Name of report field in dut to write
+        """
+
+        if report_field in dut:
+            report_values = dut[report_field]
+            for report_value in report_values:
+                para = self._document.add_paragraph()
+                para.paragraph_format.left_indent = Inches(0.25)
+                run = para.add_run(report_value.strip())
+                run.font.name = "Courier New"
+                run.font.size = Pt(10)
+
+    def _write_config_term(self, dut, report_field):
+        """Write EOS configurations to Word doc with formatting to appear
+           from a xterm
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+            report_field (string): Name of report field in dut to write
+        """
+
+        if report_field in dut and "show_cmd" in dut:
+            table = self._document.add_table(rows=1, cols=1, style="Table Grid")
+            para = table.rows[0].cells[0].paragraphs[0]
+            black = parse_xml(
+                # pylint: disable-next=consider-using-f-string
+                r'<w:shd {} w:fill="0A0A0A"/>'.format(nsdecls("w"))
+            )
+            # pylint: disable-next=protected-access
+            table.rows[0].cells[0]._tc.get_or_add_tcPr().append(black)
+            report_values = dut[report_field]
+            show_cmd = dut["show_cmd"]
+            dut_name = dut["dut"]
+
+            logging.info(f"These are recorded report values: {report_values}")
+            for report_value in report_values:
+                run = para.add_run(f"\n{dut_name}# {show_cmd.strip()}\n\n")
+                run.font.name = "Courier New"
+                run.font.size = Pt(10)
+                run.font.color.rgb = RGBColor(0, 255, 0)
+                logging.info(f"Adding value to report: {report_value.strip()}")
+
+            para = self._document.add_paragraph()
+            run = para.add_run()
 
     def _add_dut_table_row(self, test_field, dut, table):
         """Create a row in the DUT result table
@@ -652,6 +892,7 @@ class ReportClient:
 
             self._test_no += 1
 
+    # pylint: disable-next=inconsistent-return-statements
     def _compile_suite_results(self):
         """Compile test suite results and return them
 
@@ -660,8 +901,7 @@ class ReportClient:
         """
 
         logging.info(
-            "The following test suites have been collected "
-            f"{self._results_datamodel}"
+            "The following test suites have been collected " f"{self._results_datamodel}"
         )
 
         if not self._results_datamodel:
@@ -691,8 +931,7 @@ class ReportClient:
 
                     if dut["test_result"] and dut["test_result"] == "Skipped":
                         suite_result["total_skip"] += 1
-                        dut["fail_or_skip_reason"] = dut.get("actual_output",
-                                                             "")
+                        dut["fail_or_skip_reason"] = dut.get("actual_output", "")
                     elif dut["test_result"] and dut["test_result"] != "Skipped":
                         suite_result["total_pass"] += 1
                     else:
@@ -704,6 +943,7 @@ class ReportClient:
         logging.info(f"Compiled suite results: {suite_results}")
         return suite_results
 
+    # pylint: disable-next=inconsistent-return-statements
     def _compile_testcase_results(self):
         """Compile test case results and return them"""
 
@@ -750,14 +990,10 @@ class ReportClient:
 
                     testcase_results.append(testcase_result)
                     logging.info(
-                        "After testcase results struct appended: "
-                        f"{testcase_results}"
+                        f"After testcase results struct appended: {testcase_results}"
                     )
 
-                logging.info(
-                    "Interim dut -- testcase results struct "
-                    f"{testcase_results}"
-                )
+                logging.info(f"Interim dut -- testcase results struct {testcase_results}")
 
         logging.info(f"Returning testcase result {testcase_results}")
         return testcase_results
@@ -776,7 +1012,7 @@ class ReportClient:
         logging.info(f"Test suite name is {ts_name}")
         ts_name = ts_name.split(".")[0]
         ts_name = ts_name.split("_")
-        if len(ts_name) > 1 :
+        if len(ts_name) > 1:
             ts_name = ts_name[1].capitalize()
         logging.info(f"Formatted test suite name is {ts_name}")
 

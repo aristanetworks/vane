@@ -75,14 +75,6 @@ class MemoryTests:
             f"|{tops.actual_output}%| and should be under "
             f"|{tops.expected_output}%|"
         )
-        tops.comment = (
-            f"TEST if memory utilization is less than specified "
-            f"value on  |{tops.dut_name}|.\n"
-            f"GIVEN memory utilization is less than |{tops.expected_output}|.\n"
-            f"WHEN  memory utilization is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is:\n\n{tops.show_cmd_txt}"
-        )
 
         print(f"{tops.output_msg}\n{tops.comment}")
 

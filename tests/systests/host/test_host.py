@@ -66,13 +66,6 @@ class HostTests:
             f"|{tops.actual_output}| and the correct hostname is "
             f"|{tops.expected_output}|"
         )
-        tops.comment = (
-            "TEST is hostname correct.\n"
-            f"GIVEN hostname |{tops.expected_output}|.\n"
-            f"WHEN hostname is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}"
-        )
 
         print(f"{tops.output_msg}\n{tops.comment}")
 

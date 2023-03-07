@@ -76,15 +76,6 @@ class CPUTests:
             f"|{tops.actual_output}%| and should be under "
             f"|{tops.expected_output}%|"
         )
-        tops.comment = (
-            "TEST if 1 second CPU utilization is less than "
-            f"specified value on |{tops.dut_name}|.\n"
-            "GIVEN CPU utilization is less than "
-            f"|{tops.expected_output}|.\n"
-            f"WHEN CPU utilization is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.post_testcase()
@@ -110,15 +101,6 @@ class CPUTests:
             f"|{tops.actual_output}%| and should be under "
             f"|{tops.expected_output}%|"
         )
-        tops.comment = (
-            "TEST if 1 minute CPU utilization is less than "
-            f"specified value on |{tops.dut_name}|.\n"
-            "GIVEN CPU utilization is less than "
-            f"|{tops.expected_output}|.\n"
-            f"WHEN CPU utilization is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.post_testcase()
@@ -143,15 +125,6 @@ class CPUTests:
             f"\nOn router |{tops.dut_name}| 5 minute CPU load average is "
             f"|{tops.actual_output}%| and should be under "
             f"|{tops.expected_output}%|"
-        )
-        tops.comment = (
-            "TEST if 5 minute CPU utilization is less than "
-            f"specified value on |{tops.dut_name}|.\n"
-            "GIVEN CPU utilization is less than "
-            f"|{tops.expected_output}|.\n"
-            f"WHEN CPU utilization is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
         )
         print(f"{tops.output_msg}\n{tops.comment}")
 

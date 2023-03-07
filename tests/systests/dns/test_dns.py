@@ -75,15 +75,6 @@ class DNSTests:
                 f"|{tops.test_result}| for {url}.\n"
             )
 
-            tops.comment += (
-                f"TEST can |{tops.dut_name}| resolve |{url}|.\n"
-                f"GIVEN URL is |{url}|.\n"
-                "WHEN exception is |Name or service not known| "
-                "string.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}.\n"
-            )
-
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
@@ -123,15 +114,6 @@ class DNSTests:
                 f"\nOn router |{tops.dut_name}|, verifying DNS "
                 f"server reachability for |{dns_server}| is "
                 f"|{tops.test_result}|.\n"
-            )
-
-            tops.comment += (
-                f"TEST DNS servers are reachable on |{tops.dut_name}| "
-                f"GIVEN server |{dns_server}|.\n"
-                "WHEN exception is |bytes from| "
-                "string.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
             )
 
             tops.actual_results.append(tops.actual_output)
@@ -213,13 +195,7 @@ class DNSTests:
             f"|{dns_cfg}|, expect the dns config "
             f"|{vane_dns_cfg}|.\n\n"
         )
-        tops.comment += (
-            f"TEST |{tops.dut_name}| DNS config.\n"
-            f"GIVEN DNS config |{vane_dns_cfg}|.\n"
-            f"WHEN DNS config |{dns_cfg}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n\n"
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
+      
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (

@@ -70,14 +70,6 @@ class CrashTests:
             " correct number of agent crashes is "
             f"|{tops.expected_output}|.\n"
         )
-        tops.comment = (
-            f"TEST number of agent crashes on |{tops.dut_name}|.\n"
-            f"GIVEN |{tops.expected_output}| agent crashes.\n"
-            f"WHEN |{tops.actual_output}| agent crashes.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is:\n{tops.show_cmd_txt}"
-            ".\n"
-        )
 
         tops.post_testcase()
 
@@ -111,14 +103,6 @@ class SystemTests:
             f"On router |{tops.dut_name}| EOS version is "
             f"|{tops.actual_output}%|, version should be "
             f"|{tops.expected_output}%|"
-        )
-        tops.comment = (
-            "TEST EOS version running on the device on "
-            f"|{tops.dut_name}|.\n"
-            f"GIVEN version is |{tops.expected_output}|.\n"
-            f"WHEN version is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is:\n\n{tops.show_cmd_txt}"
         )
 
         tops.post_testcase()

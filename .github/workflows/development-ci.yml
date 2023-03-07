@@ -1,0 +1,41 @@
+name: development-ci
+run-name: ${{ github.actor }} CI development run
+
+on: [push]
+
+jobs:
+  validate:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      # Check out the repository
+      - uses: actions/checkout@v3
+
+      - name: Install Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          # architecture: 'x64' # The default
+
+      - name: Display the Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black==22.12.0 flake8==5.0.4 pylint==2.16.2
+
+      # Run Black on the whole repo
+      - name: Run Black to check the code for formatting problems
+        # If any code needs reformatting, black returns an exit code of 1,
+        # which fails the action
+        run: black --check ./vane
+
+      # Run flake8 on the vane and tests directories
+      - name: Lint with flake8
+        run: flake8 ./vane
+
+      # Run pylint on the vane and tests directories
+      - name: Lint with pylint
+        run: pylint ./vane

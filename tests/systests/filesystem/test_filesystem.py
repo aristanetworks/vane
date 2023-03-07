@@ -79,15 +79,6 @@ class FileSystemTests:
             )
 
             tops.test_result = tops.actual_output is tops.expected_output
-            tops.comment += (
-                f"TEST is {file_name} file present on |{tops.dut_name}|.\n"
-                f"GIVEN {file_name} file isDir state is: "
-                f"|{tops.expected_output}|.\n"
-                f"WHEN {file_name} file isDir state is "
-                f"|{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}.\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)

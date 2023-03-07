@@ -36,6 +36,8 @@ rpmbuild
 .*.docx
 */.ipynb_checkpoints/*
 *.DS_Store
+*.docx
+*.csv
 
 # Project files
 .ropeproject

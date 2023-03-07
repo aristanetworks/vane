@@ -71,20 +71,10 @@ class LldpTests:
             )
 
             tops.test_result = tops.actual_output == tops.expected_output
-            tops.comment += (
-                f"TEST if interface |{interface_name}| LLDP receive is "
-                f"enabled on |{tops.dut_name}|.\n"
-                f"GIVEN LLDP receive state is |{tops.expected_output}|.\n"
-                f"WHEN LLDP receive state is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
 
         print(f"{tops.output_msg}\n{tops.comment}")
 
@@ -119,20 +109,10 @@ class LldpTests:
             )
 
             tops.test_result = tops.actual_output == tops.expected_output
-            tops.comment += (
-                f"TEST if interface |{interface_name}| LLDP receive is "
-                f"enabled on |{tops.dut_name}|.\n"
-                f"GIVEN LLDP receive state is |{tops.expected_output}|.\n"
-                f"WHEN LLDP receive state is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
 
         print(f"{tops.output_msg}\n{tops.comment}")
 
@@ -173,14 +153,6 @@ class LldpLocalInfoTests:
         )
         tops.test_result = tops.actual_output == tops.expected_output
 
-        tops.comment = (
-            "TEST if lldp system name matches hostname on dut "
-            f"{tops.dut_name}.\n"
-            f"GIVEN hostname is |{tops.expected_output}|.\n"
-            f"WHEN LLDP system name is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is:\n\n{tops.show_cmd_txt}"
-        )
 
         print(f"{tops.output_msg}\n{tops.comment}")
 
@@ -213,20 +185,10 @@ class LldpLocalInfoTests:
             )
             tops.test_result = tops.actual_output == tops.expected_output
 
-            tops.comment += (
-                f"TEST if |{tops.dut_name}| LLDP maxFrameSize is correct "
-                f"on interface |{interface_name}|.\n"
-                f"GIVEN LLDP maxFrameSize is |{tops.expected_output}|.\n"
-                f"WHEN LLDP maxFrameSize is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -260,20 +222,9 @@ class LldpLocalInfoTests:
             )
             tops.test_result = tops.actual_output == tops.expected_output
 
-            tops.comment += (
-                f"\nTEST if {tops.dut_name} LLDP interfaceIdType is "
-                f"correct on interface |{interface_name}|.\n"
-                f"GIVEN LLDP interfaceIdType is |{tops.expected_output}|.\n"
-                f"WHEN LLDP interfaceIdType is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
-
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (

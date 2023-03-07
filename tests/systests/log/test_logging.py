@@ -73,19 +73,10 @@ class LoggingTests:
             )
 
             tops.test_result = tops.actual_output is tops.expected_output
-            tops.comment += (
-                f"Test for log message |{sys_msg}| on |{tops.dut_name}|.\n"
-                f"GIVEN message presence is |{tops.expected_output}|.\n"
-                f"WHEN message presence is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (

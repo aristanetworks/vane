@@ -65,15 +65,7 @@ class NTPTests:
             f"synchronised status is |{tops.actual_output}| "
             f" correct status is |{tops.expected_output}|.\n"
         )
-        tops.comment = (
-            f"TEST is NTP synchronized on |{tops.dut_name}|.\n"
-            f"GIVEN NTP synchronized is |{tops.expected_output}|"
-            ".\n"
-            f"WHEN NTP synchronized is |{tops.actual_output}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is:\n{tops.show_cmd_txt}"
-            ".\n"
-        )
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.post_testcase()
@@ -97,17 +89,7 @@ class NTPTests:
             f"|{tops.actual_output}| NTP peer associations, "
             f"correct associations is |{tops.expected_output}|"
         )
-        tops.comment = (
-            "TEST is NTP associations with peers on "
-            f"|{tops.dut_name}|.\n"
-            "GIVEN associated are greater than or equal to "
-            f"|{tops.expected_output}|.\n"
-            f"WHEN NTP associated peers are |{tops.actual_output}|"
-            ".\n"
-            f"THEN test case result is |{tops.test_result}|.\n"
-            f"OUTPUT of |{tops.show_cmd}| is:\n{tops.show_cmd_txt}"
-            ".\n"
-        )
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.post_testcase()
@@ -143,17 +125,6 @@ class NTPTests:
 
             tops.test_result = tops.actual_output >= tops.expected_output
 
-            tops.comment = (
-                f"TEST is {process} running on |{tops.dut_name}|"
-                ".\n"
-                f"GIVEN {process} number is "
-                f"|{tops.expected_output}|.\n"
-                f"WHEN {process} number is "
-                f"|{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{tops.show_cmd}| is:\n"
-                f"{tops.show_cmd_txt}.\n"
-            )
             print(f"{tops.output_msg}\n{tops.comment}")
 
             tops.post_testcase()
@@ -214,12 +185,7 @@ class NTPTests:
             f"|{ntp_cfg}|, expect the ntp config "
             f"|{vane_ntp_cfg}|.\n\n"
         )
-        tops.comment += (
-            f"TEST |{tops.dut_name}| NTP config.\n"
-            f"GIVEN NTP config |{vane_ntp_cfg}|.\n"
-            f"WHEN NTP config |{ntp_cfg}|.\n"
-            f"THEN test case result is |{tops.test_result}|.\n\n"
-        )
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -254,15 +220,6 @@ class NTPTests:
                 f"\nOn router |{tops.dut_name}|, verifying NTP "
                 f"server reachability for |{ntp_server}| is "
                 f"|{tops.test_result}|.\n"
-            )
-
-            tops.comment += (
-                f"TEST NTP servers are reachable on |{tops.dut_name}| "
-                f"GIVEN server |{ntp_server}|.\n"
-                "WHEN exception is |bytes from| "
-                "string.\n"
-                f"THEN test case result is |{tops.test_result}|.\n"
-                f"OUTPUT of |{show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
             )
 
             tops.actual_results.append(tops.actual_output)

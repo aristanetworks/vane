@@ -74,20 +74,11 @@ class InterfaceStatusTests:
                 f"line protocol status is set to: |{tops.actual_output}|"
                 f", correct state is |{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| link prootocol "
-                f"statuses on |{tops.dut_name}|.\n"
-                f"GIVEN interface status is |{tops.expected_output}|.\n"
-                f"WHEN interface status is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -124,20 +115,10 @@ class InterfaceStatusTests:
                 f" status is set to: |{tops.actual_output}|"
                 f", correct state is |{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| link "
-                f"status on |{tops.dut_name}|."
-                f"\nGIVEN interface status is |{tops.expected_output}|.\n"
-                f"WHEN interface status is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -192,20 +173,11 @@ class InterfacePhyTests:
                             f"|{tops.actual_output}|, correct state is "
                             f"|{tops.expected_output}|.\n\n"
                         )
-                        tops.comment += (
-                            f"TEST if interface |{interface_name}| "
-                            f"physical status on |{tops.dut_name}|.\n"
-                            f"GIVEN interface status is |{tops.expected_output}|.\n"
-                            f"WHEN interface status is |{tops.actual_output}|.\n"
-                            f"THEN test case result is |{tops.test_result}|.\n\n"
-                        )
+
 
                         tops.actual_results.append(tops.actual_output)
                         tops.expected_results.append(tops.expected_output)
 
-            tops.comment += (
-                f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-            )
             print(f"{tops.output_msg}\n{tops.comment}")
 
             tops.actual_output, tops.expected_output = (
@@ -216,9 +188,7 @@ class InterfacePhyTests:
 
             assert tops.actual_results == tops.expected_results
         else:
-            tops.comment = (
-                f"|{tops.dut_name}| is vEOS instance.  Test is invalid."
-            )
+
             tops.test_result, tops.output_msg, tops.actual_output = (
                 True,
                 None,
@@ -263,20 +233,10 @@ class InterfaceCountersTests:
                 f"counter errors has |{tops.actual_output}| inErrors"
                 f", correct state is |{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| counters have "
-                f"input errors on |{tops.dut_name}|.\n"
-                f"GIVEN interface input errors is |{tops.expected_output}|.\n"
-                f"WHEN interface input errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -316,20 +276,10 @@ class InterfaceCountersTests:
                 f"counter errors has |{tops.actual_output}| outErrors"
                 f", correct state is |{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| has output "
-                f"errors on |{tops.dut_name}|.\n"
-                f"GIVEN interface output errors is |{tops.expected_output}|.\n"
-                f"WHEN interface output errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -370,20 +320,10 @@ class InterfaceCountersTests:
                 "frameTooShorts, correct state is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| counters have "
-                f"frameTooShorts errors on |{tops.dut_name}|.\n"
-                f"GIVEN interface frameTooShorts errors is |{tops.expected_output}|.\n"
-                f"WHEN interface frameTooShorts errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -424,20 +364,10 @@ class InterfaceCountersTests:
                 "frameTooLongs, correct state is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| counters have "
-                f"frameTooLongs errors on |{tops.dut_name}|.\n"
-                f"GIVEN interface frameTooLongs errors is |{tops.expected_output}|.\n"
-                f"WHEN interface frameTooLongs errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -476,20 +406,10 @@ class InterfaceCountersTests:
                 "fcsErrors, correct state is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| counters have "
-                f"fcsErrors errors on |{tops.dut_name}|.\n"
-                f"GIVEN interface fcsErrors errors is |{tops.expected_output}|.\n"
-                f"WHEN interface fcsErrors errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -530,20 +450,11 @@ class InterfaceCountersTests:
                 "alignmentErrors, correct state is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| counters have "
-                f"alignmentErrors errors on |{tops.dut_name}|.\n"
-                f"GIVEN interface alignmentErrors errors is {tops.expected_output}|.\n"
-                f"WHEN interface alignmentErrors errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -584,20 +495,12 @@ class InterfaceCountersTests:
                 "symbolErrors, correct state is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| counters have "
-                f"symbolErrors errors on |{tops.dut_name}|.\n"
-                f"GIVEN interface symbolErrors errors is |{tops.expected_output}|.\n"
-                f"WHEN interface symbolErrors errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
+
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -642,21 +545,12 @@ class InterfaceDiscardTests:
                 f"counter discards has |{tops.actual_output}| "
                 f"outDiscards, correct state is |{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| counters has"
-                f" outbound discards on |{tops.dut_name}|.\n"
-                f"GIVEN interface outbound discards are |{tops.expected_output}|\n"
-                "WHEN interface outbound discards are "
-                f"|{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
+
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -694,20 +588,10 @@ class InterfaceDiscardTests:
                 f"counter discards has |{tops.actual_output}| "
                 f"inDiscards, correct state is |{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| counters has "
-                f"inbound discards on |{tops.dut_name}|.\n"
-                f"GIVEN interface inbound discards are |{tops.expected_output}|.\n"
-                f"WHEN interface inbound discards are |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -749,20 +633,10 @@ class InterfaceMtuTests:
                 f"MTU is |{tops.actual_output}|, correct MTU is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| MTU is correct "
-                f"on |{tops.dut_name}|.\n"
-                f"GIVEN MTU of |{tops.expected_output}|.\n"
-                f"WHEN interface MTU is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -807,12 +681,6 @@ class InterfaceCountersTests:
                 f"Rx errors is |{tops.actual_output}|, correct Rx errors is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| Rx Errors is correct.\n"
-                f"GIVEN Rx errors is |{tops.expected_output}|.\n"
-                f"WHEN Rx errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
@@ -827,12 +695,6 @@ class InterfaceCountersTests:
                 f"Giant Frames is |{tops.actual_output}|, correct Giant Frames is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| Giant Frames is correct.\n"
-                f"GIVEN Giant Frames is |{tops.expected_output}|.\n"
-                f"WHEN Giant Frames is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
@@ -844,12 +706,6 @@ class InterfaceCountersTests:
                 f"On interface |{interface_name}|: interface "
                 f"Tx Errors is |{tops.actual_output}|, correct Tx Errors is "
                 f"|{tops.expected_output}|.\n\n"
-            )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| Tx Errors is correct.\n"
-                f"GIVEN Tx Errors is |{tops.expected_output}|.\n"
-                f"WHEN Tx Errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
             )
 
             tops.actual_results.append(tops.actual_output)
@@ -865,12 +721,6 @@ class InterfaceCountersTests:
                 f"Runt Frames is |{tops.actual_output}|, correct Runt Frames is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| Runt Frames is correct.\n"
-                f"GIVEN Runt Frames is |{tops.expected_output}|.\n"
-                f"WHEN Runt Frames is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
@@ -885,12 +735,7 @@ class InterfaceCountersTests:
                 f"FCS Errors is |{tops.actual_output}|, correct FCS Errors is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| FCS Errors is correct.\n"
-                f"GIVEN FCS Errors is |{tops.expected_output}|.\n"
-                f"WHEN FCS Errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
+
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
@@ -905,19 +750,10 @@ class InterfaceCountersTests:
                 f"Alignment Errors is |{tops.actual_output}|, correct Alignment Errors is "
                 f"|{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| Alignment Errors is correct.\n"
-                f"GIVEN Alignment Errors is |{tops.expected_output}|.\n"
-                f"WHEN Alignment Errors is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
@@ -963,12 +799,7 @@ class InterfaceCountersTests:
                 f"utilization is |{tops.actual_output}%|, "
                 f"bandwidth utilization should be less than |{tops.expected_output}%|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| input bw utilization is correct.\n"
-                f"GIVEN bw utilization is |{tops.expected_output}|.\n"
-                f"WHEN bw utilization is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
+
 
             tops.actual_results.append(tops.test_result)
             tops.expected_results.append(True)
@@ -987,19 +818,12 @@ class InterfaceCountersTests:
                 f"utilization is |{tops.actual_output}%|, "
                 f"bandwidth utilization should be less than |{tops.expected_output}%|.\n\n"
             )
-            tops.comment += (
-                f"TEST if interface |{interface_name}| output bw utilization is correct.\n"
-                f"GIVEN bw utilization is |{tops.expected_output}|.\n"
-                f"WHEN bw utilization is |{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
+
 
             tops.actual_results.append(tops.test_result)
             tops.expected_results.append(True)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (

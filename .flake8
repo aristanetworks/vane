@@ -1,0 +1,15 @@
+[flake8]
+
+# List files to exclude, one per line, comma separated, e.g.
+#   vane/file1.py,
+#   vane/file2.py
+exclude =
+
+# List errors and warnings to ignore (comma after error number, followed by short description)
+ignore =
+    E722,  # do not use bare 'except'
+    F541,  # f-string missing placeholders
+    W503,  # line break before binary operator
+
+# Set maximum line length
+max-line-length = 100

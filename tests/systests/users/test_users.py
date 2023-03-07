@@ -70,22 +70,10 @@ class UsersTests:
                 f"|{tops.actual_output}|, username configured "
                 f"should be |{tops.expected_output}|.\n\n"
             )
-            tops.comment += (
-                f"TEST is {username} username configured on "
-                f" |{tops.dut_name}|.\n"
-                "GIVEN username configured status: "
-                f"|{tops.expected_output}|.\n"
-                "WHEN username configured status: "
-                f"|{tops.actual_output}|.\n"
-                f"THEN test case result is |{tops.test_result}|.\n\n"
-            )
 
             tops.actual_results.append(tops.actual_output)
             tops.expected_results.append(tops.expected_output)
 
-        tops.comment += (
-            f"OUTPUT of |{tops.show_cmd}| is :\n\n{tops.show_cmd_txt}.\n"
-        )
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (

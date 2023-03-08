@@ -29,19 +29,19 @@ jobs:
       - name: Get changed files
         id: changes
         run: |
-          echo "::set-output name=all::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs)"
-          echo "::set-output name=ts::$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep .ts$ | xargs)
+          echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs)" >> $GITHUB_ENV
+          echo "ts=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep .ts$ | xargs)" >> $GITHUB_ENV
 
       # Run Black on the whole repo
       - name: Run Black to check the code for formatting problems
         # If any code needs reformatting, black returns an exit code of 1,
         # which fails the action
-        run: black --check ${{ steps.changes.outputs.all }}
+        run: black --check ${{ env.all }}
 
       # Run flake8 on the vane and tests directories
       - name: Lint with flake8
-        run: flake8 ${{ steps.changes.outputs.all }}
+        run: flake8 ${{ env.all }}
 
       # Run pylint on the vane and tests directories
       - name: Lint with pylint
-        run: pylint ${{ steps.changes.outputs.all }}
+        run: pylint ${{ env.all }}

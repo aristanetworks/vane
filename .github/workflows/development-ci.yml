@@ -28,7 +28,7 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v35.6.1
+        uses: tj-actions/changed-files@v35
 
       # Run Black on the whole repo
       - name: Run Black to check the code for formatting problems

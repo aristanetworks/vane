@@ -28,18 +28,18 @@ jobs:
 
       - name: Get changed files
         id: changed-files
-        uses: tj-actions/changed-files@v35
+        uses: technote-space/get-diff-action@v4
 
       # Run Black on the whole repo
       - name: Run Black to check the code for formatting problems
         # If any code needs reformatting, black returns an exit code of 1,
         # which fails the action
-        run: black --check ${{ steps.changed-files.outputs.all_changed_files }}
+        run: black --check ${{ steps.changed-files.outputs.diff }}
 
       # Run flake8 on the vane and tests directories
       - name: Lint with flake8
-        run: flake8 ${{ steps.changed-files.outputs.all_changed_files }}
+        run: flake8 ${{ steps.changed-files.outputs.diff }}
 
       # Run pylint on the vane and tests directories
       - name: Lint with pylint
-        run: pylint ${{ steps.changed-files.outputs.all_changed_files }}
+        run: pylint ${{ steps.changed-files.outputs.diff }}

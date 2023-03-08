@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import pytest
 import logging
 from vane import tests_tools
@@ -131,7 +133,7 @@ def teardown_via_name(duts, setup_config, checkpoint_restore_cmd, delete_checkpo
             continue
         restore_config = [checkpoint_restore_cmd, delete_checkpoint_cmd]
         dut['connection'].config(restore_config)
-        
+
 
 def teardown_via_role(duts, setup_config, checkpoint_restore_cmd, delete_checkpoint_cmd):
     """ Restores the checkpoints on duts identified by their role """
@@ -156,7 +158,7 @@ def perform_teardown(duts, checkpoint, setup_config):
 
     if dev_ids == 'name':
         teardown_via_name(duts=duts, setup_config=setup_config, checkpoint_restore_cmd=checkpoint_restore_cmd, delete_checkpoint_cmd=delete_checkpoint_cmd)
-    
+
     elif dev_ids == 'role':
         teardown_via_role(duts=duts, setup_config=setup_config, checkpoint_restore_cmd=checkpoint_restore_cmd, delete_checkpoint_cmd=delete_checkpoint_cmd)
 

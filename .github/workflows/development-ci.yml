@@ -4,9 +4,13 @@ run-name: ${{ github.actor }} CI development run
 on: [push]
 
 jobs:
-  validate:
+  changedfiles:
 
     runs-on: ubuntu-latest
+
+    outputs:
+      all: ${{ steps.changes.outputs.all }}
+      ts: ${{ steps.changes.outputs.ts }}
 
     steps:
       # Check out the repository
@@ -29,10 +33,14 @@ jobs:
       - name: Get changed files
         id: changes
         run: |
-          git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs
           echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | xargs)" >> $GITHUB_STATE
           echo "ts=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.pull_request.base.sha }} ${{ github.sha }} | grep .ts$ | xargs)" >> $GITHUB_STATE
 
+  validate:
+    runs-on: ubuntu-latest
+    needs: changedfiles
+    if: ${{ needs.changedfiles.outputs.all }}
+    steps:
       # Run Black on the whole repo
       - name: Run Black to check the code for formatting problems
         # If any code needs reformatting, black returns an exit code of 1,

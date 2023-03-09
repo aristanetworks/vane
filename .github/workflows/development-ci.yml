@@ -33,7 +33,7 @@ jobs:
           echo "----------"
           git branch -a
           echo "----------"
-          git merge-base --fork-point origin/develop gar-testing
+          git merge-base --fork-point remotes/origin/develop gar-testing
           echo "----------"
           echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
 

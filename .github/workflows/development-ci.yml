@@ -39,10 +39,18 @@ jobs:
       #     echo "----------"
       #     echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
 
+      - name: Get fork point
+        id: forkpoint
+        run: |
+          git fetch origin develop:develop
+          echo "----------"
+          echo "base=cat .git/refs/heads/master" >> $GITHUB_ENV
+
       - name: Get changed files
         id: changes
         run: |
-          git diff --name-only --diff-filter=ACMRT ${{ github.pull_request.base.sha }} ${{ github.sha }}
+          echo ${{ env.base }}
+          git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }}
           echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }} | xargs)" >> $GITHUB_ENV
 
       # - name: Get changed files

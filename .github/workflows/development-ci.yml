@@ -51,6 +51,8 @@ jobs:
           echo "----------"
           ls -la .git/refs/heads
           echo "----------"
+          git log develop.. | grep commit
+          echo "----------"
           echo "base=$(cat .git/refs/heads/develop)" >> $GITHUB_ENV
 
       - name: Get changed files

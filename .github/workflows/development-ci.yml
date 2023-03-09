@@ -9,8 +9,8 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
+      base: ${{ steps.changes.outputs.base }}
       all: ${{ steps.changes.outputs.all }}
-      ts: ${{ steps.changes.outputs.ts }}
 
     steps:
       # Check out the repository
@@ -33,8 +33,8 @@ jobs:
       - name: Get changed files
         id: changes
         run: |
-          echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.push.base.sha }} ${{ github.sha }} | xargs)" >> $GITHUB_STATE
-          echo "ts=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.push.base.sha }} ${{ github.sha }} | grep .ts$ | xargs)" >> $GITHUB_STATE
+          echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_OUTPUT
+          echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ steps.changes.output.base }} ${{ github.sha }} | xargs)" >> $GITHUB_STATE
 
   validate:
     runs-on: ubuntu-latest

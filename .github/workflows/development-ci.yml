@@ -35,9 +35,9 @@ jobs:
       #     echo "----------"
       #     git branch -a
       #     echo "----------"
-      #     git merge-base --fork-point remotes/origin/develop gar-testing
+      #     git merge-fork --fork-point remotes/origin/develop gar-testing
       #     echo "----------"
-      #     echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
+      #     echo "fork=$(git merge-fork --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
 
       # - name: Dump GitHub context
       #   env:
@@ -55,26 +55,31 @@ jobs:
       #     echo "----------"
       #     git show $(git log develop.. | grep commit | tail -1 | awk '{ print $NF }')^1 --format=%H | head -n 1
       #     echo "----------"
-      #     echo "base=$(cat .git/refs/heads/develop)" >> $GITHUB_ENV
+      #     echo "fork=$(cat .git/refs/heads/develop)" >> $GITHUB_ENV
 
       - name: Get fork point
         id: forkpoint
+        # List all the commits since the fork point, the take the last one and
+        # pull the commit hash from the line (awk), and request the commit hash
+        # before that one (^1). This gives us the fork point hash.
         run: |
-          git fetch origin develop:develop
-          echo "----------"
-          ls -la .git/refs/heads
-          echo "----------"
-          git log develop.. | grep commit
-          echo "----------"
-          echo "base=$(git show $(git log develop.. | grep commit | tail -1 | awk '{ print $NF }')^1 --format=%H | head -n 1)" >> $GITHUB_ENV
+          echo "fork=$(git show $(git log develop.. | grep commit | tail -1 | awk '{ print $NF }')^1 --format=%H | head -n 1)" >> $GITHUB_ENV
 
       - name: Get changed files
         id: changes
+        # Adds all changed files as env.all, and changed python files as env.python
         run: |
-          echo ${{ env.base }}
-          git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }}
-          echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }} | xargs)" >> $GITHUB_ENV
-          echo "python=$(git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }} | grep .py$ | xargs)" >> $GITHUB_ENV
+          echo "Fork point hash: ${{ env.fork }}"
+
+          echo ""
+          echo "All changed files:"
+          git diff --name-only --diff-filter=ACMRT ${{ env.fork }} ${{ github.sha }}
+          echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ env.fork }} ${{ github.sha }} | xargs)" >> $GITHUB_ENV
+
+          echo ""
+          echo "Changed python files:"
+          git diff --name-only --diff-filter=ACMRT ${{ env.fork }} ${{ github.sha }} | grep .py$
+          echo "python=$(git diff --name-only --diff-filter=ACMRT ${{ env.fork }} ${{ github.sha }} | grep .py$ | xargs)" >> $GITHUB_ENV
 
       # - name: Get changed files
       #   id: changes

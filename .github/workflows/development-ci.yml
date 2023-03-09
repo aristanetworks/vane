@@ -39,10 +39,23 @@ jobs:
       #     echo "----------"
       #     echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
 
-      - name: Dump GitHub context
-        env:
-          GITHUB_CONTEXT: ${{ toJson(github) }}
-        run: echo "$GITHUB_CONTEXT"
+      # - name: Dump GitHub context
+      #   env:
+      #     GITHUB_CONTEXT: ${{ toJson(github) }}
+      #   run: echo "$GITHUB_CONTEXT"
+
+      # - name: Get fork point
+      #   id: forkpoint
+      #   run: |
+      #     git fetch origin develop:develop
+      #     echo "----------"
+      #     ls -la .git/refs/heads
+      #     echo "----------"
+      #     git log develop.. | grep commit
+      #     echo "----------"
+      #     git show $(git log develop.. | grep commit | tail -1 | awk '{ print $NF }')^1 --format=%H | head -n 1
+      #     echo "----------"
+      #     echo "base=$(cat .git/refs/heads/develop)" >> $GITHUB_ENV
 
       - name: Get fork point
         id: forkpoint
@@ -53,9 +66,7 @@ jobs:
           echo "----------"
           git log develop.. | grep commit
           echo "----------"
-          git show $(git log develop.. | grep commit | tail -1 | awk '{ print $NF }')^1 --format=%H | head -n 1
-          echo "----------"
-          echo "base=$(cat .git/refs/heads/develop)" >> $GITHUB_ENV
+          echo "base=$(git show $(git log develop.. | grep commit | tail -1 | awk '{ print $NF }')^1 --format=%H | head -n 1)" >> $GITHUB_ENV
 
       - name: Get changed files
         id: changes

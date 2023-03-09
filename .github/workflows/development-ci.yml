@@ -30,13 +30,17 @@ jobs:
         id: forkpoint
         run: |
           git fetch origin develop:develop
+          echo "----------"
           git branch -a
-          git merge-base --fork-point develop ${{ github.ref_name }}
+          echo "----------"
+          git merge-base --fork-point develop gar-testing
+          echo "----------"
           echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
 
       - name: Get changed files
         id: changes
         run: |
+          echo "${{ env.base }}"
           echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }} | xargs)" >> $GITHUB_ENV
 
       # Run Black on the whole repo

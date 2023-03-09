@@ -52,6 +52,7 @@ jobs:
           echo ${{ env.base }}
           git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }}
           echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }} | xargs)" >> $GITHUB_ENV
+          echo "python=$(git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }} | grep .py$ | xargs)" >> $GITHUB_ENV
 
       # - name: Get changed files
       #   id: changes
@@ -62,12 +63,12 @@ jobs:
       - name: Run Black to check the code for formatting problems
         # If any code needs reformatting, black returns an exit code of 1,
         # which fails the action
-        run: black --check ${{ env.all }}
+        run: black --check ${{ env.python }}
 
       # Run flake8 on the vane and tests directories
       - name: Lint with flake8
-        run: flake8 ${{ env.all }}
+        run: flake8 ${{ env.python }}
 
       # Run pylint on the vane and tests directories
       - name: Lint with pylint
-        run: pylint ${{ env.all }}
+        run: pylint ${{ env.python }}

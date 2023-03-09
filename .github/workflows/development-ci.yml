@@ -29,7 +29,7 @@ jobs:
       - name: Get fork point
         id: forkpoint
         run: |
-          echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
+          echo "base=$(git merge-base --fork-point remotes/origin/develop ${{ github.ref_name }})" >> $GITHUB_ENV
 
       - name: Get changed files
         id: changes

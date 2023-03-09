@@ -44,6 +44,8 @@ jobs:
         run: |
           git fetch origin develop:develop
           echo "----------"
+          ls -la .git/refs/heads
+          echo "----------"
           echo "base=$(cat .git/refs/heads/develop)" >> $GITHUB_ENV
 
       - name: Get changed files

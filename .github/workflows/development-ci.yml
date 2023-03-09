@@ -62,7 +62,10 @@ jobs:
         # List all the commits since the fork point, the take the last one and
         # pull the commit hash from the line (awk), and request the commit hash
         # before that one (^1). This gives us the fork point hash.
+        # We need to check out the develop branch before doing this, but use
+        # "fetch" so we do not change to the develop branch.
         run: |
+          git fetch origin develop:develop
           echo "fork=$(git show $(git log develop.. | grep commit | tail -1 | awk '{ print $NF }')^1 --format=%H | head -n 1)" >> $GITHUB_ENV
 
       - name: Get changed files

@@ -53,6 +53,8 @@ jobs:
           echo "----------"
           git log develop.. | grep commit
           echo "----------"
+          git show $(git log develop.. | grep commit | tail -1 | awk '{ print $NF }')^1 --format=%H | head -n 1
+          echo "----------"
           echo "base=$(cat .git/refs/heads/develop)" >> $GITHUB_ENV
 
       - name: Get changed files

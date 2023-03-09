@@ -30,6 +30,8 @@ jobs:
         id: forkpoint
         run: |
           git fetch origin develop:develop
+          git branch -a
+          git merge-base --fork-point develop ${{ github.ref_name }}
           echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
 
       - name: Get changed files

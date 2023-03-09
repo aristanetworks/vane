@@ -28,27 +28,27 @@ jobs:
           python -m pip install --upgrade pip
           pip install black==22.12.0 flake8==5.0.4 pylint==2.16.2
 
-      # - name: Get fork point
-      #   id: forkpoint
-      #   run: |
-      #     git fetch origin develop:develop
-      #     echo "----------"
-      #     git branch -a
-      #     echo "----------"
-      #     git merge-base --fork-point remotes/origin/develop gar-testing
-      #     echo "----------"
-      #     echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
-      #
-      # - name: Get changed files
-      #   id: changes
-      #   run: |
-      #     echo "${{ env.base }}"
-      #     echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }} | xargs)" >> $GITHUB_ENV
+      - name: Get fork point
+        id: forkpoint
+        run: |
+          git fetch origin develop:develop
+          echo "----------"
+          git branch -a
+          echo "----------"
+          git merge-base --fork-point remotes/origin/develop gar-testing
+          echo "----------"
+          echo "base=$(git merge-base --fork-point develop ${{ github.ref_name }})" >> $GITHUB_ENV
 
       - name: Get changed files
         id: changes
         run: |
-          git diff --name-only --diff-filter=ACMRT HEAD^1 HEAD
+          echo "${{ env.base }}"
+          echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ env.base }} ${{ github.sha }} | xargs)" >> $GITHUB_ENV
+
+      - name: Get changerd files
+        id: changers
+        run: |
+          git diff --name-only --diff-filter=ACMRT -r HEAD^1 HEAD
           echo "all=$(git diff --name-only --diff-filter=ACMRT ${{ github.event.before }} ${{ github.event.after }})"
 
       # Run Black on the whole repo

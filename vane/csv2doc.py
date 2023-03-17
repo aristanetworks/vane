@@ -33,14 +33,18 @@
     it into a formattted word doc.
 
     Input Variables:
-        CSVFILE (str): Path + file name for CSV input data
+        CSVFILES (list): List of path + file names for CSV input data
         DOCFILE (str): Path + file name for output Word doc
-        TESTCASE_ID (int): CSV column number with test case ID
-        CASE_NAME (int): CSV column  number with test case name
-        PROCEDURE (int): CSV column  number with test steps / procedures
-        EXPECTED_RESULT (int): CSV column  number with test criteria
-        PASS_FAIL (int): CSV column  number with test status: pass or fail
-        OBSERVATION (int): CSV column  number with test completion note
+        EOS (str): EOS version number
+        TITLE_ROW (int): Title row in CSV
+        HEADER_ROW (int): Header row in CSV
+        TC_ID (str): CSV column name with test case ID
+        CASE_NAME (str): CSV column name with test case name
+        PROCEDURE (str): CSV column name with test steps / procedures
+        EXPECTED_RESULT (str): CSV column name with test criteria
+        PASS_FAIL (str): CSV column name with test status: pass or fail
+        OBSERVATION (str): CSV column name with test completion note
+        TC_TYPE (str): CSV column name with test case type
 """
 
 import csv
@@ -51,70 +55,121 @@ from docx.oxml.ns import nsdecls
 from docx.oxml import parse_xml
 from docx.enum.text import WD_COLOR_INDEX
 
-# GLOBAL Variables
+# Global Variables
 # test suite header
 TEST_SUITE_HEADER = r"\d{1,2}\.\d{1,2}"
 # Input Variables
 # Name of CSV to use for test output
-CSVFILE = "../Arista Agora Test Plan V9.3 - EOS Test Items.csv"
+CSVFILES = [
+    "../Arista Agora Test Plan V9.3 - EOS Test Items.csv",
+    "../Arista Agora Test Plan V9.3 - CVA_CVP Test Items.csv",
+]
 DOCFILE = "../test_summary_results.docx"
-# Column number of interesting values
-TESTCASE_ID = 0  # column A
-CASE_NAME = 2  # column C
-PROCEDURE = 16  # column Q
-EXPECTED_RESULT = 17  # column R
-PASS_FAIL = 13  # column N
-OBSERVATION = 14  # column O
+# EOS version
+EOS = "4.29.1F-DPE"
+# Column name of interesting values
+TITLE_ROW = 0
+HEADER_ROW = 1
+TC_ID = r".*Test Case ID.*"
+CASE_NAME = r".*Test Case Description.*"
+PROCEDURE = r".*Test Steps.*"
+EXPECTED_RESULT = r".*Criteria.*"
+PASS_FAIL = r"Pass/Fail"
+OBSERVATION = r".*Observations.*"
+TC_TYPE = r".*Test Case Type.*"
 
 
 def parse_csv():
-    """Open and parse CSV data and find test data
+    """Iterate through a list of CSV files.  Open and parse CSV data
+       and find test data
 
     Returns:
         list: List of interesting test data
     """
-    print(f"Parsing CSV file: {CSVFILE} for test data...")
+    test_data = []
 
-    # open csv
-    with open(CSVFILE, "r", encoding="utf-8") as file:
-        csv_reader = csv.reader(file)
-        # regex for matching a test suite header
-        test_data = inspect_csv_data(csv_reader)
+    # iterate through CSV files
+    for csvfile in CSVFILES:
+        print(f"Parsing CSV file: {csvfile} for test data...")
+
+        # open csv
+        with open(csvfile, "r", encoding="utf-8") as file:
+            csv_reader = csv.reader(file)
+            # regex for matching a test suite header
+            inspect_csv_data(test_data, csv_reader)
 
     return test_data
 
 
-def inspect_csv_data(csv_reader):
+def set_header_columns(row):
+    """Use regex to find a column index for interesting data
+
+    Args:
+        row (list): CSV row
+
+    Returns:
+        dict: key is column name and value is column index
+    """
+
+    header_columns = {}
+
+    # iterate through cells to find column headers
+    for count, _ in enumerate(row):
+        if re.match(TC_ID, row[count]):
+            header_columns["tc_id"] = count
+        elif re.match(CASE_NAME, row[count]):
+            header_columns["case_name"] = count
+        elif re.match(PROCEDURE, row[count]):
+            header_columns["procedure"] = count
+        elif re.match(EXPECTED_RESULT, row[count]):
+            header_columns["expected_result"] = count
+        elif re.match(PASS_FAIL, row[count]):
+            header_columns["pass_fail"] = count
+        elif re.match(OBSERVATION, row[count]):
+            header_columns["observation"] = count
+        elif re.match(TC_TYPE, row[count]):
+            header_columns["tc_type"] = count
+
+    return header_columns
+
+
+def inspect_csv_data(test_data, csv_reader):
     """Inspect each row of CSV data and determine if its interesting
 
     Args:
+        test_data (list): Use CSV file to update list with interesting test data
         csv_reader (obj): CSV object to iterate through
-
-    Returns:
-        list: List of interesting test data
     """
 
-    test_data = []
-
-    for row in csv_reader:
+    for count, row in enumerate(csv_reader):
         test_data_entry = []
-        # parse csv row for a test case ids
-        if "TN" in row[TESTCASE_ID]:
-            test_data_entry.append(row[TESTCASE_ID])
-            test_data_entry.append(row[CASE_NAME])
-            test_data_entry.append(row[PROCEDURE])
-            test_data_entry.append(row[EXPECTED_RESULT])
-            test_data_entry.append(row[PASS_FAIL])
-            test_data_entry.append(row[OBSERVATION])
 
-            # raw data entry for output data
+        # skip title row
+        if count == TITLE_ROW:
+            pass
+        # inspect header and find correct column numbers
+        elif count == HEADER_ROW:
+            header_columns = set_header_columns(row)
+        # parse csv row for a test case ids
+        elif "TN" in row[header_columns["tc_id"]]:
+            test_data_entry.append(row[header_columns["tc_id"]])
+            test_data_entry.append(row[header_columns["case_name"]])
+            test_data_entry.append(row[header_columns["procedure"]])
+            test_data_entry.append(row[header_columns["expected_result"]])
+            test_data_entry.append(row[header_columns["pass_fail"]])
+            test_data_entry.append(row[header_columns["observation"]])
             test_data.append(test_data_entry)
         # parse csv row for header
-        elif re.match(TEST_SUITE_HEADER, row[CASE_NAME]):
-            test_data_entry.append(row[CASE_NAME])
+        elif re.match(TEST_SUITE_HEADER, row[header_columns["case_name"]]):
+            test_data_entry.append(row[header_columns["case_name"]])
             test_data.append(test_data_entry)
-
-    return test_data
+        # parse csv row for sub-section
+        elif (not row[header_columns["tc_id"]] and not row[header_columns["tc_type"]]) and row[
+            header_columns["case_name"]
+        ] != "":
+            test_data_entry.append("")
+            test_data_entry.append(row[header_columns["case_name"]])
+            test_data.append(test_data_entry)
 
 
 def write_report(test_data):
@@ -161,7 +216,7 @@ def write_header(document):
 
     # Header text
     doc_text = (
-        "\nTest Cases for Arista BAU Hardware & EOS 4.27.2F Certification. "
+        f"\nTest Cases for Arista BAU Hardware & EOS {EOS} Certification. "
         "Please note – for more details on test outputs please reference "
         "the test case output appendix docs.\n\n\n"
     )
@@ -203,20 +258,12 @@ def write_header_row(table):
     for count, header in enumerate(headers):
         para = table.rows[0].cells[count].paragraphs[0]
 
-        cell = table.cell(0, count)
         run = para.add_run(header)
         run.font.name = "Arial"
         run.font.size = Pt(9)
         run.font.bold = True
 
-        cell = table.cell(0, count)
-
-        shading_blue = parse_xml(
-            # pylint: disable-next=consider-using-f-string
-            r'<w:shd {} w:fill="00FFFF"/>'.format(nsdecls("w"))
-        )
-        # pylint: disable-next=protected-access
-        cell._tc.get_or_add_tcPr().append(shading_blue)
+        shade_cell(count, table, 0, "00FFFF")
 
 
 def write_results_table(document, test_data):
@@ -258,14 +305,7 @@ def write_data_row(table, test_data):
             run.font.name = "Arial"
             run.font.size = Pt(9)
             run.bold = True
-
-            cell = table.cell(count, 0)
-            shading_blue = parse_xml(
-                # pylint: disable-next=consider-using-f-string
-                r'<w:shd {} w:fill="CCFFFF"/>'.format(nsdecls("w"))
-            )
-            # pylint: disable-next=protected-access
-            cell._tc.get_or_add_tcPr().append(shading_blue)
+            shade_cell(0, table, count, "CCFFFF")
 
         # Identify test case result data row
         elif "TN" in test_case_entry[0]:
@@ -279,24 +319,46 @@ def write_data_row(table, test_data):
                 # Test Case Identifier cell
                 if counter == 0:
                     test_data_entry = format_test_id(test_data_entry)
-                    run = (
-                        row_cells[counter]
-                        .paragraphs[0]
-                        .add_run(test_data_entry)
-                    )
+                    run = row_cells[counter].paragraphs[0].add_run(test_data_entry)
                 # Test Case Pass/Fail cell
                 elif counter == 4:
                     format_pass_fail(row_cells, counter, test_data_entry)
                 # Cells not needing special formatting
                 else:
-                    run = (
-                        row_cells[counter]
-                        .paragraphs[0]
-                        .add_run(test_data_entry)
-                    )
+                    run = row_cells[counter].paragraphs[0].add_run(test_data_entry)
 
                 run.font.name = "Arial"
                 run.font.size = Pt(9)
+
+        # identify test suite sub section
+        elif test_case_entry[0] == "":
+            row_cells = table.add_row().cells
+            row_cells[2].merge(row_cells[5])
+
+            run = row_cells[1].paragraphs[0].add_run(test_case_entry[1])
+            run.font.name = "Arial"
+            run.font.size = Pt(9)
+
+            for cell_idx in [0, 1, 2]:
+                shade_cell(cell_idx, table, count, "CCFFFF")
+
+
+def shade_cell(cell_idx, table, count, shade):
+    """Shade a cell in word doc table
+
+    Args:
+        cell_idx (int): Column index for cell to shade
+        table (obj): Word doc table object
+        count (int): Row index for cell to shade
+        shade (str): hexadecimal color representation
+    """
+    cell = table.cell(count, cell_idx)
+    color = parse_xml(
+        # pylint: disable-next=consider-using-f-string
+        r'<w:shd {} w:fill="{}"/>'.format(nsdecls("w"), shade)
+    )
+    # pylint: disable-next=protected-access
+    cell._tc.get_or_add_tcPr().append(color)
 
 
 def format_test_id(test_data_entry):

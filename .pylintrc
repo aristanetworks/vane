@@ -19,7 +19,6 @@ ignore-patterns=
 disable=
     logging-fstring-interpolation,
     logging-not-lazy,
-    print-statement,
 
 
 [MISCELLANEOUS]

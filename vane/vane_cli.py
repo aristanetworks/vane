@@ -33,7 +33,6 @@
 Just like a weather vane, Vane is a network certification tool that shows a
 network's readiness for production based on validation tests. """
 
-import sys
 import argparse
 import logging
 from io import StringIO
@@ -42,12 +41,12 @@ import yaml
 import pytest
 from vane import tests_client
 from vane import report_client
-from vane import xcel_client
 from vane import tests_tools
 from vane import test_step_client
 import vane.config
 
 FORMAT = "[%(asctime)s %(filename)s->%(funcName)s():%(lineno)s]%(levelname)s: %(message)s"
+
 logging.basicConfig(
     level=logging.INFO,
     filename="vane.log",
@@ -63,13 +62,12 @@ def parse_cli():
     Returns:
         args (obj): An object containing the CLI arguments.
     """
-
-    parser = argparse.ArgumentParser(description=("Network Certification Tool"))
+    parser = argparse.ArgumentParser(description="Network Certification Tool")
 
     parser.add_argument(
         "--definitions-file",
         default=vane.config.DEFINITIONS_FILE,
-        help="Specify the name of the defintions file",
+        help="Specify the name of the definitions file",
     )
 
     parser.add_argument(
@@ -79,26 +77,11 @@ def parse_cli():
     )
 
     parser.add_argument(
-        "--markers",
-        help=(
-            "List of supported technology tests. "
-            "Equivalent to pytest --markers"
-        ),
-        action="store_true",
-    )
-
-    parser.add_argument(
-        "--input",
-        action="store_true",
-        default=False,
-        help="Use spreadsheet for input",
-    )
-
-    parser.add_argument(
         "--environment",
         default=vane.config.ENVIRONMENT,
         help="Specify the test execution environment",
     )
+
     parser.add_argument(
         "--generate-duts-file",
         help="Create a duts file from topology and inventory file",
@@ -108,9 +91,25 @@ def parse_cli():
 
     parser.add_argument(
         "--generate-duts-from-topo",
-        help="Generate duts file from an ACT topology file.",
+        help="Generate a duts file from an ACT topology file.",
         nargs=1,
         metavar=("topology_file"),
+    )
+
+    parser.add_argument(
+        "--generate-test-steps",
+        help=(
+            "Generate test steps for all the tests in"
+            " the test directory mentioned in the definitions file"
+        ),
+        nargs=1,
+        metavar=("test_dir"),
+    )
+
+    parser.add_argument(
+        "--markers",
+        help=("List of supported technology tests. Equivalent to pytest --markers"),
+        action="store_true",
     )
 
     args = parser.parse_args()
@@ -118,30 +117,16 @@ def parse_cli():
     return args
 
 
-def input_spreadsheet(definitions_file):
-    """Input data from a spreadsheet"""
-
-    vane_xcel_client = xcel_client.XcelClient(definitions_file)
-    vane_xcel_client.import_spreadsheet()
-    vane_xcel_client.parse_spreadsheet()
-    sys.exit(0)
-
-
 def setup_vane():
     """Do tasks to setup test suite"""
-
     logging.info("Starting Test Suite setup")
 
     vane.config.test_duts = tests_tools.import_yaml(vane.config.DUTS_FILE)
-    vane.config.test_parameters = tests_tools.import_yaml(
-        vane.config.DEFINITIONS_FILE
-    )
-    tests_tools.init_show_log(vane.config.test_parameters)
+    vane.config.test_parameters = tests_tools.import_yaml(vane.config.DEFINITIONS_FILE)
 
     logging.info("Discovering show commands from definitions")
-    vane.config.test_defs = tests_tools.return_test_defs(
-        vane.config.test_parameters
-    )
+
+    vane.config.test_defs = tests_tools.return_test_defs(vane.config.test_parameters)
     show_cmds = tests_tools.return_show_cmds(vane.config.test_defs)
     vane.config.dut_objs = tests_tools.init_duts(
         show_cmds, vane.config.test_parameters, vane.config.test_duts
@@ -155,9 +140,10 @@ def run_tests(definitions_file, duts_file):
 
     Args:
         definitions_file (str): Path and name of definition file
+        duts_file (str): Path and name of duts file
     """
-
     logging.info("Using class TestsClient to create vane_tests_client object")
+
     vane_tests_client = tests_client.TestsClient(definitions_file, duts_file)
     vane_tests_client.generate_test_definitions()
     vane_tests_client.setup_test_runner()
@@ -171,19 +157,24 @@ def write_results(definitions_file):
     Args:
         definitions_file (str): Path and name of definition file
     """
-
     logging.info("Using class ReportClient to create vane_report_client object")
+
     vane_report_client = report_client.ReportClient(definitions_file)
     vane_report_client.write_result_doc()
-    if vane.config.test_parameters["parameters"]["report_test_steps"]:
-        vane_test_step_client = test_step_client.TestStepClient(
-            vane.config.DEFINITIONS_FILE
-        )
-        vane_test_step_client.write_test_steps()
+
+
+def write_test_steps(test_dir):
+    """Writes the test steps for the given test directory tests
+
+    Args: test_dir (str): Path and name of test directory"""
+
+    vane_test_step_client = test_step_client.TestStepClient(test_dir)
+    vane_test_step_client.write_test_steps()
 
 
 def show_markers():
     """Returns the list of supported markers.
+
     Returns:
         marker_list (list): supported markers list.
     """
@@ -203,18 +194,21 @@ def show_markers():
     ]
 
     temp_stdout = StringIO()
+
     with redirect_stdout(temp_stdout):
         _ = pytest.main(["--markers"])
+
     stdout_str = temp_stdout.getvalue()
     marker_list = []
+
     for i in stdout_str.split("\n"):
         if "pytest" in i:
             marker_name = i.split(": ")[0].split(".")[2]
             marker_description = i.split(": ")[1]
+
             if marker_name not in inbuilt_list:
-                marker_list.append(
-                    dict(marker=marker_name, description=marker_description)
-                )
+                marker_list.append({"marker": marker_name, "description": marker_description})
+
     return marker_list
 
 
@@ -223,11 +217,13 @@ def create_duts_from_topo(topology_file):
     Util function responsible for reading in topology file,
     calling on test tools to create duts file from the data
     gathered from the topo file.
-    """
 
+    Args:
+        topology_file (str): Path and name of topology file
+    """
     # Open the topology file in read only
     try:
-        with open(topology_file, "r") as file:
+        with open(topology_file, "r", encoding="utf-8") as file:
             topology = yaml.safe_load(file)
     except FileNotFoundError:
         print("No valid topology file provided.")
@@ -237,7 +233,6 @@ def create_duts_from_topo(topology_file):
     if topology["nodes"]:
         username = topology["veos"]["username"]
         password = topology["veos"]["password"]
-
         topo_name = topology_file.split(".yml")[0]
         output_file = topo_name + "_duts.yaml"
 
@@ -249,31 +244,29 @@ def create_duts_from_topo(topology_file):
 
 def main():
     """main function"""
-
     logging.info("Accept input from command-line")
+
     args = parse_cli()
 
     if args.markers:
         print(f"{show_markers()}")
 
+    elif args.generate_test_steps:
+        write_test_steps(args.generate_test_steps)
+
     else:
         if args.definitions_file:
-            logging.warning(
-                "Changing Definitions file name to " f"{args.definitions_file}"
-            )
+            logging.warning(f"Changing Definitions file name to {args.definitions_file}")
             vane.config.DEFINITIONS_FILE = args.definitions_file
 
         if args.duts_file:
-            logging.warning("Changing DUTS file name to " f"{args.duts_file}")
+            logging.warning(f"Changing DUTS file name to {args.duts_file}")
             vane.config.DUTS_FILE = args.duts_file
 
         if args.generate_duts_file:
             vane.config.DUTS_FILE = tests_tools.create_duts_file(
                 args.generate_duts_file[0], args.generate_duts_file[1]
             )
-
-        if args.input:
-            input_spreadsheet(vane.config.DEFINITIONS_FILE)
 
         if args.environment:
             vane.config.ENVIRONMENT = args.environment

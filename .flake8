@@ -7,9 +7,12 @@ exclude =
 
 # List errors and warnings to ignore (comma after error number, followed by short description)
 ignore =
-    E722,  # do not use bare 'except'
-    F541,  # f-string missing placeholders
-    W503,  # line break before binary operator
+    # do not use bare 'except'
+    E722,
+    # f-string missing placeholders
+    F541,
+    # line break before binary operator
+    W503,
 
 # Set maximum line length
 max-line-length = 100

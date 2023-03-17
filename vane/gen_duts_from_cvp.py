@@ -33,101 +33,175 @@
 Python script to obtain device inventory information from
 CVP and generate a DUTS file for Vane
 
-Author: David Lewis (dlewis@arista.com)
-Date: 21/10/2022
-
-reqs: cvprac, pyeapi, yaml, ssl, urllib3
+reqs: cvprac, pyeapi, yaml, urllib3
 
 Run: python3 gen_duts_from_cvp.py
 """
 
-from cvprac.cvp_client import CvpClient
-import ssl
-ssl._create_default_https_context = ssl._create_unverified_context
-import urllib3
-urllib3.disable_warnings()
-import yaml
-import pyeapi
+import argparse
 import sys
+import yaml
+import urllib3
+import pyeapi
+from cvprac.cvp_client import CvpClient
+from cvprac.cvp_client_errors import (
+    CvpApiError,
+    CvpLoginError,
+    CvpRequestError,
+    CvpSessionLogOutError,
+)
+from requests.exceptions import HTTPError, ReadTimeout, Timeout, TooManyRedirects
 
-username = '<devices username>'
-password = 'devices password'
-cvp_instance = '<cvp ip address>'
-cvp_username = '<cvp username>'
-cvp_password = '<cvp password>'
 
-def main():
+def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name):
     """
-    main function: 
-        (1) Gets input for username and password,
-        (2) Connects to CVP instance using Cvprac and sends request
-        to get inventory
-        (3) Iterates through device inventory, collects neighbor
-        information and then generates duts file
+    create_duts_file_from_cvp function:
+        (1) Function to retrieve the inventory from cvp.
+        (2) Also retrieves all the neighbors for each device by running lldp cmd on
+        devices.
+        (3) All this info is dumped in file 'duts_file_name'.
+    Args:
+        cvp_ip: ip address for CVP
+        cvp_username: username for CVP
+        cvp_password: password for CVP
+        duts_file_name: name of the duts file to be written
     """
 
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     try:
         clnt = CvpClient()
-        clnt.connect(nodes=[cvp_instance], username=cvp_username, password=cvp_password) # nodes=address of cvp instance
+        clnt.connect([cvp_ip], cvp_username, cvp_password)
+        print(f"Pull the inventory from CVP: {cvp_ip}")
         inventory = clnt.api.get_inventory()
-    except:
-        sys.exit("Can't connect to CVP instance.")
-        
-    # check if inventory has devices
-    if inventory:
-        with open('duts.yaml', 'w', encoding='utf-8') as file:
-            file.write('duts: \n')
-            for dut in inventory:
-                neighbors = get_neighbors(host=dut["ipAddress"], username=username, password=password)
-                generate_duts_file(dut=dut, file=file, username=username, password=password, neighbors=neighbors)
+    except (
+        CvpLoginError,
+        CvpApiError,
+        CvpSessionLogOutError,
+        CvpRequestError,
+        HTTPError,
+        ReadTimeout,
+        Timeout,
+        TooManyRedirects,
+        TypeError,
+        ValueError,
+    ) as err:
+        msg = f"Could not get CVP inventory info: {err}"
+        sys.exit(msg)
+
+    dut_file = {}
+    dut_properties = []
+    for dev in inventory:
+        if dev["ztpMode"]:
+            continue
+        dut_properties.append(
+            {
+                "mgmt_ip": dev["ipAddress"],
+                "name": dev["hostname"],
+                "password": cvp_password,
+                "transport": "https",
+                "username": cvp_username,
+                "role": "unknown",
+                "neighbors": [],
+            }
+        )
+
+    if dut_properties:
+        dut_file.update({"duts": dut_properties})
+
+    lldp_cmd = "show lldp neighbors | json"
+    show_cmds = [lldp_cmd]
+    workers = len(dut_properties)
+    print(f"Run 'show lldp neighbors' on {workers} duts")
+    for dut in dut_properties:
+        dut_worker(dut, show_cmds)
+
+    neighbors_matrix = {}
+    for dut in dut_properties:
+        neighbors = dut["output"][lldp_cmd]["result"][0]["lldpNeighbors"]
+        for neighbor in neighbors:
+            del neighbor["ttl"]
+            fqdn = neighbor["neighborDevice"]
+            neighbor["neighborDeivce"] = fqdn.split(".")[0]
+        neighbors_matrix[dut["name"]] = neighbors
+
+    for dut_property in dut_properties:
+        dut_property["neighbors"] = neighbors_matrix[dut_property["name"]]
+        del dut_property["output"]
+        del dut_property["connection"]
+
+    if dut_properties:
+        dut_file.update({"duts": dut_properties})
+        with open(duts_file_name, "w", encoding="utf-8") as yamlfile:
+            yaml.dump(dut_file, yamlfile, sort_keys=False)
+            print(f"Yaml file {duts_file_name} created")
 
 
-def get_neighbors(host, username, password):
+def dut_worker(dut, show_cmds):
+    """Execute 'show_cmds' on dut. Update dut structured data with show
+    output.
+
+    Args:
+      dut(dict): structured data of a dut output data, hostname, and
+      connection
+      show_cmds: list of show_cmds to be run on dut. Output is added
+      to dut dict itself
     """
-    get_neighbors function:
-        (1) Connects to device using pyeapi
-        (2) Executes and obtains neighbor data from dut
-        (3) Returns neighbor information
-    
-    args:
-        (1) host = hostname/address of the dut
-        (2) transport = transport protocol
-        (3) username = username to connect to dut
-        (4) password = password to connect to dut
+
+    eos = {
+        "device_type": "arista_eos",
+        "ip": dut["mgmt_ip"],
+        "username": dut["username"],
+        "password": dut["password"],
+        "secret": dut["password"],
+    }
+
+    dut["output"] = {}
+
+    dut["connection"] = pyeapi.connect(
+        host=eos["ip"], username=eos["username"], password=eos["password"]
+    )
+
+    for show_cmd in show_cmds:
+        output = dut["connection"].execute(show_cmd)
+        dut["output"][show_cmd] = output
+
+
+def main():
+    """main function"""
+
+    args = parse_cli()
+
+    if args.generate_cvp_duts_file:
+        create_duts_file_from_cvp(
+            args.generate_cvp_duts_file[0],
+            args.generate_cvp_duts_file[1],
+            args.generate_cvp_duts_file[2],
+            args.generate_cvp_duts_file[3],
+        )
+
+
+def parse_cli():
+    """Parse CLI options.
+
+    Returns:
+      args (obj): An object containing the CLI arguments.
     """
-    conn = pyeapi.connect(host=host, transport='https', username=username, password=password)
-    neighbors = conn.execute(['show lldp neighbors'])
-    return neighbors["result"][0]["lldpNeighbors"]
 
+    parser = argparse.ArgumentParser(
+        description=(
+            "Script to generate duts.yaml for vane from CVP and devices. Does not work for ACT env."
+        )
+    )
 
-def generate_duts_file(dut, file, username, password, neighbors):
-    """
-    generate_duts_file function:
-        (1) Creates DUT dictionary from information
-        gathered from the device
-        (2) Writes DUT dictionary to yaml file
+    parser.add_argument(
+        "--generate-cvp-duts-file",
+        help="Create a duts file from CVP inventory",
+        nargs=4,
+        metavar=("cvp_ip_address", "cvp_username", "cvp_password", "duts_file_name"),
+    )
+    args = parser.parse_args()
 
-    args:
-        (1) dut = dut object gathered using cvprac
-        (2) file = file to write the object to
-        (3) username = username to write to file
-        (4) password = password to write to file
-        (5) neighbors = neighbor data gathered using pyeapi
-    """
-
-    dut_dict = [
-        {
-            'mgmt_ip' : dut["ipAddress"],
-            'name' : dut["hostname"],
-            'neighbors' : neighbors,
-            'password' : password,
-            'transport' : 'https',
-            'username' : username,
-            'role' : ''
-        }
-    ]
-
-    yaml.dump(dut_dict, file)
+    return args
 
 
 if __name__ == "__main__":

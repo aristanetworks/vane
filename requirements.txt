@@ -1,26 +1,26 @@
-pyyaml
+cvprac
 jinja2
+mdutils
+netmiko
+openpyxl
 pyeapi
 python-docx
-openpyxl
-netmiko
-mdutils
+pyyaml
 
 # Dev
-pylint
-flake8
+black==23.1.0
 coverage
 coverage-badge
-black
+flake8==6.0.0
 mypy
+pylint==2.17.0
 
 # pytest plugins
 pytest
+pytest-cache
+pytest-cov
 pytest-excel
-pytest-xdist
 pytest-html
 pytest-json
-pytest-cache
-pytest-sugar
 #pytest-spec
-pytest-cov
+pytest-xdist

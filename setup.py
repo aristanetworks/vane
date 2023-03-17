@@ -1,3 +1,4 @@
+"""Module setup dependencies"""
 import setuptools
 
 from vane import __version__, __author__
@@ -14,30 +15,30 @@ setuptools.setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent",
     ],
-    packages=setuptools.find_packages(include=['vane', 'vane.*']),
+    packages=setuptools.find_packages(include=["vane", "vane.*"]),
     entry_points={
-        'console_scripts': [
-            'vane = vane.vane_cli:main',
+        "console_scripts": [
+            "vane = vane.vane_cli:main",
         ]
     },
     install_requires=[
-        'pytest',
-        'pyyaml',
-        'jinja2',
-        'pyeapi',
-        'python-docx',
-        'openpyxl',
-        'pytest-excel',
-        'pytest-xdist',
-        'pytest-html',
-        'pytest-json',
-        'pytest-cache',
-        'pytest-sugar',
-        'pytest-cov',
-        'netmiko'
+        "cvprac",
+        "jinja2",
+        "netmiko",
+        "openpyxl",
+        "pyeapi",
+        "pytest",
+        "pytest-cache",
+        "pytest-cov",
+        "pytest-excel",
+        "pytest-html",
+        "pytest-json",
+        "pytest-xdist",
+        "python-docx",
+        "pyyaml",
     ],
     python_requires=">=3.6",
-    keywords=['vane', 'pytest'],
+    keywords=["vane", "pytest"],
     zip_safe=False,
-    include_package_data=True
+    include_package_data=True,
 )

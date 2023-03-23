@@ -74,7 +74,7 @@ jobs:
           echo "3-----------------------------------------"
           git config --local user.email "actions@github.com"
           echo "4-----------------------------------------"
-          if git diff --quiet coverage.svg; then
+          if ! git diff --quiet coverage.svg; then
             echo "-----------------------------------------"
             echo "Updating coverage badge"
             git status || true

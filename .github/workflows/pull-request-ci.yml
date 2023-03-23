@@ -1,0 +1,63 @@
+name: pull-request-ci
+run-name: Pull request merge processing
+
+# Run the unittests when a pull request is merged, and post the coverage
+# results badge to the repo page
+
+on:
+  pull_request:
+    branches:
+      - gar-testing-merge
+    types:
+      - closed
+
+jobs:
+  unittest:
+    # Run the Vane unittests and get the total coverage
+
+    # Only run the tests when the pull request is merged
+    # A closed (canceled) PR does not need to be processed
+    if: github.event.pull_request.merged == true
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          # architecture: 'x64' # The default
+
+      - name: Display the Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Display git information
+        run: git status
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run the unittests
+        # Install vane in "editable/developer" mode, so the executable is using
+        # the source files and coverage can monitor the proper directory
+        continue-on-error: true
+        run: |
+          pip install -e .
+          mkdir -p $PWD/tests/unittests/fixtures/reports/results
+          pytest --cov-report term-missing --cov=$PWD/vane $PWD/tests/unittests
+
+      - name: Report the coverage
+        # Get the coverage score and return success if the value is >= 90
+        run: |
+          cov_score=$(coverage report | awk '$1 == "TOTAL" {print $NF+0}')
+          echo -e "\n----------------"
+          echo "Coverage is ${cov_score}%"
+          echo -e "----------------\n"

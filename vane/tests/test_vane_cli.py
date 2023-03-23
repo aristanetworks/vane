@@ -22,6 +22,24 @@ def test_parse_cli():
     definitions_file = "definitions.yaml"
     duts_file = "duts.yaml"
     environment = "test"
+    generate_duts_file = None
+    generate_duts_from_topo = None
+    generate_test_steps = None
+    markers = False
+
+    assert definitions_file == output.definitions_file
+    assert duts_file == output.duts_file
+    assert environment == output.environment
+    assert generate_duts_file == output.generate_duts_file
+    assert generate_duts_from_topo == output.generate_duts_from_topo
+    assert generate_test_steps == output.generate_test_steps
+    assert markers == output.markers
+
+def test_setup_vane():
+    assert 0 == 0
+
+
+    
 
 
 

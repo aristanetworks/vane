@@ -72,6 +72,7 @@ jobs:
           git config --local user.email "actions@github.com"
           git diff --quiet coverage.svg
           changed=$?
+          echo "changed is: $changed"
           if [[ "changed" == 1 ]]; then
             echo "-----------------------------------------"
             echo "Updating coverage badge"

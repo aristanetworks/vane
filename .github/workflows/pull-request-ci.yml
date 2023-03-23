@@ -73,8 +73,15 @@ jobs:
           git diff --quiet coverage.svg
           changed=$?
           if [[ "changed" == 1 ]]; then
+            echo "-----------------------------------------"
             echo "Updating coverage badge"
+            git status
+            echo "-----------------------------------------"
             git add coverage.svg
+            git status
+            echo "-----------------------------------------"
             git commit -am "Updating coverage badge"
+            echo "-----------------------------------------"
             git push -f origin ${{ github.base_ref }}
+            echo "-----------------------------------------"
           fi

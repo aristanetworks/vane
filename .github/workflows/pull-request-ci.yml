@@ -37,7 +37,7 @@ jobs:
       - name: Display the Python version
         run: python -c "import sys; print(sys.version)"
 
-      - name: Display github information
+      - name: Display github context information
         env:
           GITHUB_CONTEXT: ${{ toJson(github) }}
         run: echo "$GITHUB_CONTEXT"
@@ -63,7 +63,7 @@ jobs:
           echo -e "\n----------------"
           echo "Coverage is ${cov_score}%"
           echo -e "----------------\n"
-          coverage-badge -o coverage.svg
+          coverage-badge -f -o coverage.svg
 
       - name: Commit the coverage badge
         run: |
@@ -72,4 +72,4 @@ jobs:
           git config --local user.email "actions@github.com"
           git add coverage.svg
           git commit -am "Updating coverage badge"
-          git push -f origin gar-testing-merge
+          git push -f origin ${{ github.base_ref }}

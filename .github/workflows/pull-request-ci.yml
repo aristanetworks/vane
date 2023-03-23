@@ -70,6 +70,8 @@ jobs:
           git status
           git config --local user.name actions-user
           git config --local user.email "actions@github.com"
-          git add coverage.svg
-          git commit -am "Updating coverage badge"
-          git push -f origin ${{ github.base_ref }}
+          if ! git diff --exit-code; then
+            git add coverage.svg
+            git commit -am "Updating coverage badge"
+            git push -f origin ${{ github.base_ref }}
+          fi

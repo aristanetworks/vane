@@ -65,10 +65,10 @@ jobs:
 
       - name: Commit the coverage badge
         run: |
+          git status
           git config --local user.name actions-user
           git config --local user.email "actions@github.com"
-          if ! git diff --exit-code; then
-            git add coverage.svg
-            git commit -am "Updating coverage badge"
-            git push -f origin gar-testing-merge
-          fi
+          ls -la
+          git add coverage.svg
+          git commit -am "Updating coverage badge"
+          git push -f origin gar-testing-merge

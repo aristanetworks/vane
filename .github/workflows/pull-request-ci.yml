@@ -37,8 +37,10 @@ jobs:
       - name: Display the Python version
         run: python -c "import sys; print(sys.version)"
 
-      - name: Display git information
-        run: git status
+      - name: Display github information
+        env:
+          GITHUB_CONTEXT: ${{ toJson(github) }}
+        run: echo "$GITHUB_CONTEXT"
 
       - name: Install dependencies
         run: |
@@ -68,7 +70,6 @@ jobs:
           git status
           git config --local user.name actions-user
           git config --local user.email "actions@github.com"
-          ls -la
           git add coverage.svg
           git commit -am "Updating coverage badge"
           git push -f origin gar-testing-merge

@@ -6,16 +6,18 @@
       # CPU process ceiling
       expected_output: 1
       # Optionally filter duts by criteria: name, role, regex, or names
-      criteria: name
-      filter: BLW1
+      criteria: names
+      filter: 
+        - BLFE1
     - name: test_1_min_cpu_utlization_on_
       description: Verify 1 minute CPU % is under specificied value
       show_cmd: show processes
       # CPU process ceiling
       expected_output: 10
       # Optionally filter duts by criteria: name, role, regex, or names
-      criteria: role
-      filter: leaf
+      criteria: roles
+      filter: 
+        - leaf
     - name: test_5_min_cpu_utlization_on_
       description: Verify 5 minute CPU % is under specificied value
       show_cmd: show processes
@@ -24,5 +26,4 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter:
-        - BL2
-        - BL1
+        - BLFE1

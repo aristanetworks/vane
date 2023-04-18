@@ -1,8 +1,39 @@
-import os
+#!/usr/bin/env python3
+#
+# Copyright (c) 2023, Arista Networks EOS+
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the Arista nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+"""
+Collection of misc functions that dont fit anywhere else but are still required.
+"""
+
 import sys
-import subprocess
 import collections
-import logging
 
 
 def make_iterable(value):
@@ -14,42 +45,43 @@ def make_iterable(value):
     Returns:
         An iterable object of type list
     """
-    if sys.version_info <= (3, 0) and isinstance(value, unicode):
+    if sys.version_info <= (3, 0) and isinstance(value, str):
         # Convert unicode values to strings for Python 2
         value = str(value)
-    if isinstance(value, str) or isinstance(value, dict):
+    if isinstance(value, (dict, str)):
         value = [value]
 
     if sys.version_info <= (3, 3):
         if not isinstance(value, collections.Iterable):
-            raise TypeError('value must be an iterable object')
+            raise TypeError("value must be an iterable object")
     else:
         if not isinstance(value, collections.abc.Iterable):
-            raise TypeError('value must be an iterable object')
+            raise TypeError("value must be an iterable object")
 
     return value
 
-def run_script(path_to_run, py_file):
-    args = ["python{}".format(''), "{}{}".format(path_to_run, py_file)]
-    res = subprocess.Popen(args, stdout=subprocess.PIPE)
-    output, error_ = res.communicate()
-
-    if not error_:
-        logging.info(f"Output for run_script {py_file}: {output}")
-    else:
-        logging.error(f"Error in run_script {py_file}: {error_}")
-
-def get_current_testcase_class(request):
-    nodeid = request.node.nodeid.split("::")
-    test_class = nodeid[1] if len(nodeid) == 3 else None
-    return test_class
 
 def get_current_fixture_testclass(request):
+    """
+    Method to get the name of the Test Function's class
+    from the request fixture.
+    Args: request - is the pytest request fixture
+    Returns: Name of the test functions's class
+    """
+
     nodeid = request.node.nodeid.split("::")
     test_class = nodeid[1] if len(nodeid) >= 2 else None
     return test_class
 
+
 def get_current_fixture_testname(request):
+    """
+    Method to get the name of the Test Function
+    from the request fixture.
+    Args: request - is the pytest request fixture
+    Returns: Name of the test function
+    """
+
     nodeid = request.node.nodeid.split("::")
     test_name = nodeid[2] if len(nodeid) >= 3 else None
     return test_name.split("[")[0]

@@ -38,13 +38,13 @@ Fixture setup and teardown functions
 """
 
 import datetime
-import logging
 import pytest
 
 from jinja2 import Template
 from vane import tests_tools
 from vane.config import dut_objs, test_defs
 from vane.utils import get_current_fixture_testclass, get_current_fixture_testname
+from vane.vane_logging import logging
 
 
 def idfn(val):

@@ -32,7 +32,52 @@
 """Templates for reporting"""
 
 REPORT_TEMPLATES = {
-    2: {
+    "default": {
+        "test_id": {
+            "required": True,
+            "format": "string",
+            "output_name": "test identifier",
+            "summary": True,
+        },
+        "name": {
+            "required": True,
+            "format": "string",
+            "output_name": "test case name",
+            "summary": True,
+        },
+        "description": {"required": True, "format": "string"},
+        "show_cmd_txts": {
+            "required": False,
+            "format": "config_term",
+            "default": [],
+            "output_name": "dut output",
+        },
+        "expected_output": {
+            "required": True,
+            "format": "dict_string",
+            "output_name": "expected output",
+        },
+        "actual_output": {
+            "required": True,
+            "format": "dict_string",
+            "output_name": "actual output",
+        },
+        "test_result": {
+            "required": True,
+            "format": "test_result",
+            "output_name": "test result",
+            "summary": True,
+        },
+        "fail_or_skip_reason": {
+            "required": True,
+            "format": "string",
+            "default": "None",
+            "output_name": "fail or skip reason",
+            "summary": True,
+        },
+        "comment": {"required": False, "format": "string", "default": "None"},
+    },
+    "modern": {
         "test_id": {
             "required": True,
             "format": "string",
@@ -86,7 +131,7 @@ REPORT_TEMPLATES = {
             "default": [],
             "output_name": "dut output",
         },
-        "criteria": {
+        "test_criteria": {
             "required": True,
             "format": "string",
             "default": "None",
@@ -107,5 +152,5 @@ REPORT_TEMPLATES = {
             "summary": True,
         },
         "comment": {"required": False, "format": "string", "default": "None"},
-    }
+    },
 }

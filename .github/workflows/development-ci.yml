@@ -10,12 +10,17 @@ on:
 
 jobs:
   validate:
+    # Run validation checks on the code that has been changed,
+    # including checking formatting with Black, and linting checks
+    # with flake8 and pylint. Branches cannot be merged into develop
+    # unless the validate checks all pass.
 
     runs-on: ubuntu-latest
 
     steps:
-      # Check out the repository
-      - uses: actions/checkout@v3
+
+      - name: Check out the repository
+        uses: actions/checkout@v3
         with:
           fetch-depth: 0
 
@@ -27,6 +32,13 @@ jobs:
 
       - name: Display the Python version
         run: python -c "import sys; print(sys.version)"
+
+      # - name: Display github context information
+      #   # Prints all the github.<xxx> variables in the workflow log.
+      #   # Uncomment if needed for reference
+      #   env:
+      #     GITHUB_CONTEXT: ${{ toJson(github) }}
+      #   run: echo "$GITHUB_CONTEXT"
 
       - name: Install dependencies
         run: |
@@ -77,3 +89,51 @@ jobs:
       - name: Lint with pylint
         if: ${{ env.python }}
         run: pylint ${{ env.python }}
+
+  unittest:
+    # Run the Vane unittests
+    # Test coverage is compared with a 90% target goal and the check will fail
+    # if below that point, however the branch is allowed to be merged with
+    # develop regardless of the coverage score and whether the unittest check
+    # passes or fails.
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          # architecture: 'x64' # The default
+
+      - name: Display the Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run the unittests
+        # Install vane in "editable/developer" mode, so the executable is using
+        # the source files and coverage can monitor the proper directory
+        continue-on-error: true
+        run: |
+          pip install -e .
+          mkdir -p $PWD/tests/unittests/fixtures/reports/results
+          pytest --cov-report term-missing --cov=$PWD/vane $PWD/tests/unittests
+
+      - name: Report the coverage
+        # Get the coverage score and return success if the value is >= 90
+        run: |
+          cov_score=$(coverage report | awk '$1 == "TOTAL" {print $NF+0}')
+          echo -e "\n----------------"
+          echo "Coverage is ${cov_score}%"
+          echo -e "----------------\n"
+          [ "${cov_score}" -ge "90" ]

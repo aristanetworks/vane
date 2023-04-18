@@ -2,6 +2,8 @@
 
 Network Certification Tool
 
+![Coverage](./coverage.svg)
+
 ## Description
 
 A weather vane is an instrument used for showing the direction of the wind.

@@ -12,9 +12,9 @@
     - name: test_if_dns_servers_are_reachable_on_
       description: Verifies DNS servers are reachable via ping
       show_cmd: null
-      # List of NTP servers
       dns_servers:
-        - 11.201.12.2
+        - 8.8.8.8
+        - 192.168.0.5
       dns_vrf: null
       expected_output: True
     - name: test_dns_configuration_on_
@@ -22,7 +22,8 @@
       show_cmd: null
       # List of NTP servers
       dns_servers:
-        - 11.201.12.2
+        - 8.8.8.8
+        - 192.168.0.5
       dns_vrf: default
       dn_name: null
       dns_intf: null

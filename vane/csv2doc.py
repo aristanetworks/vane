@@ -77,6 +77,15 @@ EXPECTED_RESULT = r".*Criteria.*"
 PASS_FAIL = r"Pass/Fail"
 OBSERVATION = r".*Observations.*"
 TC_TYPE = r".*Test Case Type.*"
+# Column Width
+WIDTHS = (
+    Inches(0.5),
+    Inches(1.17),
+    Inches(2.50),
+    Inches(1.25),
+    Inches(0.75),
+    Inches(1.50),
+)
 
 
 def parse_csv():
@@ -256,6 +265,7 @@ def write_header_row(table):
 
     # Write header row in table
     for count, header in enumerate(headers):
+        set_cell_widths(table, 0)
         para = table.rows[0].cells[count].paragraphs[0]
 
         run = para.add_run(header)
@@ -276,9 +286,8 @@ def write_results_table(document, test_data):
 
     # create table
     table = document.add_table(rows=1, cols=6, style="Table Grid")
+    table.autofit = False
 
-    # Set table column widths
-    set_col_widths(table)
     # create table rows
     write_header_row(table)
     write_data_row(table, test_data)
@@ -295,10 +304,11 @@ def write_data_row(table, test_data):
     # Iterate through test data and write table rows
     for count, test_case_entry in enumerate(test_data):
         count += 1
+        row_cells = table.add_row().cells
+        set_cell_widths(table, count)
 
         # Identify test suite sub-header row
         if re.match(TEST_SUITE_HEADER, test_case_entry[0]):
-            row_cells = table.add_row().cells
             row_cells[0].merge(row_cells[5])
             row_cells[0].text = ""
             run = row_cells[0].paragraphs[0].add_run(test_case_entry)
@@ -309,8 +319,6 @@ def write_data_row(table, test_data):
 
         # Identify test case result data row
         elif "TN" in test_case_entry[0]:
-            row_cells = table.add_row().cells
-
             for counter, test_data_entry in enumerate(test_case_entry):
                 row_cells[counter].text = ""
                 run.font.name = "Arial"
@@ -332,7 +340,6 @@ def write_data_row(table, test_data):
 
         # identify test suite sub section
         elif test_case_entry[0] == "":
-            row_cells = table.add_row().cells
             row_cells[2].merge(row_cells[5])
 
             run = row_cells[1].paragraphs[0].add_run(test_case_entry[1])
@@ -400,25 +407,16 @@ def format_pass_fail(row_cells, counter, test_data_entry):
         run.font.bold = True
 
 
-def set_col_widths(table):
-    """Set width of Word table columns
-        Note: Table column width is presently broken in docx module.
-        Word defaults to autofit.
+def set_cell_widths(table, row):
+    """Set width of Word table cell
 
     Args:
         table (obj): Word doc table object
+        row (int): Table row number for operations
     """
-    widths = (
-        Inches(0.5),
-        Inches(1.17),
-        Inches(1.55),
-        Inches(1.25),
-        Inches(0.85),
-        Inches(2.15),
-    )
-    for row in table.rows:
-        for idx, width in enumerate(widths):
-            row.cells[idx].width = width
+
+    for column, width in enumerate(WIDTHS):
+        table.rows[row].cells[column].width = width
 
 
 def main():

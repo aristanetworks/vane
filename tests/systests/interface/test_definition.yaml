@@ -73,7 +73,7 @@
     - name: test_if_intf_mtu_is_correct_on_
       description: Verify the interfaces of interest MTU
       # Interface MTU size
-      expected_output: 10178
+      expected_output: 1500
       show_cmd: show interfaces
     - name: test_if_interface_errors_on_
       description: Verifies interfaces L1 errors (Rx, Giants, Tx, Runts, FCS, Align)

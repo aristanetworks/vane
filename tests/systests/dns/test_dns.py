@@ -33,10 +33,9 @@
 
 import pytest
 from vane import tests_tools
-from vane.fixtures import dut, tests_definitions
-
 
 TEST_SUITE = __file__
+
 
 @pytest.mark.nrfu
 @pytest.mark.base_feature
@@ -55,17 +54,16 @@ class DNSTests:
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        show_cmds = []
 
         urls = tops.test_parameters["urls"]
-        dut_conn = dut["connection"]
 
         for url in urls:
             show_cmd = f"ping {url}"
-            show_cmds.append(show_cmd)
+            tops.show_cmds.append(show_cmd)
 
-            show_cmd_txt = dut_conn.run_commands(show_cmd, encoding="text")
-            show_cmd_txt = show_cmd_txt[0]["output"]
+            print(show_cmd)
+            show_cmd_txt = tops.run_show_cmds([show_cmd], encoding="text")
+            show_cmd_txt = show_cmd_txt[0]["result"]["output"]
 
             tops.actual_output = "Name or service not known" not in show_cmd_txt
             tops.test_result = tops.actual_output is tops.expected_output
@@ -80,12 +78,12 @@ class DNSTests:
 
         print(f"{tops.output_msg}\n{tops.comment}")
 
-        tops.show_cmd = show_cmds
         tops.actual_output, tops.expected_output = (
             tops.actual_results,
             tops.expected_results,
         )
-        tops.post_testcase()
+
+        tops.generate_report(tops.dut_name, tops.output_msg)
 
         assert tops.actual_results == tops.expected_results
 
@@ -106,8 +104,8 @@ class DNSTests:
             else:
                 show_cmd = f"ping {dns_server}"
 
-            tops.return_show_cmd(show_cmd)
-            tops.actual_output = "bytes from" in tops.show_cmd_txt
+            output = tops.run_show_cmds([show_cmd], "text")[0]["result"]["output"]
+            tops.actual_output = "bytes from" in output
             tops.test_result = tops.actual_output is tops.expected_output
 
             tops.output_msg += (
@@ -125,8 +123,8 @@ class DNSTests:
             tops.actual_results,
             tops.expected_results,
         )
-        tops.post_testcase()
 
+        tops.generate_report(tops.dut_name, tops.output_msg)
         assert tops.actual_results == tops.expected_results
 
     def test_dns_configuration_on_(self, dut, tests_definitions):
@@ -137,22 +135,19 @@ class DNSTests:
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        tops.return_show_cmd("show running-config section name-server")
+        output = tops.run_show_cmds(["show running-config section name-server"], "text")
 
-        tops.actual_output = tops.show_cmd_txt
         dns_servers = tops.test_parameters["dns_servers"]
         dns_vrf = tops.test_parameters["dns_vrf"]
         dns_intf = tops.test_parameters["dns_intf"]
         dn_name = tops.test_parameters["dn_name"]
-        dns_cfg = tops.show_cmd_txt
+        dns_cfg = output[0]["result"]["output"]
         vane_dns_cfg = ""
 
         if dns_servers:
             for dns_server in dns_servers:
                 if dns_vrf:
-                    dns_server_cfg = (
-                        f"ip name-server vrf {dns_vrf} {dns_server}"
-                    )
+                    dns_server_cfg = f"ip name-server vrf {dns_vrf} {dns_server}"
                 else:
                     dns_server_cfg = f"ip name-server {dns_server}"
 
@@ -195,12 +190,12 @@ class DNSTests:
             f"|{dns_cfg}|, expect the dns config "
             f"|{vane_dns_cfg}|.\n\n"
         )
-      
+
         print(f"{tops.output_msg}\n{tops.comment}")
 
         tops.actual_output, tops.expected_output = (
             tops.actual_results,
             tops.expected_results,
         )
-        tops.post_testcase()
+        tops.generate_report(tops.dut_name, tops.output_msg)
         assert tops.actual_results == tops.expected_results

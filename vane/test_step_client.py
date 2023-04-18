@@ -34,17 +34,9 @@
 import os
 import json
 import re
-import logging
 from pathlib import Path
 import datetime
 from mdutils.mdutils import MdUtils
-
-logging.basicConfig(
-    level=logging.INFO,
-    filename="vane.log",
-    filemode="w",
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-)
 
 
 class TestStepClient:

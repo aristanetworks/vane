@@ -42,10 +42,10 @@
 
     - Excel report: Tabular representation of results. """
 
-import logging
 import os
 import stat
 import sys
+import shutil
 
 import configparser
 import jinja2
@@ -54,15 +54,8 @@ import yaml
 
 from jinja2 import Template, Undefined
 from pytest import ExitCode
-
-
-FORMAT = "[%(asctime)s %(filename)s->%(funcName)s():%(lineno)s]%(levelname)s: %(message)s"
-logging.basicConfig(
-    level=logging.INFO,
-    filename="vane.log",
-    filemode="w",
-    format=FORMAT,
-)
+from vane.vane_logging import logging
+from vane import tests_tools
 
 
 class NullUndefined(Undefined):
@@ -85,32 +78,11 @@ class TestsClient:
         """
 
         logging.info("Convert yaml data-model to a python data structure")
-        self.data_model = self._import_yaml(test_definition)
-        self.duts_model = self._import_yaml(test_duts)
+        self.data_model = tests_tools.import_yaml(test_definition)
+        self.duts_model = tests_tools.import_yaml(test_duts)
 
         logging.info(f"Internal test data-model initialized with value: {self.data_model}")
         self.test_parameters = []
-
-    def _import_yaml(self, yaml_file):
-        """Import YAML file as python data structure
-
-        Args:
-            yaml_file (str): Name of YAML file
-        """
-
-        logging.info(f"Opening {yaml_file} for read")
-        try:
-            with open(yaml_file, "r", encoding="utf-8") as input_yaml:
-                try:
-                    yaml_data = yaml.safe_load(input_yaml)
-                    logging.info(f"Inputted the following yaml: {yaml_data}")
-                    return yaml_data
-                except yaml.YAMLError as err_data:
-                    logging.error(f"Error in YAML file. {err_data}")
-                    sys.exit(1)
-        except OSError as err_data:
-            logging.error(f"Definitions file: {yaml_file} not found. {err_data}")
-            sys.exit(1)
 
     def write_test_def_file(
         self, template_definitions, master_definitions, test_dir, test_definitions
@@ -132,12 +104,12 @@ class TestsClient:
             for file in files:
                 if file == template_definitions:
                     # Inputs template yaml data
-                    with open(
-                        os.path.join(root, file), "r", encoding="utf-8"
-                    ).read() as template_file:
+                    with open(os.path.join(root, file), "r", encoding="utf-8") as template_file:
+                        template = template_file.read()
+
                         # Uses Jinja2 templating to generate new test definition
                         # file and replace the given templates
-                        test_template = Template(str(template_file), undefined=NullUndefined)
+                        test_template = Template(str(template), undefined=NullUndefined)
                         master_template = Template(str(master_definitions), undefined=NullUndefined)
                         replace_data = yaml.safe_load(master_template.render())
 
@@ -145,8 +117,8 @@ class TestsClient:
                         yaml_new = yaml.safe_load(new)
 
                         new_file = os.path.join(root, test_definitions)
-                        with open(new_file, "w", encoding="utf-8") as file:
-                            yaml.safe_dump(yaml_new, file, sort_keys=False)
+                        with open(new_file, "w", encoding="utf-8") as outfile:
+                            yaml.safe_dump(yaml_new, outfile, sort_keys=False)
                         logging.info("Regenerared test definition files")
 
     def generate_test_definitions(self):
@@ -162,7 +134,7 @@ class TestsClient:
             # Checks if generate_test_definitions is true
             if definitions["generate_test_definitions"]:
                 # Inputs relevant test_definition files information
-                master_definitions = self._import_yaml(definitions["master_definitions"])
+                master_definitions = tests_tools.import_yaml(definitions["master_definitions"])
                 template_definitions = definitions["template_definitions"]
                 test_definitions = definitions["test_definitions"]
 
@@ -183,6 +155,7 @@ class TestsClient:
         logging.info("Starting test setup")
         self._render_eapi_cfg()
         self._remove_result_files()
+        self._remove_test_results_dir()
         self._set_test_parameters()
 
     def test_runner(self):
@@ -454,3 +427,13 @@ class TestsClient:
                 os.remove(result_file)
             else:
                 logging.warning(f"Not removing file: {name}")
+
+    def _remove_test_results_dir(self):
+        """Removing the subdirectories and the files within them belonging to TEST RESULTS dir"""
+
+        test_results_dir = "reports/TEST RESULTS"
+
+        if os.path.exists(test_results_dir):
+            # Deleting a non-empty folder
+            shutil.rmtree(test_results_dir, ignore_errors=True)
+            logging.info(f"Deleted {test_results_dir} directory successfully")

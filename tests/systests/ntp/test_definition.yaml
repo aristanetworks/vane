@@ -22,7 +22,7 @@
       show_cmd: null
       # List of NTP servers
       ntp_servers:
-        - 169.254.169.123
+        - 138.236.128.36
       ntp_vrf: null
       ntp_intf: null
       expected_output: True
@@ -31,6 +31,6 @@
       show_cmd: null
       # List of NTP servers
       ntp_servers:
-        - 169.254.169.123
+        - 138.236.128.36
       ntp_vrf: null
       expected_output: True

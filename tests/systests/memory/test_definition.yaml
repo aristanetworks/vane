@@ -6,7 +6,8 @@
       # memory process ceiling
       expected_output: 80
       # Optionally filter duts by criteria: name, role, regex, or names
-      criteria: name
-      filter: BLW1
+      criteria: names
+      filter: 
+        - BLFE1
       comment: null
       result: True

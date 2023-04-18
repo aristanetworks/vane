@@ -1,9 +1,0 @@
-test_suites:
-- dir_path: tests/systests/host
-  name: test_host.py
-  testcases:
-  - description: Verify hostname is set on device is correct
-    expected_output: null
-    name: test_if_hostname_is_correcet_on_
-    show_cmd: show hostname
-    test_setup: test_setup.yaml

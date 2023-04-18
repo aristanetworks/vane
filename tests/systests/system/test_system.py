@@ -31,8 +31,6 @@
 
 """ Tests to validate base feature status."""
 
-import inspect
-import logging
 import pytest
 from vane import tests_tools
 
@@ -58,8 +56,8 @@ class CrashTests:
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        tops.return_show_cmd("show agent logs crash")
-        lines = tops.show_cmd_txt.split("\n")
+        show_cmd_txt = tops.run_show_cmds(["show agent logs crash"], "text")[0]["result"]["output"]
+        lines = show_cmd_txt.split("\n")
         tops.actual_output = len(lines) - 1
 
         tops.test_result = tops.actual_output <= tops.expected_output
@@ -71,7 +69,7 @@ class CrashTests:
             f"|{tops.expected_output}|.\n"
         )
 
-        tops.post_testcase()
+        tops.generate_report(tops.dut_name, tops.output_msg)
 
         assert tops.actual_output <= tops.expected_output
 
@@ -105,6 +103,6 @@ class SystemTests:
             f"|{tops.expected_output}%|"
         )
 
-        tops.post_testcase()
+        tops.generate_report(tops.dut_name, tops.output_msg)
 
         assert tops.actual_output == tops.expected_output

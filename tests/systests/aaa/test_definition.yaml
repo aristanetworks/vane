@@ -9,7 +9,7 @@
     - name: test_if_aaa_session_logging_is_working_on_
       description: Verify AAA session logging is working by identifying eapi connection
       show_cmd: show users detail
-      expected_output: commandApi
+      expected_output: command-api
       comment: null
       result: True
     - name: test_if_commands_authorization_methods_set_on_

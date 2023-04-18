@@ -31,14 +31,12 @@
 
 """ Tests to validate base feature status."""
 
-import inspect
-import logging
 import pytest
 from vane import tests_tools
-from vane.fixtures import dut, tests_definitions
 
 
 TEST_SUITE = __file__
+
 
 @pytest.mark.nrfu
 @pytest.mark.base_feature
@@ -68,7 +66,7 @@ class NTPTests:
 
         print(f"{tops.output_msg}\n{tops.comment}")
 
-        tops.post_testcase()
+        tops.generate_report(tops.dut_name, tops.output_msg)
 
         assert tops.actual_output == tops.expected_output
 
@@ -92,7 +90,7 @@ class NTPTests:
 
         print(f"{tops.output_msg}\n{tops.comment}")
 
-        tops.post_testcase()
+        tops.generate_report(tops.dut_name, tops.output_msg)
 
         assert tops.actual_output == tops.expected_output
 
@@ -127,7 +125,7 @@ class NTPTests:
 
             print(f"{tops.output_msg}\n{tops.comment}")
 
-            tops.post_testcase()
+            tops.generate_report(tops.dut_name, tops.output_msg)
 
             assert tops.actual_output == tops.expected_output
 
@@ -139,9 +137,11 @@ class NTPTests:
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        tops.return_show_cmd("show running-config section ntp")
+        show_cmd_txt = tops.run_show_cmds(["show running-config section ntp"], "text")[0]["result"][
+            "output"
+        ]
 
-        tops.actual_output = tops.show_cmd_txt
+        tops.actual_output = show_cmd_txt
         ntp_servers = tops.test_parameters["ntp_servers"]
         ntp_vrf = tops.test_parameters["ntp_vrf"]
         ntp_intf = tops.test_parameters["ntp_intf"]
@@ -192,7 +192,7 @@ class NTPTests:
             tops.actual_results,
             tops.expected_results,
         )
-        tops.post_testcase()
+        tops.generate_report(tops.dut_name, tops.output_msg)
         assert tops.actual_results == tops.expected_results
 
     def test_if_ntp_servers_are_reachable_on_(self, dut, tests_definitions):
@@ -212,8 +212,8 @@ class NTPTests:
             else:
                 show_cmd = f"ping {ntp_server}"
 
-            tops.return_show_cmd(show_cmd)
-            tops.actual_output = "bytes from" in tops.show_cmd_txt
+            show_cmd_txt = tops.run_show_cmds([show_cmd], encoding="text")
+            tops.actual_output = "bytes from" in show_cmd_txt[0]["result"]["output"]
             tops.test_result = tops.actual_output is tops.expected_output
 
             tops.output_msg += (
@@ -229,6 +229,6 @@ class NTPTests:
             tops.actual_results,
             tops.expected_results,
         )
-        tops.post_testcase()
+        tops.generate_report(tops.dut_name, tops.output_msg)
 
         assert tops.actual_results == tops.expected_results

@@ -32,8 +32,6 @@
 
 """Utilities for using PyTest in network testing"""
 
-import sys
-import logging
 import datetime
 import json
 import os
@@ -44,14 +42,8 @@ from docx.oxml.ns import qn, nsdecls
 from docx.oxml import OxmlElement, parse_xml
 from docx.shared import Inches, Pt, RGBColor
 from vane.report_templates import REPORT_TEMPLATES
-
-FORMAT = "[%(asctime)s %(filename)s->%(funcName)s():%(lineno)s]%(levelname)s: %(message)s"
-logging.basicConfig(
-    level=logging.INFO,
-    filename="vane.log",
-    filemode="w",
-    format=FORMAT,
-)
+from vane.tests_tools import yaml_read
+from vane.vane_logging import logging
 
 TABLE_GRID = "Table Grid"
 TOTAL_TESTS = "Total Tests"
@@ -65,23 +57,22 @@ class ReportClient:
     """Creates an instance of the Report Client."""
 
     def __init__(self, test_definition):
-        """Initializes the Test Client
+        """Initializes the Report Client
 
         Args:
             test_definition (str): YAML representation of NRFU tests
         """
 
         logging.info("Convert yaml data-model to a python data structure")
-        self.data_model = self._import_yaml(test_definition)
+        self.data_model = yaml_read(test_definition)
         logging.info(f"Internal test data-model initialized with value: {self.data_model}")
         self._summary_results = self._compile_test_results()
         logging.info(f"Test Results: {self._summary_results}")
 
         self._reports_dir = self.data_model["parameters"]["report_dir"]
         _results_dir = self.data_model["parameters"]["results_dir"]
-        _results_file = self.data_model["parameters"]["results_file"]
         self._results_datamodel = None
-        self._compile_yaml_data(_results_dir, _results_file)
+        self._compile_yaml_data(_results_dir)
         logging.info(f"Results file data is {self._results_datamodel}")
 
         self._document = docx.Document()
@@ -91,22 +82,21 @@ class ReportClient:
         self._major_section = 1
         self._test_no = 1
 
-    def _compile_yaml_data(self, yaml_dir, yaml_file):
-        """[summary]
+    def _compile_yaml_data(self, yaml_dir):
+        """Import result data into report client to results data model
 
         Args:
-            yaml_dir ([type]): [description]
-            yaml_file ([type]): [description]
+            yaml_dir (str): Results directory path
         """
 
-        logging.info(f"yaml directory is {yaml_dir}\nyaml output file is {yaml_file}")
+        logging.info(f"yaml directory is {yaml_dir}\nyaml")
         yaml_files = os.listdir(yaml_dir)
         logging.info(f"yaml input files are {yaml_files}")
 
         for name in yaml_files:
             if "result-" in name:
                 yaml_file = f"{yaml_dir}/{name}"
-                yaml_data = self._import_yaml(yaml_file)
+                yaml_data = yaml_read(yaml_file)
 
                 self._reconcile_results(yaml_data)
             else:
@@ -115,10 +105,10 @@ class ReportClient:
         logging.info(f"Updated results_data to {self._results_datamodel}")
 
     def _reconcile_results(self, test_parameters):
-        """[summary]
+        """Validate test case results data and reconciles any missing data
 
         Args:
-            yaml_data ([type]): [description]
+            test_parameters (dict): data struct representing a test case
         """
 
         test_suite = test_parameters["test_suite"]
@@ -179,28 +169,6 @@ class ReportClient:
             yaml_ptr = self._results_datamodel["test_suites"][suite_index]
             yaml_ptr["test_cases"][test_index]["duts"].append(test_parameters)
 
-    def _import_yaml(self, yaml_file):
-        """Import YAML file as python data structure
-
-        Args:
-            yaml_file (str): Name of YAML file
-        """
-
-        logging.info(f"Opening {yaml_file} for read")
-        try:
-            # pylint: disable-next=unspecified-encoding
-            with open(yaml_file, "r") as input_yaml:
-                try:
-                    yaml_data = yaml.safe_load(input_yaml)
-                    logging.info(f"Inputted the following yaml: {yaml_data}")
-                    return yaml_data
-                except yaml.YAMLError as err_data:
-                    logging.error(f"Error in YAML file. {err_data}")
-                    sys.exit(1)
-        except OSError as err_data:
-            logging.error(f"Defintions file: {yaml_file} not found. {err_data}")
-            sys.exit(1)
-
     def write_result_doc(self):
         """Create MSFT docx with results"""
 
@@ -242,6 +210,7 @@ class ReportClient:
 
     def _write_toc_page(self):
         """Write table of contents page"""
+
         w_fldchar = "w:fldChar"
         w_fldchar_type = "w:fldCharType"
 
@@ -287,32 +256,31 @@ class ReportClient:
 
         logging.info("Create summary results table")
         self._document.add_heading(f"{self._major_section}.1 Summary Results", 2)
-        table = self._document.add_table(rows=1, cols=6)
-        table.style = TABLE_GRID
+        table = self._document.add_table(rows=1, cols=6, style="Table Grid")
+        headers = [
+            TOTAL_TESTS,
+            TOTAL_PASSED,
+            TOTAL_FAILED,
+            TOTAL_SKIPPED,
+            "Total Errored",
+            "Total Duration",
+        ]
 
-        hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = TOTAL_TESTS
-        hdr_cells[1].text = TOTAL_PASSED
-        hdr_cells[2].text = TOTAL_FAILED
-        hdr_cells[3].text = TOTAL_SKIPPED
-        hdr_cells[4].text = "Total Errored"
-        hdr_cells[5].text = "Total Duration"
+        for column, header in enumerate(headers):
+            self._write_cell(table, header.upper(), column, 0, "Arial", 9, True, "00FFFF")
 
+        _ = table.add_row().cells
+        data_row = []
         ptr = self._summary_results["summaryResults"]
-        total_tests = self._totals(ptr, "num_tests")
-        total_pass = self._totals(ptr, "passed")
-        total_fail = self._totals(ptr, "failed")
-        total_skip = self._totals(ptr, "skipped")
-        total_err = self._totals(ptr, "error")
-        total_time = self._totals(ptr, "duration")
+        data_row.append(self._totals(ptr, "num_tests"))
+        data_row.append(self._totals(ptr, "passed"))
+        data_row.append(self._totals(ptr, "failed"))
+        data_row.append(self._totals(ptr, "skipped"))
+        data_row.append(self._totals(ptr, "error"))
+        data_row.append(self._totals(ptr, "duration"))
 
-        row_cells = table.add_row().cells
-        row_cells[0].text = total_tests
-        row_cells[1].text = total_pass
-        row_cells[2].text = total_fail
-        row_cells[3].text = total_skip
-        row_cells[4].text = total_err
-        row_cells[5].text = total_time
+        for column, cell_data in enumerate(data_row):
+            self._write_cell(table, cell_data, column, 1, "Arial", 9)
 
     def _write_dut_summary_results(self):
         """Write summary DUT result section"""
@@ -323,34 +291,28 @@ class ReportClient:
             2,
         )
 
-        table = self._document.add_table(rows=1, cols=6)
-        table.style = TABLE_GRID
+        table = self._document.add_table(rows=1, cols=6, style="Table Grid")
+        headers = ["DUT", TOTAL_TESTS, TOTAL_PASSED, TOTAL_FAILED, TOTAL_SKIPPED, "Total Errored"]
 
-        hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = "DUT"
-        hdr_cells[1].text = TOTAL_TESTS
-        hdr_cells[2].text = TOTAL_PASSED
-        hdr_cells[3].text = TOTAL_FAILED
-        hdr_cells[4].text = TOTAL_SKIPPED
-        hdr_cells[5].text = "Total Errored"
+        for column, header in enumerate(headers):
+            self._write_cell(table, header.upper(), column, 0, "Arial", 9, True, "00FFFF")
 
         duts = self._summary_results["duts"]
 
-        for dut in duts:
-            total_tests = self._totals(dut, "TOTAL")
-            total_pass = self._totals(dut, "PASS")
-            total_fail = self._totals(dut, "FAIL")
-            total_skip = self._totals(dut, "SKIP")
-            total_err = self._totals(dut, "ERROR")
-            dut_name = self._totals(dut, "name")
+        for row, dut in enumerate(duts):
+            logging.info(f"Create dut summary row: {row+1}")
+            _ = table.add_row().cells
+            data_row = []
 
-            row_cells = table.add_row().cells
-            row_cells[0].text = dut_name
-            row_cells[1].text = total_tests
-            row_cells[2].text = total_pass
-            row_cells[3].text = total_fail
-            row_cells[4].text = total_skip
-            row_cells[5].text = total_err
+            data_row.append(self._totals(dut, "name"))
+            data_row.append(self._totals(dut, "TOTAL"))
+            data_row.append(self._totals(dut, "PASS"))
+            data_row.append(self._totals(dut, "FAIL"))
+            data_row.append(self._totals(dut, "SKIP"))
+            data_row.append(self._totals(dut, "ERROR"))
+
+            for column, cell_data in enumerate(data_row):
+                self._write_cell(table, cell_data, column, (row + 1), "Arial", 9)
 
     def _write_suite_summary_results(self):
         """Write summary test suite result section"""
@@ -362,27 +324,30 @@ class ReportClient:
             logging.info("Skipping the test suite results")
             return
 
-        table = self._document.add_table(rows=1, cols=5)
-        table.style = TABLE_GRID
+        table = self._document.add_table(rows=1, cols=5, style="Table Grid")
+        headers = ["Test Suite", TOTAL_TESTS, TOTAL_PASSED, TOTAL_FAILED, TOTAL_SKIPPED]
 
-        hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = "Test Suite"
-        hdr_cells[1].text = TOTAL_TESTS
-        hdr_cells[2].text = TOTAL_PASSED
-        hdr_cells[3].text = TOTAL_FAILED
-        hdr_cells[4].text = TOTAL_SKIPPED
+        for column, header in enumerate(headers):
+            self._write_cell(table, header.upper(), column, 0, "Arial", 9, True, "00FFFF")
+
         if not suite_results:
             logging.info("Skipping the test suite results")
             return
-        for suite_result in suite_results:
-            ts_name = self._format_ts_name(suite_result["name"])
 
-            row_cells = table.add_row().cells
-            row_cells[0].text = ts_name
-            row_cells[1].text = str(suite_result["total_tests"])
-            row_cells[2].text = str(suite_result["total_pass"])
-            row_cells[3].text = str(suite_result["total_fail"])
-            row_cells[4].text = str(suite_result["total_skip"])
+        for row, suite_result in enumerate(suite_results):
+            _ = table.add_row().cells
+            data_row = []
+            ts_name = self._format_ts_name(suite_result["name"])
+            logging.info(f"Writing row {row+1}")
+
+            data_row.append(ts_name)
+            data_row.append(str(suite_result["total_tests"]))
+            data_row.append(str(suite_result["total_pass"]))
+            data_row.append(str(suite_result["total_fail"]))
+            data_row.append(str(suite_result["total_skip"]))
+
+            for column, cell_data in enumerate(data_row):
+                self._write_cell(table, cell_data, column, (row + 1), "Arial", 9)
 
     def _compile_test_results(self):
         """Parse PyTest JSON results and compile:"""
@@ -392,8 +357,7 @@ class ReportClient:
         test_results = {}
         logging.info(f"Opening JSON file {json_report} to parse for summary results")
 
-        # pylint: disable-next=unspecified-encoding
-        with open(json_report, "r") as json_file:
+        with open(json_report, "r", encoding="utf-8") as json_file:
             logging.info(f"Raw json report is {json_file}")
             test_data = json.load(json_file)
             tests = test_data["report"]["tests"]
@@ -407,8 +371,14 @@ class ReportClient:
         return test_results
 
     def _parse_testcases(self, testcases):
-        """Parse Test cases and return compilation per DUT"""
+        """Parse Test cases and return compilation per DUT
 
+        Args:
+            testcases (dict): data structure of test case results
+
+        Returns:
+            dict: data structure with compiled results
+        """
         testcases_results = []
         dut_list = []
 
@@ -468,15 +438,12 @@ class ReportClient:
         self._major_section += 1
 
         report_styles = REPORT_TEMPLATES.keys()
-        logging.info(f"Inputted the following report styles {report_styles}")
+        logging.info(f"Inputted the following report summary styles {report_styles}")
 
         if "report_summary_style" in self.data_model["parameters"]:
             report_style = self.data_model["parameters"]["report_summary_style"]
             logging.info(f"Summary style in parameters set to {report_style}")
-            if report_style == 1:
-                logging.info("report_summary_style is set to 1, default")
-                self._default_tc_report()
-            elif report_style in report_styles:
+            if report_style in report_styles:
                 logging.info(f"report_summary_style is set to {report_style}, custom")
                 report_template = REPORT_TEMPLATES[report_style]
                 self._custom_tc_report(report_template)
@@ -511,7 +478,7 @@ class ReportClient:
         table = self._document.add_table(rows=1, cols=columns, style="Table Grid")
 
         self._create_header_row(table, summary_headers, report_template)
-        self._create_data_row(table, 1, testcase_results, report_template)
+        self._create_data_row(table, testcase_results, report_template)
 
     def _create_header_row(self, table, summary_headers, report_template):
         """Writes header row within Word doc table
@@ -538,20 +505,17 @@ class ReportClient:
         for column, header in enumerate(headers):
             self._write_cell(table, header.upper(), column, row, "Arial", 9, True, "00FFFF")
 
-    def _create_data_row(self, table, row, testcase_results, report_template):
+    def _create_data_row(self, table, testcase_results, report_template):
         """Writes a data row within Word doc table
 
         Args:
             table (obj): Word doc obj representing a tables
-            row (obj): Word doc obj representing a row in a table
             testcase_results (dict): Data structure with test case results
             report_template (dict): Data structure describing reports fields
         """
-        if row > 0:
-            # pylint: disable-next=expression-not-assigned
-            table.add_row().cells
 
-        for testcase_result in testcase_results:
+        for row, testcase_result in enumerate(testcase_results):
+            _ = table.add_row().cells
             for column, testcase_data in enumerate(testcase_result):
                 logging.info(
                     f"Writing test field: {testcase_data}"
@@ -565,7 +529,7 @@ class ReportClient:
                     table,
                     testcase_result[testcase_data],
                     column,
-                    row,
+                    (row + 1),
                     "Arial",
                     9,
                     data_format=data_format,
@@ -602,8 +566,14 @@ class ReportClient:
 
         if data_format == "numbered_list":
             logging.info("Formatting a numbered list")
-            for list_idx, list_entry in enumerate(text):
-                run = para.add_run(f"{list_idx+1}. {list_entry}\n")
+            if text:
+                for list_idx, list_entry in enumerate(text):
+                    run = para.add_run(f"{list_idx+1}. {list_entry}\n")
+            else:
+                logging.warning(
+                    f"Empty list has been found: {text}.  Resetting value to null string"
+                )
+                run = para.add_run("")
         elif data_format == "test_result":
             logging.info("Formatting a Test Result")
             if text:
@@ -767,10 +737,10 @@ class ReportClient:
             self._major_section += 1
 
     def _write_detail_major_section(self, test_suite):
-        """Write Detailed majore report section
+        """Write detailed major report section
 
         Args:
-            test_suite (dict): test_suite result data
+            test_case (dict): Test case result specific parameters
         """
 
         ts_name = self._format_ts_name(test_suite["name"])
@@ -780,10 +750,10 @@ class ReportClient:
         )
 
     def _write_detail_minor_section(self, test_case, minor_section):
-        """[summary]
+        """Write detailed minor report section
 
         Args:
-            test_case (dict): test_case result data
+            test_case (dict): Test case result specific parameters
             minor_section (int): minor section number
         """
 
@@ -792,11 +762,12 @@ class ReportClient:
         self._document.add_heading(f"{self._major_section}.{minor_section} Test Case: {tc_name}", 2)
 
     def _write_detail_dut_section(self, dut, minor_section, dut_section):
-        """[summary]
+        """Write detailed DUT test case report section
+
         Args:
-            dut ([type]): [description]
-            minor_section ([type]): [description]
-            dut_section ([type]): [description]
+            dut (dict): DUT specific parameters
+            minor_section (int): Minor section number
+            dut_section (int): DUT section number
         """
 
         logging.info(f"Raw DUT data is {dut}")
@@ -812,38 +783,17 @@ class ReportClient:
         logging.info(f"Inputted the following report styles {report_styles}")
 
         if "report_style" in dut:
-            if dut["report_style"] == 1:
-                logging.info(f"Report_style is set: {dut['report_style']}, default")
-                self._write_default_detail_dut_section(dut)
-            elif dut["report_style"] in report_styles:
+            if dut["report_style"] in report_styles:
                 logging.info(f"Report_style is set: {dut['report_style']}, custom")
                 self._write_custom_detail_dut_section(dut)
             else:
-                logging.info("Report_style is incorrect")
-                self._write_default_detail_dut_section(dut)
+                logging.info(f"Report_style is incorrect: {dut['report_style']}. Set to default.")
+                dut["report_style"] = "default"
+                self._write_custom_detail_dut_section(dut)
         else:
-            logging.info("Report_style is not set")
-            self._write_default_detail_dut_section(dut)
-
-    def _write_default_detail_dut_section(self, dut):
-        table = self._document.add_table(rows=1, cols=2)
-        table.style = TABLE_GRID
-
-        hdr_cells = table.rows[0].cells
-        hdr_cells[0].text = "Test Parameter"
-        hdr_cells[1].text = "Description"
-
-        self._add_dut_table_row("test_id", dut, table)
-        self._add_dut_table_row("name", dut, table)
-        self._add_dut_table_row("description", dut, table)
-        self._add_dut_table_row("dut", dut, table)
-        self._add_dut_table_row("show_cmd", dut, table)
-        self._add_dut_table_row("show_cmds", dut, table)
-        self._add_dut_table_row("expected_output", dut, table)
-        self._add_dut_table_row("actual_output", dut, table)
-        self._add_dut_table_row("test_result", dut, table)
-        self._add_dut_table_row("fail_or_skip_reason", dut, table)
-        self._add_dut_table_row("comment", dut, table)
+            logging.info("Report_style is NOT set.  Setting to default report_style.")
+            dut["report_style"] = "default"
+            self._write_custom_detail_dut_section(dut)
 
     def _write_custom_detail_dut_section(self, dut):
         """Method for writing a custom detailed DUT section within report
@@ -1077,16 +1027,16 @@ class ReportClient:
             # pylint: disable-next=protected-access
             table.rows[0].cells[0]._tc.get_or_add_tcPr().append(black)
             report_values = dut[report_field]
-            show_cmd = dut["show_cmd"]
+            show_cmds = dut["show_cmds"]
             dut_name = dut["dut"]
 
             logging.info(f"These are recorded report values: {report_values}")
-            for report_value in report_values:
-                run = para.add_run(f"\n{dut_name}# {show_cmd.strip()}\n\n")
+            for index, report_value in enumerate(report_values):
+                run = para.add_run(f"\n{dut_name}# {show_cmds[index]}\n\n{report_value}\n")
+                logging.info(f"Adding value to report: {report_value.strip()}")
                 run.font.name = "Courier New"
                 run.font.size = Pt(10)
                 run.font.color.rgb = RGBColor(0, 255, 0)
-                logging.info(f"Adding value to report: {report_value.strip()}")
 
             para = self._document.add_paragraph()
             run = para.add_run()
@@ -1117,7 +1067,6 @@ class ReportClient:
 
             self._test_no += 1
 
-    # pylint: disable-next=inconsistent-return-statements
     def _compile_suite_results(self):
         """Compile test suite results and return them
 
@@ -1129,7 +1078,7 @@ class ReportClient:
 
         if not self._results_datamodel:
             logging.info("Skipping the compiled test suite result")
-            return
+            return ""
 
         test_suites = self._results_datamodel["test_suites"]
         suite_results = []
@@ -1166,13 +1115,12 @@ class ReportClient:
         logging.info(f"Compiled suite results: {suite_results}")
         return suite_results
 
-    # pylint: disable-next=inconsistent-return-statements
     def _compile_testcase_results(self):
         """Compile test case results and return them"""
 
         if not self._results_datamodel:
             logging.info("Skipping test case results")
-            return
+            return ""
 
         test_suites = self._results_datamodel["test_suites"]
         testcase_results = []
@@ -1240,7 +1188,7 @@ class ReportClient:
         return ts_name
 
     def _format_tc_name(self, tc_name):
-        """Input a PyTest test case  name and return a formatted name for
+        """Input a PyTest test case name and return a formatted name for
             test case
 
         Args:

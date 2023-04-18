@@ -37,6 +37,7 @@ from vane import tests_tools
 
 TEST_SUITE = __file__
 
+
 @pytest.mark.demo
 @pytest.mark.nrfu
 @pytest.mark.platform_status
@@ -44,6 +45,7 @@ TEST_SUITE = __file__
 @pytest.mark.virtual
 @pytest.mark.physical
 @pytest.mark.eos424
+# pylint: disable=too-few-public-methods
 class HostTests:
     """Host status Test Suite"""
 
@@ -58,7 +60,7 @@ class HostTests:
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
         tops.expected_output = tops.dut_name
-        tops.actual_output = dut["connection"].run_commands(tops.show_cmd, "json")[0]["hostname"]
+        tops.actual_output = tops.run_show_cmds(["show hostname"])[0]["result"]["hostname"]
         tops.test_result = tops.actual_output == tops.expected_output
 
         tops.output_msg = (

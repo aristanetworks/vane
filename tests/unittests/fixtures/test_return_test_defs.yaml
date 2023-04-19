@@ -1,0 +1,16 @@
+test_suites: 
+- name: test_tacacs.py
+  testcases: 
+  - name: test_if_tacacs_is_sending_messages_on_
+    description: Verify tacacs messages are sending correctly
+    show_cmd: show tacacs
+    expected_output: 
+    comment: 
+    result: True
+  - name: test_if_tacacs_is_receiving_messages_on_
+    description: Verify tacacs messages are received correctly
+    show_cmd: show tacacs
+    expected_output: 
+    comment: 
+    result: True
+  dir_path: ../systests/tacacs

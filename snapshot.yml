@@ -1,0 +1,8 @@
+snapshots:
+  - bgp
+
+bgp:
+  - eos: show ip bgp summary
+    mappings:
+      - eos: vrfs.default.peers.'var'.peerState
+        avd: router_bgp.neighbors.var.peerState

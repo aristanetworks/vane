@@ -1,0 +1,10 @@
+- name: TestBGP
+  testcases:
+    - name: test_bgp_session_peer_state
+      description: Test case to verify bgp peer state
+      show_cmd: show ip bgp summary
+      expected_output: null
+      comment: null
+      result: True
+      test_criteria: All expected BGP sessions peer state must match the network BGP session peer state
+      report_style: modern

@@ -1,0 +1,30 @@
+test_suites:
+- name: test_aaa.py
+  testcases:       
+  - name: test_if_authentication_counters_are_incrementing_on_
+    description: Verify AAA counters are working correctly
+    show_cmd: show aaa counters
+    expected_output: 
+    comment: 
+    result: True             
+  - name: test_if_aaa_session_logging_is_working_on_
+    description: Verify AAA session logging is working by identifying eapi connection
+    show_cmd: show users detail
+    expected_output: commandApi
+    comment: 
+    result: True            
+  - name: test_if_commands_authorization_methods_set_on_
+    description: Verify AAA command authorization are method-lists set correct
+    cmd_auth: ["none"]
+    show_cmd: show aaa methods all
+    expected_output: 
+    comment: 
+    result: True
+  - name: test_if_exec_authorization_methods_set_on_
+    description: Verify AAA exec authorization are method-lists set correct
+    exec_auth: ["none"]
+    show_cmd: show aaa methods all
+    expected_output: 
+    comment: 
+    result: True
+                    

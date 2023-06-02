@@ -185,7 +185,6 @@ class DaemonTests:
             tops.actual_results.append(actual_output)
             tops.expected_results.append(tops.expected_output["daemon_enabled"])
 
-
         """
         TS: Creating test report based on results
         """

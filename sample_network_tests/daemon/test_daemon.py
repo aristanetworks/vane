@@ -185,15 +185,10 @@ class DaemonTests:
             tops.actual_results.append(actual_output)
             tops.expected_results.append(tops.expected_output["daemon_enabled"])
 
-        tops.actual_output, tops.expected_output = (
-            tops.actual_results,
-            tops.expected_results,
-        )
 
         """
         TS: Creating test report based on results
         """
         tops.parse_test_steps(self.test_if_daemons_are_enabled_on_)
-        tops.test_result = tops.actual_output == tops.expected_output
-        tops.generate_report(tops.dut_name, self.output)
+        tops.generate_report(tops.dut_name, self.output, "results")
         assert tops.actual_output == tops.expected_output

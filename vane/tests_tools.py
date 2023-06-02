@@ -1015,12 +1015,16 @@ class TestOps:
 
         return case_parameters[0]
 
-    def generate_report(self, dut_name, output):
+    def generate_report(self, dut_name, output, reporting="output"):
         """Utility to generate report
 
         Args:
           dut_name: name of the device
         """
+
+        if reporting == "results":
+            self._remap_reporting()
+
         logging.debug(f"Output on device {dut_name} after SSH connection is: {output}")
 
         self.test_parameters["comment"] = self.comment
@@ -1047,6 +1051,18 @@ class TestOps:
         self._html_report()
         self._write_results()
         self._write_text_results()
+
+    def _remap_reporting(self):
+        """Remap actual_results/expected_results to actual_output/expected_output"""
+
+        logging.warning("Variable remapping from results to output required")
+
+        self.actual_output, self.expected_output = (
+            self.actual_results,
+            self.expected_results,
+        )
+
+        self.test_result = self.actual_output == self.expected_output
 
     def _html_report(self):
         """Print to standard output for HTML reporting"""

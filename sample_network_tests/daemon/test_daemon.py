@@ -188,6 +188,7 @@ class DaemonTests:
         """
         TS: Creating test report based on results
         """
+        tops.test_result = tops.actual_results == tops.expected_results
         tops.parse_test_steps(self.test_if_daemons_are_enabled_on_)
         tops.generate_report(tops.dut_name, self.output, "results")
         assert tops.actual_output == tops.expected_output

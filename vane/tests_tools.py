@@ -1062,8 +1062,6 @@ class TestOps:
             self.expected_results,
         )
 
-        self.test_result = self.actual_output == self.expected_output
-
     def _html_report(self):
         """Print to standard output for HTML reporting"""
 

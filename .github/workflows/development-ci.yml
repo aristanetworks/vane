@@ -41,9 +41,14 @@ jobs:
       #   run: echo "$GITHUB_CONTEXT"
 
       - name: Install dependencies
+        # Use poetry to create a requirements.txt format file, then install those requirements
+        # using pip
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install poetry==1.5.1
+          poetry export -f requirements.txt --with dev --without-hashes -o poetry-requirements.txt
+          cat poetry-requirements.txt
+          pip install -r poetry-requirements.txt
 
       - name: Get fork point
         id: forkpoint
@@ -116,9 +121,14 @@ jobs:
         run: python -c "import sys; print(sys.version)"
 
       - name: Install dependencies
+        # Use poetry to create a requirements.txt format file, then install those requirements
+        # using pip
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install poetry==1.5.1
+          poetry export -f requirements.txt --with dev --without-hashes -o poetry-requirements.txt
+          cat poetry-requirements.txt
+          pip install -r poetry-requirements.txt
 
       - name: Run the unittests
         # Install vane in "editable/developer" mode, so the executable is using

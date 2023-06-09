@@ -1004,7 +1004,7 @@ class ReportClient:
 
         if report_field in dut:
             report_value = dut[report_field]
-            formatted_data = yaml.dump(report_value)
+            formatted_data = yaml.dump(report_value).rstrip(".\n")
             logging.info(f"Data formatted to YAML: {formatted_data}")
             para = self._document.add_paragraph()
             self._write_text(para, formatted_data.strip(), left_indent=Inches(0.25))

@@ -10,7 +10,8 @@ on:
 
 env:
   POETRY_VERSION: 1.5.1
-  POETRY_ENVIRONMENT: "source $(poetry env info --path)/bin/activate"
+  # POETRY_ENVIRONMENT: "source $(poetry env info --path)/bin/activate"
+  POETRY_ENVIRONMENT: "source ${poetry_home}/bin/activate"
 
 jobs:
   validate:
@@ -52,6 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry==$POETRY_VERSION
           poetry install
+          echo "poetry_home=$(poetry env info --path)" >> $GITHUB_ENV
 
       - name: Get fork point
         id: forkpoint

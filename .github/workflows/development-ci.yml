@@ -144,12 +144,14 @@ jobs:
         # the source files and coverage can monitor the proper directory
         continue-on-error: true
         run: |
+          source $(poetry env info --path)/bin/activate
           mkdir -p $PWD/tests/unittests/fixtures/reports/results
           pytest --cov-report term-missing --cov=$PWD/vane $PWD/tests/unittests
 
       - name: Report the coverage
         # Get the coverage score and return success if the value is >= 90
         run: |
+          source $(poetry env info --path)/bin/activate
           cov_score=$(coverage report | awk '$1 == "TOTAL" {print $NF+0}')
           echo -e "\n----------------"
           echo "Coverage is ${cov_score}%"

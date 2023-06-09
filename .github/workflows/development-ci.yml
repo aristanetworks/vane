@@ -11,7 +11,7 @@ on:
 env:
   POETRY_VERSION: 1.5.1
   # POETRY_ENVIRONMENT: "source $(poetry env info --path)/bin/activate"
-  POETRY_ENVIRONMENT: "source ${{ env.poetry_home }}/bin/activate"
+  # POETRY_ENVIRONMENT: "source ${{ env.poetry_home }}/bin/activate"
 
 jobs:
   validate:
@@ -89,21 +89,21 @@ jobs:
         # If any code needs reformatting, black returns an exit code of 1,
         # which fails the action
         run: |
-          exec "${POETRY_ENVIRONMENT}"
+          source ${{ env.poetry_home }}/bin/activate
           black --check ${{ env.python }}
 
       # Run flake8 on the vane and tests directories
       - name: Lint with flake8
         if: ${{ env.python }}
         run: |
-          exec "${POETRY_ENVIRONMENT}"
+          source ${{ env.poetry_home }}/bin/activate
           flake8 ${{ env.python }}
 
       # Run pylint on the vane and tests directories
       - name: Lint with pylint
         if: ${{ env.python }}
         run: |
-          exec "${POETRY_ENVIRONMENT}"
+          source ${{ env.poetry_home }}/bin/activate
           pylint ${{ env.python }}
 
   unittest:

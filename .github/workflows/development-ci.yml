@@ -50,11 +50,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry==$POETRY_VERSION
           poetry install
-          source $(poetry env info --path)/bin/activate
-        # /usr/local/bin/poetry config virtualenvs.create false
-        # poetry export -f requirements.txt --with dev --without-hashes -o poetry-requirements.txt
-        # cat poetry-requirements.txt
-        # pip install -r poetry-requirements.txt
 
       - name: Get fork point
         id: forkpoint
@@ -89,17 +84,23 @@ jobs:
         if: ${{ env.python }}
         # If any code needs reformatting, black returns an exit code of 1,
         # which fails the action
-        run: black --check ${{ env.python }}
+        run: |
+          source $(poetry env info --path)/bin/activate
+          black --check ${{ env.python }}
 
       # Run flake8 on the vane and tests directories
       - name: Lint with flake8
         if: ${{ env.python }}
-        run: flake8 ${{ env.python }}
+        run: |
+          source $(poetry env info --path)/bin/activate
+          flake8 ${{ env.python }}
 
       # Run pylint on the vane and tests directories
       - name: Lint with pylint
         if: ${{ env.python }}
-        run: pylint ${{ env.python }}
+        run: |
+          source $(poetry env info --path)/bin/activate
+          pylint ${{ env.python }}
 
   unittest:
     # Run the Vane unittests
@@ -133,11 +134,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry==$POETRY_VERSION
           poetry install
-          source $(poetry env info --path)/bin/activate
-        # /usr/local/bin/poetry config virtualenvs.create false
-        # poetry export -f requirements.txt --with dev --without-hashes -o poetry-requirements.txt
-        # cat poetry-requirements.txt
-        # pip install -r poetry-requirements.txt
 
       - name: Run the unittests
         # Install vane in "editable/developer" mode, so the executable is using

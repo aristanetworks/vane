@@ -99,7 +99,6 @@ jobs:
       - name: Lint with pylint
         if: ${{ env.python }}
         run: |
-          source $(poetry env info --path)/bin/activate
           pylint ${{ env.python }}
 
   unittest:

@@ -53,7 +53,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry==$POETRY_VERSION
           poetry install
-          echo "poetry_home=$(poetry env info --path)" >> $GITHUB_ENV
+          echo "poetry_home=source $(poetry env info --path)/bin/activate" >> $GITHUB_ENV
 
       - name: Get fork point
         id: forkpoint
@@ -89,7 +89,7 @@ jobs:
         # If any code needs reformatting, black returns an exit code of 1,
         # which fails the action
         run: |
-          source ${{ env.poetry_home }}/bin/activate
+          eval "${{ env.poetry_home }}"
           black --check ${{ env.python }}
 
       # Run flake8 on the vane and tests directories

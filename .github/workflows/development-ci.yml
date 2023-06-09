@@ -11,7 +11,7 @@ on:
 env:
   POETRY_VERSION: 1.5.1
   # POETRY_ENVIRONMENT: "source $(poetry env info --path)/bin/activate"
-  POETRY_ENVIRONMENT: "source ${poetry_home}/bin/activate"
+  POETRY_ENVIRONMENT: "source ${{ env.poetry_home }}/bin/activate"
 
 jobs:
   validate:

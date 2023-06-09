@@ -63,7 +63,7 @@ def parse_cli():
     parser.add_argument(
         "--definitions-file",
         default=vane.config.DEFINITIONS_FILE,
-        help="Specify the name of the definitions file",
+        help="XXX Specify the name of the definitions file",
     )
 
     parser.add_argument(

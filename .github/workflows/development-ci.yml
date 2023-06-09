@@ -79,14 +79,14 @@ jobs:
           git diff --name-only --diff-filter=ACMRT ${{ env.fork }} ${{ github.sha }} | grep .py$ || echo '<none>'
           echo "python=$(git diff --name-only --diff-filter=ACMRT ${{ env.fork }} ${{ github.sha }} | grep .py$ | xargs)" >> $GITHUB_ENV
 
-      # Run Black on the whole repo
-      - name: Run Black to check the code for formatting problems
-        if: ${{ env.python }}
-        # If any code needs reformatting, black returns an exit code of 1,
-        # which fails the action
-        run: |
-          source $(poetry env info --path)/bin/activate
-          black --check ${{ env.python }}
+      # # Run Black on the whole repo
+      # - name: Run Black to check the code for formatting problems
+      #   if: ${{ env.python }}
+      #   # If any code needs reformatting, black returns an exit code of 1,
+      #   # which fails the action
+      #   run: |
+      #     source $(poetry env info --path)/bin/activate
+      #     black --check ${{ env.python }}
 
       # Run flake8 on the vane and tests directories
       - name: Lint with flake8

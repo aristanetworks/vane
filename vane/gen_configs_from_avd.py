@@ -74,8 +74,9 @@ def create_configs_file(avd_sd_dir):
     with open("configs.yml", "w", encoding="utf-8") as file:
         yaml.safe_dump(config, file, sort_keys=False)
 
+
 def get_non_mgmt_data(file):
-    """ Function to get non mgmt data from AVD SD file
+    """Function to get non mgmt data from AVD SD file
 
     Args:
       file: full path to AVD SD file to be read
@@ -87,9 +88,7 @@ def get_non_mgmt_data(file):
     data["vrfs"] = full_config.get("vrfs", {})
     data["vlans"] = full_config.get("vlans", {})
     data["vlan_interfaces"] = full_config.get("vlan_interfaces", {})
-    data["port_channel_interfaces"] = full_config.get(
-        "port_channel_interfaces", {}
-    )
+    data["port_channel_interfaces"] = full_config.get("port_channel_interfaces", {})
     data["ethernet_interfaces"] = full_config.get("ethernet_interfaces", {})
     data["mlag_configuration"] = full_config.get("mlag_configuration", {})
     data["loopback_interfaces"] = full_config.get("loopback_interfaces", {})
@@ -98,7 +97,7 @@ def get_non_mgmt_data(file):
 
 
 def get_mgmt_data(file):
-    """ Function to get mgmt data from AVD SD file
+    """Function to get mgmt data from AVD SD file
 
     Args:
       file: full path to AVD SD file to be read

@@ -52,7 +52,6 @@ def create_configs_file(avd_sd_dir):
     config = {}
     for dir_path, _, avd_files in avd_info:
         for avd_file in avd_files:
-            print(avd_file)
             if avd_file.startswith("."):
                 continue
             if avd_file.endswith("debug-vars.yml"):

@@ -1,0 +1,83 @@
+eapi_file: tests/unittests/fixtures/eapi.conf
+mgmt_ip: 10.255.31.234
+name: DCBBW1
+neighbors:
+- neighborDevice: DSR01
+  neighborPort: Ethernet1
+  port: Ethernet1
+- neighborDevice: BLFW1
+  neighborPort: Ethernet1
+  port: Ethernet3
+- neighborDevice: BLFW2
+  neighborPort: Ethernet1
+  port: Ethernet4
+output:
+  interface_list:
+  - hostname: DCBBW1
+    interface_name: Ethernet1
+    media_type: ''
+    z_hostname: DSR01
+    z_interface_name: Ethernet1
+  - hostname: DCBBW1
+    interface_name: Ethernet3
+    media_type: ''
+    z_hostname: BLFW1
+    z_interface_name: Ethernet1
+  - hostname: DCBBW1
+    interface_name: Ethernet4
+    media_type: ''
+    z_hostname: BLFW2
+    z_interface_name: Ethernet1
+  show clock:
+    json:
+      clockSource:
+        local: true
+      localTime:
+        dayOfMonth: 25
+        dayOfWeek: 3
+        dayOfYear: 145
+        daylightSavingsAdjust: 0
+        hour: 22
+        min: 26
+        month: 5
+        sec: 59
+        year: 2023
+      timezone: UTC
+      utcTime: 1685053619.06094
+    text: 'Thu May 25 22:26:59 2023
+
+      Timezone: UTC
+
+      Clock source: local
+
+      '
+  show version:
+    json:
+      architecture: x86_64
+      bootupTimestamp: 1684776615.0
+      configMacAddress: 00:00:00:00:00:00
+      hardwareRevision: ''
+      hwMacAddress: 00:00:00:00:00:00
+      imageFormatVersion: '1.0'
+      imageOptimization: None
+      internalBuildId: 2fd003fd-04c4-4b44-9c26-417e6ca42009
+      internalVersion: 4.27.2F-26069621.4272F
+      isIntlVersion: false
+      memFree: 2755568
+      memTotal: 3938900
+      mfgName: Arista
+      modelName: vEOS-lab
+      serialNumber: SN-DCBBW1
+      systemMacAddress: a4:86:49:d7:e2:d9
+      uptime: 277003.72
+      version: 4.27.2F
+    text: "Arista vEOS-lab\nHardware version: \nSerial number: SN-DCBBW1\nHardware\
+      \ MAC address: a486.49d7.e2d9\nSystem MAC address: a486.49d7.e2d9\n\nSoftware\
+      \ image version: 4.27.2F\nArchitecture: x86_64\nInternal build version: 4.27.2F-26069621.4272F\n\
+      Internal build ID: 2fd003fd-04c4-4b44-9c26-417e6ca42009\nImage format version:\
+      \ 1.0\nImage optimization: None\n\nUptime: 3 days, 4 hours and 56 minutes\n\
+      Total memory: 3938900 kB\nFree memory: 2755560 kB\n\n"
+report_dir: reports
+results_dir: reports/results
+role: unknown
+username: cvpadmin

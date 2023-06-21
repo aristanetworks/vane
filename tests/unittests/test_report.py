@@ -2,7 +2,7 @@ import vane.report_client as report_client
 import datetime
 
 
-DEFINITIONS = 'tests/unittests/fixtures/definitions.yaml'
+DEFINITIONS = 'sample_network_tests/definitions.yaml'
 RC = report_client.ReportClient(DEFINITIONS)
 
 def test_assert():

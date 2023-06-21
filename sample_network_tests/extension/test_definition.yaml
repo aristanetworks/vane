@@ -1,0 +1,33 @@
+- name: test_extension.py
+  testcases:
+    - name: test_if_extensions_are_installed_on_
+      description: Verify a list of extension are installed on a DUT
+      # List extensions to check on DUT
+      extensions:
+        - awslogs.swix
+        - awsha.rpm
+        - twamp.rpm
+      show_cmd: show extensions
+      expected_output: installed
+      report_style: modern
+      test_criteria: Verify a list of extension are installed on a DUT
+      # Optionally filter duts by criteria: name, role, regex, or names
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
+    - name: test_if_extensions_are_erroring_on_
+      description: Verify a list of extension are not erroring on a DUT
+      # List extensions to check on DUT
+      extensions:
+        - awslogs.swix
+        - awsha.rpm
+      show_cmd: show extensions
+      expected_output: False
+      report_style: modern
+      test_criteria: Verify a list of extension are not erroring on a DUT
+      # Optionally filter duts by criteria: name, role, regex, or names
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1

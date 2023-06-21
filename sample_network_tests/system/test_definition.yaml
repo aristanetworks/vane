@@ -1,0 +1,25 @@
+- name: test_system.py
+  testcases:
+    - name: test_if_there_is_agents_have_crashed_on_
+      description: Verifies the agents logs crash is empty
+      show_cmd: show agent logs crash
+      expected_output: 0
+      report_style: modern
+      test_criteria: Verifies the agents logs crash is empty
+      # Optionally filter duts by criteria: name, role, regex, or names
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
+    - name: test_if_eos_version_is_correct_on_
+      description: Verifies EOS version running on the device 
+      show_cmd: show version
+      # EOS version name
+      expected_output: 4.27.2F
+      report_style: modern
+      test_criteria: Verifies EOS version running on the device 
+      # Optionally filter duts by criteria: name, role, regex, or names
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1

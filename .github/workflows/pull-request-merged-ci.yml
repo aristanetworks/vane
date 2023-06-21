@@ -11,6 +11,9 @@ on:
     types:
       - closed
 
+env:
+  POETRY_VERSION: 1.5.1
+
 jobs:
   coverage:
     # Run the Vane unittests and get the total coverage, updating the
@@ -45,17 +48,23 @@ jobs:
       #     GITHUB_CONTEXT: ${{ toJson(github) }}
       #   run: echo "$GITHUB_CONTEXT"
 
-      - name: Install dependencies
+      - name: Install Vane and dependencies
+        # Use poetry to install Vane and its dependencies
+        #   Later stages that require Vane or dependencies must activate the virtual environment
+        #   so we export `source $(poetry env info --path)/bin/activate` as env.poetry_home and
+        #   eval that value in the stages that need it
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          pip install poetry==$POETRY_VERSION
+          poetry install
+          echo "poetry_home=source $(poetry env info --path)/bin/activate" >> $GITHUB_ENV
 
       - name: Run the unittests
         # Install vane in "editable/developer" mode, so the executable is using
         # the source files and coverage can monitor the proper directory
         continue-on-error: true
         run: |
-          pip install -e .
+          eval "${{ env.poetry_home }}"
           mkdir -p $PWD/tests/unittests/fixtures/reports/results
           pytest --cov-report term-missing --cov=$PWD/vane $PWD/tests/unittests
 
@@ -63,11 +72,12 @@ jobs:
         # Get the coverage score and create the coverage badge
         # Coverage score is for reference only
         run: |
+          eval "${{ env.poetry_home }}"
           cov_score=$(coverage report | awk '$1 == "TOTAL" {print $NF+0}')
           echo -e "\n----------------"
           echo "Coverage is ${cov_score}%"
           echo -e "----------------\n"
-          coverage-badge -f -o coverage.svg
+          coverage-badge -f -o resources/coverage.svg
 
       - name: Commit the coverage badge
         # Check the git diff for coverage.svg. If the file has been modified
@@ -77,9 +87,9 @@ jobs:
           git status || true
           git config --local user.name actions-user
           git config --local user.email "actions@github.com"
-          if ! git diff --quiet coverage.svg; then
+          if ! git diff --quiet resources/coverage.svg; then
             echo "Updating coverage badge"
-            git add coverage.svg
+            git add resources/coverage.svg
             git commit -am "Updating coverage badge"
             git push -f origin ${{ github.base_ref }}
           fi

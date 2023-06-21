@@ -1,0 +1,34 @@
+- name: test_vane.py
+  testcases:
+    - name: test_if_ssh_json_cmds_run
+      description: Verify running cmds using ssh with json encoding
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify cmds can be run using ssh with json encoding
+    - name: test_if_ssh_text_cmds_run
+      description: Verify running cmds using ssh with text encoding
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify cmds can be run using ssh with text encoding
+    - name: test_if_ssh_can_run_show_tech_support
+      description: Verify show tech support cmd using ssh 
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify show tech support cmd can be run using ssh
+    - name: test_if_ssh_can_run_ping_cmd
+      description: Verify running ping cmd using ssh 
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify ping cmd can be run using ssh
+      input:
+        ping_ip: google.com
+    - name: test_if_ssh_run_commands_func
+      description: Verify ssh conn run_commands func
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify ssh conn run_commands func

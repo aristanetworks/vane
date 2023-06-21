@@ -2,7 +2,7 @@
 
 Network Certification Tool
 
-![Coverage](./coverage.svg)
+![Coverage](./resources/coverage.svg)
 
 ## Description
 
@@ -91,25 +91,47 @@ Build and run the docker development container using:
 ```
     make dev
     ...
-    project # 
+    🐳 c39d4cd0a377 project # 
 ```
 
-First step is to install Vane. If you are just running tests and will not be
-modifying the source, running in a pipeline, then use the following command:
+The prompt indicates we are in a container (the Docker whale) and a container ID, as well as the
+current path. The container is run with the local development environment shared as a mount point.
+Working done in the local development environment will be reflected in the container environment.
+
+The container is also built using the Python poetry packaging system. When the container is first
+started, the Vane dependencies are installed in the container in a virtual environment, but the Vane
+package itself is not installed. The virtual environment is also not active when the container is
+first started up.
+
+To start the poetry virtual environment, while in the `project` directory issue the following command:
 ```
-    project # make install
+    🐳 c39d4cd0a377 project # poetry shell
+    ...
+    (vane-py3.9) 🐳 c39d4cd0a377 project #
+```
+An alias, `activate`, has also been created for the command `source $(poetry env info
+--path)/bin/activate`, which is an equivalent command to the `poetry shell` command.
+```
+    🐳 c39d4cd0a377 project # activate
+    ...
+    (vane-py3.9) 🐳 c39d4cd0a377 project #
 ```
 
-If you are debugging and modifying the source then use the following command to
-install from source. You can use 'pip list' to check if vane was installed.
-ONLY USE ONE OF THE INSTALLATION APPROACHES.
+In either case, the prompt will change to indicate the virtual environment is active by prefixing
+the project name and python version, and Vane work can now be done in the environment.
+
+If you will be running Vane, install vane with the following command (make sure the prompt indicates
+the virtual environment is active):
 ```
-    project # pip install -e .
+    (vane-py3.9) 🐳 c39d4cd0a377 project # poetry install
 ```
+This command always installs the package in a modifiable state, similar to the `pip install -e`
+option. Any changes made to the Vane source (outside the container) will be reflected in the poetry
+virtual environment (inside the container).
 
 Running the unit tests:
 ```
-    project # make unittest
+    (vane-py3.9) 🐳 c39d4cd0a377 project # make unittest
 ```
 
 The system tests require virtual or physical EOS switches to test on. For
@@ -118,18 +140,18 @@ uses the Arista Cloud Test environment for testing.
 
 Running the system tests:
 ```
-    project # make systest
+    (vane-py3.9) 🐳 c39d4cd0a377 project # make systest
 ```
 
 Running the unit and system tests together.
 ```
-    project # make tests
+    (vane-py3.9) 🐳 c39d4cd0a377 project # make tests
 ```
 
 The coverage report is printed after running the unittest or systest. You can
 run the coverage report at any time after running the tests.
 ```
-    project # make coverage_report
+    (vane-py3.9) 🐳 c39d4cd0a377 project # make coverage_report
 ```
 
 ### Testing Vane Package using python virtual env
@@ -153,9 +175,9 @@ Running the unit tests:
     (venv) $ pytest --cov-report term-missing --cov=vane tests/unittests
 ```
 
-Running the system tests:
+Running the sample network tests tests:
 ```
-    (venv) $ vane --definitions_file tests/systests/fixtures/definitions.yaml --duts_file tests/fixtures/duts.yaml
+    (venv) $ vane --definitions_file sample_network_tests/definitions.yaml --duts_file sample_network_tests/duts.yaml
 ```
 
 The coverage report is printed after running the unittest or systest. You can

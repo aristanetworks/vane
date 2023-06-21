@@ -1,0 +1,22 @@
+- name: test_ztp.py
+  testcases:
+    - name: test_if_zerotouch_is_disabled_on_
+      description: Verify zerotouch-config is disabled 
+      show_cmd: show zerotouch
+      expected_output: disabled
+      report_style: modern
+      test_criteria: Verify zerotouch-config is disabled 
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
+    - name: test_for_zerotouch_config_file_on_
+      description: Verify zerotouch-config file is on flash
+      show_cmd: dir flash:zerotouch-config
+      expected_output: True
+      report_style: modern
+      test_criteria: Verify zerotouch-config file is on flash
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1

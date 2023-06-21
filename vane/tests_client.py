@@ -119,7 +119,7 @@ class TestsClient:
                         new_file = os.path.join(root, test_definitions)
                         with open(new_file, "w", encoding="utf-8") as outfile:
                             yaml.safe_dump(yaml_new, outfile, sort_keys=False)
-                        logging.info("Regenerared test definition files")
+                        logging.info("Regenerated test definition files")
 
     def generate_test_definitions(self):
         """
@@ -146,7 +146,7 @@ class TestsClient:
                         test_dir=test_dir,
                         test_definitions=test_definitions,
                     )
-        except OSError:
+        except (OSError, KeyError):
             print("Unable to regenerate test definition files.")
 
     def setup_test_runner(self):
@@ -227,7 +227,7 @@ class TestsClient:
     def _set_test_cases(self):
         """Set test cases for test run"""
 
-        test_cases = self.data_model["parameters"]["test_cases"]
+        test_cases = self.data_model["parameters"].get("test_cases")
 
         logging.info(f"Run the following tests: {test_cases}")
         if test_cases == "All":
@@ -240,7 +240,7 @@ class TestsClient:
     def _set_html_report(self):
         """Set html_report for test run"""
 
-        html_report = self.data_model["parameters"]["html_report"]
+        html_report = self.data_model["parameters"].get("html_report")
         html_name = f"--html={html_report}.html"
         list_out = [x for x in self.test_parameters if "--html" in x]
 
@@ -257,14 +257,14 @@ class TestsClient:
     def _set_excel_report(self, report_dir):
         """Set excel_report for test run"""
 
-        excel_report = self.data_model["parameters"]["excel_report"]
+        excel_report = self.data_model["parameters"].get("excel_report")
         excel_name = f"--excelreport={report_dir}/{excel_report}.xlsx"
         self._set_cmdline_report(excel_report, excel_name, "--excelreport")
 
     def _set_json_report(self):
         """Set json_report for test run"""
 
-        json_report = self.data_model["parameters"]["json_report"]
+        json_report = self.data_model["parameters"].get("json_report")
         json_name = f"--json={json_report}.json"
         self._set_cmdline_report(json_report, json_name, "--json")
 

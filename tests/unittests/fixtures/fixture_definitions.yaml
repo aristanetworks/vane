@@ -1,0 +1,29 @@
+parameters:
+  eapi_file: tests/unittests/fixtures/eapi.conf
+  eapi_template: tests/fixtures/templates/eapi.conf.j2
+  eos_conn: eapi
+  excel_report: null
+  html_report: reports/report
+  json_report: reports/report
+  mark: 
+  processes: null
+  report_dir: reports 
+  results_file: result.yml
+  results_dir: reports/results
+  setup_show: false
+  show_clock: true
+  show_log: show_output.log
+  stdout: false
+  test_cases: test_cpu.py
+  test_dirs: 
+  - sample_network_tests/cpu
+  report_test_steps: true
+  generate_test_definitions: false
+  master_definitions: master_def.yaml
+  template_definitions: tests_definitions.yaml
+  test_definitions: test_definition.yaml
+  verbose: true
+  network_configs: tests/unittests/fixtures/test_network_configs.yaml
+  spreadsheet: tests/fixtures/spreadsheets/PS-LLD-Questionnaire-Template.xlsx
+  xcel_definitions: tests/fixtures/spreadsheets/xcel_definitions.yaml
+  xcel_schema: tests/fixtures/spreadsheets/xcel_schema.yaml

@@ -51,6 +51,7 @@ from cvprac.cvp_client_errors import (
     CvpSessionLogOutError,
 )
 from requests.exceptions import HTTPError, ReadTimeout, Timeout, TooManyRedirects
+from vane.vane_logging import logging
 
 
 def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name):
@@ -71,6 +72,7 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
     try:
         clnt = CvpClient()
         clnt.connect([cvp_ip], cvp_username, cvp_password)
+        logging.info("Pulling the inventory from CVP")
         print(f"Pull the inventory from CVP: {cvp_ip}")
         inventory = clnt.api.get_inventory()
     except (
@@ -86,6 +88,7 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
         ValueError,
     ) as err:
         msg = f"Could not get CVP inventory info: {err}"
+        logging.error("Could not get CVP inventory info")
         sys.exit(msg)
 
     dut_file = {}
@@ -133,6 +136,7 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
         dut_file.update({"duts": dut_properties})
         with open(duts_file_name, "w", encoding="utf-8") as yamlfile:
             yaml.dump(dut_file, yamlfile, sort_keys=False)
+            logging.info(f"Yaml file {duts_file_name} created")
             print(f"Yaml file {duts_file_name} created")
 
 
@@ -172,6 +176,7 @@ def main():
     args = parse_cli()
 
     if args.generate_cvp_duts_file:
+        logging.info("Generating duts file from CVP")
         create_duts_file_from_cvp(
             args.generate_cvp_duts_file[0],
             args.generate_cvp_duts_file[1],

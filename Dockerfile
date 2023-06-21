@@ -2,20 +2,37 @@
 FROM python:3.9
 MAINTAINER Professional Service: Software Services <eos-cs-sw@arista.com>
 
+# Configure some python settings for containers
+#   Don't write .pyc files while working in the container
+ENV PYTHONDONTWRITEBYTECODE 1
+#   Don't buffer output while working in the container
+ENV PYTHONBUFFERED 1
+#   Don't store installation files in the container
+ENV PIP_NO_CACHE_DIR 1
+
+# Set the poetry version to use
+ENV POETRY_VERSION 1.5.1
+
 # Install necessary packages
 RUN apt-get update \
-    && apt-get -y install vim sudo tree rpm yamllint \
-       openvpn iputils-ping unzip \
+    && apt-get -y install \
+        iputils-ping \
+        openvpn \
+        rpm \
+        sudo \
+        tree \
+        unzip \
+        vim \
+        yamllint \
     && rm -rf /var/lib/apt/lists/*
+
+# Update pip and install the poetry package
+RUN pip3 install --upgrade pip
+RUN pip install poetry==${POETRY_VERSION}
 
 # Create the /project directory and add it as a mountpoint
 WORKDIR /project
 COPY . .
-
-# Install python modules required by the repo
-ADD requirements.txt /tmp/requirements.txt
-RUN pip3 install --trusted-host pypi.python.org -r /tmp/requirements.txt \
-    && pip3 install --upgrade pip
 
 # Allow python install to run without being root
 RUN chmod 777 /usr/local/lib/python*/site-packages /usr/local/bin
@@ -36,4 +53,11 @@ RUN echo "%sudo   ALL=(ALL:ALL) ALL" >> /etc/sudoers \
 USER $UNAME
 RUN echo "PS1='🐳  \[\033[1;36m\]\h \[\033[1;34m\]\W\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]'" >> /home/${UNAME}/.bashrc
 
-CMD ["/bin/sh"]
+# Install dependencies required by the repo
+RUN poetry install --no-root
+
+# Create an alias for activating the poetry shell
+RUN echo "alias activate='source `poetry env info --path`/bin/activate'" >> /home/${UNAME}/.bashrc
+
+# Start the container
+CMD ["/bin/bash"]

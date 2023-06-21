@@ -128,7 +128,7 @@ def setup_vane():
         show_cmds, vane.config.test_parameters, vane.config.test_duts
     )
 
-    logging.info(f"Return to test suites: \nduts: {vane.config.dut_objs}")
+    logging.debug(f"Return to test suites: \nduts: {vane.config.dut_objs}")
 
 
 def run_tests(definitions_file, duts_file):
@@ -203,7 +203,9 @@ def show_markers():
             marker_description = i.split(": ")[1]
 
             if marker_name not in inbuilt_list:
-                marker_list.append({"marker": marker_name, "description": marker_description})
+                marker_list.append(
+                    {"marker": marker_name, "description": marker_description}
+                )
 
     return marker_list
 
@@ -257,7 +259,7 @@ def download_test_results():
 
 def main():
     """main function"""
-    logging.info("Accept input from command-line")
+    logging.info("Reading in input from command-line")
 
     args = parse_cli()
 
@@ -269,7 +271,9 @@ def main():
 
     else:
         if args.definitions_file:
-            logging.warning(f"Changing Definitions file name to {args.definitions_file}")
+            logging.warning(
+                f"Changing Definitions file name to {args.definitions_file}"
+            )
             vane.config.DEFINITIONS_FILE = args.definitions_file
 
         if args.duts_file:

@@ -1,7 +1,7 @@
 import vane.tests_client as tests_client
 
-DEFINITIONS = 'tests/unittests/fixtures/definitions.yaml'
-DUTS = 'tests/fixtures/duts.yaml'
+DEFINITIONS = 'sample_network_tests/definitions.yaml'
+DUTS = 'sample_network_tests/duts.yaml'
 def test_assert():
     assert True
 

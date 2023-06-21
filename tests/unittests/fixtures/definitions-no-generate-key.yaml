@@ -1,0 +1,25 @@
+parameters:
+  eapi_file: /builds/gslab-dev/vane/tests/fixtures/templates/.eapi.conf
+  eapi_template: /builds/gslab-dev/vane/tests/fixtures/templates/eapi.conf.j2
+  excel_report: null
+  html_report: /builds/gslab-dev/vane-tests-vocus/reports/report.html
+  json_report: /builds/gslab-dev/vane-tests-vocus/reports/report.json
+  mark: null
+  processes: null
+  report_dir:  /builds/gslab-dev/vane/reports
+  results_file: result.yml
+  results_dir: /builds/gslab-dev/vane-tests-vocus/results
+  report_test_steps: false
+  setup_show: false
+  show_log: show_output.log
+  stdout: false
+  test_cases: All
+  test_dirs:
+    - .
+  master_definitions: master_def.yaml
+  template_definitions: test_definition.yaml
+  test_definitions: test_definition.yaml
+  verbose: true
+  spreadsheet: /builds/gslab-dev/vane/tests/fixtures/spreadsheets/PS-LLD-Questionnaire-Template.xlsx
+  xcel_definitions: /builds/gslab-dev/vane/tests/fixtures/spreadsheets/xcel_definitions.yaml
+  xcel_schema: /builds/gslab-dev/vane/tests/fixtures/spreadsheets/xcel_schema.yaml

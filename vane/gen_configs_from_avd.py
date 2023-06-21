@@ -47,6 +47,29 @@ def create_configs_file(avd_sd_dir):
     Args:
       avd_sd_dir: Dir that holds AVD structured data
     """
+    # list of keys to read from AVD SD files
+    non_mgmt_data = [
+        "router_bgp",
+        "vrfs",
+        "vlans",
+        "vlan_interfaces",
+        "port_channel_interfaces",
+        "ethernet_interfaces",
+        "mlag_configuration",
+        "loopback_interfaces",
+        "vxlan_interfaces",
+        "management_interfaces",
+        "vxlan_interface",
+    ]
+    mgmt_data = [
+        "snmp_server",
+        "tacacs_servers",
+        "ip_tacacs_source_interfaces",
+        "name_server",
+        "ntp",
+        "mgmt_interface_vrf",
+        "logging",
+    ]
 
     avd_info = os.walk(avd_sd_dir)
     config = {}
@@ -56,14 +79,14 @@ def create_configs_file(avd_sd_dir):
                 continue
             if avd_file.endswith("debug-vars.yml"):
                 file_path = f"{dir_path}/{avd_file}"
-                mgmt_data = get_mgmt_data(file_path)
+                mgmt_data = get_data_from_avd_sd_file(mgmt_data, file_path)
                 device_name = avd_file.split(".")[0].replace("-debug-vars", "")
                 if config.get(device_name) is None:
                     config[device_name] = {}
                 config[device_name].update(mgmt_data)
             else:
                 file_path = f"{dir_path}/{avd_file}"
-                data = get_non_mgmt_data(file_path)
+                data = get_data_from_avd_sd_file(non_mgmt_data, file_path)
                 device_name = avd_file.split(".")[0]
                 if config.get(device_name) is None:
                     config[device_name] = {}
@@ -74,44 +97,19 @@ def create_configs_file(avd_sd_dir):
         yaml.safe_dump(config, file, sort_keys=False)
 
 
-def get_non_mgmt_data(file):
-    """Function to get non mgmt data from AVD SD file
+def get_data_from_avd_sd_file(data_list, sd_file):
+    """Function to get data from AVD SD file
 
     Args:
-      file: full path to AVD SD file to be read
+      data_list: list of keys to read from AVD SD file
+      sd_file: full path to AVD SD file to be read
     """
-    with open(file, "r", encoding="utf-8") as input_yaml:
+    with open(sd_file, "r", encoding="utf-8") as input_yaml:
         full_config = yaml.safe_load(input_yaml)
     data = {}
-    data["router_bgp"] = full_config.get("router_bgp", {})
-    data["vrfs"] = full_config.get("vrfs", {})
-    data["vlans"] = full_config.get("vlans", {})
-    data["vlan_interfaces"] = full_config.get("vlan_interfaces", {})
-    data["port_channel_interfaces"] = full_config.get("port_channel_interfaces", {})
-    data["ethernet_interfaces"] = full_config.get("ethernet_interfaces", {})
-    data["mlag_configuration"] = full_config.get("mlag_configuration", {})
-    data["loopback_interfaces"] = full_config.get("loopback_interfaces", {})
-    data["vxlan_interfaces"] = full_config.get("vxlan_interfaces", {})
+    for item in data_list:
+        data[item] = full_config.get(item, {})
     return data
-
-
-def get_mgmt_data(file):
-    """Function to get mgmt data from AVD SD file
-
-    Args:
-      file: full path to AVD SD file to be read
-    """
-    with open(file, "r", encoding="utf-8") as input_yaml:
-        full_config = yaml.safe_load(input_yaml)
-    mgmt_data = {}
-    mgmt_data["snmp_server"] = full_config.get("snmp_server", {})
-    mgmt_data["tacacs_servers"] = full_config.get("tacacs_servers", {})
-    mgmt_data["ip_tacacs_source_interfaces"] = full_config.get("ip_tacacs_source_interfaces", {})
-    mgmt_data["name_server"] = full_config.get("name_server", {})
-    mgmt_data["ntp"] = full_config.get("ntp", {})
-    mgmt_data["mgmt_interface_vrf"] = full_config.get("mgmt_interface_vrf", {})
-    mgmt_data["logging"] = full_config.get("logging", {})
-    return mgmt_data
 
 
 def add_lldp_neighbors_dict(config):

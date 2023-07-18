@@ -41,6 +41,7 @@ import re
 import pprint
 import yaml
 
+from jinja2 import Template
 from vane import config, device_interface
 from vane.vane_logging import logging
 
@@ -126,41 +127,6 @@ def parametrize_duts(test_fname, test_defs, dut_objs):
             dut_parameters[testname]["ids"] = ids
 
     return dut_parameters
-
-
-def setup_import_yaml(yaml_file):
-    """Import YAML file as python data structure
-    Also remove lines starting from #
-
-    Args:
-        yaml_file (str): Name of YAML file
-
-    Returns:
-        yaml_data (dict): YAML data structure
-    """
-    logging.info(f"Opening {yaml_file} for read")
-
-    temp_file = yaml_file.split(".")[0] + "_temp." + yaml_file.split(".")[1]
-
-    try:
-        # need to read the setup yaml file and filter out comments
-        # here a line is copied to temp file if it does not start with #
-        with open(yaml_file, "r", encoding="utf-8") as input_yaml:
-            with open(temp_file, "w", encoding="utf-8") as temp_yaml:
-                for line in input_yaml.readlines():
-                    if not line.strip().startswith("#"):
-                        temp_yaml.write(line)
-
-        # temp file is now used to load yaml
-        yaml_data = yaml_read(temp_file)
-        os.remove(temp_file)
-        return yaml_data
-
-    except OSError as err:
-        print(f">>> {yaml_file} YAML FILE MISSING")
-        logging.error(f"ERROR YAML FILE: {yaml_file} NOT FOUND. {err}")
-        logging.error("EXITING TEST RUNNER")
-        sys.exit(1)
 
 
 def import_yaml(yaml_file):
@@ -263,7 +229,6 @@ def login_duts(test_parameters, test_duts):
 
     duts = test_duts["duts"]
     logins = []
-    eapi_file = test_parameters["parameters"]["eapi_file"]
 
     network_configs = {}
     if "network_configs" in test_parameters["parameters"]:
@@ -282,13 +247,11 @@ def login_duts(test_parameters, test_duts):
 
         eos_conn = test_parameters["parameters"].get("eos_conn", DEFAULT_EOS_CONN)
         netmiko_conn = device_interface.NetmikoConn()
-        netmiko_conn.set_conn_params(eapi_file)
-        netmiko_conn.set_up_conn(name)
+        netmiko_conn.set_up_conn(dut)
         login_ptr["ssh_conn"] = netmiko_conn
 
         pyeapi_conn = device_interface.PyeapiConn()
-        pyeapi_conn.set_conn_params(eapi_file)
-        pyeapi_conn.set_up_conn(name)
+        pyeapi_conn.set_up_conn(dut)
         login_ptr["eapi_conn"] = pyeapi_conn
 
         if eos_conn == "eapi":
@@ -305,7 +268,6 @@ def login_duts(test_parameters, test_duts):
         login_ptr["neighbors"] = dut["neighbors"]
         login_ptr["results_dir"] = test_parameters["parameters"]["results_dir"]
         login_ptr["report_dir"] = test_parameters["parameters"]["report_dir"]
-        login_ptr["eapi_file"] = eapi_file
 
         if name in network_configs:
             login_ptr["network_configs"] = network_configs[name]
@@ -692,13 +654,117 @@ def return_test_defs(test_parameters):
                     test_def = import_yaml(file_path)
                     for test_suite in test_def:
                         test_suite["dir_path"] = f"{dir_path}"
+                        import_config(dir_path, test_suite)
                     test_defs["test_suites"] += test_def
 
+    logging.info(f"Creating {report_dir} reports directory")
+    os.makedirs(report_dir, exist_ok=True)
     export_yaml(report_dir + "/" + test_definitions_file, test_defs)
 
     logging.debug(f"Return the following test definitions data structure {test_defs}")
 
     return test_defs
+
+
+def import_config(dir_path, test_suite):
+    """Check for setup file.  If setup file exists import configuration for reporting
+
+    Args:
+        dir_path (str): Path to test case directory
+        test_suite (dict): Test case definition parameters
+    """
+
+    for testcase in test_suite["testcases"]:
+        if "test_setup" in testcase:
+            setup_file = f"{dir_path}/{testcase['test_setup']}"
+            logging.info(
+                f"Importing setup file: {setup_file} into test case: {testcase['name']} definition"
+            )
+
+            setup_config = import_yaml(setup_file)
+            logging.debug(f"Configuration setup is {setup_config}")
+
+            dev_ids = setup_config.get("key", "name")
+            logging.debug(f"Imported configuration will uses {dev_ids}")
+
+            if dev_ids == "name":
+                import_config_from_name(setup_config, testcase)
+            elif dev_ids == "role":
+                import_config_from_role(setup_config, testcase)
+
+
+def import_config_from_name(setup_config, testcase):
+    """Import configuration from a device name
+
+    Args:
+        setup_config (dict): Setup file data structure
+        testcase (dict): test case defintions data structure
+    """
+
+    testcase["configuration"] = ""
+    for dev_name in setup_config:
+        testcase["configuration"] += f"{dev_name}:\n"
+        setup_schema = setup_config[dev_name]["schema"]
+
+        if setup_schema is None:
+            testcase["configuration"] += f"{setup_config[dev_name]['template']}\n"
+        else:
+            setup_template = Template(setup_config[dev_name]["template"])
+            formatted_config = setup_template.render(setup_schema)
+            testcase["configuration"] += f"{formatted_config}\n"
+
+        logging.debug(f"Updated test case data structure with setup: {testcase['configuration']}")
+
+
+def import_config_from_role(setup_config, testcase):
+    """Import configuration from a device role
+
+    Args:
+        setup_config (dict): Setup file data structure
+        testcase (dict): test case defintions data structure
+    """
+
+    testcase["configuration"] = ""
+    for role_name in setup_config:
+        if role_name != "key":
+            logging.debug(f"Setting role to: {role_name}")
+            dev_names = return_duts_with_role(role_name)
+
+            for dev_name in dev_names:
+                testcase["configuration"] += f"{dev_name}:\n"
+                setup_schema = setup_config[role_name]["schema"]
+
+                if setup_schema is None:
+                    testcase["configuration"] += f"{setup_config[role_name]['template']}\n"
+                else:
+                    setup_template = Template(setup_config[role_name]["template"])
+                    formatted_config = setup_template.render(setup_schema)
+                    testcase["configuration"] += f"{formatted_config}\n"
+
+                logging.debug(
+                    f"Updated test case data structure with setup: {testcase['configuration']}"
+                )
+
+
+def return_duts_with_role(role_name):
+    """Create a list of duts with a role
+
+    Args:
+        role_name (str): Role to match in duts data structure
+
+    Returns:
+        list: Hostnames of DUTs with role
+    """
+
+    dev_names = []
+    for dut in config.test_duts["duts"]:
+        dut_role = dut.get("role", "")
+        if dut_role == role_name:
+            dev_names.append(dut["name"])
+
+    logging.debug(f"The following DUTs: {dev_names} have role: {role_name}")
+
+    return dev_names
 
 
 def export_yaml(yaml_file, yaml_data):
@@ -1145,7 +1211,6 @@ class TestOps:
         self._show_cmd_txts.setdefault(dut_name, [])
         self._show_cmds.setdefault(dut_name, [])
         self.show_cmd_txts.setdefault(dut_name, [])
-        self.show_cmds.setdefault(dut_name, [])
 
     def run_show_cmds(self, show_cmds, dut=None, encoding="json", conn_type="eapi"):
         """run_show_cmds is a wrapper which runs the 'show_cmds'
@@ -1185,23 +1250,40 @@ class TestOps:
 
         self.set_evidence_default(dut_name)
 
-        # if encoding is json run the commands, store the results
-        if encoding == "json":
-            json_results = conn.enable(show_cmds)
-
-        # run show clock if flag is set
+        # first run show clock if flag is set
         if self.show_clock_flag:
             show_clock_cmds = ["show clock"]
             # run the show_clock_cmds
-            show_clock_op = conn.enable(show_clock_cmds, "text")
+            try:
+                show_clock_op = conn.enable(show_clock_cmds, "text")
+            except BaseException as e:
+                # add the show clock cmd to _show_cmds
+                self._show_cmds[dut_name] = self._show_cmds[dut_name] + show_clock_cmds
+                # add the exception result to _show_cmds_txts
+                self._show_cmd_txts[dut_name].append(str(e))
+                raise e
+
             # add the show_clock_cmds to TestOps object's _show_cmds list
             # also add the o/p of show_clock_cmds to TestOps object's _show_cmds_txts list
             for result_dict in show_clock_op:
                 self._show_cmds[dut_name].append(result_dict["command"])
                 self._show_cmd_txts[dut_name].append(result_dict["result"]["output"])
 
-        # run the commands in text mode
-        txt_results = conn.enable(show_cmds, encoding="text")
+        # then run commands
+        try:
+            # if encoding is json run the commands, store the results
+            if encoding == "json":
+                json_results = conn.enable(show_cmds)
+            # also run the commands in text mode
+            txt_results = conn.enable(show_cmds, encoding="text")
+        except BaseException as e:
+            # add the show_cmds to TestOps object's _show_cmds list
+            self._show_cmds[dut_name].append(show_cmds)
+            # add the exception result to all the show cmds in show_cmds list
+            for _ in show_cmds:
+                self._show_cmd_txts[dut_name].append(str(e))
+            raise e
+
         # add the show_cmds to TestOps object's show_cmds and _show_cmds list
         # also add the o/p of show_cmds to TestOps object's show_cmds_txts and
         # _show_cmds_txts list

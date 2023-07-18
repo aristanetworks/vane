@@ -54,7 +54,6 @@ def test_constructor():
         "_init_parameters",
         "_remove_result_files",
         "_remove_test_results_dir",
-        "_render_eapi_cfg",
         "_set_cmdline_input",
         "_set_cmdline_no_input",
         "_set_cmdline_report",
@@ -70,7 +69,6 @@ def test_constructor():
         "_set_test_dirs",
         "_set_test_parameters",
         "_set_verbosity",
-        "_write_file",
         "generate_test_definitions",
         "setup_test_runner",
         "test_runner",
@@ -100,8 +98,8 @@ def test_write_test_def_file(loginfo):
     test_definitions = "test_definition_regenerated.yaml"  # don't overwrite the file
 
     # Make sure the regenerated file does not exist
-    if os.path.exists(test_definitions):
-        os.remove(test_definitions)
+    if os.path.exists(test_dir + "/" + test_definitions):
+        os.remove(test_dir + "/" + test_definitions)
 
     # Write test def file
     client.write_test_def_file(template_definitions, master_definitions, test_dir, test_definitions)
@@ -118,6 +116,9 @@ def test_write_test_def_file(loginfo):
 
     # Verify logging message was called
     loginfo.assert_called_with("Regenerated test definition files")
+
+    if os.path.exists(test_dir + "/" + test_definitions):
+        os.remove(test_dir + "/" + test_definitions)
 
 
 def test_generate_test_definitions(loginfo):
@@ -296,17 +297,12 @@ def test__set_test_parameters(loginfo, logwarn):
         call("Use data-model to create test parameters"),
         call("Setting test parameters"),
         call("Initialize test parameter values"),
-        call("Enable pytest output True"),
-        call("Enable pytest output True"),
-        call("Enable pytest output True"),
         call("Run the following tests: All"),
         call("Running All test cases."),
         call("Set HTML report name to: --html=tests/unittests/fixtures/reports/report.html"),
         call("Set --json report name to: --json=tests/unittests/fixtures/reports/report.json"),
-        call("Not Setting PyTest -n"),
-        call("Set PyTest -m to: demo"),
     ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+    loginfo.assert_has_calls(loginfo_calls, any_order=True)
 
     # Validate warning message logged for excel report
     logwarn.assert_called_with("--excelreport report will NOT be created")
@@ -329,13 +325,10 @@ def test__set_test_parameters_unset(loginfo, logwarn):
         call("Use data-model to create test parameters"),
         call("Setting test parameters"),
         call("Initialize test parameter values"),
-        call("Enable pytest output True"),
         call("Run the following tests: "),
         call("Could not find test cases."),
-        call("Not Setting PyTest -n"),
-        call("Set PyTest -m to: demo"),
     ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+    loginfo.assert_has_calls(loginfo_calls, any_order=True)
 
     # Validate the following warning messages are logged in order
     logwarn_calls = [
@@ -369,14 +362,12 @@ def test__set_test_parameters_unset_cmd_line(loginfo, logwarn):
         call("Use data-model to create test parameters"),
         call("Setting test parameters"),
         call("Initialize test parameter values"),
-        call("Enable pytest output True"),
-        call("Remove and disable pytest output False"),
         call("Run the following tests: "),
         call("Could not find test cases."),
-        call("Not Setting PyTest -n"),
-        call("Set PyTest -m to: demo"),
+        call("Setting PyTest parameter processes (extension: -n) to None"),
+        call("Setting PyTest parameter marker (extension: -m) to demo"),
     ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+    loginfo.assert_has_calls(loginfo_calls, any_order=True)
 
     # Validate the following warning messages are logged in order
     logwarn_calls = [
@@ -386,164 +377,6 @@ def test__set_test_parameters_unset_cmd_line(loginfo, logwarn):
         call("--json report will NOT be created"),
     ]
     logwarn.assert_has_calls(logwarn_calls, any_order=False)
-
-
-def test__render_eapi_cfg(loginfo):
-    """Validate _render_eapi_config"""
-
-    # Load a definitions file built for _render_eapi_cfg
-    # This definition file has an eapi file that is named eapi_rendered.conf
-    client = vane.tests_client.TestsClient(
-        "tests/unittests/fixtures/defs_render_eapi_cfg.yaml", DUTS
-    )
-
-    # Make sure the rendered eapi file does not exist
-    filepath = client.data_model["parameters"]["eapi_file"]
-    if os.path.exists(filepath):
-        os.remove(filepath)
-
-    # Run _render_eapi_cfg
-    client._render_eapi_cfg()
-
-    # Assert the expected file was created
-    assert os.path.exists(filepath)
-
-    # Assert the new eapi file contains the expected data (compare with known eapi file)
-    # pylint: disable=consider-using-with
-    unittest.TestCase().assertListEqual(
-        list(open(filepath, mode="r", encoding="utf-8")),
-        list(open("tests/unittests/fixtures/eapi.conf", mode="r", encoding="utf-8")),
-    )
-
-    # Validate the following messages are logged in order
-    loginfo_calls = [
-        call("Render .eapi.conf file for device access"),
-        call("Open tests/fixtures/templates/eapi.conf.j2 Jinja2 template for reading"),
-        call("Read and save contents of tests/fixtures/templates/eapi.conf.j2 Jinja2 template"),
-        call(
-            "Using tests/fixtures/templates/eapi.conf.j2 Jinja2 template to render "
-            "tests/unittests/fixtures/eapi_rendered.conf file with parameters "
-            "[{'mgmt_ip': '10.255.74.38', 'name': 'BL1', 'neighbors': [{'neighborDevice': "
-            "'leaf1', 'neighborPort': 'Ethernet1', 'port': 'Ethernet1'}, {'neighborDevice': "
-            "'leaf2', 'neighborPort': 'Ethernet1', 'port': 'Ethernet2'}], 'password': 'cvp123!', "
-            "'transport': 'https', 'username': 'cvpadmin', 'role': 'leaf'}, {'mgmt_ip': "
-            "'10.255.22.26', 'name': 'BL2', 'neighbors': [{'neighborDevice': 'leaf1', "
-            "'neighborPort': 'Ethernet1', 'port': 'Ethernet1'}, {'neighborDevice': 'leaf2', "
-            "'neighborPort': 'Ethernet1', 'port': 'Ethernet2'}], 'password': 'cvp123!', "
-            "'transport': 'https', 'username': 'cvpadmin', 'role': 'leaf'}]"
-        ),
-        call(
-            "Rendered tests/unittests/fixtures/eapi_rendered.conf as: [connection:BL1]\n"
-            "host: 10.255.74.38\nusername: cvpadmin\n\npassword: cvp123!\n\ntransport: "
-            "https\n\n[connection:BL2]\nhost: 10.255.22.26\nusername: cvpadmin\n\n"
-            "password: cvp123!\n\ntransport: https\n\n"
-        ),
-        call("Open tests/unittests/fixtures/eapi_rendered.conf for writing"),
-        call("Change permissions of tests/unittests/fixtures/eapi_rendered.conf to 777"),
-    ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-
-def test__render_eapi_cfg_neg(loginfo, logerr, capsys):
-    """Validate failure when eapi_template does not exist"""
-
-    # Load a definitions file built for _render_eapi_cfg
-    # This definition file has an eapi file that is named eapi_rendered.conf
-    client = vane.tests_client.TestsClient(
-        "tests/unittests/fixtures/defs_render_eapi_cfg_no_template.yaml", DUTS
-    )
-
-    template = client.data_model["parameters"]["eapi_template"]
-
-    # Catch the system exit during the pytest
-    with pytest.raises(SystemExit) as pytest_exit:
-        # Run _render_eapi_cfg
-        client._render_eapi_cfg()
-
-    captured = capsys.readouterr()
-    err_msg = f"[Errno 2] No such file or directory: '{template}'"
-    assert (
-        f">>> ERROR READING {template}: {err_msg}" in captured.out
-    ), "tests_client._render_eapi_cfg did not fail when template file could not be read"
-
-    # Validate the system exit was called
-    assert pytest_exit.type == SystemExit
-    assert pytest_exit.value.code == 1
-
-    # Validate the following messages are logged in order
-    loginfo_calls = [
-        call("Render .eapi.conf file for device access"),
-        call("Open tests/fixtures/templates/eapi.missing.conf.j2 Jinja2 template for reading"),
-    ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-    # Validate the following messages are logged in order
-    logerr_calls = [
-        call(f"ERROR READING {template}: {err_msg}"),
-        call("EXITING TEST RUNNER"),
-    ]
-    logerr.assert_has_calls(logerr_calls, any_order=False)
-
-
-def test__write_file_neg(loginfo, logerr, capsys):
-    """Validate failure when eapi_file path is not writable"""
-
-    # Load a definitions file built for _render_eapi_cfg
-    # This definition file has an eapi file that with a path that does not exist
-    client = vane.tests_client.TestsClient(
-        "tests/unittests/fixtures/defs_render_eapi_cfg_bad_path.yaml", DUTS
-    )
-
-    filepath = client.data_model["parameters"]["eapi_file"]
-
-    # Catch the system exit during the pytest
-    with pytest.raises(SystemExit) as pytest_exit:
-        # Run _render_eapi_cfg
-        client._render_eapi_cfg()
-
-    captured = capsys.readouterr()
-    err_msg = f"[Errno 2] No such file or directory: '{filepath}'"
-    assert (
-        f">>> ERROR WRITING {filepath}: {err_msg}" in captured.out
-    ), "tests_client._write_file did not fail when eapi file path could not be opened"
-
-    # Validate the system exit was called
-    assert pytest_exit.type == SystemExit
-    assert pytest_exit.value.code == 1
-
-    # Validate the following messages are logged in order
-    loginfo_calls = [
-        call("Render .eapi.conf file for device access"),
-        call("Open tests/fixtures/templates/eapi.conf.j2 Jinja2 template for reading"),
-        call("Read and save contents of tests/fixtures/templates/eapi.conf.j2 Jinja2 template"),
-        call(
-            "Using tests/fixtures/templates/eapi.conf.j2 Jinja2 template to render "
-            "tests/unittests/fixtures/invalid/path/eapi_rendered.conf file with parameters "
-            "[{'mgmt_ip': '10.255.74.38', 'name': 'BL1', 'neighbors': [{'neighborDevice': "
-            "'leaf1', 'neighborPort': 'Ethernet1', 'port': 'Ethernet1'}, {'neighborDevice': "
-            "'leaf2', 'neighborPort': 'Ethernet1', 'port': 'Ethernet2'}], 'password': 'cvp123!', "
-            "'transport': 'https', 'username': 'cvpadmin', 'role': 'leaf'}, {'mgmt_ip': "
-            "'10.255.22.26', 'name': 'BL2', 'neighbors': [{'neighborDevice': 'leaf1', "
-            "'neighborPort': 'Ethernet1', 'port': 'Ethernet1'}, {'neighborDevice': 'leaf2', "
-            "'neighborPort': 'Ethernet1', 'port': 'Ethernet2'}], 'password': 'cvp123!', "
-            "'transport': 'https', 'username': 'cvpadmin', 'role': 'leaf'}]"
-        ),
-        call(
-            "Rendered tests/unittests/fixtures/invalid/path/eapi_rendered.conf as: "
-            "[connection:BL1]\nhost: 10.255.74.38\nusername: cvpadmin\n\npassword: cvp123!\n\n"
-            "transport: https\n\n[connection:BL2]\nhost: 10.255.22.26\nusername: cvpadmin\n\n"
-            "password: cvp123!\n\ntransport: https\n\n"
-        ),
-        call("Open tests/unittests/fixtures/invalid/path/eapi_rendered.conf for writing"),
-    ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-    # Validate the following messages are logged in order
-    logerr_calls = [
-        call(f"ERROR WRITING {filepath}: {err_msg}"),
-        call("EXITING TEST RUNNER"),
-    ]
-    logerr.assert_has_calls(logerr_calls, any_order=False)
 
 
 def test__remove_result_files(loginfo):

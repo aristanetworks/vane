@@ -943,8 +943,8 @@ class ReportClient:
                 self._write_numbered_list(dut, report_field)
             elif report_format == "dict_string":
                 self._write_dict_string(dut, report_field)
-            elif report_format == "config_list":
-                self._write_config_list(dut, report_field)
+            elif report_format == "config_string":
+                self._write_config_string(dut, report_field)
             elif report_format == "config_term":
                 self._write_config_term(dut, report_field)
             elif report_format == "test_result":
@@ -1051,7 +1051,7 @@ class ReportClient:
             else:
                 self._write_text(para, "FAIL", bold=True, color=RGBColor(255, 0, 0))
 
-    def _write_config_list(self, dut, report_field):
+    def _write_config_string(self, dut, report_field):
         """Write list of EOS configurations to Word doc with formatting
 
         Args:
@@ -1060,16 +1060,15 @@ class ReportClient:
         """
 
         if report_field in dut:
-            report_values = dut[report_field]
-            for report_value in report_values:
-                para = self._document.add_paragraph()
-                self._write_text(
-                    para,
-                    report_value.strip(),
-                    font="Courier New",
-                    font_size=10,
-                    left_indent=Inches(0.25),
-                )
+            report_value = dut[report_field]
+            para = self._document.add_paragraph()
+            self._write_text(
+                para,
+                report_value,
+                font="Courier New",
+                font_size=10,
+                left_indent=Inches(0.25),
+            )
 
     def _write_config_term(self, dut, report_field):
         """Write EOS configurations to Word doc with formatting to appear

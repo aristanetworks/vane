@@ -46,6 +46,43 @@ LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
 class VaneTests:
     """Vane Test Suite"""
 
+    def test_if_remove_comments_work(self, dut, tests_definitions):
+        """TD: Verifies if setup comments work
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            """
+            TS: Run cmds 'show hostname' again
+            """
+            self.output = tops.run_show_cmds(tops.show_cmd)
+
+            tops.actual_output = self.output[0]["result"]["hostname"]
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if setup commnets can be specified. "
+                f"Vane recorded error: {exception}"
+            )
+
+        """
+        TS: Compare latest o/p with expected output
+        """
+        tops.parse_test_steps(self.test_if_remove_comments_work)
+        tops.test_result = tops.actual_output == tops.expected_output
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.actual_output == tops.expected_output
+
     def test_if_ssh_json_cmds_run(self, dut, tests_definitions):
         """TD: Verifies cmds run using ssh and output is same as eapi
 

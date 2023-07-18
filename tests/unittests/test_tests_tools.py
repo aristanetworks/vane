@@ -6,6 +6,7 @@ import sys
 from unittest.mock import call
 import pytest
 import yaml
+import pyeapi.eapilib
 import vane
 from tests.unittests.fixtures.test_steps import test_steps
 from vane import tests_tools
@@ -297,13 +298,7 @@ def test_login_duts(loginfo, mocker):
 
     # assert called to NetmikoCOnn and PyeapiConn were made correctly
 
-    netmiko_instance.set_conn_params.assert_called_with("tests/unittests/fixtures/eapi.conf")
-    assert netmiko_instance.set_conn_params.call_count == 2
-
     assert netmiko_instance.set_up_conn.call_count == 2
-
-    pyeapi_instance.set_conn_params.assert_called_with("tests/unittests/fixtures/eapi.conf")
-    assert pyeapi_instance.set_conn_params.call_count == 2
 
     assert pyeapi_instance.set_up_conn.call_count == 2
 
@@ -320,7 +315,6 @@ def test_login_duts(loginfo, mocker):
         assert dut_info["neighbors"] == test_duts["duts"][index]["neighbors"]
         assert dut_info["results_dir"] == test_parameters["parameters"]["results_dir"]
         assert dut_info["report_dir"] == test_parameters["parameters"]["report_dir"]
-        assert dut_info["eapi_file"] == test_parameters["parameters"]["eapi_file"]
         assert dut_info["network_configs"] == "network_configs"
 
     # assert logs
@@ -1005,11 +999,12 @@ def test_test_ops_constructor(mocker):
     assert tops.results_dir == "reports/results"
     assert tops.report_dir == "reports"
 
-    assert tops.show_cmds == {"DCBBW1": ["show version", "show version"]}
+    assert tops.show_cmds == {"DCBBW1": ["show version"]}
     assert tops._show_cmds == {"DCBBW1": ["show version", "show version"]}
     assert tops.show_cmd == "show version"
 
-    assert tops.show_cmd_txts == tops._show_cmd_txts == {"DCBBW1": [OUTPUT, OUTPUT]}
+    assert tops.show_cmd_txts == {"DCBBW1": [OUTPUT]}
+    assert tops._show_cmd_txts == {"DCBBW1": [OUTPUT, OUTPUT]}
 
     assert tops.show_cmd_txt == OUTPUT
 
@@ -1340,18 +1335,18 @@ def test_test_ops_run_show_cmds_json(mocker):
     mocker_object.side_effect = [
         [
             {
-                "command": "show interfaces status",
-                "result": {"interfaceStatuses": "Management1"},
-                "encoding": "json",
-            }
-        ],
-        [
-            {
                 "command": "show clock",
                 "result": {
                     "output": "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n"
                 },
                 "encoding": "text",
+            }
+        ],
+        [
+            {
+                "command": "show interfaces status",
+                "result": {"output": {"interfaceStatuses": "Management1"}},
+                "encoding": "json",
             }
         ],
         [
@@ -1372,21 +1367,20 @@ def test_test_ops_run_show_cmds_json(mocker):
 
     show_cmds = ["show interfaces status"]
     dut = {"connection": vane.device_interface.PyeapiConn, "name": "neighbor"}
+    dut["eapi_conn"] = dut["connection"]
     tops.show_clock_flag = True
+    tops.show_cmds = show_cmds
     actual_output = tops.run_show_cmds(show_cmds, dut, "json")
 
     # assert return values
     assert actual_output == [
         {
             "command": "show interfaces status",
-            "result": {"interfaceStatuses": "Management1"},
+            "result": {"output": {"interfaceStatuses": "Management1"}},
             "encoding": "json",
         }
     ]
-    assert tops.show_cmds == {
-        "DCBBW1": ["show version", "show version"],
-        "neighbor": ["show lldp neighbors", "show interfaces status"],
-    }
+    assert tops.show_cmds == show_cmds
     assert tops._show_cmds == {
         "DCBBW1": ["show version", "show version"],
         "neighbor": ["show clock", "show lldp neighbors", "show interfaces status"],
@@ -1394,7 +1388,6 @@ def test_test_ops_run_show_cmds_json(mocker):
 
     assert tops.show_cmd_txts == {
         "DCBBW1": [
-            OUTPUT,
             OUTPUT,
         ],
         "neighbor": ["TEXT_result", "TEXT_result"],
@@ -1436,10 +1429,11 @@ def test_test_ops_run_show_cmds_text(mocker):
     tops = create_test_ops_instance(mocker)
 
     dut = {"connection": vane.device_interface.PyeapiConn, "name": "neighbor"}
+    dut["eapi_conn"] = dut["connection"]
     tops.show_clock_flag = False
-    show_cmds = ["show lldp neighbors", "show interfaces status"]
+    tops.show_cmds = ["show lldp neighbors", "show interfaces status"]
 
-    actual_output = tops.run_show_cmds(show_cmds, dut, "text")
+    actual_output = tops.run_show_cmds(tops.show_cmds, dut, "text")
 
     # assert return values
     assert actual_output == [
@@ -1450,10 +1444,7 @@ def test_test_ops_run_show_cmds_text(mocker):
             "encoding": "text",
         },
     ]
-    assert tops.show_cmds == {
-        "DCBBW1": ["show version", "show version"],
-        "neighbor": ["show lldp neighbors", "show interfaces status"],
-    }
+    assert tops.show_cmds == ["show lldp neighbors", "show interfaces status"]
     assert tops._show_cmds == {
         "DCBBW1": ["show version", "show version"],
         "neighbor": ["show lldp neighbors", "show interfaces status"],
@@ -1461,7 +1452,6 @@ def test_test_ops_run_show_cmds_text(mocker):
 
     assert tops.show_cmd_txts == {
         "DCBBW1": [
-            OUTPUT,
             OUTPUT,
         ],
         "neighbor": ["TEXT_result", "TEXT_result"],
@@ -1473,3 +1463,56 @@ def test_test_ops_run_show_cmds_text(mocker):
         ],
         "neighbor": ["TEXT_result", "TEXT_result"],
     }
+
+
+def test_test_ops_run_show_cmds_json_exception_fail(mocker):
+    """Validates the functionality of run_show_cmds method"""
+    mocker.patch(
+        "vane.tests_tools.TestOps._get_parameters",
+        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
+    )
+    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+
+    mocker_object = mocker.patch("vane.device_interface.PyeapiConn.enable")
+    mocker_object.side_effect = [pyeapi.eapilib.CommandError(1000, "Invalid command")]
+
+    tops = create_test_ops_instance(mocker)
+
+    show_cmds = ["show interfaces status"]
+    dut = {"connection": vane.device_interface.PyeapiConn, "name": "neighbor"}
+    dut["eapi_conn"] = dut["connection"]
+
+    with pytest.raises(pyeapi.eapilib.CommandError):
+        tops.run_show_cmds(show_cmds, dut, "json")
+
+    # verify that _show_cmds still got updated with commands that failed
+    assert tops._show_cmds["neighbor"] == [["show interfaces status"]]
+
+    assert tops._show_cmd_txts["neighbor"] == ["Error [1000]: Invalid command [None]"]
+
+
+def test_test_ops_run_show_cmds_text_exception_fail(mocker):
+    """Validates the functionality of run_show_cmds method"""
+    mocker.patch(
+        "vane.tests_tools.TestOps._get_parameters",
+        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
+    )
+    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+
+    mocker_object = mocker.patch("vane.device_interface.PyeapiConn.enable")
+    mocker_object.side_effect = [pyeapi.eapilib.CommandError(1000, "Invalid command")]
+
+    tops = create_test_ops_instance(mocker)
+
+    dut = {"connection": vane.device_interface.PyeapiConn, "name": "neighbor"}
+    dut["eapi_conn"] = dut["connection"]
+
+    show_cmds = ["show interfaces status"]
+
+    with pytest.raises(pyeapi.eapilib.CommandError):
+        tops.run_show_cmds(show_cmds, dut, "text")
+
+    # verify that _show_cmds still got updated with commands that failed
+    assert tops._show_cmds["neighbor"] == [["show interfaces status"]]
+
+    assert tops._show_cmd_txts["neighbor"] == ["Error [1000]: Invalid command [None]"]

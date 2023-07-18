@@ -35,7 +35,6 @@
 """
 
 import os
-import configparser
 import json
 import pyeapi
 import netmiko
@@ -99,11 +98,7 @@ class CommandError(Exception):
 class DeviceConn:
     """Base class for connecting to Arista devices"""
 
-    def set_conn_params(self, conf_file):
-        """Set the Device connection parameters"""
-        pass
-
-    def set_up_conn(self, device_name: str):
+    def set_up_conn(self, device_data):
         """Connect to the mentioned device"""
         pass
 
@@ -132,14 +127,18 @@ class PyeapiConn(DeviceConn):
         # pylint: disable=attribute-defined-outside-init
         return self._connection
 
-    def set_conn_params(self, conf_file):
-        """sets the config using eapi conf_file"""
-        pyeapi.load_config(conf_file)
-
-    def set_up_conn(self, device_name):
+    def set_up_conn(self, device_data):
         """connects to device using pyeapi"""
         # pylint: disable=attribute-defined-outside-init
-        self._connection = pyeapi.connect_to(device_name)
+        self._connection = pyeapi.connect(
+            transport=device_data["transport"],
+            host=device_data["mgmt_ip"],
+            username=device_data["username"],
+            password=device_data["password"],
+            return_node=True,
+        )
+        if device_data.get("enable_pwd", ""):
+            self._connection.enable_authentication(device_data["enable_pwd"])
 
     def run_commands(self, cmds, encoding="json", send_enable=True, **kwargs):
         """wrapper around pyeapi run_commands func"""
@@ -169,20 +168,10 @@ class NetmikoConn(DeviceConn):
         """returns the connection object"""
         return self._connection
 
-    def set_conn_params(self, conf_file):
-        """Sets the connection params specified in conf_file"""
-        # pylint: disable=attribute-defined-outside-init
-        self._config = configparser.ConfigParser()
-        self._config.read(conf_file)
-
-    def set_up_conn(self, device_name):
+    def set_up_conn(self, device_data):
         """sets up conn to device using _config params"""
-        name = f"connection:{device_name}"
-        if not self._config.has_section(name):
-            raise AttributeError("connection profile not found")
 
-        self.name = device_name
-        device_attributes = dict(self._config.items(name))
+        self.name = device_data["name"]
 
         default_device_type = "arista_eos"
 
@@ -191,13 +180,13 @@ class NetmikoConn(DeviceConn):
         except FileExistsError:
             pass
 
-        logfile = f"netmiko-logs/netmiko-session-{device_name}.log"
+        logfile = f'netmiko-logs/netmiko-session-{device_data["name"]}.log'
         remote_device = {
-            "device_type": device_attributes.get("device_type", default_device_type),
-            "host": device_attributes["host"],
-            "username": device_attributes["username"],
-            "password": device_attributes["password"],
-            "secret": device_attributes.get("enable_mode_secret", ""),
+            "device_type": device_data.get("device_type", default_device_type),
+            "host": device_data["mgmt_ip"],
+            "username": device_data["username"],
+            "password": device_data["password"],
+            "secret": device_data.get("enable_pwd", ""),
             "session_log": logfile,
         }
         if remote_device["device_type"] == "autodetect":

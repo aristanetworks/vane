@@ -1,0 +1,7 @@
+key: name
+DSR01:
+  schema:
+  template: |
+    #temp-hostname is temporary hostname
+    hostname temp-hostname
+

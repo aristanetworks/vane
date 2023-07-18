@@ -27,8 +27,8 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-''' vane - Network Certification Tool
-'''
+""" vane - Network Certification Tool
+"""
 
-__version__ = '0.9'
-__author__ = 'Arista Networks, Inc.'
+__version__ = "0.91"
+__author__ = "Arista Networks, Inc."

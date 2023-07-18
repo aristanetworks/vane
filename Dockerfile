@@ -34,6 +34,9 @@ RUN pip install poetry==${POETRY_VERSION}
 WORKDIR /project
 COPY . .
 
+# Set the poetry lock file as root first
+RUN poetry lock
+
 # Allow python install to run without being root
 RUN chmod 777 /usr/local/lib/python*/site-packages /usr/local/bin
 
@@ -53,7 +56,7 @@ RUN echo "%sudo   ALL=(ALL:ALL) ALL" >> /etc/sudoers \
 USER $UNAME
 RUN echo "PS1='🐳  \[\033[1;36m\]\h \[\033[1;34m\]\W\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]'" >> /home/${UNAME}/.bashrc
 
-# Install dependencies required by the repo
+# Install dependencies required by the repo (as the docker user)
 RUN poetry install --no-root
 
 # Create an alias for activating the poetry shell

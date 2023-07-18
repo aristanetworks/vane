@@ -85,3 +85,25 @@ def get_current_fixture_testname(request):
     nodeid = request.node.nodeid.split("::")
     test_name = nodeid[2] if len(nodeid) >= 3 else None
     return test_name.split("[")[0]
+
+
+def remove_comments(input_string):
+    """
+    Method to remove a line that starts with #
+
+    Args: input_string - string (possibly multiline)
+    Returns: output_string - is the input_string with lines starting
+    with # removed.
+    """
+
+    # if input_string is empty
+    if not input_string:
+        return input_string
+
+    output_string_arr = []
+    for line in input_string.splitlines():
+        if not line.strip().startswith("#"):
+            output_string_arr.append(line)
+
+    output_string = "\n".join(output_string_arr)
+    return output_string

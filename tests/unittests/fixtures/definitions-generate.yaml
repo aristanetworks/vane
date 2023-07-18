@@ -17,7 +17,7 @@ parameters:
   test_dirs:
     - .
   generate_test_definitions: true
-  master_definitions: master_def.yaml
+  master_definitions: tests/unittests/fixtures/master_def.yaml
   template_definitions: test_definition.yaml
   test_definitions: test_definition.yaml
   verbose: true

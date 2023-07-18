@@ -19,7 +19,7 @@ parameters:
   - sample_network_tests/cpu
   report_test_steps: true
   generate_test_definitions: false
-  master_definitions: master_def.yaml
+  master_definitions: tests/unittests/fixtures/master_def.yaml
   template_definitions: tests_definitions.yaml
   test_definitions: test_definition.yaml
   verbose: true

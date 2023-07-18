@@ -110,7 +110,7 @@ REPORT_TEMPLATES = {
         },
         "configuration": {
             "required": False,
-            "format": "config_list",
+            "format": "config_string",
             "default": ["Network configuration is unchanged"],
         },
         "test_steps": {

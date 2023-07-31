@@ -135,6 +135,7 @@ class PyeapiConn(DeviceConn):
             host=device_data["mgmt_ip"],
             username=device_data["username"],
             password=device_data["password"],
+            timeout=device_data.get("timeout", 60),
             return_node=True,
         )
         if device_data.get("enable_pwd", ""):
@@ -188,6 +189,7 @@ class NetmikoConn(DeviceConn):
             "password": device_data["password"],
             "secret": device_data.get("enable_pwd", ""),
             "session_log": logfile,
+            "read_timeout_override": device_data.get("timeout", None),
         }
         if remote_device["device_type"] == "autodetect":
             guesser = SSHDetect(**remote_device)

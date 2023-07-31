@@ -292,3 +292,145 @@ class VaneTests:
         """TD: Verifies if invalid cmd in setup is handled properly"""
 
         """ This function is never called since the setup fails"""
+
+    def test_run_show_cmds_timeout_func(self, dut, tests_definitions):
+        """TD: Verifies run_show_cmds() timeout func
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            tops.show_cmds[tops.dut_name] = ["show ntp status", "show bgp summary"]
+
+            """
+            TS: Run cmds using eapi and ssh run_commands
+            """
+            ssh_output = tops.run_show_cmds(
+                tops.show_cmds[tops.dut_name], conn_type="ssh", timeout=120
+            )
+            eapi_output = tops.run_show_cmds(
+                tops.show_cmds[tops.dut_name], conn_type="eapi", timeout=120
+            )
+            eapi_op = []
+            for output in eapi_output:
+                eapi_op.append(output["result"])
+
+            """
+            TS: Compare eapi and ssh outputs
+            """
+            tops.actual_output, tops.expected_output = (ssh_output, eapi_output)
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if ssh can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_run_show_cmds_timeout_func)
+        tops.test_result = tops.actual_output == tops.expected_output
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.actual_output == tops.expected_output
+
+    def test_run_cfg_cmds_ssh_func(self, dut, tests_definitions):
+        """TD: Verifies run_cfg_cmds() ssh functionality
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            description = "test"
+            cfg_cmds = ["interface eth16", f"description {description}"]
+
+            """
+            TS: Run cmds using ssh run_cfg_cmds
+            """
+            tops.run_cfg_cmds(cfg_cmds, conn_type="ssh")
+
+            """
+            TS: check if config is present
+            """
+
+            show_cmds = ["show running-config interfaces ethernet 16"]
+
+            tops.actual_output = tops.run_show_cmds(show_cmds, encoding="text")
+
+            tops.expected_output = f"description {description}"
+
+            cfg_cmds = ["interface eth16", f"no description {description}"]
+
+            tops.run_cfg_cmds(cfg_cmds, conn_type="ssh")
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if ssh can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_run_cfg_cmds_ssh_func)
+        tops.test_result = tops.expected_output in tops.actual_output[0]["result"]["output"]
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.expected_output in tops.actual_output[0]["result"]["output"]
+
+    def test_run_cfg_cmds_eapi_func(self, dut, tests_definitions):
+        """TD: Verifies run_cfg_cmds() eapi functionality
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            description = "test"
+            cfg_cmds = ["interface eth16", f"description {description}"]
+
+            """
+            TS: Run cmds using eapi run_cfg_cmds
+            """
+            tops.run_cfg_cmds(cfg_cmds, conn_type="eapi")
+
+            """
+            TS: check if config is present
+            """
+
+            show_cmds = ["show running-config interfaces ethernet 16"]
+
+            tops.actual_output = tops.run_show_cmds(show_cmds, encoding="text")
+
+            tops.expected_output = f"description {description}"
+
+            cfg_cmds = ["interface eth16", f"no description {description}"]
+
+            tops.run_cfg_cmds(cfg_cmds, conn_type="ssh")
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if ssh can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_run_cfg_cmds_eapi_func)
+        tops.test_result = tops.expected_output in tops.actual_output[0]["result"]["output"]
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.expected_output in tops.actual_output[0]["result"]["output"]

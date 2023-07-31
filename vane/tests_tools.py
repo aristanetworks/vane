@@ -264,8 +264,10 @@ def login_duts(test_parameters, test_duts):
         login_ptr["name"] = name
         login_ptr["mgmt_ip"] = dut["mgmt_ip"]
         login_ptr["username"] = dut["username"]
+        login_ptr["password"] = dut["password"]
         login_ptr["role"] = dut["role"]
         login_ptr["neighbors"] = dut["neighbors"]
+        login_ptr["transport"] = dut["transport"]
         login_ptr["results_dir"] = test_parameters["parameters"]["results_dir"]
         login_ptr["report_dir"] = test_parameters["parameters"]["report_dir"]
 
@@ -977,6 +979,7 @@ class TestOps:
         self.show_cmd_txts = {self.dut_name: []}
         self.show_cmd_txt = ""
         self._show_cmd_txts = {self.dut_name: []}
+        self._cfg_cmd_txts = {self.dut_name: []}
 
         if len(self._show_cmds[self.dut_name]) > 0 and self.dut:
             self._verify_show_cmd(self._show_cmds[self.dut_name], self.dut)
@@ -1055,6 +1058,26 @@ class TestOps:
             else:
                 logging.debug("No show command output to display")
 
+        # write evidence for cfg cmds if any
+        for dut_name, _cfg_cmds in self._cfg_cmds.items():
+            text_file = (
+                f"{report_dir}/TEST RESULTS/{test_id} {test_case}/"
+                f"{test_id} {dut_name} Configuration.txt"
+            )
+            text_data = {}
+            index = 1
+
+            for command, text in zip(_cfg_cmds, self._cfg_cmd_txts[dut_name]):
+                text_data[str(index) + ". " + dut_name + "# " + command] = "\n\n" + text
+                index += 1
+
+            if text_data:
+                export_text(text_file, text_data, self.dut_name)
+            else:
+                logging.debug(
+                    f"No cfg command output to display for test id {test_id} test case {test_case}"
+                )
+
     def _get_parameters(self, tests_parameters, test_suite, test_case):
         """Return test parameters for a test case
 
@@ -1118,6 +1141,8 @@ class TestOps:
         self.test_parameters["show_cmd_txts"] = self._show_cmd_txts
         self.test_parameters["test_steps"] = self.test_steps
         self.test_parameters["show_cmds"] = self._show_cmds
+        self.test_parameters["cfg_cmds"] = self._cfg_cmds
+        self.test_parameters["cfg_cmd_txts"] = self._cfg_cmd_txts
 
         if str(self.show_cmd_txt):
             self.test_parameters["show_cmd"] += ":\n\n" + self.show_cmd_txt
@@ -1216,23 +1241,141 @@ class TestOps:
         self._show_cmd_txts.setdefault(dut_name, [])
         self._show_cmds.setdefault(dut_name, [])
         self.show_cmd_txts.setdefault(dut_name, [])
+        self._cfg_cmd_txts.setdefault(dut_name, [])
+        self._cfg_cmds.setdefault(dut_name, [])
 
-    def run_show_cmds(self, show_cmds, dut=None, encoding="json", conn_type="eapi"):
+    def get_new_conn(self, dut, conn_type, timeout):
+        """get new conn returns a new connection to dut of type 'conn_type'
+        with read timeout set to timeout
+        Args: dut: the device to get the connection to
+        conn_type: eapi or ssh
+        timeout: Read time out for the connection
+
+        Returns a new eapi or ssh connection to dut
+        """
+        device_data = {}
+        device_data["transport"] = dut["transport"]
+        device_data["mgmt_ip"] = dut["mgmt_ip"]
+        device_data["username"] = dut["username"]
+        device_data["password"] = dut["password"]
+        device_data["enable_pwd"] = dut.get("enable_pwd", "")
+        device_data["timeout"] = timeout
+        device_data["name"] = dut["name"]
+        if conn_type == "eapi":
+            logging.info(f"Creating new eapi connection to {dut['name']}")
+            pyeapi_conn = device_interface.PyeapiConn()
+            pyeapi_conn.set_up_conn(device_data)
+            return pyeapi_conn
+
+        if conn_type == "ssh":
+            logging.info(f"Creating new ssh connection to {dut['name']}")
+            netmiko_conn = device_interface.NetmikoConn()
+            netmiko_conn.set_up_conn(device_data)
+            return netmiko_conn
+
+        raise ValueError(f"conn_type [{conn_type}] not supported")
+
+    def run_cfg_cmds(self, cfg_cmds, dut=None, conn_type="eapi", timeout=0, new_conn=False):
+        """run_cfg_cmds is a wrapper which runs the configuration cmds
+        if no dut is passed then cmds are run on TestOps dut object
+        if conn_type is eapi then pyeapi is used to connect to dut
+        if conn_type is ssh then netmiko is used to connect to dut
+        if timeout is non-zero then a new connection is created with new timeout
+        if new_conn is True a new connction to dut is created
+
+        Args: cfg_cmds: list of configuration cmds to run
+        dut: device on which cfg_cmds have to run
+        conn_type: connection type to dut - either pyeapi or netmiko
+        timeout: read timeout for dut connection
+        new_conn: whether to get a new conn to dut
+
+        Returns: A dict object that includes the response for each command
+        """
+        if dut is None:
+            dut = self.dut
+
+        if timeout == 0:
+            if conn_type == "eapi":
+                conn = dut["eapi_conn"]
+            elif conn_type == "ssh":
+                conn = dut["ssh_conn"]
+            else:
+                raise ValueError(f"conn_type [{conn_type}] not supported")
+        elif timeout > 0 or new_conn:
+            conn = self.get_new_conn(dut, conn_type, timeout)
+
+        dut_name = dut["name"]
+
+        # initializing evidence values for other duts since
+        # init only initializes for primary dut
+
+        self.set_evidence_default(dut_name)
+
+        # first run show clock if flag is set
+        if self.show_clock_flag:
+            show_clock_cmds = ["show clock"]
+            # run the show_clock_cmds
+            try:
+                show_clock_op = conn.enable(show_clock_cmds, "text")
+            except BaseException as e:
+                # add the show clock cmd to _cfg_cmds
+                logging.error(
+                    f"show clock cmds {show_clock_cmds} for cfg cmds generated exception {str(e)}"
+                )
+                self._cfg_cmds[dut_name] = show_clock_cmds
+                # add the exception result to _cfg_cmd_txts
+                self._cfg_cmd_txts[dut_name].append(str(e))
+                raise e
+
+            # add the show_clock_cmds to TestOps object's _cfg_cmds list
+            # also add the o/p of show_clock_cmds to TestOps object's _cfg_cmds_txts list
+            for result_dict in show_clock_op:
+                self._cfg_cmds[dut_name].append(result_dict["command"])
+                self._cfg_cmd_txts[dut_name].append(result_dict["result"]["output"])
+
+        try:
+            # run the commands
+            results = conn.config(cfg_cmds)
+        except BaseException as e:
+            logging.error(f"config cmds {cfg_cmds} generated exception {str(e)}")
+            # add the cfg_cmds to TestOps object's _cfg_cmds list
+            # add the exception result to all the cfg cmds in cfg_cmds list
+            for cmd in cfg_cmds:
+                self._cfg_cmds[dut_name].append(cmd)
+                self._cfg_cmd_txts[dut_name].append(str(e))
+            raise e
+
+        # add the cfg_cmds to TestOps object's cfg_cmds and _cfg_cmds list
+        # also add the o/p of cfg_cmds to TestOps object's cfg_cmds_txts and
+        # _cfg_cmds_txts list
+        for cmd in cfg_cmds:
+            self._cfg_cmds[dut_name].append(cmd)
+            self._cfg_cmd_txts[dut_name].append("")
+
+        return results
+
+    def run_show_cmds(
+        self, show_cmds, dut=None, encoding="json", conn_type="eapi", timeout=0, new_conn=False
+    ):
         """run_show_cmds is a wrapper which runs the 'show_cmds'
         conn_type determines how the cmds are being run
         if conn_type is eapi then pyeapi is used on specified dut
         if conn_type is ssh then netmiko connection in dut object is used
-        if no dut is passed then cmds are run on primary dut
+        if no dut is passed then cmds are run on TestOps dut object
         It returns the output of these 'show_cmds' in the encoding requested.
         Also it checks show_clock_flag
         to see if 'show_clock' cmd needs to be run. It stores the text output for
         'show_cmds' list in 'show_cmds_txt' list for the specific dut.
         Also 'show_cmds' list is appended to object's 'show_cmds' list.
+        If timeout is non-zero then a new connection is created with new timeout
+        If new_conn is set to True then new connection is created
 
         Args: show_cmds: list of show commands to be run
         dut: the device to run the show command on
         encoding: json or text, with json being default
         conn_type: eapi or ssh, with eapi being default
+        timeout: timeout to be used for connection to DUT
+        new_conn: whether or not to create a new conn to DUT
 
         Returns: A dict object that includes the response for each command along
         with the encoding
@@ -1241,12 +1384,15 @@ class TestOps:
         if dut is None:
             dut = self.dut
 
-        if conn_type == "eapi":
-            conn = dut["eapi_conn"]
-        elif conn_type == "ssh":
-            conn = dut["ssh_conn"]
-        else:
-            raise ValueError(f"conn_type [{conn_type}] not supported")
+        if timeout == 0:
+            if conn_type == "eapi":
+                conn = dut["eapi_conn"]
+            elif conn_type == "ssh":
+                conn = dut["ssh_conn"]
+            else:
+                raise ValueError(f"conn_type [{conn_type}] not supported")
+        elif timeout > 0 or new_conn:
+            conn = self.get_new_conn(dut, conn_type, timeout)
 
         dut_name = dut["name"]
 
@@ -1283,9 +1429,9 @@ class TestOps:
             txt_results = conn.enable(show_cmds, encoding="text")
         except BaseException as e:
             # add the show_cmds to TestOps object's _show_cmds list
-            self._show_cmds[dut_name].append(show_cmds)
             # add the exception result to all the show cmds in show_cmds list
-            for _ in show_cmds:
+            for cmd in show_cmds:
+                self._show_cmds[dut_name].append(cmd)
                 self._show_cmd_txts[dut_name].append(str(e))
             raise e
 

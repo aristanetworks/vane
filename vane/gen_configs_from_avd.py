@@ -40,6 +40,7 @@ Run: python3 gen_configs_from_avd_py --generate-configs-file <avd-structured-dat
 import argparse
 import os
 import yaml
+from vane.vane_logging import logging
 
 
 def create_configs_file(avd_sd_dir):
@@ -101,6 +102,7 @@ def main():
 
     args = parse_cli()
 
+    logging.info(f"Set config directory to {args.generate_configs_file[0]}")
     if args.generate_configs_file:
         create_configs_file(args.generate_configs_file[0])
 

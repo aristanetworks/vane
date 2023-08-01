@@ -1297,3 +1297,56 @@ class TestOps:
             return txt_results
 
         return json_results
+
+    def transfer_file(self, dut=None, src_file, dest_file, operation, sftp=False):
+        """ 
+        transfer_file will transfer filename to/from the the dut depending 
+        on the operation mentioned. 
+
+        dut: device to/from which file needs to be transferred
+        src_file: full filename of src file
+        dest_file: full filename of dest file 
+        operation: 'get' or 'put'
+        sftp: whether to use sftp transport or not
+        """
+
+        if dut is None:
+            dut = self.dut
+
+        if direction != "get" || direction != "put":
+            raise ValueError(f"direction [{direction}] not supported")
+
+        new_dut = dut.copy()
+        session_log = f"file_transfer_{new_dut['name']}-{time.strftime('%Y%m%d-%H%M%S')}" 
+        new_dut["session_log"] = session_log
+        conn = self.get_new_conn(new_dut, conn_type="ssh", timeout=60)
+
+        # first run show clock if flag is set
+        if self.show_clock_flag:
+            show_clock_cmds = ["show clock"]
+            # run the show_clock_cmds
+            try:
+                show_clock_op = conn.enable(show_clock_cmds, "text")
+            except BaseException as e:
+                # add the show clock cmd to _show_cmds
+                self._show_cmds[dut_name] = self._show_cmds[dut_name] + show_clock_cmds
+                # add the exception result to _show_cmds_txts
+                self._show_cmd_txts[dut_name].append(str(e))
+                raise e
+
+        # form request for evidence gathering
+        transfer_request = f"src_file: {src_file} dest_file: {dest_file} op: {operation} sftp: {sftp}"
+ 
+        # transfer file
+        try:
+            conn.file_transfer(src_file, dest_file, operation, sftp)
+        except BaseException as e:
+            self._show_cmds[new_dut["name"]].append(transfer_request)
+            self._show_cmd_txts[new_dut["name"]].append(str(e))
+            raise e
+
+        self._show_cmds[new_dut["name"]].append(transfer_request)
+        # open session log and copy over the evidence
+        # hide the username from the evidence collection
+        with open(session_log, 'r') as file:
+            self._show_cmd_txts[new_dut["name"]].append(file.read().replace(new_dut["username"], "XXXXX"))

@@ -276,7 +276,7 @@ def test_test_runner_usage_err(mocker, capsys):
     assert pytest_exit.value.code == 1
 
 
-def test__set_test_parameters(loginfo, logwarn):
+def test__set_test_parameters(loginfo, logwarn, mocker):
     """Validate _set_test_parameters with various values"""
 
     # pylint: disable-next=fixme
@@ -289,6 +289,8 @@ def test__set_test_parameters(loginfo, logwarn):
         "tests/unittests/fixtures/defs_set_test_params.yaml", DUTS
     )
 
+    mocker.patch("vane.tests_client.TestsClient.now", return_value="-08-01-2023 15:18:22")
+
     # Run _set_test_parameters
     client._set_test_parameters()
 
@@ -299,7 +301,10 @@ def test__set_test_parameters(loginfo, logwarn):
         call("Initialize test parameter values"),
         call("Run the following tests: All"),
         call("Running All test cases."),
-        call("Set HTML report name to: --html=tests/unittests/fixtures/reports/report.html"),
+        call(
+            "Set HTML report name to: --html=tests/unittests/fixtures/reports/"
+            "report-08-01-2023 15:18:22.html"
+        ),
         call("Set --json report name to: --json=tests/unittests/fixtures/reports/report.json"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=True)

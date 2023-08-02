@@ -47,6 +47,7 @@ import sys
 import shutil
 
 import configparser
+from datetime import datetime
 import pytest
 import yaml
 
@@ -246,7 +247,9 @@ class TestsClient:
         """Set html_report for test run"""
 
         html_report = self.data_model["parameters"].get("html_report")
-        html_name = f"--html={html_report}.html"
+        dt_string = self.now()
+        html_title = html_report + dt_string
+        html_name = f"--html={html_title}.html"
         list_out = [x for x in self.test_parameters if "--html" in x]
 
         if html_report and html_name not in self.test_parameters:
@@ -389,3 +392,8 @@ class TestsClient:
             # Deleting a non-empty folder
             shutil.rmtree(test_results_dir, ignore_errors=True)
             logging.info(f"Deleted {test_results_dir} directory successfully")
+
+    def now(self):
+        """Return current date and time"""
+
+        return (datetime.now()).strftime("-%m-%d-%Y %H:%M:%S")

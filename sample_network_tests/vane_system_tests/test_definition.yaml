@@ -39,3 +39,10 @@
       expected_output: null
       report_style: modern
       test_criteria: Verify ssh conn run_commands func
+    - name: test_if_setup_fail_is_handled
+      description: Verify setup fail is handled properly
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify ssh conn run_commands func
+      test_setup: test_setup_garbage.yaml

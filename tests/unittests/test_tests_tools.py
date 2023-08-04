@@ -775,7 +775,7 @@ def test_return_test_defs(logdebug):
         "parameters": {
             "report_dir": "reports",
             "test_cases": "test_tacacs.py",
-            "test_dirs": ["sample_network_tests/tacacs"],
+            "test_dirs": ["tests/unittests/fixtures/fixture_tacacs"],
             "test_definitions": "test_definition.yaml",
         }
     }
@@ -803,7 +803,7 @@ def test_return_test_defs(logdebug):
         "'expected_output': None, 'report_style': 'modern', "
         "'test_criteria': 'Verify tacacs messages are received correctly', "
         "'criteria': 'names', 'filter': ['DSR01', 'DCBBW1'], 'comment': None, 'result': True}], "
-        "'dir_path': 'sample_network_tests/tacacs'}]}"
+        "'dir_path': 'tests/unittests/fixtures/fixture_tacacs'}]}"
     )
     shutil.rmtree("reports", ignore_errors=True)
 

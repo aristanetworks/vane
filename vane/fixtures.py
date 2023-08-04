@@ -137,8 +137,18 @@ def setup_via_name(duts, setup_config, checkpoint):
         logging.info(f"Sending checkpoint command and config to dut {dutt['name']}")
         logging.debug(f"Sending checkpoint command: {checkpoint_cmd}")
         logging.debug(f"Sending config:\n{config}")
-        dutt["connection"].enable(gold_config)
-        dutt["connection"].config(config)
+        try:
+            dutt["connection"].enable(gold_config)
+            dutt["connection"].config(config)
+        except BaseException as e:
+            logging.info(f"setup failed with exception {e} and mesg {str(e)}")
+            logging.debug(f"reverting to checkpoint {checkpoint}")
+            # something failed, call teardown
+            checkpoint_restore_cmd = f"configure replace checkpoint:{checkpoint} skip-checkpoint"
+            delete_checkpoint_cmd = f"delete checkpoint:{checkpoint}"
+            teardown_via_name(duts, setup_config, checkpoint_restore_cmd, delete_checkpoint_cmd)
+            # reraise the exception
+            raise e
 
 
 def setup_via_role(duts, setup_config, checkpoint):
@@ -167,8 +177,20 @@ def setup_via_role(duts, setup_config, checkpoint):
             logging.info(f"Sending checkpoint command and config to dut {dutt['name']}")
             logging.debug(f"Sending checkpoint command: {checkpoint_cmd}")
             logging.debug(f"Sending config:\n{config}")
-            dutt["connection"].enable(gold_config)
-            dutt["connection"].config(config)
+            try:
+                dutt["connection"].enable(gold_config)
+                dutt["connection"].config(config)
+            except BaseException as e:
+                logging.info(f"setup failed with exception {e} and mesg {str(e)}")
+                logging.debug(f"reverting to checkpoint {checkpoint}")
+                # something failed, call teardown
+                checkpoint_restore_cmd = (
+                    f"configure replace checkpoint:{checkpoint} skip-checkpoint"
+                )
+                delete_checkpoint_cmd = f"delete checkpoint:{checkpoint}"
+                teardown_via_role(duts, setup_config, checkpoint_restore_cmd, delete_checkpoint_cmd)
+                # reraise the exception
+                raise e
 
 
 def perform_setup(duts, test, setup_config):

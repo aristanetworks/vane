@@ -15,17 +15,17 @@ Make sure to link the issue in the github PR UI
 
 # Type of change
 
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] This change requires a documentation update
-- [ ] Other (please specify)
+- - [ ] Bug fix (non-breaking change which fixes an issue)
+- - [ ] New feature (non-breaking change which adds functionality)
+- - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
+- - [ ] This change requires a documentation update
+- - [ ] Other (please specify)
 
 # Effort required on reviewers end
 
-- [ ] Easy
-- [ ] Medium
-- [ ] Hard 
+- - [ ] Easy
+- - [ ] Medium
+- - [ ] Hard 
 
 # How Has This Been Tested?
 
@@ -39,8 +39,8 @@ Make sure to link the issue in the github PR UI
     
 # CI pipeline result
 
-- [ ] Pass
-- [ ] Fail
+- - [ ] Pass
+- - [ ] Fail
   
   If it fails, explain the reason and whether or not we should ignore the failure
   

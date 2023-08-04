@@ -99,7 +99,7 @@ class ZTPTests:
             tops.test_result = False
             tops.output_msg += (
                 f"On router {tops.dut_name} ZTP process is in "
-                f"mode {tops.actual_output} while the correct mode is "
+                f"mode {tops.actual_output} while the expected mode is "
                 f"{tops.expected_output}\n"
             )
 
@@ -147,7 +147,7 @@ class ZTPTests:
             tops.output_msg += (
                 f"On router {tops.dut_name} ZTP configuration "
                 f"'file on flash' is {tops.actual_output}, "
-                f" while the correct value is {tops.expected_output}\n"
+                f" while the expected value is {tops.expected_output}\n"
             )
 
         """

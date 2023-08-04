@@ -1,12 +1,11 @@
-import vane.tests_client as tests_client
+"""vane unit tests"""
+from vane import tests_client
 
-DEFINITIONS = 'sample_network_tests/definitions.yaml'
-DUTS = 'sample_network_tests/duts.yaml'
-def test_assert():
-    assert True
+DEFINITIONS = "tests/unittests/fixtures/fixture_definitions.yaml"
+DUTS = "tests/unittests/fixtures/fixture_duts.yaml"
+
 
 def test_object_creation():
-    """ Verify spreadsheet can be inputted
-    """
+    """Verify spreadsheet can be inputted"""
 
     _ = tests_client.TestsClient(DEFINITIONS, DUTS)

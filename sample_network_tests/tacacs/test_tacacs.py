@@ -102,7 +102,7 @@ class TacacsTests:
                         tops.test_result = True
                         tops.output_msg = (
                             f"\nOn router {tops.dut_name} TACACS messages2 sent: "
-                            f"{eos_messages_sent_2} increments from TACACS "
+                            f"{eos_messages_sent_2} correctly increments from TACACS "
                             f"messages1 sent: {eos_messages_sent_1}"
                         )
                         break
@@ -184,7 +184,7 @@ class TacacsTests:
                         tops.test_result = True
                         tops.output_msg = (
                             f"\nOn router {tops.dut_name} TACACS messages2 received: "
-                            f"{eos_messages_received_2} increments from TACACS "
+                            f"{eos_messages_received_2} correctly increments from TACACS "
                             f"messages1 received: {eos_messages_received_1}"
                         )
                         break

@@ -107,9 +107,9 @@ class ExtensionsTests:
                 )
             else:
                 tops.output_msg += (
-                    f"\nOn router {tops.dut_name} extension "
+                    f"\nOn router {tops.dut_name} the actual extension "
                     f"{extension} status is "
-                    f"{tops.actual_output}, while correct status is "
+                    f"{tops.actual_output}, while the expected extension status is "
                     f"{tops.expected_output}.\n"
                 )
 
@@ -175,9 +175,9 @@ class ExtensionsTests:
                 )
             else:
                 tops.output_msg += (
-                    f"\nOn router {tops.dut_name} extension "
+                    f"\nOn router {tops.dut_name} the actual extension "
                     f"{extension} error status is "
-                    f"{tops.actual_output}, while correct error status "
+                    f"{tops.actual_output}, while the expected extension error status "
                     f"is {tops.expected_output}.\n"
                 )
 

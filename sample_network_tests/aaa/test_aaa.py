@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2019, Arista Networks EOS+
+# Copyright (c) 2023, Arista Networks EOS+
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,52 @@
 
 """ Tests to validate base feature status."""
 
-import inspect
-import logging
 import pytest
+from pyeapi.eapilib import EapiError
 from vane import tests_tools
+from vane.vane_logging import logging
+from vane.config import dut_objs, test_defs
 
 
 TEST_SUITE = __file__
 LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
+
+dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
+test1_duts = dut_parameters["test_if_authentication_counters_are_incrementing_on_"]["duts"]
+test1_ids = dut_parameters["test_if_authentication_counters_are_incrementing_on_"]["ids"]
+
+test2_duts = dut_parameters["test_if_aaa_session_logging_is_working_on_"]["duts"]
+test2_ids = dut_parameters["test_if_aaa_session_logging_is_working_on_"]["ids"]
+
+test3_duts = dut_parameters["test_if_commands_authorization_methods_set_on_"]["duts"]
+test3_ids = dut_parameters["test_if_commands_authorization_methods_set_on_"]["ids"]
+
+test4_duts = dut_parameters["test_if_exec_authorization_methods_set_on_"]["duts"]
+test4_ids = dut_parameters["test_if_exec_authorization_methods_set_on_"]["ids"]
+
+test5_duts = dut_parameters["test_if_default_login_authentication_methods_set_on_"]["duts"]
+test5_ids = dut_parameters["test_if_default_login_authentication_methods_set_on_"]["ids"]
+
+test6_duts = dut_parameters["test_if_login_authentication_methods_set_on_"]["duts"]
+test6_ids = dut_parameters["test_if_login_authentication_methods_set_on_"]["ids"]
+
+test7_duts = dut_parameters["test_if_dot1x_authentication_methods_set_on_"]["duts"]
+test7_ids = dut_parameters["test_if_dot1x_authentication_methods_set_on_"]["ids"]
+
+test8_duts = dut_parameters["test_if_enable_authentication_methods_set_on_"]["duts"]
+test8_ids = dut_parameters["test_if_enable_authentication_methods_set_on_"]["ids"]
+
+test9_duts = dut_parameters["test_if_system_accounting_methods_set_on_"]["duts"]
+test9_ids = dut_parameters["test_if_system_accounting_methods_set_on_"]["ids"]
+
+test10_duts = dut_parameters["test_if_exec_accounting_methods_set_on_"]["duts"]
+test10_ids = dut_parameters["test_if_exec_accounting_methods_set_on_"]["ids"]
+
+test11_duts = dut_parameters["test_if_privilege_accounting_methods_set_on_"]["duts"]
+test11_ids = dut_parameters["test_if_privilege_accounting_methods_set_on_"]["ids"]
+
+test12_duts = dut_parameters["test_if_dot1x_accounting_methods_set_on_"]["duts"]
+test12_ids = dut_parameters["test_if_dot1x_accounting_methods_set_on_"]["ids"]
 
 
 @pytest.mark.nrfu
@@ -47,652 +85,768 @@ LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
 class AAATests:
     """AAA Test Suite"""
 
-    @pytest.mark.skip(reason="No AAA setup on DUTs")
-    def test_if_authentication_counters_are_incrementing_on_(
-        self, return_global_data, dut, tests_definitions
-    ):
-        """Verify AAA counters are working correctly
+    # @pytest.mark.skip(reason="No AAA setup on DUTs")
+    @pytest.mark.parametrize("dut", test1_duts, ids=test1_ids)
+    def test_if_authentication_counters_are_incrementing_on_(self, dut, tests_definitions):
+        """TD: Verify AAA counters are working correctly
 
         Args:
           dut (dict): Encapsulates dut details including name, connection
           tests_definitions (dict): Test parameters
         """
 
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
-
-        logging.info(
-            f"TEST is |{dut_name}| authentication counters " "incrementing"
-        )
-
-        ptr = dut["output"][show_cmd]["json"]
-        auth_allowed_1 = ptr["authorizationAllowed"]
-        logging.info(
-            f"GIVEN {auth_allowed_1} authentication counters at " "time 1"
-        )
-
-        show_output, _ = tests_tools.return_show_cmd(
-            show_cmd, dut, test_case, LOG_FILE
-        )
-        auth_allowed_2 = show_output[0]["result"]["authorizationAllowed"]
-        logging.info(
-            f"WHEN {auth_allowed_2} authentication counters at " "time 2"
-        )
-
-        actual_output = f"Authroization Allowed Message Time 1: \
-                        {auth_allowed_1} \nAuthorization Allowed Message \
-                        Time 2: {auth_allowed_2}"
-
-        if auth_allowed_1 < auth_allowed_2:
-            print(
-                f"\nOn router |{dut_name}| AAA authorization allowed "
-                f"messages2: |{auth_allowed_2}| increments from AAA "
-                f"authorization allowed message1: |{auth_allowed_1}|"
+        try:
+            """
+            TS: Collecting output of show command 'show aaa counters' from dut
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]
+            assert self.output, "AAA Counter details are not collected."
+            logging.info(
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
             )
-            logging.info("THEN test case result is |True|")
-        else:
-            print(
-                f"\nOn router |{dut_name}| AAA authorization allowed "
-                f"messages2: |{auth_allowed_2}| doesn't increments from AAA "
-                f"authorization allowed message1: |{auth_allowed_1}|"
+            auth_allowed_1 = self.output["authorizationAllowed"]
+
+            """
+            TS: Running show command 'show aaa counters' on dut again to check for
+            counter increments
+            """
+            self.output = tops.run_show_cmds(tops.show_cmd, "json")[0]["result"]
+            assert self.output, "AAA Counter details are not collected."
+            logging.info(
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
             )
-            logging.info("THEN test case result is |False|")
+            auth_allowed_2 = self.output["authorizationAllowed"]
 
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
-        assert auth_allowed_1 < auth_allowed_2
-
-    def test_if_aaa_session_logging_is_working_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify AAA session logging is working by identifying eapi connection
-
-        Args:
-          dut (dict): Encapsulates dut details including name, connection
-          tests_definitions (dict): Test parameters
-        """
-
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
-
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
-
-        logging.info(
-            f"TEST is |{dut_name}| AAA session logging is working by "
-            "identifying eapi connection"
-        )
-
-        actual_output = dut["output"][show_cmd]["json"]["nonInteractives"]
-        aaa_flag = False
-
-        for non_interactive in actual_output:
-            service = actual_output[non_interactive]["service"]
-            logging.info(f"GIVEN {expected_output} is nonInteractive sessions")
-            logging.info(f"WHEN {service} is nonInteractive sessions")
-
-            if service == "commandApi":
-                print(
-                    f"\nOn router |{dut_name}| identified eAPi AAA session: "
-                    f"|{service}|"
+            if auth_allowed_1 < auth_allowed_2:
+                tops.test_result = True
+                tops.output_msg = (
+                    f"\nOn router {tops.dut_name} AAA authorization allowed "
+                    f"messages2: {auth_allowed_2} increments from AAA "
+                    f"authorization allowed message1: {auth_allowed_1}"
                 )
-                aaa_flag = True
+            else:
+                tops.test_result = False
+                tops.output_msg = (
+                    f"\nOn router {tops.dut_name} AAA authorization allowed "
+                    f"messages2: {auth_allowed_2} doesn't increment from AAA "
+                    f"authorization allowed message1: {auth_allowed_1}"
+                )
 
-        if not aaa_flag:
-            print(
-                f"\nOn router |{dut_name}| did NOT identified eAPi AAA "
-                f"session: |{service}|"
+            assert auth_allowed_1 < auth_allowed_2
+
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f" EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating AAA Counters. Vane recorded error: {exception} "
             )
 
-        for non_interactive in actual_output:
-            service = actual_output[non_interactive]["service"]
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_authentication_counters_are_incrementing_on_)
+        tops.generate_report(tops.dut_name, tops.output_msg)
 
-            test_result = service == expected_output
-            logging.info(f"THEN test case result is |{test_result}|")
-            logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
-
-            assert service == expected_output
-
-    @pytest.mark.authorization
-    def test_if_commands_authorization_methods_set_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify AAA command authorization are method-lists set correct
+    @pytest.mark.parametrize("dut", test2_duts, ids=test2_ids)
+    def test_if_aaa_session_logging_is_working_on_(self, dut, tests_definitions):
+        """TD: Verify AAA session logging is working by identifying eapi connection
 
         Args:
           dut (dict): Encapsulates dut details including name, connection
           tests_definitions (dict): Test parameters
         """
 
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        cmd_auth = test_parameters["cmd_auth"]
-        expected_output = cmd_auth
+        try:
+            """
+            TS: Run show command `show users detail` on dut
+            """
 
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
-
-        logging.info(
-            "TEST is command authorization methods list set correct "
-            f"on |{dut_name}| "
-        )
-        logging.info(f"GIVEN command authorization method list: |{cmd_auth}|")
-
-        ptr = dut["output"][show_cmd]["json"]["authorization"]
-        actual_output = ptr["commandsAuthzMethods"]["privilege0-15"]["methods"]
-        logging.info(
-            f"WHEN EOS command authorization method list is set "
-            f"to |{actual_output}|"
-        )
-
-        test_result = actual_output == expected_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
-
-        print(
-            f"\nOn router |{dut_name}| AAA authorization methods for f"
-            f"commands: |{actual_output}|"
-        )
-
-        assert actual_output == expected_output
-
-    @pytest.mark.authorization
-    def test_if_exec_authorization_methods_set_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify AAA exec authorization are method-lists set correct
-
-        Args:
-          dut (dict): Encapsulates dut details including name, connection
-          tests_definitions (dict): Test parameters
-        """
-
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
-
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        exec_auth = test_parameters["exec_auth"]
-        expected_output = exec_auth
-
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
-
-        logging.info(
-            "TEST is exec authorization methods list set correct "
-            f"on |{dut_name}| "
-        )
-        logging.info(f"GIVEN exec authorization method list: |{exec_auth}|")
-
-        ptr = dut["output"][show_cmd]["json"]["authorization"]
-        actual_output = ptr["execAuthzMethods"]["exec"]["methods"]
-        logging.info(
-            "WHEN EOS exec authorization method list is set to "
-            f"|{actual_output}|"
-        )
-
-        test_result = actual_output == expected_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
-
-        print(
-            f"\nOn router |{dut_name}| AAA authorization methods for exec: "
-            f"|{actual_output}|"
-        )
-
-        assert actual_output == expected_output
-
-    @pytest.mark.authentication
-    def test_if_default_login_authentication_methods_set_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify AAA default login authentication are method-lists set correct
-
-        Args:
-          dut (dict): Encapsulates dut details including name, connection
-          tests_definitions (dict): Test parameters
-        """
-
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
-
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        login_auth = test_parameters["login_auth"]
-        expected_output = login_auth
-
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
-
-        logging.info(
-            f"TEST is default login authentication methods list set "
-            f"correct on |{dut_name}| "
-        )
-        logging.info(f"GIVEN login authentication method list: |{login_auth}|")
-
-        ptr = dut["output"][show_cmd]["json"]["authentication"]
-        actual_output = ptr["loginAuthenMethods"]["default"]["methods"]
-        logging.info(
-            "WHEN EOS login authentication method list is set to "
-            f"|{actual_output}|"
-        )
-
-        test_result = actual_output == expected_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
-
-        print(
-            f"\nOn router |{dut_name}| AAA authentication methods for "
-            f"default login: |{actual_output}|"
-        )
-
-        assert actual_output == expected_output
-
-    @pytest.mark.authentication
-    def test_if_login_authentication_methods_set_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify AAA login authentication are method-lists set correct
-
-        Args:
-          dut (dict): Encapsulates dut details including name, connection
-          tests_definitions (dict): Test parameters
-        """
-
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
-
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        login_auth = test_parameters["login_auth"]
-        expected_output = login_auth
-
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
-
-        logging.info(
-            "TEST is login authentication methods list set correct "
-            f"on |{dut_name}| "
-        )
-        logging.info(f"GIVEN login authentication method list: |{login_auth}|")
-
-        if login_auth:
-            ptr = dut["output"][show_cmd]["json"]["authentication"]
-            actual_output = ptr["loginAuthenMethods"]["login"]["methods"]
+            self.output = dut["output"][tops.show_cmd]["json"]
+            assert self.output, "User details are not collected."
             logging.info(
-                "WHEN EOS login authentication method list is set "
-                f"to |{actual_output}|"
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
             )
 
-            test_result = actual_output == expected_output
-            logging.info(f"THEN test case result is |{test_result}|")
-            logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
+            non_interactives = self.output["nonInteractives"]
 
-            print(
-                f"\nOn router |{dut_name}| AAA authentication methods for "
-                f"login: |{actual_output}|"
+            aaa_flag = False
+            for non_interactive in non_interactives:
+                tops.actual_output = non_interactives[non_interactive]["service"]
+                if tops.actual_output == tops.expected_output:
+                    tops.output_msg += (
+                        f"\nOn router {tops.dut_name} identified eAPi AAA session: "
+                        f"{tops.actual_output} which is correct.\n\n"
+                    )
+                else:
+                    tops.output_msg += (
+                        f"\nOn router {tops.dut_name} identified eAPi AAA session: "
+                        f"{tops.actual_output} while the expected session "
+                        f"is {tops.expected_output}.\n\n"
+                    )
+                tops.actual_results.append(tops.actual_output)
+                tops.expected_results.append(tops.expected_output)
+
+                if tops.actual_output == "commandApi":
+                    aaa_flag = True
+
+            if not aaa_flag:
+                tops.output_msg += (
+                    f"\nOn router {tops.dut_name} did NOT identify eAPi AAA "
+                    f"session: {tops.actual_output}"
+                )
+
+            tops.actual_output, tops.expected_output = (
+                tops.actual_results,
+                tops.expected_results,
+            )
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_aaa_session_logging_is_working_on_)
+        tops.test_result = tops.actual_output == tops.expected_output
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
+
+    @pytest.mark.authorization
+    @pytest.mark.parametrize("dut", test3_duts, ids=test3_ids)
+    def test_if_commands_authorization_methods_set_on_(self, dut, tests_definitions):
+        """TD: Verify AAA command authorization are method-lists set correct
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+          tests_definitions (dict): Test parameters
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            """
+            TS: Collecting output of show command 'show aaa methods all' from dut
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]["authorization"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
             )
 
-            assert actual_output == expected_output
+            tops.actual_output = self.output["commandsAuthzMethods"]["privilege0-15"]["methods"]
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
+
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS command authorization method "
+                f"list is set to: {tops.actual_output}, which is correct.\n\n"
+            )
         else:
-            logging.info(
-                "WHEN EOS login authentication method list is set to " "|None|"
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS command authorization method "
+                f"list is set to: {tops.actual_output}, while "
+                f"the expected authorization method list is {tops.expected_output}.\n\n"
             )
-            logging.info("THEN test case result is |True|")
-            logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_commands_authorization_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
 
-            assert True
-
-    @pytest.mark.authentication
-    def test_if_dot1x_authentication_methods_set_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify AAA dot1x authentication are method-lists set correct
+    @pytest.mark.authorization
+    @pytest.mark.parametrize("dut", test4_duts, ids=test4_ids)
+    def test_if_exec_authorization_methods_set_on_(self, dut, tests_definitions):
+        """TD: Verify AAA exec authorization are method-lists set correct
 
         Args:
           dut (dict): Encapsulates dut details including name, connection
           tests_definitions (dict): Test parameters
         """
 
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        dot1x_auth = test_parameters["dot1x_auth"]
-        expected_output = dot1x_auth
+        try:
+            """
+            TS: Collecting output of show command 'show aaa methods all' from dut
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]["authorization"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
+            tops.actual_output = self.output["execAuthzMethods"]["exec"]["methods"]
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
 
-        logging.info(
-            f"TEST is dot1x authentication methods list set correct "
-            f"on |{dut_name}| "
-        )
-        logging.info(f"GIVEN dot1x authentication method list: |{dot1x_auth}|")
-
-        ptr = dut["output"][show_cmd]["json"]["authentication"]
-        actual_output = ptr["dot1xAuthenMethods"]["default"]["methods"]
-        logging.info(
-            "WHEN EOS dot1x authentication method list is set to "
-            f"|{actual_output}|"
-        )
-
-        test_result = actual_output == expected_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
-
-        print(
-            f"\nOn router |{dut_name}| AAA authentication methods for dot1x "
-            f"default: |{actual_output}|"
-        )
-
-        assert actual_output == expected_output
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS exec authorization method "
+                f"list is set to: {tops.actual_output}, which is correct.\n\n"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS exec authorization method "
+                f"list is set to: {tops.actual_output}, while "
+                f"the expected exec authorization method list is {tops.expected_output}.\n\n"
+            )
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_exec_authorization_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
 
     @pytest.mark.authentication
-    def test_if_enable_authentication_methods_set_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify AAA enable authentication method-lists are set correct
+    @pytest.mark.parametrize("dut", test5_duts, ids=test5_ids)
+    def test_if_default_login_authentication_methods_set_on_(self, dut, tests_definitions):
+        """TD: Verify AAA default login authentication are method-lists set correct
 
         Args:
           dut (dict): Encapsulates dut details including name, connection
           tests_definitions (dict): Test parameters
         """
 
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        enable_auth = test_parameters["enable_auth"]
-        expected_output = enable_auth
+        try:
+            """
+            TS: Run show command 'show aaa methods all' on dut
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]["authentication"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
+            )
+            tops.actual_output = self.output["loginAuthenMethods"]["default"]["methods"]
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
 
-        logging.info(
-            "TEST is enable authentication methods list set correct "
-            f"on |{dut_name}| "
-        )
-        logging.info(
-            "GIVEN enable authentication method list: " f"|{enable_auth}|"
-        )
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS login authentication method "
+                f"list is set to: {tops.actual_output}, which is correct.\n\n"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS login authentication method "
+                f"list is set to: {tops.actual_output}, while "
+                f"the expected EOS login authentication method list is {tops.expected_output}.\n\n"
+            )
 
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_default_login_authentication_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
 
-        ptr = dut["output"][show_cmd]["json"]["authentication"]
-        actual_output = ptr["enableAuthenMethods"]["default"]["methods"]
+    @pytest.mark.authentication
+    @pytest.mark.parametrize("dut", test6_duts, ids=test6_ids)
+    def test_if_login_authentication_methods_set_on_(self, dut, tests_definitions):
+        """TD: Verify AAA login authentication are method-lists set correct
 
-        print(
-            f"\nOn router |{dut['name']}| AAA authentication methods for "
-            f"enable default: |{actual_output}|"
-        )
-        logging.info(
-            f"WHEN EOS enable authentication method list is set to "
-            f"|{actual_output}|"
-        )
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+          tests_definitions (dict): Test parameters
+        """
 
-        test_result = actual_output == expected_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        assert actual_output == expected_output
+        try:
+            if tops.expected_output:
+                """
+                TS: Collecting output of show command 'show aaa methods all' from dut
+                """
+                self.output = dut["output"][tops.show_cmd]["json"]["authentication"]
+                assert self.output, "No AAA method details are available"
+                logging.info(
+                    f"On device {tops.dut_name}"
+                    f" output of {tops.show_cmd} command is: {self.output}"
+                )
+
+                tops.actual_output = self.output["loginAuthenMethods"]["login"]["methods"]
+                if tops.expected_output == tops.actual_output:
+                    tops.test_result = True
+
+                    tops.output_msg += (
+                        f"On router {tops.dut_name} EOS login authentication method "
+                        f"list is set to: {tops.actual_output}, while "
+                        f"correct EOS login authentication method list is "
+                        f" {tops.expected_output}.\n\n"
+                    )
+                else:
+                    tops.test_result = False
+                    tops.output_msg += (
+                        f"On router {tops.dut_name} EOS login authentication method "
+                        f"list is set to: {tops.actual_output}, while "
+                        f"the expected EOS login authentication method list is "
+                        f" {tops.expected_output}.\n\n"
+                    )
+            else:
+                tops.actual_output = None
+                tops.test_result = True
+                tops.output_msg += (
+                    "EOS login authentication method list is set to None"
+                    " hence test case result is True"
+                )
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f" EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating login authentication methods. "
+                f"Vane recorded error: {exception} "
+            )
+
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_login_authentication_methods_set_on_)
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.actual_output == tops.expected_output
+
+    @pytest.mark.authentication
+    @pytest.mark.parametrize("dut", test7_duts, ids=test7_ids)
+    def test_if_dot1x_authentication_methods_set_on_(self, dut, tests_definitions):
+        """TD: Verify AAA dot1x authentication are method-lists set correct
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+          tests_definitions (dict): Test parameters
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            """
+            TS: Collecting output of show command 'show aaa methods all' from dut
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]["authentication"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
+            )
+
+            tops.actual_output = self.output["dot1xAuthenMethods"]["default"]["methods"]
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
+
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS dot1x authentication method "
+                f"list is set to: {tops.actual_output}, which is correct.\n\n"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS dot1x authentication method "
+                f"list is set to: {tops.actual_output}, while "
+                f"the expected EOS dot1x authentication method list is {tops.expected_output}.\n\n"
+            )
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_dot1x_authentication_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
+
+    @pytest.mark.authentication
+    @pytest.mark.parametrize("dut", test8_duts, ids=test8_ids)
+    def test_if_enable_authentication_methods_set_on_(self, dut, tests_definitions):
+        """TD: Verify AAA enable authentication method-lists are set correct
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+          tests_definitions (dict): Test parameters
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            """
+            TS: Collecting output of show command 'show aaa methods all' from dut
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]["authentication"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
+            )
+
+            tops.actual_output = self.output["enableAuthenMethods"]["default"]["methods"]
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
+
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS enable authentication method "
+                f"list is set to: {tops.actual_output}, which is correct.\n\n"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} EOS enable authentication method "
+                f"list is set to: {tops.actual_output}, while "
+                f"the expected EOS enable authentication method list is {tops.expected_output}.\n\n"
+            )
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_enable_authentication_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
 
     @pytest.mark.accounting
+    @pytest.mark.parametrize("dut", test9_duts, ids=test9_ids)
     def test_if_system_accounting_methods_set_on_(self, dut, tests_definitions):
-        """Verify AAA system accounting method-lists are set correct
+        """TD: Verify AAA system accounting method-lists are set correct
 
         Args:
           dut (dict): Encapsulates dut details including name, connection
           tests_definitions (dict): Test parameters
         """
 
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        default_acct = test_parameters["default_acct"]
-        console_acct = test_parameters["console_acct"]
-        expected_output = [default_acct, console_acct]
+        try:
+            """
+            TS: Collecting output of show command 'show aaa methods all' from dut
+            """
 
-        logging.info(
-            f"TEST is system accounting methods list set correct "
-            f"on |{dut_name}| "
-        )
-        logging.info(
-            f"GIVEN default system accounting method list: "
-            f"|{default_acct}| and console system accounting method"
-            f"list: |{console_acct}|"
-        )
+            self.output = dut["output"][tops.show_cmd]["json"]["accounting"]["systemAcctMethods"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
+            eos_default_acct = self.output["system"]["defaultMethods"]
+            eos_console_acct = self.output["system"]["consoleMethods"]
 
-        dut_ptr = dut["output"][show_cmd]["json"]
-        acct_ptr = dut_ptr["accounting"]["systemAcctMethods"]
-        eos_default_acct = acct_ptr["system"]["defaultMethods"]
-        eos_console_acct = acct_ptr["system"]["consoleMethods"]
-        actual_output = [eos_default_acct, eos_console_acct]
+            tops.expected_output = [
+                tops.test_parameters["default_acct"],
+                tops.test_parameters["console_acct"],
+            ]
+            tops.actual_output = [eos_default_acct, eos_console_acct]
 
-        print(
-            f"\nOn router |{dut['name']}| AAA accounting methods for "
-            f"default: |{eos_default_acct}|"
-        )
-        logging.info(
-            f"WHEN default system accounting method list: "
-            f"|{eos_default_acct}| and console system accounting "
-            f"method list: |{eos_console_acct}|"
-        )
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
 
-        test_result = expected_output == actual_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} default system and "
+                f"console system accounting method list "
+                f"is {tops.actual_output}, which is correct.\n\n"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} default system and "
+                f"console system accounting method list "
+                f"is {tops.actual_output}, while the expected default system and "
+                f"console system accounting method list "
+                f"is {tops.expected_output}.\n\n"
+            )
 
-        assert expected_output == actual_output
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_system_accounting_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
 
     @pytest.mark.accounting
+    @pytest.mark.parametrize("dut", test10_duts, ids=test10_ids)
     def test_if_exec_accounting_methods_set_on_(self, dut, tests_definitions):
-        """Verify AAA exec accounting method-lists are set correct
+        """TD: Verify AAA exec accounting method-lists are set correct
 
         Args:
           dut (dict): Encapsulates dut details including name, connection
           tests_definitions (dict): Test parameters
         """
 
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        default_acct = test_parameters["default_acct"]
-        console_acct = test_parameters["console_acct"]
-        expected_output = [default_acct, console_acct]
+        try:
+            """
+            TS: Collecting output of show command 'show aaa methods all' from dut
+            """
 
-        logging.info(
-            f"TEST is exec accounting methods list set correct "
-            f"on |{dut_name}| "
-        )
-        logging.info(
-            f"GIVEN exec system accounting method list: "
-            f"|{default_acct}| and exec system accounting method"
-            f"list: |{console_acct}|"
-        )
+            self.output = dut["output"][tops.show_cmd]["json"]["accounting"]["execAcctMethods"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
+            eos_default_acct = self.output["exec"]["defaultMethods"]
+            eos_console_acct = self.output["exec"]["consoleMethods"]
 
-        dut_ptr = dut["output"][show_cmd]["json"]
-        acct_ptr = dut_ptr["accounting"]["execAcctMethods"]
-        eos_default_acct = acct_ptr["exec"]["defaultMethods"]
-        eos_console_acct = acct_ptr["exec"]["consoleMethods"]
-        actual_output = [eos_default_acct, eos_console_acct]
+            tops.expected_output = [
+                tops.test_parameters["default_acct"],
+                tops.test_parameters["console_acct"],
+            ]
+            tops.actual_output = [eos_default_acct, eos_console_acct]
 
-        print(
-            f"\nOn router |{dut['name']}| AAA accounting exec methods for "
-            f"console: |{eos_console_acct}|"
-        )
-        logging.info(
-            f"WHEN default exec accounting method list: "
-            f"|{eos_default_acct}| and console exec accounting method"
-            f"list: |{eos_console_acct}|"
-        )
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
 
-        test_result = expected_output == actual_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} default exec and "
+                f"console exec accounting method list "
+                f"is {tops.actual_output}, which is correct.\n\n"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} default exec and "
+                f"console exec accounting method list "
+                f"is {tops.actual_output}, while the expected default exec "
+                f"and console exec accounting method list "
+                f"is {tops.expected_output}.\n\n"
+            )
 
-        assert expected_output == actual_output
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_exec_accounting_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
 
     @pytest.mark.accounting
-    def test_if_priviledge_accounting_methods_set_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify AAA priviledge accounting method-lists are set correct
+    @pytest.mark.parametrize("dut", test11_duts, ids=test11_ids)
+    def test_if_privilege_accounting_methods_set_on_(self, dut, tests_definitions):
+        """TD: Verify AAA privilege accounting method-lists are set correct
 
         Args:
           dut (dict): Encapsulates dut details including name, connection
           tests_definitions (dict): Test parameters
         """
 
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        default_acct = test_parameters["default_acct"]
-        console_acct = test_parameters["console_acct"]
-        expected_output = [default_acct, console_acct]
+        try:
+            """
+            TS: Collecting output of show command 'show aaa methods all' from dut
+            """
 
-        logging.info(
-            f"TEST is priviledge accounting methods list set correct "
-            f"on |{dut_name}| "
-        )
-        logging.info(
-            f"GIVEN priviledge system accounting method list: "
-            f"|{default_acct}| and priviledge system accounting "
-            f"method list: |{console_acct}|"
-        )
+            self.output = dut["output"][tops.show_cmd]["json"]["accounting"]["commandsAcctMethods"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
+            eos_default_acct = self.output["privilege0-15"]["defaultMethods"]
+            eos_console_acct = self.output["privilege0-15"]["consoleMethods"]
 
-        dut_ptr = dut["output"][show_cmd]["json"]
-        acct_ptr = dut_ptr["accounting"]["commandsAcctMethods"]
-        eos_default_acct = acct_ptr["privilege0-15"]["defaultMethods"]
-        eos_console_acct = acct_ptr["privilege0-15"]["consoleMethods"]
-        actual_output = [eos_default_acct, eos_console_acct]
+            tops.expected_output = [
+                tops.test_parameters["default_acct"],
+                tops.test_parameters["console_acct"],
+            ]
+            tops.actual_output = [eos_default_acct, eos_console_acct]
 
-        print(
-            f"\nOn router |{dut['name']}| AAA accounting exec methods for "
-            f"console: |{eos_console_acct}|"
-        )
-        logging.info(
-            f"WHEN default privilege accounting method list: "
-            f"|{eos_default_acct}| and console privilege accounting "
-            f"method list: |{eos_console_acct}|"
-        )
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
 
-        test_result = expected_output == actual_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} default privilege and "
+                f"console privilege accounting method list "
+                f"is {tops.actual_output}, which is correct.\n\n"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} default privilege and "
+                f"console privilege accounting method list "
+                f"is {tops.actual_output}, while the expected default privilege and "
+                f"console privilege accounting method list "
+                f"is {tops.expected_output}.\n\n"
+            )
 
-        assert expected_output == actual_output
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_privilege_accounting_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
 
     @pytest.mark.accounting
+    @pytest.mark.parametrize("dut", test12_duts, ids=test12_ids)
     def test_if_dot1x_accounting_methods_set_on_(self, dut, tests_definitions):
-        """Verify AAA dot1x accounting method-lists are set correct
+        """TD: Verify AAA dot1x accounting method-lists are set correct
 
         Args:
          dut (dict): Encapsulates dut details including name, connection
          tests_definitions (dict): Test parameters
         """
 
-        test_case = inspect.currentframe().f_code.co_name
-        test_parameters = tests_tools.get_parameters(
-            tests_definitions, TEST_SUITE, test_case
-        )
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        expected_output = test_parameters["expected_output"]
-        dut_name = dut["name"]
-        default_acct = test_parameters["default_acct"]
-        console_acct = test_parameters["console_acct"]
-        expected_output = [default_acct, console_acct]
+        try:
+            """
+            TS: Collecting output of show command 'show aaa methods all' from dut
+            """
 
-        logging.info(
-            f"TEST is dot1x accounting methods list set correct on "
-            f"|{dut_name}|"
-        )
-        logging.info(
-            f"GIVEN dot1x system accounting method list: "
-            f"|{default_acct}| and dot1x system accounting method"
-            f"list: |{console_acct}|"
-        )
+            self.output = dut["output"][tops.show_cmd]["json"]["accounting"]["dot1xAcctMethods"]
+            assert self.output, "No AAA method details are available"
+            logging.info(
+                f"On device {tops.dut_name}" f" output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        show_cmd = test_parameters["show_cmd"]
-        tests_tools.verify_show_cmd(show_cmd, dut)
-        show_cmd_txt = dut["output"][show_cmd]["text"]
+            eos_default_acct = self.output["dot1x"]["defaultMethods"]
+            eos_console_acct = self.output["dot1x"]["consoleMethods"]
 
-        ptr = dut["output"][show_cmd]["json"]["accounting"]
-        eos_default_acct = ptr["dot1xAcctMethods"]["dot1x"]["defaultMethods"]
-        eos_console_acct = ptr["dot1xAcctMethods"]["dot1x"]["consoleMethods"]
-        actual_output = [eos_default_acct, eos_console_acct]
+            tops.expected_output = [
+                tops.test_parameters["default_acct"],
+                tops.test_parameters["console_acct"],
+            ]
+            tops.actual_output = [eos_default_acct, eos_console_acct]
 
-        print(
-            f"\nOn router |{dut_name}| AAA accounting exec methods for "
-            f"dot1x: |{eos_console_acct}|"
-        )
-        logging.info(
-            f"WHEN default dot1x accounting method list: "
-            f"|{eos_default_acct}| and console dot1x accounting "
-            f"method list: |{eos_console_acct}|"
-        )
+        except (
+            AssertionError,
+            AttributeError,
+            LookupError,
+            EapiError,
+        ) as exception:
+            logging.error(
+                f"Error occurred during the testsuite execution on dut:"
+                f" {tops.dut_name} is {str(exception)}"
+            )
+            tops.actual_output = str(exception)
 
-        test_result = expected_output == actual_output
-        logging.info(f"THEN test case result is |{test_result}|")
-        logging.info(f"OUTPUT of |{show_cmd}| is :\n\n{show_cmd_txt}")
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg += (
+                f"On router {tops.dut_name} default dot1x and "
+                f"console dot1x accounting method list "
+                f"is {tops.actual_output}, which is correct.\n\n"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg += (
+                f"On router {tops.dut_name} default dot1x and "
+                f"console dot1x accounting method list "
+                f"is {tops.actual_output}, while the expected default dot1x and "
+                f"console dot1x accounting method list "
+                f"is {tops.expected_output}.\n\n"
+            )
 
-        assert expected_output == actual_output
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_dot1x_accounting_methods_set_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output

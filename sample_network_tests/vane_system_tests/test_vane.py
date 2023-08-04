@@ -287,3 +287,8 @@ class VaneTests:
         tops.test_result = tops.actual_output == tops.expected_output
         tops.generate_report(tops.dut_name, tops.output_msg)
         assert tops.actual_output == tops.expected_output
+
+    def test_if_setup_fail_is_handled(self):
+        """TD: Verifies if invalid cmd in setup is handled properly"""
+
+        """ This function is never called since the setup fails"""

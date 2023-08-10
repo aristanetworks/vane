@@ -956,7 +956,12 @@ class TestOps:
             self.show_clock_flag = False
 
         self.show_cmds = {self.dut_name: []}
+<<<<<<< HEAD
         self._show_cmds = {self.dut_name: []}
+=======
+        self._show_cmds = {self.dut_name: ["show version"]}
+        self._cfg_cmds = {self.dut_name: []}
+>>>>>>> aafa9d7 (Issue #381: Unit testing and fixing for review comments)
 
         if self.show_clock_flag:
             self._show_cmds[self.dut_name].append("show clock")
@@ -1037,37 +1042,27 @@ class TestOps:
 
     def _write_text_results(self):
         """Write the text output of show command to a text file"""
+
+        self._write_evidence(self._show_cmds, self._show_cmd_txts, "Verification")
+        self._write_evidence(self._cfg_cmds, self._cfg_cmd_txts, "Configuration")
+
+    def _write_evidence(self, cmds, cmds_outputs, file_substring):
+        """Write the cmds and their outputs to the file"""
+
         report_dir = self.report_dir
         test_id = self.test_parameters["test_id"]
         test_case = self.test_parameters["name"]
 
-        for dut_name, _show_cmds in self._show_cmds.items():
+        # write evidence for cmds if any
+        for dut_name, dut_cmds in cmds.items():
             text_file = (
                 f"{report_dir}/TEST RESULTS/{test_id} {test_case}/"
-                f"{test_id} {dut_name} Verification.txt"
+                f"{test_id} {dut_name} {file_substring}.txt"
             )
             text_data = {}
             index = 1
 
-            for command, text in zip(_show_cmds, self._show_cmd_txts[dut_name]):
-                text_data[str(index) + ". " + dut_name + "# " + command] = "\n\n" + text
-                index += 1
-
-            if text_data:
-                export_text(text_file, text_data, self.dut_name)
-            else:
-                logging.debug("No show command output to display")
-
-        # write evidence for cfg cmds if any
-        for dut_name, _cfg_cmds in self._cfg_cmds.items():
-            text_file = (
-                f"{report_dir}/TEST RESULTS/{test_id} {test_case}/"
-                f"{test_id} {dut_name} Configuration.txt"
-            )
-            text_data = {}
-            index = 1
-
-            for command, text in zip(_cfg_cmds, self._cfg_cmd_txts[dut_name]):
+            for command, text in zip(dut_cmds, cmds_outputs[dut_name]):
                 text_data[str(index) + ". " + dut_name + "# " + command] = "\n\n" + text
                 index += 1
 
@@ -1291,68 +1286,16 @@ class TestOps:
 
         Returns: A dict object that includes the response for each command
         """
-        if dut is None:
-            dut = self.dut
 
-        if timeout == 0:
-            if conn_type == "eapi":
-                conn = dut["eapi_conn"]
-            elif conn_type == "ssh":
-                conn = dut["ssh_conn"]
-            else:
-                raise ValueError(f"conn_type [{conn_type}] not supported")
-        elif timeout > 0 or new_conn:
-            conn = self.get_new_conn(dut, conn_type, timeout)
-
-        dut_name = dut["name"]
-
-        # initializing evidence values for other duts since
-        # init only initializes for primary dut
-
-        self.set_evidence_default(dut_name)
-
-        # first run show clock if flag is set
-        if self.show_clock_flag:
-            show_clock_cmds = ["show clock"]
-            # run the show_clock_cmds
-            try:
-                show_clock_op = conn.enable(show_clock_cmds, "text")
-            except BaseException as e:
-                # add the show clock cmd to _cfg_cmds
-                logging.error(
-                    f"show clock cmds {show_clock_cmds} for cfg cmds generated exception {str(e)}"
-                )
-                self._cfg_cmds[dut_name] = show_clock_cmds
-                # add the exception result to _cfg_cmd_txts
-                self._cfg_cmd_txts[dut_name].append(str(e))
-                raise e
-
-            # add the show_clock_cmds to TestOps object's _cfg_cmds list
-            # also add the o/p of show_clock_cmds to TestOps object's _cfg_cmds_txts list
-            for result_dict in show_clock_op:
-                self._cfg_cmds[dut_name].append(result_dict["command"])
-                self._cfg_cmd_txts[dut_name].append(result_dict["result"]["output"])
-
-        try:
-            # run the commands
-            results = conn.config(cfg_cmds)
-        except BaseException as e:
-            logging.error(f"config cmds {cfg_cmds} generated exception {str(e)}")
-            # add the cfg_cmds to TestOps object's _cfg_cmds list
-            # add the exception result to all the cfg cmds in cfg_cmds list
-            for cmd in cfg_cmds:
-                self._cfg_cmds[dut_name].append(cmd)
-                self._cfg_cmd_txts[dut_name].append(str(e))
-            raise e
-
-        # add the cfg_cmds to TestOps object's cfg_cmds and _cfg_cmds list
-        # also add the o/p of cfg_cmds to TestOps object's cfg_cmds_txts and
-        # _cfg_cmds_txts list
-        for cmd in cfg_cmds:
-            self._cfg_cmds[dut_name].append(cmd)
-            self._cfg_cmd_txts[dut_name].append("")
-
-        return results
+        return self._run_and_record_cmds(
+            encoding="text",
+            cmd_type="cfg",
+            cmds=cfg_cmds,
+            dut=dut,
+            conn_type=conn_type,
+            timeout=timeout,
+            new_conn=new_conn,
+        )
 
     def run_show_cmds(
         self, show_cmds, dut=None, encoding="json", conn_type="eapi", timeout=0, new_conn=False
@@ -1381,10 +1324,40 @@ class TestOps:
         with the encoding
         """
 
+        return self._run_and_record_cmds(
+            encoding=encoding,
+            cmd_type="show",
+            cmds=show_cmds,
+            dut=dut,
+            conn_type=conn_type,
+            timeout=timeout,
+            new_conn=new_conn,
+        )
+
+    def _run_and_record_cmds(
+        self, cmds, conn_type, timeout, new_conn, encoding="json", cmd_type="show", dut=None
+    ):
+        """_run_and_record_cmds runs both config and show cmds and records the output
+        of these commands
+        Args:
+        cmds: list of cfg/show cmds to run
+        conn_type: eapi or ssh
+        timeout: timeout to be used for connection to DUT, if non-zero timeout is specified
+                 then a new connection is created
+        new_conn: whether or not to create a new connection to DUT
+        encoding: json or text, with json being default
+        cmd_type: type of cmd to run - "show" or "cfg" with "show" being default
+        dut: the device to run the cmds on
+
+        Returns: A dict object that includes the response for each command
+        """
+
+        # if dut is not passed, use this object's dut
         if dut is None:
             dut = self.dut
 
         if timeout == 0:
+            # if timeout is zero, then use existing connections
             if conn_type == "eapi":
                 conn = dut["eapi_conn"]
             elif conn_type == "ssh":
@@ -1392,6 +1365,8 @@ class TestOps:
             else:
                 raise ValueError(f"conn_type [{conn_type}] not supported")
         elif timeout > 0 or new_conn:
+            # if timeout is non-zero or user wants a new connection
+            # get the new connection
             conn = self.get_new_conn(dut, conn_type, timeout)
 
         dut_name = dut["name"]
@@ -1401,6 +1376,17 @@ class TestOps:
 
         self.set_evidence_default(dut_name)
 
+        # depending on type of cmd_type set the local variables
+        # to point to right class members
+        if cmd_type == "show":
+            int_cmds_list = self._show_cmds[dut_name]
+            ext_cmd_txts = self.show_cmd_txts[dut_name]
+            int_cmd_txts = self._show_cmd_txts[dut_name]
+        else:
+            int_cmds_list = self._cfg_cmds[dut_name]
+            int_cmd_txts = self._cfg_cmd_txts[dut_name]
+            ext_cmd_txts = None
+
         # first run show clock if flag is set
         if self.show_clock_flag:
             show_clock_cmds = ["show clock"]
@@ -1408,41 +1394,61 @@ class TestOps:
             try:
                 show_clock_op = conn.enable(show_clock_cmds, "text")
             except BaseException as e:
-                # add the show clock cmd to _show_cmds
-                self._show_cmds[dut_name] = self._show_cmds[dut_name] + show_clock_cmds
-                # add the exception result to _show_cmds_txts
-                self._show_cmd_txts[dut_name].append(str(e))
+                # add the show clock cmd to internal evidence cmds list
+                for cmd in show_clock_cmds:
+                    int_cmds_list.append(cmd)
+                # add the exception result to internal evidence output list
+                int_cmd_txts.append(str(e))
+                # add the exception result to external evidence output list
+                if ext_cmd_txts is not None:
+                    ext_cmd_txts.append(e)
                 raise e
 
-            # add the show_clock_cmds to TestOps object's _show_cmds list
-            # also add the o/p of show_clock_cmds to TestOps object's _show_cmds_txts list
+            # add the show_clock_cmds to internal cmds list
+            # also add the o/p of show_clock_cmds to external cmd output list
             for result_dict in show_clock_op:
-                self._show_cmds[dut_name].append(result_dict["command"])
-                self._show_cmd_txts[dut_name].append(result_dict["result"]["output"])
+                int_cmds_list.append(result_dict["command"])
+                int_cmd_txts.append(result_dict["result"]["output"])
 
         # then run commands
         try:
-            # if encoding is json run the commands, store the results
-            if encoding == "json":
-                json_results = conn.enable(show_cmds)
-            # also run the commands in text mode
-            txt_results = conn.enable(show_cmds, encoding="text")
+            if cmd_type == "show":
+                # if encoding is json run the commands, store the results
+                if encoding == "json":
+                    json_results = conn.enable(cmds)
+                # also run the commands in text mode
+                txt_results = conn.enable(cmds, encoding="text")
+            else:
+                # run the config cmd
+                txt_results = conn.config(cmds)
         except BaseException as e:
-            # add the show_cmds to TestOps object's _show_cmds list
-            # add the exception result to all the show cmds in show_cmds list
-            for cmd in show_cmds:
-                self._show_cmds[dut_name].append(cmd)
-                self._show_cmd_txts[dut_name].append(str(e))
+            logging.error(f"Following cmds {cmds} generated exception {str(e)}")
+            # add the cmds to internal cmds list
+            # add the exception result for all the cmds in cmds list
+            for cmd in cmds:
+                int_cmds_list.append(cmd)
+                int_cmd_txts.append(str(e))
+                if ext_cmd_txts is not None:
+                    ext_cmd_txts.append(e)
+
             raise e
 
-        # add the show_cmds to TestOps object's show_cmds and _show_cmds list
-        # also add the o/p of show_cmds to TestOps object's show_cmds_txts and
-        # _show_cmds_txts list
-        for result_dict in txt_results:
-            self._show_cmds[dut_name].append(result_dict["command"])
-            self.show_cmd_txts[dut_name].append(result_dict["result"]["output"])
-            self._show_cmd_txts[dut_name].append(result_dict["result"]["output"])
-        if encoding == "text":
-            return txt_results
+        # add the cmds to internal cmds list
+        for cmd in cmds:
+            int_cmds_list.append(cmd)
 
-        return json_results
+        # also add the text o/p of cmds to internal and external cmd output list
+        if cmd_type == "cfg" and conn_type == "ssh":
+            for cmd in cmds:
+                int_cmd_txts.append(txt_results)
+        else:
+            for result_dict in txt_results:
+                result = result_dict.get("result", {"output": ""})
+                int_cmd_txts.append(result["output"])
+                if ext_cmd_txts is not None:
+                    ext_cmd_txts.append(result["output"])
+
+        if cmd_type == "show" and encoding == "json":
+            return json_results
+
+        return txt_results

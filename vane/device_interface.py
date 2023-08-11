@@ -118,6 +118,9 @@ class DeviceConn:
         """Configures the node with the specified commands"""
         pass
 
+    def transfer_file(self, dut=None, src_file, dest_file, operation, sftp=False);
+        """Transfer the file to/from the dut"""
+        pass
 
 class PyeapiConn(DeviceConn):
     """PyeapiConn connects to Arista devices using PyEAPI"""
@@ -161,6 +164,9 @@ class PyeapiConn(DeviceConn):
         output = self._connection.config(commands, **kwargs)
         return output
 
+    def transfer_file(self, dut=None, src_file, dest_file, operation, sftp=False);
+        """Transfer the file to/from the dut"""
+        raise NotImplementedError("PyeapiConn does not implement transfer_file()")
 
 class NetmikoConn(DeviceConn):
     """NetmikoConn connects to Arista devices using ssh conn"""
@@ -188,7 +194,7 @@ class NetmikoConn(DeviceConn):
             "username": device_data["username"],
             "password": device_data["password"],
             "secret": device_data.get("enable_pwd", ""),
-            "session_log": logfile,
+            "session_log": device_data.get("session_log", logfile),
             "read_timeout_override": device_data.get("timeout", None),
         }
         if remote_device["device_type"] == "autodetect":

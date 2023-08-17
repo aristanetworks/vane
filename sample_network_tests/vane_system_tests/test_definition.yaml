@@ -64,3 +64,15 @@
       expected_output: null
       report_style: modern
       test_criteria: Verify eapi conn run_cfg_cmds func
+    - name: test_file_transfer
+      description: Verify file transfer ssh functionality
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify file transfer ssh func
+    - name: test_file_transfer_using_sftp
+      description: Verify file transfer sftp functionality
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify file transfer sftp func

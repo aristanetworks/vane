@@ -32,6 +32,7 @@
 """ Tests to validate vane functionality."""
 
 import pprint
+import time
 import pytest
 from pyeapi.eapilib import EapiError
 from vane import tests_tools
@@ -434,3 +435,95 @@ class VaneTests:
         tops.test_result = tops.expected_output in tops.actual_output[0]["result"]["output"]
         tops.generate_report(tops.dut_name, tops.output_msg)
         assert tops.expected_output in tops.actual_output[0]["result"]["output"]
+
+    def test_file_transfer(self, dut, tests_definitions):
+        """TD: Verifies transfer_file() ssh functionality
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            """
+            TS: Transfer file named "sample.txt"
+            """
+            src_file = "sample_network_tests/vane_system_tests/sample.txt"
+            timestr = time.strftime("%Y%m%d-%H%M%S")
+            dest_file = f"sample-{timestr}.txt"
+
+            file_system = "/mnt/flash"
+            operation = "put"
+            tops.expected_output = {
+                "file_exists": True,
+                "file_transferred": True,
+                "file_verified": True,
+            }
+            tops.actual_output = tops.transfer_file(
+                src_file=src_file, dest_file=dest_file, file_system=file_system, operation=operation
+            )
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if ssh can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_file_transfer)
+        tops.test_result = tops.expected_output == tops.actual_output
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.expected_output == tops.actual_output
+
+    def test_file_transfer_using_sftp(self, dut, tests_definitions):
+        """TD: Verifies transfer_file() sftp functionality
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            """
+            TS: Transfer file named "sample-sftp.txt"
+            """
+            src_file = "sample_network_tests/vane_system_tests/sample-sftp.txt"
+            timestr = time.strftime("%Y%m%d-%H%M%S")
+            dest_file = f"sample-{timestr}.txt"
+
+            file_system = "/mnt/flash"
+            operation = "put"
+            tops.expected_output = {
+                "file_exists": True,
+                "file_transferred": True,
+                "file_verified": True,
+            }
+            tops.actual_output = tops.transfer_file(
+                src_file=src_file,
+                dest_file=dest_file,
+                file_system=file_system,
+                operation=operation,
+                sftp=True,
+            )
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if ssh can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_file_transfer_using_sftp)
+        tops.test_result = tops.expected_output == tops.actual_output
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.expected_output == tops.actual_output

@@ -39,6 +39,7 @@ import os
 import inspect
 import re
 import pprint
+import time
 import yaml
 
 from jinja2 import Template
@@ -1251,6 +1252,8 @@ class TestOps:
         device_data["enable_pwd"] = dut.get("enable_pwd", "")
         device_data["timeout"] = timeout
         device_data["name"] = dut["name"]
+        if dut.get("session_log"):
+            device_data["session_log"] = dut["session_log"]
         if conn_type == "eapi":
             logging.info(f"Creating new eapi connection to {dut['name']}")
             pyeapi_conn = device_interface.PyeapiConn()
@@ -1448,14 +1451,14 @@ class TestOps:
 
         return txt_results
 
-    def transfer_file(self, dut=None, src_file, dest_file, operation, sftp=False):
-        """ 
-        transfer_file will transfer filename to/from the the dut depending 
-        on the operation mentioned. 
+    def transfer_file(self, src_file, dest_file, file_system, operation, dut=None, sftp=False):
+        """
+        transfer_file will transfer filename to/from the the dut depending
+        on the operation mentioned.
 
         dut: device to/from which file needs to be transferred
         src_file: full filename of src file
-        dest_file: full filename of dest file 
+        dest_file: full filename of dest file
         operation: 'get' or 'put'
         sftp: whether to use sftp transport or not
         """
@@ -1463,11 +1466,15 @@ class TestOps:
         if dut is None:
             dut = self.dut
 
-        if direction != "get" || direction != "put":
-            raise ValueError(f"direction [{direction}] not supported")
+        dut_name = dut["name"]
+
+        if operation not in ("get", "put"):
+            raise ValueError(f"operation [{operation}] not supported")
 
         new_dut = dut.copy()
-        session_log = f"file_transfer_{new_dut['name']}-{time.strftime('%Y%m%d-%H%M%S')}" 
+        session_log = (
+            f"netmiko-logs/file_transfer_{new_dut['name']}-{time.strftime('%Y%m%d-%H%M%S')}.log"
+        )
         new_dut["session_log"] = session_log
         conn = self.get_new_conn(new_dut, conn_type="ssh", timeout=60)
 
@@ -1479,17 +1486,26 @@ class TestOps:
                 show_clock_op = conn.enable(show_clock_cmds, "text")
             except BaseException as e:
                 # add the show clock cmd to _show_cmds
-                self._show_cmds[dut_name] = self._show_cmds[dut_name] + show_clock_cmds
-                # add the exception result to _show_cmds_txts
-                self._show_cmd_txts[dut_name].append(str(e))
+                for cmd in show_clock_cmds:
+                    self._show_cmds[dut_name].append(cmd)
+                    # add the exception result to _show_cmds_txts
+                    self._show_cmd_txts[dut_name].append(str(e))
                 raise e
 
+            # add the show_clock_cmds to internal cmds list
+            # also add the o/p of show_clock_cmds to external cmd output list
+            for result_dict in show_clock_op:
+                self._show_cmds[dut_name].append(result_dict["command"])
+                self._show_cmd_txts[dut_name].append(result_dict["result"]["output"])
+
         # form request for evidence gathering
-        transfer_request = f"src_file: {src_file} dest_file: {dest_file} op: {operation} sftp: {sftp}"
- 
+        transfer_request = (
+            f"src_file: {src_file} dest_file: {dest_file} op: {operation} sftp: {sftp}"
+        )
+
         # transfer file
         try:
-            conn.file_transfer(src_file, dest_file, operation, sftp)
+            result = conn.transfer_file(src_file, dest_file, file_system, operation, sftp)
         except BaseException as e:
             self._show_cmds[new_dut["name"]].append(transfer_request)
             self._show_cmd_txts[new_dut["name"]].append(str(e))
@@ -1498,5 +1514,13 @@ class TestOps:
         self._show_cmds[new_dut["name"]].append(transfer_request)
         # open session log and copy over the evidence
         # hide the username from the evidence collection
-        with open(session_log, 'r') as file:
-            self._show_cmd_txts[new_dut["name"]].append(file.read().replace(new_dut["username"], "XXXXX"))
+        with open(session_log, "r", encoding="utf-8") as file:
+            self._show_cmd_txts[new_dut["name"]].append(
+                file.read().replace(new_dut["username"], "XXXXX")
+            )
+
+        try:
+            os.remove(session_log)
+        except OSError:
+            pass
+        return result

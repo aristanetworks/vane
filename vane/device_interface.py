@@ -38,8 +38,9 @@ import os
 import json
 import pyeapi
 import netmiko
+import paramiko
 from netmiko.ssh_autodetect import SSHDetect
-from netmiko import Netmiko
+from netmiko import Netmiko, file_transfer
 from vane.utils import make_iterable
 
 
@@ -118,9 +119,10 @@ class DeviceConn:
         """Configures the node with the specified commands"""
         pass
 
-    def transfer_file(self, dut=None, src_file, dest_file, operation, sftp=False);
+    def transfer_file(self, src_file, dest_file, file_system, operation, sftp=False):
         """Transfer the file to/from the dut"""
         pass
+
 
 class PyeapiConn(DeviceConn):
     """PyeapiConn connects to Arista devices using PyEAPI"""
@@ -164,9 +166,10 @@ class PyeapiConn(DeviceConn):
         output = self._connection.config(commands, **kwargs)
         return output
 
-    def transfer_file(self, dut=None, src_file, dest_file, operation, sftp=False);
+    def transfer_file(self, src_file, dest_file, file_system, operation, sftp=False):
         """Transfer the file to/from the dut"""
         raise NotImplementedError("PyeapiConn does not implement transfer_file()")
+
 
 class NetmikoConn(DeviceConn):
     """NetmikoConn connects to Arista devices using ssh conn"""
@@ -368,3 +371,22 @@ class NetmikoConn(DeviceConn):
         response = self._connection.send_config_set(commands)
 
         return response
+
+    def transfer_file(self, src_file, dest_file, file_system, operation, sftp=False):
+        """Transfer the file to/from the dut"""
+
+        if sftp:
+            transport = self._connection.remote_conn.get_transport()
+            self._connection.remote_conn = paramiko.SFTPClient.from_transport(transport)
+
+        self._connection.enable()
+        transfer = file_transfer(
+            self._connection,
+            source_file=src_file,
+            dest_file=dest_file,
+            file_system=file_system,
+            direction=operation,
+            overwrite_file=True,
+        )
+
+        return transfer

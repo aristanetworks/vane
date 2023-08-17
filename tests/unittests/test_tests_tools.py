@@ -1619,3 +1619,137 @@ def test_test_ops_run_cfg_cmds_ssh(mocker):
             config_return_value,
         ],
     }
+
+
+def test_test_ops_transfer_file(mocker):
+    """Validates the functionality of transfer_file method"""
+    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+
+    mocker.patch(
+        "vane.device_interface.NetmikoConn.set_up_conn",
+        return_value=vane.device_interface.NetmikoConn,
+    )
+    mocker_object = mocker.patch("vane.device_interface.NetmikoConn.enable")
+    mocker_object.side_effect = [
+        [
+            {
+                "command": "show clock",
+                "result": {
+                    "output": "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n"
+                },
+                "encoding": "text",
+            }
+        ],
+    ]
+
+    transfer_file_return = {
+        "file_exists": True,
+        "file_transferred": True,
+        "file_verified": True,
+    }
+    mocker.patch(
+        "vane.device_interface.NetmikoConn.transfer_file", return_value=transfer_file_return
+    )
+
+    tops = create_test_ops_instance(mocker)
+    my_text = """Last login: Wed Aug 16 20:51:31 2023 from 10.8.0.14
+
+
+DSR01#
+DSR01#terminal width 511
+Width set to 511 columns.
+DSR01#terminal length 0
+Pagination disabled.
+DSR01#
+DSR01#
+DSR01#bash
+
+Arista Networks EOS shell
+
+[user1@DSR01 ~]$ /bin/ls /mnt/flash/sample-20230816-145133.txt 2> /dev/null
+[user1@DSR01 ~]$ exit
+logout
+DSR01#bash
+
+Arista Networks EOS shell
+
+[user1@DSR01 ~]$ /bin/df -k /mnt/flash
+Filesystem     1K-blocks    Used Available Use% Mounted on
+/dev/nvme0n1p1   8124856 1146708   6961764  15% /mnt/flash
+[user1@DSR01 ~]$ exit
+logout
+DSR01#
+DSR01#verify /md5 file:/mnt/flash/sample-20230816-145133.txt
+verify /md5 (file:/mnt/flash/sample-20230816-145133.txt) = 3c5fd98f35b7e6b24a07cf3fc3220352
+DSR01#"""
+    mocked_file_data = mocker.mock_open(read_data=my_text)
+    mocker.patch("builtins.open", mocked_file_data)
+    mocker.patch("os.remove")
+
+    dut = {
+        "connection": vane.device_interface.NetmikoConn,
+        "name": "neighbor",
+        "transport": "https",
+        "mgmt_ip": "1.1.1.1",
+        "username": "user1",
+        "password": "pass1",
+    }
+    tops.dut = dut
+    tops._show_cmds["neighbor"] = []
+    tops._show_cmd_txts["neighbor"] = []
+    tops.show_clock_flag = True
+
+    actual_output = tops.transfer_file(
+        src_file="sample.txt",
+        dest_file="sample-20230816-145133.txt",
+        file_system="/mnt/flash",
+        operation="get",
+        sftp=True,
+    )
+
+    # assert return values
+    assert actual_output == {
+        "file_exists": True,
+        "file_transferred": True,
+        "file_verified": True,
+    }
+    assert tops._show_cmds == {
+        "DCBBW1": ["show version", "show version"],
+        "neighbor": [
+            "show clock",
+            "sftp src_file: sample.txt dest_file: sample-20230816-145133.txt op: get",
+        ],
+    }
+
+    assert tops._show_cmd_txts == {
+        "DCBBW1": [
+            "Arista vEOS-lab\nHardware version: \nSerial number: SN-DCBBW1\n"
+            "Hardware MAC address: a486.49d7.e2d9\nSystem MAC address: "
+            "a486.49d7.e2d9\n\nSoftware image version: 4.27.2F\nArchitecture: "
+            "x86_64\nInternal build version: 4.27.2F-26069621.4272F\nInternal "
+            "build ID: 2fd003fd-04c4-4b44-9c26-417e6ca42009\nImage format version: "
+            "1.0\nImage optimization: None\n\nUptime: 3 days, 4 hours and 56 "
+            "minutes\nTotal memory: 3938900 kB\nFree memory: 2755560 kB\n\n",
+            "Arista vEOS-lab\nHardware version: \nSerial number: SN-DCBBW1\nHardware "
+            "MAC address: a486.49d7.e2d9\nSystem MAC address: a486.49d7.e2d9\n\n"
+            "Software image version: 4.27.2F\nArchitecture: x86_64\nInternal build "
+            "version: 4.27.2F-26069621.4272F\nInternal build ID: 2fd003fd-04c4-4b44-"
+            "9c26-417e6ca42009\nImage format version: 1.0\nImage optimization: None\n\n"
+            "Uptime: 3 days, 4 hours and 56 minutes\nTotal memory: 3938900 kB\n"
+            "Free memory: 2755560 kB\n\n",
+        ],
+        "neighbor": [
+            "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n",
+            "Last login: Wed Aug 16 20:51:31 2023 from 10.8.0.14\n\n\nDSR01#\nDSR01"
+            "#terminal width 511\nWidth set to 511 columns.\nDSR01#terminal length 0"
+            "\nPagination disabled.\nDSR01#\nDSR01#\nDSR01#bash\n\nArista Networks "
+            "EOS shell\n\n[XXXXX@DSR01 ~]$ /bin/ls /mnt/flash/sample-20230816-145133"
+            ".txt 2> /dev/null\n[XXXXX@DSR01 ~]$ exit\nlogout\nDSR01#bash\n\nArista "
+            "Networks EOS shell\n\n[XXXXX@DSR01 ~]$ /bin/df -k /mnt/flash\nFilesystem     "
+            "1K-blocks    Used Available Use% Mounted on\n/dev/nvme0n1p1   "
+            "8124856 1146708   6961764  15% /mnt/flash\n[XXXXX@DSR01 ~]$ exit\nlogout"
+            "\nDSR01#\nDSR01#verify /md5 file:/mnt/flash/sample-20230816-145133.txt\nverify "
+            "/md5 (file:/mnt/flash/sample-20230816-145133.txt) = 3c5fd98f35b7e6b24a07c"
+            "f3fc3220352\nDSR01#",
+        ],
+    }

@@ -1498,10 +1498,13 @@ class TestOps:
                 self._show_cmds[dut_name].append(result_dict["command"])
                 self._show_cmd_txts[dut_name].append(result_dict["result"]["output"])
 
+        if sftp:
+            cmd_str = "sftp"
+        else:
+            cmd_str = "scp"
+
         # form request for evidence gathering
-        transfer_request = (
-            f"src_file: {src_file} dest_file: {dest_file} op: {operation} sftp: {sftp}"
-        )
+        transfer_request = f"{cmd_str} src_file: {src_file} dest_file: {dest_file} op: {operation}"
 
         # transfer file
         try:

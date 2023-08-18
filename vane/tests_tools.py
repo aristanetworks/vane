@@ -958,6 +958,7 @@ class TestOps:
 
         self.show_cmds = {self.dut_name: []}
         self._show_cmds = {self.dut_name: []}
+        self._cfg_cmds = {self.dut_name: []}
 
         if self.show_clock_flag:
             self._show_cmds[self.dut_name].append("show clock")

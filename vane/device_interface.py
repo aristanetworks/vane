@@ -197,8 +197,8 @@ class NetmikoConn(DeviceConn):
             "username": device_data["username"],
             "password": device_data["password"],
             "secret": device_data.get("enable_pwd", ""),
-            "read_timeout_override": device_data.get("timeout", None),
             "session_log": device_data.get("session_log", logfile),
+            "read_timeout_override": device_data.get("timeout", None),
         }
         if remote_device["device_type"] == "autodetect":
             guesser = SSHDetect(**remote_device)

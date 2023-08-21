@@ -7,3 +7,9 @@
         - admin
       show_cmd: show running-config section username
       expected_output: True
+      report_style: modern
+      test_criteria: Verify username is set correctly
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1

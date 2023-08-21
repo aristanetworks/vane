@@ -43,12 +43,10 @@
     - Excel report: Tabular representation of results. """
 
 import os
-import stat
 import sys
 import shutil
 
 import configparser
-import jinja2
 import pytest
 import yaml
 
@@ -81,7 +79,7 @@ class TestsClient:
         self.data_model = tests_tools.import_yaml(test_definition)
         self.duts_model = tests_tools.import_yaml(test_duts)
 
-        logging.info(f"Internal test data-model initialized with value: {self.data_model}")
+        logging.debug(f"Internal test data-model initialized with value: {self.data_model}")
         self.test_parameters = []
 
     def write_test_def_file(
@@ -119,7 +117,7 @@ class TestsClient:
                         new_file = os.path.join(root, test_definitions)
                         with open(new_file, "w", encoding="utf-8") as outfile:
                             yaml.safe_dump(yaml_new, outfile, sort_keys=False)
-                        logging.info("Regenerared test definition files")
+                        logging.info("Regenerated test definition files")
 
     def generate_test_definitions(self):
         """
@@ -146,14 +144,13 @@ class TestsClient:
                         test_dir=test_dir,
                         test_definitions=test_definitions,
                     )
-        except OSError:
+        except (OSError, KeyError):
             print("Unable to regenerate test definition files.")
 
     def setup_test_runner(self):
-        """Setup eapi cfg, remove result files, set test params"""
+        """Setup remove result files, set test params"""
 
         logging.info("Starting test setup")
-        self._render_eapi_cfg()
         self._remove_result_files()
         self._remove_test_results_dir()
         self._set_test_parameters()
@@ -198,27 +195,35 @@ class TestsClient:
         """Set verbosity for test run"""
 
         verbose = self.data_model["parameters"]["verbose"]
+        logging.info(f"Setting PyTest parameter verbosity (extension: -v) to {verbose}")
         self._set_cmdline_no_input(verbose, "-v")
 
     def _set_stdout(self):
         """Set stdout for test run"""
 
         stdout = self.data_model["parameters"]["stdout"]
+        logging.info(f"Setting PyTest parameter standard out (extension: -s) to {stdout}")
         self._set_cmdline_no_input(stdout, "-s")
 
     def _set_setup_show(self):
         """Set setup-show for test run"""
 
         setup_show = self.data_model["parameters"]["setup_show"]
+        logging.info(
+            f"Setting PyTest parameter setup show (extension: --setup-show) to {setup_show}"
+        )
         self._set_cmdline_no_input(setup_show, "--setup-show")
 
     def _set_cmdline_no_input(self, parameter, ext):
-        """Set parameters for test run"""
+        """Set parameters for test run
+
+        Args:
+          parameter (bool): Enable/disable pytest parameter
+          ext(str): PyTest command line extension
+        """
         if parameter and ext not in self.test_parameters:
-            logging.info(f"Enable pytest output {parameter}")
             self.test_parameters.append(ext)
         if not parameter and ext in self.test_parameters:
-            logging.info(f"Remove and disable pytest output {parameter}")
             parameter_index = self.test_parameters.index(ext)
             self.test_parameters.pop(parameter_index)
         else:
@@ -227,7 +232,7 @@ class TestsClient:
     def _set_test_cases(self):
         """Set test cases for test run"""
 
-        test_cases = self.data_model["parameters"]["test_cases"]
+        test_cases = self.data_model["parameters"].get("test_cases")
 
         logging.info(f"Run the following tests: {test_cases}")
         if test_cases == "All":
@@ -240,7 +245,7 @@ class TestsClient:
     def _set_html_report(self):
         """Set html_report for test run"""
 
-        html_report = self.data_model["parameters"]["html_report"]
+        html_report = self.data_model["parameters"].get("html_report")
         html_name = f"--html={html_report}.html"
         list_out = [x for x in self.test_parameters if "--html" in x]
 
@@ -257,15 +262,19 @@ class TestsClient:
     def _set_excel_report(self, report_dir):
         """Set excel_report for test run"""
 
-        excel_report = self.data_model["parameters"]["excel_report"]
+        excel_report = self.data_model["parameters"].get("excel_report")
         excel_name = f"--excelreport={report_dir}/{excel_report}.xlsx"
+        logging.info(
+            f"Setting PyTest parameter Excel report (extension: --excelreport)to {excel_report}"
+        )
         self._set_cmdline_report(excel_report, excel_name, "--excelreport")
 
     def _set_json_report(self):
         """Set json_report for test run"""
 
-        json_report = self.data_model["parameters"]["json_report"]
+        json_report = self.data_model["parameters"].get("json_report")
         json_name = f"--json={json_report}.json"
+        logging.info(f"Setting PyTest parameter JSON report (extension: --json) to {json_report}")
         self._set_cmdline_report(json_report, json_name, "--json")
 
     def _set_cmdline_report(self, parameter, report, ext):
@@ -285,6 +294,7 @@ class TestsClient:
     def _set_processes(self):
         """Set processes for test run"""
         processes = self.data_model["parameters"]["processes"]
+        logging.info(f"Setting PyTest parameter processes (extension: -n) to {processes}")
         self._set_cmdline_input(processes, "-n")
 
     def _get_markers(self):
@@ -301,6 +311,7 @@ class TestsClient:
         if mark and mark not in self._get_markers():
             print(f"Marker {mark} is not supported. Update marker parameter in definition file")
             sys.exit(0)
+        logging.info(f"Setting PyTest parameter marker (extension: -m) to {mark}")
         self._set_cmdline_input(mark, "-m")
 
     def _set_junit(self, report_dir):
@@ -317,20 +328,16 @@ class TestsClient:
         list_out = [x for x in self.test_parameters if ext in x]
 
         if parameter and len(list_out) == 0:
-            logging.info(f"Set PyTest {ext} to: {parameter}")
             self.test_parameters.append(f"{ext} {parameter}")
         elif parameter and len(list_out) > 0:
             for list_item in list_out:
                 parameter_index = self.test_parameters.index(list_item)
                 self.test_parameters.pop(parameter_index)
-            logging.info(f"Set PyTest {ext} to: {parameter}")
             self.test_parameters.append(f"{ext} {parameter}")
         elif not parameter and len(list_out) > 0:
             for list_item in list_out:
                 parameter_index = self.test_parameters.index(list_item)
                 self.test_parameters.pop(parameter_index)
-        else:
-            logging.info(f"Not Setting PyTest {ext}")
 
     def _set_test_parameters(self):
         """Use data-model to create test parameters"""
@@ -353,61 +360,6 @@ class TestsClient:
         self._set_junit(report_dir)
         self._set_test_dirs(test_dirs)
 
-    def _render_eapi_cfg(self):
-        """Render .eapi.conf file so pytests can log into devices"""
-
-        logging.info("Render .eapi.conf file for device access")
-        eapi_template = self.data_model["parameters"]["eapi_template"]
-        eapi_file = self.data_model["parameters"]["eapi_file"]
-        duts = self.duts_model["duts"]
-
-        try:
-            logging.info(f"Open {eapi_template} Jinja2 template for reading")
-
-            with open(eapi_template, "r", encoding="utf-8") as jinja_file:
-                logging.info(f"Read and save contents of {eapi_template} Jinja2 template")
-                jinja_template = jinja_file.read()
-                logging.info(
-                    f"Using {eapi_template} Jinja2 template to "
-                    f"render {eapi_file} file with parameters {duts}"
-                )
-                resource_file = (
-                    jinja2.Environment(autoescape=True)
-                    .from_string(jinja_template)
-                    .render(duts=duts)
-                )
-        except IOError as err_data:
-            print(f">>> ERROR READING {eapi_template}: {err_data}")
-            logging.error(f"ERROR READING {eapi_template}: {err_data}")
-            logging.error("EXITING TEST RUNNER")
-            sys.exit(1)
-
-        self._write_file(resource_file)
-
-    def _write_file(self, file_data):
-        """Write data to a file
-
-        Args:
-            file_data (str): Data to write to file
-        """
-
-        eapi_file = self.data_model["parameters"]["eapi_file"]
-
-        logging.info(f"Rendered {eapi_file} as: {file_data}")
-        try:
-            logging.info(f"Open {eapi_file} for writing")
-
-            with open(eapi_file, "w", encoding="utf-8") as output_file:
-                output_file.write(file_data)
-        except (IOError, FileNotFoundError) as err_data:
-            print(f">>> ERROR WRITING {eapi_file}: {err_data}")
-            logging.error(f"ERROR WRITING {eapi_file}: {err_data}")
-            logging.error("EXITING TEST RUNNER")
-            sys.exit(1)
-
-        logging.info(f"Change permissions of {eapi_file} to 777")
-        os.chmod(eapi_file, stat.S_IRWXU)
-
     def _remove_result_files(self):
         """Remove pre-existing results file"""
 
@@ -418,7 +370,7 @@ class TestsClient:
             os.makedirs(results_dir)
 
         results_files = os.listdir(results_dir)
-        logging.info(f"Result files are {results_files}")
+        logging.debug(f"Result files are {results_files}")
 
         for name in results_files:
             if "result-" in name:

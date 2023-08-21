@@ -1,0 +1,23 @@
+key: role
+host1:
+  schema:
+  template: |
+   interface Ethernet3
+   no switchport
+   vrf DVT-2
+   ip address 192.168.2.4/31
+   ip route vrf DVT-2 0.0.0.0/0 192.168.2.0
+host2:
+  schema:
+  template: |
+   interface Ethernet13
+   no switchport
+   ip address 192.168.2.5/31
+host3:
+  schema:
+  template: |
+   interface Ethernet7
+   no switchport
+   vrf DVT-2
+   ip address 192.168.2.6/31
+   ip route vrf DVT-2 0.0.0.0/0 192.168.2.0

@@ -110,7 +110,7 @@ REPORT_TEMPLATES = {
         },
         "configuration": {
             "required": False,
-            "format": "config_list",
+            "format": "config_string",
             "default": ["Network configuration is unchanged"],
         },
         "test_steps": {
@@ -119,10 +119,10 @@ REPORT_TEMPLATES = {
             "output_name": "procedure",
             "summary": True,
         },
-        "expected_output": {
+        "input": {
             "required": False,
             "format": "dict_string",
-            "default": "None",
+            "default": "No user defined input",
             "output_name": "input",
         },
         "show_cmd_txts": {

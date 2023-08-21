@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2019, Arista Networks EOS+
+# Copyright (c) 2023, Arista Networks EOS+
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -31,14 +31,31 @@
 
 """ Tests to validate base feature status."""
 
-import inspect
-import logging
 import pytest
+from pyeapi.eapilib import EapiError
+from vane.config import dut_objs, test_defs
 from vane import tests_tools
-
+from vane.vane_logging import logging
 
 TEST_SUITE = __file__
 LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
+
+dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
+test1_duts = dut_parameters["test_if_management_https_api_server_is_running_on_"]["duts"]
+test1_ids = dut_parameters["test_if_management_https_api_server_is_running_on_"]["ids"]
+
+test2_duts = dut_parameters["test_if_management_https_api_server_port_is_correct_on_"]["duts"]
+test2_ids = dut_parameters["test_if_management_https_api_server_port_is_correct_on_"]["ids"]
+
+test3_duts = dut_parameters["test_if_management_https_api_server_is_enabled_on_"]["duts"]
+test3_ids = dut_parameters["test_if_management_https_api_server_is_enabled_on_"]["ids"]
+
+test4_duts = dut_parameters["test_if_management_http_api_server_is_running_on_"]["duts"]
+test4_ids = dut_parameters["test_if_management_http_api_server_is_running_on_"]["ids"]
+
+test5_duts = dut_parameters["test_if_management_local_http_api_server_is_running_on_"]["duts"]
+test5_ids = dut_parameters["test_if_management_local_http_api_server_is_running_on_"]["ids"]
+
 
 @pytest.mark.demo
 @pytest.mark.nrfu
@@ -46,130 +63,297 @@ LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
 @pytest.mark.api
 @pytest.mark.virtual
 @pytest.mark.physical
-@pytest.mark.eos424
 class APITests:
     """API Test Suite"""
 
-    def test_if_management_https_api_server_is_running_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify management api https server is running
+    @pytest.mark.parametrize("dut", test1_duts, ids=test1_ids)
+    def test_if_management_https_api_server_is_running_on_(self, dut, tests_definitions):
+        """TD: Verify management api https server is running
         Args:
          dut (dict): Encapsulates dut details including name, connection
          tests_definitions (dict): Test parameters
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        ptr = dut["output"][tops.show_cmd]["json"]
-        tops.actual_output = ptr["httpsServer"]["running"]
-        tops.test_result = tops.actual_output == tops.expected_output
 
-        tops.output_msg += (
-            f"\nOn router |{tops.dut_name}| HTTPS Server is "
-            f"running state: |{tops.actual_output}|, should be "
-            f"in state |{tops.expected_output}|"
-        )
-        print(f"{tops.output_msg}\n{tops.comment}")
+        try:
+            """
+            TS: Collecting the output of 'show management api http-commands' command from DUT
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]
+            assert (self.output.get("httpsServer")).get(
+                "running"
+            ), "Show management api http-commands details are not found"
+            logging.info(
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        tops.post_testcase()
+            tops.actual_output = {"https_server_running": self.output["httpsServer"]["running"]}
 
-        assert tops.expected_output == tops.actual_output
+        except (AttributeError, LookupError, EapiError) as exp:
+            tops.actual_output = str(exp)
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: {str(exp)}"
+            )
+            tops.output_msg += (
+                f" EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating HTTP Server. Vane recorded error: {exp} "
+            )
 
-    def test_if_management_https_api_server_port_is_correct_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify https server is enabled on port 443
+        """
+        TS: Check HTTPS Server running status
+        """
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg = (
+                f"On router {tops.dut_name} HTTPS Server is correctly in running state: "
+                f"{tops.actual_output['https_server_running']}"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg = (
+                f"On router {tops.dut_name} HTTPS Server is incorrectly in running state: "
+                f"{tops.actual_output['https_server_running']}, should be in state "
+                f"{tops.expected_output['https_server_running']}"
+            )
+
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_management_https_api_server_is_running_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
+
+    @pytest.mark.parametrize("dut", test2_duts, ids=test2_ids)
+    def test_if_management_https_api_server_port_is_correct_on_(self, dut, tests_definitions):
+        """TD: Verify https server is enabled on port 443
         Args:
          dut (dict): Encapsulates dut details including name, connection
          tests_definitions (dict): Test parameters
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        ptr = dut["output"][tops.show_cmd]["json"]
-        tops.actual_output = ptr["httpsServer"]["port"]
-        tops.test_result = tops.actual_output == tops.expected_output
 
-        tops.output_msg += (
-            f"\nOn router |{tops.dut_name}| HTTPS Server is "
-            f"running on port: |{tops.actual_output}|, should be "
-            f"port |{tops.expected_output}|"
-        )
-        print(f"{tops.output_msg}\n{tops.comment}")
+        try:
+            """
+            TS: Collecting the output of 'show management api http-commands' command from DUT
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]
+            assert (self.output.get("httpsServer")).get(
+                "port"
+            ), "Show management api http-commands details are not found"
+            logging.info(
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        tops.post_testcase()
+            tops.actual_output = {"https_server_port": self.output["httpsServer"]["port"]}
 
-        assert tops.expected_output == tops.actual_output
+        except (AttributeError, LookupError, EapiError) as exp:
+            tops.actual_output = str(exp)
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: {str(exp)}"
+            )
+            tops.output_msg += (
+                f" EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating HTTP Server. Vane recorded error: {exp} "
+            )
 
-    def test_if_management_https_api_server_is_enabled_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify management api https server is enabled
+        """
+        TS: Check HTTPS Server port
+        """
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg = (
+                f"On router {tops.dut_name} HTTPS Server is correctly running on port: "
+                f"{tops.actual_output['https_server_port']}"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg = (
+                f"On router {tops.dut_name} HTTPS Server is incorrectly running on port: "
+                f"{tops.actual_output['https_server_port']}, should be running on port "
+                f"{tops.expected_output['https_server_port']}"
+            )
+
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_management_https_api_server_port_is_correct_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
+
+    @pytest.mark.parametrize("dut", test3_duts, ids=test3_ids)
+    def test_if_management_https_api_server_is_enabled_on_(self, dut, tests_definitions):
+        """TD: Verify management api https server is enabled
         Args:
          dut (dict): Encapsulates dut details including name, connection
          tests_definitions (dict): Test parameters
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        tops.actual_output = dut["output"][tops.show_cmd]["json"]["enabled"]
-        tops.test_result = tops.actual_output == tops.expected_output
 
-        tops.output_msg += (
-            f"\nOn router |{tops.dut_name}| API is "
-            f"enabled state: |{tops.actual_output}|, should be "
-            f"in state |{tops.expected_output}|"
-        )
-        print(f"{tops.output_msg}\n{tops.comment}")
+        try:
+            """
+            TS: Collecting the output of 'show management api http-commands' command from DUT
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]
+            assert self.output.get(
+                "enabled"
+            ), "Show management api http-commands details are not found"
+            logging.info(
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        tops.post_testcase()
+            tops.actual_output = {"https_server_enabled": self.output["enabled"]}
 
-        assert tops.expected_output == tops.actual_output
+        except (AttributeError, LookupError, EapiError) as exp:
+            tops.actual_output = str(exp)
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: {str(exp)}"
+            )
+            tops.output_msg += (
+                f" EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating HTTP Server. Vane recorded error: {exp} "
+            )
 
-    def test_if_management_http_api_server_is_running_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify management api http server is not running
+        """
+        TS: Check HTTPS Server is enabled
+        """
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg = (
+                f"On router {tops.dut_name} HTTPS Server is correctly in enabled state: "
+                f"{tops.actual_output['https_server_enabled']}"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg = (
+                f"On router {tops.dut_name} HTTPS Server is incorrectly in enabled state: "
+                f"{tops.actual_output['https_server_enabled']}, should be in state "
+                f"{tops.expected_output['https_server_enabled']}"
+            )
+
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_management_https_api_server_is_enabled_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
+
+    @pytest.mark.parametrize("dut", test4_duts, ids=test4_ids)
+    def test_if_management_http_api_server_is_running_on_(self, dut, tests_definitions):
+        """TD: Verify management api http server is not running
         Args:
          dut (dict): Encapsulates dut details including name, connection
          tests_definitions (dict): Test parameters
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        ptr = dut["output"][tops.show_cmd]["json"]
-        tops.actual_output = ptr["httpServer"]["running"]
-        tops.test_result = tops.actual_output == tops.expected_output
 
-        tops.output_msg += (
-            f"\nOn router |{tops.dut_name}| HTTP Server is "
-            f"running state: |{tops.actual_output}|, should be "
-            f"in state |{tops.expected_output}|"
-        )
-        print(f"{tops.output_msg}\n{tops.comment}")
+        try:
+            """
+            TS: Collecting the output of 'show management api http-commands' command from DUT
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]
+            assert self.output.get(
+                "httpServer"
+            ), "Show management api http-commands details are not found"
+            logging.info(
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        tops.post_testcase()
+            tops.actual_output = {"http_server_running": self.output["httpServer"]["running"]}
 
-        assert tops.expected_output == tops.actual_output
+        except (AttributeError, LookupError, EapiError) as exp:
+            tops.actual_output = str(exp)
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: {str(exp)}"
+            )
+            tops.output_msg += (
+                f" EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating HTTP Server. Vane recorded error: {exp} "
+            )
 
-    def test_if_management_local_http_api_server_is_running_on_(
-        self, dut, tests_definitions
-    ):
-        """Verify management api local httpserver is not running
+        """
+        TS: Check HTTP Server running status
+        """
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg = (
+                f"On router {tops.dut_name} HTTP Server is correctly in running state: "
+                f"{tops.actual_output['http_server_running']}"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg = (
+                f"On router {tops.dut_name} HTTP Server is incorrectly in running state: "
+                f"{tops.actual_output['http_server_running']}, should be in state "
+                f"{tops.expected_output['http_server_running']}"
+            )
+
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_management_http_api_server_is_running_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output
+
+    @pytest.mark.parametrize("dut", test4_duts, ids=test4_ids)
+    def test_if_management_local_http_api_server_is_running_on_(self, dut, tests_definitions):
+        """TD: Verify management api local httpserver is not running
         Args:
          dut (dict): Encapsulates dut details including name, connection
          tests_definitions (dict): Test parameters
         """
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        ptr = dut["output"][tops.show_cmd]["json"]
-        tops.actual_output = ptr["localHttpServer"]["running"]
-        tops.test_result = tops.actual_output == tops.expected_output
 
-        tops.output_msg += (
-            f"\nOn router |{tops.dut_name}| HTTP Server is "
-            f"running state: |{tops.actual_output}|, should be "
-            f"in state |{tops.expected_output}|"
-        )
-        print(f"{tops.output_msg}\n{tops.comment}")
+        try:
+            """
+            TS: Collecting the output of 'show management api http-commands' command from DUT
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]
+            assert self.output.get(
+                "localHttpServer"
+            ), "Show management api http-commands details are not found"
+            logging.info(
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        tops.post_testcase()
+            tops.actual_output = {
+                "local_http_server_running": self.output["localHttpServer"]["running"]
+            }
 
-        assert tops.expected_output == tops.actual_output
+        except (AttributeError, LookupError, EapiError) as exp:
+            tops.actual_output = str(exp)
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: {str(exp)}"
+            )
+            tops.output_msg += (
+                f" EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating HTTP Server. Vane recorded error: {exp} "
+            )
+
+        """
+        TS: Check Local HTTP Server running status
+        """
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg = (
+                f"On router {tops.dut_name} Local HTTP Server is correctly in running state: "
+                f"{tops.actual_output['local_http_server_running']}"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg = (
+                f"On router {tops.dut_name} LocalHTTP Server is incorrectly in running state: "
+                f"{tops.actual_output['local_http_server_running']}, should be in state "
+                f"{tops.expected_output['local_http_server_running']}"
+            )
+
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_management_local_http_api_server_is_running_on_)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.actual_output == tops.expected_output

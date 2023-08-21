@@ -1,0 +1,30 @@
+# This is a sample definitions.yaml file which can be used to run vane.
+# The fields below can be changed to reflect specific test cases, test directories which need to be run.
+
+parameters:
+  eapi_file: tests/unittests/fixtures/eapi.conf
+  eapi_template: tests/fixtures/templates/eapi.conf.j2
+  eos_conn: eapi
+  excel_report: null
+  html_report: tests/unittests/fixtures/reports/report
+  json_report: tests/unittests/fixtures/reports/report
+  mark: demo
+  processes: null
+  report_dir: reports
+  results_file: result.yml
+  results_dir: tests/unittests/fixtures/reports/results
+  setup_show: false
+  show_log: show_output.log
+  stdout: false
+  test_cases: All
+  test_dirs:
+  - sample_network_tests
+  report_test_steps: true
+  generate_test_definitions: false
+  master_definitions: tests/unittests/fixtures/master_def.yaml
+  template_definitions: tests_definitions.yaml
+  test_definitions: test_definition.yaml
+  verbose: true
+  spreadsheet: tests/fixtures/spreadsheets/PS-LLD-Questionnaire-Template.xlsx
+  xcel_definitions: tests/fixtures/spreadsheets/xcel_definitions.yaml
+  xcel_schema: tests/fixtures/spreadsheets/xcel_schema.yaml

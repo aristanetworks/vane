@@ -8,15 +8,17 @@ parameters:
   processes: null
   report_dir: tests/unittests/fixtures/reports
   results_file: result.yml
-  results_dir: tests/unittests/fixtures/reports/results
+  results_dir: tests/unittests/fixtures/reports/tests_client_results
+  report_test_steps: false
   setup_show: false
   show_log: show_output.log
   stdout: false
   test_cases: All
-  eos_conn: pyeapi
-  test_dirs: 
-  - .
-  test_definitions: tests_definitions.yaml
+  test_dirs:
+    - .
+  generate_test_definitions: false
+  master_definitions: tests/unittests/fixtures/master_def.yaml
+  template_definitions: test_definition.yaml
   verbose: true
   spreadsheet: tests/fixtures/spreadsheets/PS-LLD-Questionnaire-Template.xlsx
   xcel_definitions: tests/fixtures/spreadsheets/xcel_definitions.yaml

@@ -27,8 +27,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-''' vane - Network Certification Tool
-'''
+""" vane - Network Certification Tool
+"""
+from importlib import metadata
 
-__version__ = '0.8'
-__author__ = 'Arista Networks, Inc.'
+__version__ = metadata.version(__package__)
+
+__author__ = "Arista Networks, Inc."

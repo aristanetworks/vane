@@ -34,12 +34,15 @@
    2. ssh driver - uses Netmiko package
 """
 
-import configparser
+import os
 import json
 import pyeapi
+import netmiko
+import paramiko
 from netmiko.ssh_autodetect import SSHDetect
-from netmiko import Netmiko
+from netmiko import Netmiko, file_transfer
 from vane.utils import make_iterable
+
 
 error_responses = [
     '% This is an unconverted command\n{\n    "errors": '
@@ -96,11 +99,7 @@ class CommandError(Exception):
 class DeviceConn:
     """Base class for connecting to Arista devices"""
 
-    def set_conn_params(self, conf_file):
-        """Set the Device connection parameters"""
-        pass
-
-    def set_up_conn(self, device_name: str):
+    def set_up_conn(self, device_data):
         """Connect to the mentioned device"""
         pass
 
@@ -120,6 +119,10 @@ class DeviceConn:
         """Configures the node with the specified commands"""
         pass
 
+    def transfer_file(self, src_file, dest_file, file_system, operation, sftp=False):
+        """Transfer the file to/from the dut"""
+        pass
+
 
 class PyeapiConn(DeviceConn):
     """PyeapiConn connects to Arista devices using PyEAPI"""
@@ -129,14 +132,19 @@ class PyeapiConn(DeviceConn):
         # pylint: disable=attribute-defined-outside-init
         return self._connection
 
-    def set_conn_params(self, conf_file):
-        """sets the config using eapi conf_file"""
-        pyeapi.load_config(conf_file)
-
-    def set_up_conn(self, device_name):
+    def set_up_conn(self, device_data):
         """connects to device using pyeapi"""
         # pylint: disable=attribute-defined-outside-init
-        self._connection = pyeapi.connect_to(device_name)
+        self._connection = pyeapi.connect(
+            transport=device_data["transport"],
+            host=device_data["mgmt_ip"],
+            username=device_data["username"],
+            password=device_data["password"],
+            timeout=device_data.get("timeout", 60),
+            return_node=True,
+        )
+        if device_data.get("enable_pwd", ""):
+            self._connection.enable_authentication(device_data["enable_pwd"])
 
     def run_commands(self, cmds, encoding="json", send_enable=True, **kwargs):
         """wrapper around pyeapi run_commands func"""
@@ -158,6 +166,10 @@ class PyeapiConn(DeviceConn):
         output = self._connection.config(commands, **kwargs)
         return output
 
+    def transfer_file(self, src_file, dest_file, file_system, operation, sftp=False):
+        """Transfer the file to/from the dut"""
+        raise NotImplementedError("PyeapiConn does not implement transfer_file()")
+
 
 class NetmikoConn(DeviceConn):
     """NetmikoConn connects to Arista devices using ssh conn"""
@@ -166,27 +178,27 @@ class NetmikoConn(DeviceConn):
         """returns the connection object"""
         return self._connection
 
-    def set_conn_params(self, conf_file):
-        """Sets the connection params specified in conf_file"""
-        # pylint: disable=attribute-defined-outside-init
-        self._config = configparser.ConfigParser()
-        self._config.read(conf_file)
-
-    def set_up_conn(self, device_name):
+    def set_up_conn(self, device_data):
         """sets up conn to device using _config params"""
-        name = f"connection:{device_name}"
-        if not self._config.has_section(name):
-            raise AttributeError("connection profile not found")
 
-        device_attributes = dict(self._config.items(name))
+        self.name = device_data["name"]
 
         default_device_type = "arista_eos"
+
+        try:
+            os.makedirs("netmiko-logs")
+        except FileExistsError:
+            pass
+
+        logfile = f'netmiko-logs/netmiko-session-{device_data["name"]}.log'
         remote_device = {
-            "device_type": device_attributes.get("device_type", default_device_type),
-            "host": device_attributes["host"],
-            "username": device_attributes["username"],
-            "password": device_attributes["password"],
-            "secret": device_attributes.get("enable_mode_secret", ""),
+            "device_type": device_data.get("device_type", default_device_type),
+            "host": device_data["mgmt_ip"],
+            "username": device_data["username"],
+            "password": device_data["password"],
+            "secret": device_data.get("enable_pwd", ""),
+            "session_log": device_data.get("session_log", logfile),
+            "read_timeout_override": device_data.get("timeout", None),
         }
         if remote_device["device_type"] == "autodetect":
             guesser = SSHDetect(**remote_device)
@@ -202,47 +214,63 @@ class NetmikoConn(DeviceConn):
 
         if isinstance(cmds, list):
             local_cmds = cmds.copy()
-            for i, cmd in enumerate(local_cmds):
+            for i, cmd in enumerate(cmds):
                 local_cmds[i] = cmd + pipe_json
-
         elif isinstance(cmds, str):
-            cmds = cmds + pipe_json
+            local_cmds = cmds + pipe_json
+
         return cmds, local_cmds
 
-    def send_list_cmds(self, cmds, local_cmds, cmds_op, encoding="json"):
+    def send_list_cmds(self, cmds, encoding="json"):
         """send_list_cmds: sends the list of commands to device conn
         and collects the output as list"""
 
-        for i, cmd in enumerate(local_cmds):
-            output = self._connection.send_command(cmd)
-            if output not in error_responses and encoding == "json":
-                output = json.loads(output)
+        cmds_op = []
+
+        for i, cmd in enumerate(cmds):
+            try:
+                output = self._connection.send_command(cmd)
+            except netmiko.exceptions.NetmikoTimeoutException:
+                # try resetting connection and see if it works
+                self.set_up_conn(self.name)
+                output = self._connection.send_command(cmd)
+
+            if output not in error_responses:
+                if encoding == "json":
+                    output = json.loads(output)
+                    cmds_op.append(output)
+                elif encoding == "text":
+                    # for text encoding, creating the format
+                    # similar to one returned by eapi format
+                    text_ob = {"output": output}
+                    cmds_op.append(text_ob)
             else:
-                err_msg = f"Could not execute {cmd[i]} .Got error: {output}"
+                err_msg = f"Could not execute {cmds[i]}.Got error: {output}"
                 raise CommandError(err_msg, cmds)
 
-            if encoding == "text":
-                # for text encoding, creating the format similar to one returned by eapi format
+        return cmds_op
+
+    def send_str_cmds(self, cmds, encoding="json"):
+        """send_str_cmds: sends one command to device conn"""
+
+        cmds_op = []
+        try:
+            output = self._connection.send_command(cmds)
+        except netmiko.exceptions.NetmikoTimeoutException:
+            # try resetting connection and see if it works
+            self.set_up_conn(self.name)
+            output = self._connection.send_command(cmds)
+
+        if output not in error_responses:
+            if encoding == "json":
+                output = json.loads(output)
+                cmds_op.append(output)
+            elif encoding == "text":
                 text_ob = {"output": output}
                 cmds_op.append(text_ob)
-            else:
-                cmds_op.append(output)
-
-    def send_str_cmds(self, cmds, cmds_op, encoding="json"):
-        """send_str_cmds: sends one command to device conn"""
-        output = self._connection.send_command(cmds)
-
-        if output not in error_responses and encoding == "json":
-            output = json.loads(output)
         else:
             err_msg = f"Could not execute {cmds} . Got error: {output}"
             raise CommandError(err_msg, cmds)
-
-        if encoding == "text":
-            text_ob = {"output": output}
-            cmds_op.append(text_ob)
-        else:
-            cmds_op.append(output)
 
         return cmds_op
 
@@ -260,17 +288,16 @@ class NetmikoConn(DeviceConn):
         if encoding == "json":
             # for json encoding, lets try to run cmds using | json
             cmds, local_cmds = self.get_cmds(cmds=cmds)
-
         elif encoding == "text" and isinstance(cmds, list):
             local_cmds = cmds.copy()
+        else:
+            # when cmds is a string and encoding is text
+            local_cmds = cmds
 
-        cmds_op = []
         if isinstance(cmds, list):
-            # pylint: disable=assignment-from-no-return
-            cmds_op = self.send_list_cmds(cmds=cmds, local_cmds=local_cmds, cmds_op=cmds_op)
+            cmds_op = self.send_list_cmds(cmds=local_cmds, encoding=encoding)
         elif isinstance(cmds, str):
-            # pylint: disable=assignment-from-no-return
-            cmds_op = self.send_str_cmds(cmds=cmds, cmds_op=cmds_op)
+            cmds_op = self.send_str_cmds(cmds=local_cmds, encoding=encoding)
 
         return cmds_op
 
@@ -321,9 +348,9 @@ class NetmikoConn(DeviceConn):
                 try:
                     resp = self.run_commands(command, encoding, send_enable, **kwargs)
                     results.append({"command": command, "result": resp[0], "encoding": encoding})
-                except CommandError as exc:
-                    # pylint: disable=no-member
-                    if exc.error_code == 1003:
+                except CommandError:
+                    # if encoding is json probably we need to run this cmd using text
+                    if encoding == "json":
                         resp = self.run_commands(command, "text", send_enable, **kwargs)
                         results.append({"command": command, "result": resp[0], "encoding": "text"})
                     else:
@@ -340,15 +367,26 @@ class NetmikoConn(DeviceConn):
         commands = make_iterable(commands)
         commands = list(commands)
 
-        # push the configure command onto the command stack
-        commands.insert(0, "configure terminal")
-        response = self.run_commands(commands, **kwargs)
-        # pylint: disable=no-member
-        if self.autorefresh:
-            # pylint: disable=no-member
-            self.refresh()
-
-        # pop the configure command output off the stack
-        response.pop(0)
+        self._connection.enable()
+        response = self._connection.send_config_set(commands)
 
         return response
+
+    def transfer_file(self, src_file, dest_file, file_system, operation, sftp=False):
+        """Transfer the file to/from the dut"""
+
+        if sftp:
+            transport = self._connection.remote_conn.get_transport()
+            self._connection.remote_conn = paramiko.SFTPClient.from_transport(transport)
+
+        self._connection.enable()
+        transfer = file_transfer(
+            self._connection,
+            source_file=src_file,
+            dest_file=dest_file,
+            file_system=file_system,
+            direction=operation,
+            overwrite_file=True,
+        )
+
+        return transfer

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2019, Arista Networks EOS+
+# Copyright (c) 2023, Arista Networks EOS+
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -63,17 +63,17 @@ class ReportClient:
             test_definition (str): YAML representation of NRFU tests
         """
 
-        logging.info("Convert yaml data-model to a python data structure")
+        logging.info("Reading YAML data-model and converting into a Python data structure")
         self.data_model = yaml_read(test_definition)
-        logging.info(f"Internal test data-model initialized with value: {self.data_model}")
+        logging.debug(f"Internal test data-model initialized with value: {self.data_model}")
         self._summary_results = self._compile_test_results()
-        logging.info(f"Test Results: {self._summary_results}")
+        logging.debug(f"Test Results: {self._summary_results}")
 
         self._reports_dir = self.data_model["parameters"]["report_dir"]
         _results_dir = self.data_model["parameters"]["results_dir"]
         self._results_datamodel = None
         self._compile_yaml_data(_results_dir)
-        logging.info(f"Results file data is {self._results_datamodel}")
+        logging.debug(f"Results file data is {self._results_datamodel}")
 
         self._document = docx.Document()
         section = self._document.sections[0]
@@ -89,9 +89,10 @@ class ReportClient:
             yaml_dir (str): Results directory path
         """
 
-        logging.info(f"yaml directory is {yaml_dir}\nyaml")
+        logging.info("Compiling test case results into data model")
+        logging.debug(f"yaml directory is {yaml_dir}\n")
         yaml_files = os.listdir(yaml_dir)
-        logging.info(f"yaml input files are {yaml_files}")
+        logging.debug(f"yaml input files are {yaml_files}")
 
         for name in yaml_files:
             if "result-" in name:
@@ -102,7 +103,7 @@ class ReportClient:
             else:
                 logging.error(f"Incorrect filename: {name}")
 
-        logging.info(f"Updated results_data to {self._results_datamodel}")
+        logging.debug(f"Updated results_data to {self._results_datamodel}")
 
     def _reconcile_results(self, test_parameters):
         """Validate test case results data and reconciles any missing data
@@ -115,6 +116,10 @@ class ReportClient:
         test_suite = test_suite.split("/")[-1]
         dut_name = test_parameters["dut"]
         test_case = test_parameters["name"]
+        logging.info(
+            "Validating test case results data and reconciling missing data for test case: "
+            f"{test_case} on DUT: {dut_name}"
+        )
 
         if not self._results_datamodel:
             self._results_datamodel = {
@@ -126,20 +131,19 @@ class ReportClient:
                 ]
             }
 
-        logging.info(f"\n\n\rFind the Index for test suite: {test_suite} on dut {dut_name}\n\n\r")
-        logging.info(self._results_datamodel["test_suites"])
+        logging.debug(f"\n\n\rFound the Index for test suite: {test_suite} on dut {dut_name}\n\n\r")
+        logging.debug(self._results_datamodel["test_suites"])
         test_suites = [param["name"] for param in self._results_datamodel["test_suites"]]
 
         if test_suite in test_suites:
             suite_index = test_suites.index(test_suite)
-            logging.info(f"Test suite {test_suite} exists in results file at index {suite_index}")
+            logging.debug(f"Test suite {test_suite} exists in results file at index {suite_index}")
         else:
             logging.info(f"Create test suite {test_suite} in results file")
             suite_stub = {"name": test_suite, "test_cases": []}
             self._results_datamodel["test_suites"].append(suite_stub)
             suite_index = len(self._results_datamodel["test_suites"]) - 1
 
-        logging.info(f"Find Index for test case: {test_case} on duts {dut_name}")
         test_cases = [
             param["name"]
             for param in self._results_datamodel["test_suites"][suite_index]["test_cases"]
@@ -147,14 +151,14 @@ class ReportClient:
 
         if test_case in test_cases:
             test_index = test_cases.index(test_case)
-            logging.info(f"Test case {test_case} exists in results file at index {test_index}")
+            logging.debug(f"Test case {test_case} exists in results file at index {test_index}")
         else:
             logging.info(f"Create test case {test_case} in results file")
             test_stub = {"name": test_case, "duts": []}
             self._results_datamodel["test_suites"][suite_index]["test_cases"].append(test_stub)
             test_index = len(self._results_datamodel["test_suites"][suite_index]["test_cases"]) - 1
 
-        logging.info(f"Find Index for dut {dut_name}")
+        logging.debug(f"Find Index for dut {dut_name}")
         duts = [
             param["dut"]
             for param in self._results_datamodel["test_suites"][suite_index]["test_cases"][
@@ -163,7 +167,7 @@ class ReportClient:
         ]
 
         if dut_name not in duts:
-            logging.info(
+            logging.debug(
                 f"Add DUT {dut_name} to test case {test_case} with parameters {test_parameters}"
             )
             yaml_ptr = self._results_datamodel["test_suites"][suite_index]
@@ -194,13 +198,13 @@ class ReportClient:
         format_date = date_obj.strftime("%B %d, %Y %I:%M:%S%p")
         file_date = date_obj.strftime("%y%m%d%H%M")
 
-        logging.info(f"Returning formatted date: {format_date}")
+        logging.debug(f"Returning formatted date: {format_date}")
         return format_date, file_date
 
     def _write_title_page(self):
         """Write report title page"""
 
-        logging.info("Create report title page")
+        logging.info("Creating report title page")
         format_date, _ = self._return_date()
         self._document.add_heading("Test Report", 0)
         para = self._document.add_paragraph()
@@ -210,6 +214,7 @@ class ReportClient:
     def _write_toc_page(self):
         """Write table of contents page"""
 
+        logging.info("Creating report table of contents page")
         w_fldchar = "w:fldChar"
         w_fldchar_type = "w:fldCharType"
 
@@ -242,6 +247,7 @@ class ReportClient:
     def _write_summary_report(self):
         """Write summary reports"""
 
+        logging.info("Creating summary report section")
         self._document.add_heading(f"{self._major_section}. Test Results Summary", 1)
         self._write_summary_results()
         self._write_dut_summary_results()
@@ -253,7 +259,7 @@ class ReportClient:
     def _write_summary_results(self):
         """Write summary results section"""
 
-        logging.info("Create summary results table")
+        logging.info("Creating total test case summary results table")
         self._document.add_heading(f"{self._major_section}.1 Summary Results", 2)
         table = self._document.add_table(rows=1, cols=6, style="Table Grid")
         headers = [
@@ -284,7 +290,7 @@ class ReportClient:
     def _write_dut_summary_results(self):
         """Write summary DUT result section"""
 
-        logging.info("Create DUT summary results table")
+        logging.info("Creating DUT summary results table")
         self._document.add_heading(
             f"{self._major_section }.2 Summary Totals for Devices Under Tests",
             2,
@@ -299,7 +305,7 @@ class ReportClient:
         duts = self._summary_results["duts"]
 
         for row, dut in enumerate(duts):
-            logging.info(f"Create dut summary row: {row+1}")
+            logging.debug(f"Creating dut summary row: {row+1}")
             _ = table.add_row().cells
             data_row = []
 
@@ -320,7 +326,7 @@ class ReportClient:
         self._document.add_heading(f"{self._major_section }.3 Summary Totals for Test Suites", 2)
         suite_results = self._compile_suite_results()
         if not suite_results:
-            logging.info("Skipping the test suite results")
+            logging.warning("Skipping the test suite results")
             return
 
         table = self._document.add_table(rows=1, cols=5, style="Table Grid")
@@ -330,14 +336,14 @@ class ReportClient:
             self._write_cell(table, header.upper(), column, 0, "Arial", 9, True, "00FFFF")
 
         if not suite_results:
-            logging.info("Skipping the test suite results")
+            logging.warning("Skipping the test suite results")
             return
 
         for row, suite_result in enumerate(suite_results):
             _ = table.add_row().cells
             data_row = []
             ts_name = self._format_ts_name(suite_result["name"])
-            logging.info(f"Writing row {row+1}")
+            logging.debug(f"Writing row {row+1}")
 
             data_row.append(ts_name)
             data_row.append(str(suite_result["total_tests"]))
@@ -357,14 +363,14 @@ class ReportClient:
         logging.info(f"Opening JSON file {json_report} to parse for summary results")
 
         with open(json_report, "r", encoding="utf-8") as json_file:
-            logging.info(f"Raw json report is {json_file}")
+            logging.debug(f"Raw json report is {json_file}")
             test_data = json.load(json_file)
             tests = test_data["report"]["tests"]
-            logging.info(f"Structured json report is {test_data}")
+            logging.debug(f"Structured json report is {test_data}")
 
             summary = test_data["report"]["summary"]
             test_results["summaryResults"] = summary
-            logging.info(f"Summary for test cases are {summary}")
+            logging.debug(f"Summary for test cases are {summary}")
             test_results["duts"] = self._parse_testcases(tests)
 
         return test_results
@@ -409,6 +415,8 @@ class ReportClient:
 
                 testcases_results[dut_index]["TOTAL"] += 1
 
+        logging.debug(f"DUT compiled results: {testcases_results}")
+
         return testcases_results
 
     def _totals(self, ptr, ptr_key):
@@ -433,24 +441,25 @@ class ReportClient:
     def _write_tests_case_report(self):
         """Write summary test case report"""
 
+        logging.info("Creating report summary test case report section")
         self._document.add_heading(f"{self._major_section}. Test Case Results Summary", 1)
         self._major_section += 1
 
         report_styles = REPORT_TEMPLATES.keys()
-        logging.info(f"Inputted the following report summary styles {report_styles}")
+        logging.debug(f"Inputted the following report summary styles {report_styles}")
 
         if "report_summary_style" in self.data_model["parameters"]:
             report_style = self.data_model["parameters"]["report_summary_style"]
-            logging.info(f"Summary style in parameters set to {report_style}")
+            logging.debug(f"Summary style in parameters set to {report_style}")
             if report_style in report_styles:
-                logging.info(f"report_summary_style is set to {report_style}, custom")
+                logging.debug(f"report_summary_style is set to {report_style}, custom")
                 report_template = REPORT_TEMPLATES[report_style]
                 self._custom_tc_report(report_template)
             else:
-                logging.info(f"report_summary_style is correctly set to {report_style}, default")
+                logging.debug(f"report_summary_style is correctly set to {report_style}, default")
                 self._default_tc_report()
         else:
-            logging.info(f"No summary style set in parameters: {self.data_model['parameters']}")
+            logging.warning(f"No summary style set in parameters: {self.data_model['parameters']}")
             self._default_tc_report()
 
     def _custom_tc_report(self, report_template):
@@ -476,8 +485,15 @@ class ReportClient:
         columns = len(summary_headers)
         table = self._document.add_table(rows=1, cols=columns, style="Table Grid")
 
-        self._create_header_row(table, summary_headers, report_template)
-        self._create_data_row(table, testcase_results, report_template)
+        if testcase_results:
+            self._create_header_row(table, summary_headers, report_template)
+            self._create_data_row(table, testcase_results, report_template)
+        else:
+            logging.error("Vane ran no test cases against DUTS")
+            print(
+                "Vane ran no test cases against DUTs.  Check your duts.yml file and test case "
+                "filters"
+            )
 
     def _create_header_row(self, table, summary_headers, report_template):
         """Writes header row within Word doc table
@@ -491,14 +507,14 @@ class ReportClient:
         row = 0
 
         for summary_header in summary_headers:
-            logging.info(f"summary header info: {summary_header}")
+            logging.debug(f"summary header info: {summary_header}")
             if "output_name" in report_template[summary_header]:
-                logging.info(
+                logging.debug(
                     f"Output name set to: {report_template[summary_header]['output_name']}"
                 )
                 headers.append(report_template[summary_header]["output_name"])
             else:
-                logging.info(f"No output name setting header to: {summary_header}")
+                logging.warning(f"No output name setting header to: {summary_header}")
                 headers.append(summary_header)
 
         for column, header in enumerate(headers):
@@ -516,13 +532,13 @@ class ReportClient:
         for row, testcase_result in enumerate(testcase_results):
             _ = table.add_row().cells
             for column, testcase_data in enumerate(testcase_result):
-                logging.info(
+                logging.debug(
                     f"Writing test field: {testcase_data}"
                     f"with value: {report_template[testcase_data]}"
                 )
                 if "format" in report_template[testcase_data]:
                     data_format = report_template[testcase_data]["format"]
-                    logging.info(f"Format has been set to {format}")
+                    logging.debug(f"Format has been set to {format}")
 
                 self._write_cell(
                     table,
@@ -563,10 +579,10 @@ class ReportClient:
             text_color (obj, optional): Text output color. Defaults to None
         """
         para = table.rows[row].cells[column].paragraphs[0]
-        logging.info(f"Added cell ({row}, {column}) to report with value: {text}")
+        logging.debug(f"Added cell ({row}, {column}) to report with value: {text}")
 
         if data_format == "numbered_list":
-            logging.info("Formatting a numbered list")
+            logging.debug("Formatting a numbered list")
             if text:
                 for list_idx, list_entry in enumerate(text):
                     self._write_text(para, f"{list_idx+1}. {list_entry}\n")
@@ -576,7 +592,7 @@ class ReportClient:
                 )
                 self._write_text(para, "")
         elif data_format == "test_result":
-            logging.info("Formatting a Test Result")
+            logging.debug("Formatting a Test Result")
             if text:
                 self._write_text(para, "PASS", bold=True, color=RGBColor(0, 255, 0))
             else:
@@ -621,7 +637,7 @@ class ReportClient:
             left_indent (obj, optional): Sets left in indent in Doc. Defaults to None
         """
         run = para.add_run(text)
-        logging.info(
+        logging.debug(
             f"Adding text '{text}' with font {font}, font_size {font_size}, bold {bold}, "
             f"alignment {align}"
         )
@@ -657,9 +673,9 @@ class ReportClient:
         Returns:
             list: List of fields to include in test case report header row
         """
-        logging.info(f"Checking report style for summary headers {report_template}")
+        logging.debug(f"Checking report style for summary headers {report_template}")
         summary_headers = {k: v for (k, v) in report_template.items() if "summary" in v}
-        logging.info(f"The following are summary fields: {summary_headers}")
+        logging.debug(f"The following are summary fields: {summary_headers}")
         return summary_headers
 
     def _compile_custom_tc_results(self, summary_headers):
@@ -672,7 +688,7 @@ class ReportClient:
             dict: Data structure with test case results
         """
         if not self._results_datamodel:
-            logging.info("Skipping test case results")
+            logging.warning("Skipping test case results")
             return None
 
         tbl_headers = summary_headers.keys()
@@ -694,10 +710,11 @@ class ReportClient:
                         tbl_value = self._return_tbl_value(dut, tbl_header)
                         testcase_result[tbl_header] = tbl_value
 
-                    logging.info(f"Compiled DUT results: {testcase_result}")
+                    logging.debug(f"Compiled DUT results: {testcase_result}")
                     testcase_results.append(testcase_result)
 
-        logging.info(f"Returning testcase result {testcase_results}")
+        logging.info("Returning testcase result")
+        logging.debug(f"Returning testcase result {testcase_results}")
         return testcase_results
 
     def _return_tbl_value(self, dut, tbl_header):
@@ -710,12 +727,12 @@ class ReportClient:
         Returns:
             str: Test case value for summary header
         """
-        logging.info(f"dut data structure set to: {dut}")
+        logging.debug(f"dut data structure set to: {dut}")
         if tbl_header in dut:
             tbl_value = dut[tbl_header]
-            logging.info(f"{tbl_header} set to {tbl_value} in dut structure")
+            logging.debug(f"{tbl_header} set to {tbl_value} in dut structure")
         else:
-            logging.info(f"{tbl_header} NOT in dut structure")
+            logging.warning(f"{tbl_header} NOT in dut structure")
             tbl_value = "Value NOT set in test case"
 
         return tbl_value
@@ -725,7 +742,7 @@ class ReportClient:
 
         testcase_results = self._compile_testcase_results()
         if not testcase_results:
-            logging.info("Skipping the summary testcase report")
+            logging.warning("Skipping the summary testcase report")
             return
 
         table = self._document.add_table(rows=1, cols=7)
@@ -741,7 +758,7 @@ class ReportClient:
         hdr_cells[5].text = "Result"
         hdr_cells[6].text = "Failure or Skip Reason"
         if not testcase_results:
-            logging.info("Skipping the summary testcase report")
+            logging.warning("Skipping the summary testcase report")
             return
         for testcase_result in testcase_results:
             row_cells = table.add_row().cells
@@ -760,8 +777,9 @@ class ReportClient:
     def _write_detail_report(self):
         """Write detailed test case report"""
 
+        logging.info("Creating report detailed test case report section")
         if not self._results_datamodel:
-            logging.info("Skipping the detailed testcase report")
+            logging.warning("Skipping the detailed testcase report")
             return
 
         test_suites = self._results_datamodel["test_suites"]
@@ -816,28 +834,30 @@ class ReportClient:
             dut_section (int): DUT section number
         """
 
-        logging.info(f"Raw DUT data is {dut}")
+        logging.debug(f"Raw DUT data is {dut}")
         dut_name = dut["dut"]
         dut_name = dut_name.upper()
-        logging.info(f"DUT name is {dut_name}")
+        tc_name = dut["name"]
+        logging.info(f"Writing detailed test case results: {tc_name} for dut: {dut_name}")
+        logging.debug(f"DUT name is {dut_name}")
         self._document.add_heading(
             f"{self._major_section}.{minor_section}. {dut_section} DUT: {dut_name}",
             3,
         )
 
         report_styles = REPORT_TEMPLATES.keys()
-        logging.info(f"Inputted the following report styles {report_styles}")
+        logging.debug(f"Inputted the following report styles {report_styles}")
 
         if "report_style" in dut:
             if dut["report_style"] in report_styles:
-                logging.info(f"Report_style is set: {dut['report_style']}, custom")
+                logging.debug(f"Report_style is set: {dut['report_style']}, custom")
                 self._write_custom_detail_dut_section(dut)
             else:
-                logging.info(f"Report_style is incorrect: {dut['report_style']}. Set to default.")
+                logging.debug(f"Report_style is incorrect: {dut['report_style']}. Set to default.")
                 dut["report_style"] = "default"
                 self._write_custom_detail_dut_section(dut)
         else:
-            logging.info("Report_style is NOT set.  Setting to default report_style.")
+            logging.warning("Report_style is NOT set.  Setting to default report_style.")
             dut["report_style"] = "default"
             self._write_custom_detail_dut_section(dut)
 
@@ -850,12 +870,15 @@ class ReportClient:
         """
 
         report_style = dut["report_style"]
+        tc_name = dut["name"]
         report_template = REPORT_TEMPLATES[report_style]
 
         missing_fields = self._required_template_fields(dut, report_template)
 
         if missing_fields:
-            logging.info("Required report fields are NOT in test definitions")
+            logging.warning(
+                "Required report fields are NOT in test definitions for test case: {tc_name}"
+            )
             para = self._document.add_paragraph()
             out_msg = (
                 f"The following required fields are missing: {missing_fields}, ",
@@ -864,7 +887,7 @@ class ReportClient:
             )
             self._write_text(para, out_msg, bold=True, color=RGBColor(255, 0, 0))
         else:
-            logging.info("Required report fields are in test definitions")
+            logging.info(f"Required report fields are in test definitions for test case: {tc_name}")
             self._write_custom_paragraph(dut, report_template)
 
     def _required_template_fields(self, dut, report_template):
@@ -879,10 +902,10 @@ class ReportClient:
             set: Required fields missing from dut data struct
         """
         required_fields = {k for (k, v) in report_template.items() if v["required"]}
-        logging.info(f"The following fields are required: {required_fields}")
-        logging.info(f"DUT keys are {dut.keys()}")
+        logging.warning(f"The following fields are required: {required_fields}")
+        logging.debug(f"DUT keys are {dut.keys()}")
         missing_fields = required_fields.difference(dut.keys())
-        logging.info(f"The following required fields are missing: {missing_fields}")
+        logging.error(f"The following required fields are missing: {missing_fields}")
 
         return missing_fields
 
@@ -910,7 +933,7 @@ class ReportClient:
             else:
                 report_format = "missing"
 
-            logging.info(f"Format for {report_field} is set to {report_format}")
+            logging.debug(f"Format for {report_field} is set to {report_format}")
 
             if report_format == "string":
                 self._write_text(para, report_text)
@@ -920,8 +943,8 @@ class ReportClient:
                 self._write_numbered_list(dut, report_field)
             elif report_format == "dict_string":
                 self._write_dict_string(dut, report_field)
-            elif report_format == "config_list":
-                self._write_config_list(dut, report_field)
+            elif report_format == "config_string":
+                self._write_config_string(dut, report_field)
             elif report_format == "config_term":
                 self._write_config_term(dut, report_field)
             elif report_format == "test_result":
@@ -989,10 +1012,13 @@ class ReportClient:
 
         if report_field in dut:
             report_values = dut[report_field]
+            list_counter = 1
+
             for report_value in report_values:
+                report_value = f"{list_counter}. {report_value}"
                 para = self._document.add_paragraph()
-                para.style = "List Number 2"
-                self._write_text(para, report_value)
+                self._write_text(para, report_value, left_indent=Inches(0.25))
+                list_counter += 1
 
     def _write_dict_string(self, dut, report_field):
         """Write a dictionary in YAML format to Word doc
@@ -1025,7 +1051,7 @@ class ReportClient:
             else:
                 self._write_text(para, "FAIL", bold=True, color=RGBColor(255, 0, 0))
 
-    def _write_config_list(self, dut, report_field):
+    def _write_config_string(self, dut, report_field):
         """Write list of EOS configurations to Word doc with formatting
 
         Args:
@@ -1034,16 +1060,15 @@ class ReportClient:
         """
 
         if report_field in dut:
-            report_values = dut[report_field]
-            for report_value in report_values:
-                para = self._document.add_paragraph()
-                self._write_text(
-                    para,
-                    report_value.strip(),
-                    font="Courier New",
-                    font_size=10,
-                    left_indent=Inches(0.25),
-                )
+            report_value = dut[report_field]
+            para = self._document.add_paragraph()
+            self._write_text(
+                para,
+                report_value,
+                font="Courier New",
+                font_size=10,
+                left_indent=Inches(0.25),
+            )
 
     def _write_config_term(self, dut, report_field):
         """Write EOS configurations to Word doc with formatting to appear
@@ -1056,27 +1081,26 @@ class ReportClient:
 
         if report_field in dut and "show_cmds" in dut:
             table = self._document.add_table(rows=1, cols=1, style="Table Grid")
-            report_values = dut[report_field]
+
+            show_cmd_txts = dut["show_cmd_txts"]
             show_cmds = dut["show_cmds"]
-            dut_name = dut["dut"]
-
-            logging.info(f"These are recorded report values: {report_values}")
-            for index, report_value in enumerate(report_values):
-                if index != 0:
-                    _ = table.add_row().cells
-
-                config_output = f"\n{dut_name}# {show_cmds[index]}\n\n{report_value}\n"
-                self._write_cell(
-                    table,
-                    config_output,
-                    0,
-                    index,
-                    font="Courier New",
-                    font_size=10,
-                    color="0A0A0A",
-                    text_color=RGBColor(0, 255, 0),
-                )
-                logging.info(f"Adding value to report: {report_value.strip()}")
+            index = 0
+            for dut_name in show_cmds.keys():
+                for command, text in zip(show_cmds.get(dut_name), show_cmd_txts.get(dut_name)):
+                    if index != 0:
+                        _ = table.add_row().cells
+                    config_output = f"\n{dut_name}# {command}\n\n{text}\n"
+                    self._write_cell(
+                        table,
+                        config_output,
+                        0,
+                        index,
+                        font="Courier New",
+                        font_size=10,
+                        color="0A0A0A",
+                        text_color=RGBColor(0, 255, 0),
+                    )
+                    index = index + 1
 
             para = self._document.add_paragraph()
             _ = para.add_run()
@@ -1088,10 +1112,10 @@ class ReportClient:
             suite_results (list): List of compiled test suite data
         """
 
-        logging.info(f"The following test suites have been collected {self._results_datamodel}")
+        logging.debug(f"The following test suites have been collected {self._results_datamodel}")
 
         if not self._results_datamodel:
-            logging.info("Skipping the compiled test suite result")
+            logging.warning("Skipping the compiled test suite result")
             return ""
 
         test_suites = self._results_datamodel["test_suites"]
@@ -1106,7 +1130,7 @@ class ReportClient:
             suite_result["name"] = test_suite["name"]
 
             suite_name = suite_result["name"]
-            logging.info(
+            logging.warning(
                 "Zeroing test_suite results for test suite: "
                 f"{suite_name} and data: {suite_result}"
             )
@@ -1123,17 +1147,17 @@ class ReportClient:
                     else:
                         suite_result["total_fail"] += 1
 
-            logging.info(f"Compiled test suite data: {suite_result}")
+            logging.debug(f"Compiled test suite data: {suite_result}")
             suite_results.append(suite_result)
 
-        logging.info(f"Compiled suite results: {suite_results}")
+        logging.debug(f"Compiled suite results: {suite_results}")
         return suite_results
 
     def _compile_testcase_results(self):
         """Compile test case results and return them"""
 
         if not self._results_datamodel:
-            logging.info("Skipping test case results")
+            logging.warning("Skipping test case results")
             return ""
 
         test_suites = self._results_datamodel["test_suites"]
@@ -1154,7 +1178,7 @@ class ReportClient:
 
                     dut_name = dut["dut"]
                     fail_reason = dut["fail_or_skip_reason"]
-                    logging.info(f"Compiling results for DUT/s {dut_name}")
+                    logging.debug(f"Compiling results for DUT/s {dut_name}")
                     testcase_id = dut["test_id"]
 
                     if dut["test_result"] and dut["test_result"] == "Skipped":
@@ -1171,14 +1195,14 @@ class ReportClient:
                     testcase_result["dut"] = dut_name
                     testcase_result["results"] = test_result
                     testcase_result["fail_or_skip_reason"] = fail_reason
-                    logging.info(f"Compiled results: {testcase_result}")
+                    logging.debug(f"Compiled results: {testcase_result}")
 
                     testcase_results.append(testcase_result)
-                    logging.info(f"After testcase results struct appended: {testcase_results}")
+                    logging.debug(f"After testcase results struct appended: {testcase_results}")
 
-                logging.info(f"Interim dut -- testcase results struct {testcase_results}")
+                logging.debug(f"Interim dut -- testcase results struct {testcase_results}")
 
-        logging.info(f"Returning testcase result {testcase_results}")
+        logging.debug(f"Returning testcase result {testcase_results}")
         return testcase_results
 
     def _format_ts_name(self, ts_name):
@@ -1192,12 +1216,12 @@ class ReportClient:
             ts_name (str): Formatted test suite name
         """
 
-        logging.info(f"Test suite name is {ts_name}")
+        logging.debug(f"Test suite name is {ts_name}")
         ts_name = ts_name.split(".")[0]
         ts_name = ts_name.split("_")
         if len(ts_name) > 1:
             ts_name = ts_name[1].capitalize()
-        logging.info(f"Formatted test suite name is {ts_name}")
+        logging.debug(f"Formatted test suite name is {ts_name}")
 
         return ts_name
 
@@ -1212,10 +1236,11 @@ class ReportClient:
             tc_name (str): Formatted test case name
         """
 
-        logging.info(f"Test case name is {tc_name}")
-        tc_name = " ".join(tc_name.split("_"))[:-3]
+        logging.debug(f"Test case name is {tc_name}")
+        tc_name = tc_name.replace("_", " ")
         tc_name = tc_name.replace("intf", "interface")
         tc_name = tc_name.capitalize()
-        logging.info(f"Formattted test case name is {tc_name}")
+
+        logging.debug(f"Formattted test case name is {tc_name}")
 
         return tc_name

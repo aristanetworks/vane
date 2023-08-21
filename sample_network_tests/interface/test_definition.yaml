@@ -5,83 +5,163 @@
       # interface protocol status
       expected_output: up
       show_cmd: show interfaces status
+      report_style: modern
+      test_criteria: Verify the interfaces of interest protocol statuses are connected
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_link_status_is_connected_on_
       description: Verify the interfaces of interest link statuses are connected
       # interface link status
       expected_output: connected
       show_cmd: show interfaces status
+      report_style: modern
+      test_criteria: Verify the interfaces of interest link statuses are connected
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_phy_status_connected_on_
-      description: Verify the interfaces of interest link statuses are connected
+      description: Verify the interfaces of interest physical state is link up
       # interface physical status
       expected_output: linkUp
       show_cmd: show interfaces phy detail
+      report_style: modern
+      test_criteria: Verify the interfaces of interest physical state is link up
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_counters_has_input_errors_on_
       description: Verify the interfaces of interest does not have input errors
       # Number of tolerable input errors
       expected_output: 0
       show_cmd: show interfaces counters errors
+      report_style: modern
+      test_criteria: Verify the interfaces of interest does not have input errors
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_counters_has_output_errors_on_
-      description: Verify the interfaces of interest does not have outut errors
+      description: Verify the interfaces of interest does not have output errors
       # Number of tolerable output errors
       expected_output: 0
       show_cmd: show interfaces counters errors
+      report_style: modern
+      test_criteria:  Verify the interfaces of interest does not have output errors
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_counters_has_frame_too_short_errors_on_
       description: Verify the interfaces of interest have no frameTooShorts errors
       # Number of tolerable frameTooShorts errors
       expected_output: 0
       show_cmd: show interfaces counters errors
+      report_style: modern
+      test_criteria: Verify the interfaces of interest have no frameTooShorts errors
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_counters_has_frame_too_long_errors_on_
       description: Verify the interfaces of interest have no frameTooLong errors
       # Number of tolerable frameLongShorts errors
       expected_output: 0
       show_cmd: show interfaces counters errors
+      report_style: modern
+      test_criteria: Verify the interfaces of interest have no frameTooLong errors
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_counters_has_fcs_errors_on_
       description: Verify the interfaces of interest have no fcsErrors errors
       # Number of tolerable fcsErrors errors
       expected_output: 0
       show_cmd: show interfaces counters errors
-    - name: test_if_intf_counters_has_fcs_errors_on_
-      description: Verify the interfaces of interest have no fcsErrors errors
-      # Number of tolerable fcsErrors errors
-      expected_output: 0
-      show_cmd: show interfaces counters errors
+      report_style: modern
+      test_criteria: Verify the interfaces of interest have no fcsErrors errors
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_counters_has_alignment_errors_on_
       description: Verify the interfaces of interest have no alignmentErrors errors
       # Number of tolerable alignmentErrors errors
       expected_output: 0
       show_cmd: show interfaces counters errors
+      report_style: modern
+      test_criteria: Verify the interfaces of interest have no alignmentErrors errors
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_counters_has_symbol_errors_on_
       description: Verify the interfaces of interest have no symbolErrors errors
       # Number of tolerable symbolErrors errors
       expected_output: 0
       show_cmd: show interfaces counters errors
+      report_style: modern
+      test_criteria: Verify the interfaces of interest have no symbolErrors errors
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
+    - name: test_if_interface_errors_on_
+      description: Verifies interfaces L1 errors (Rx, Giants, Tx, Runts, FCS, Align)
+      # Number of tolerable errors
+      expected_output: 0
+      show_cmd: show interfaces
+      report_style: modern
+      test_criteria: Verifies interfaces L1 errors (Rx, Giants, Tx, Runts, FCS, Align)
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
+    - name: test_interface_utilization_on_
+      description: Verify input and output bandwidth utilization of interfaces
+      # Number of tolerable errors
+      expected_output: 70
+      show_cmd: show interfaces
+      report_style: modern
+      test_criteria: Verify input and output bandwidth utilization of interfaces
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_out_counters_are_discarding_on_
       description: Verify the interfaces of interest have no outDiscards
       # Number of tolerable outDiscards errors
       expected_output: 0
       show_cmd: show interfaces counters discards
+      report_style: modern
+      test_criteria: Verify the interfaces of interest have no outDiscards
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_in_counters_are_discarding_on_
       description: Verify the interfaces of interest have no inDiscards
       # Number of tolerable inDiscards errors
       expected_output: 0
       show_cmd: show interfaces counters discards
-    - name: test_if_intf_in_counters_are_discarding_on_
-      description: Verify the interfaces of interest have no inDiscards
-      # Number of tolerable inDiscards errors
-      expected_output: 0
-      show_cmd: show interfaces counters discards
+      report_style: modern
+      test_criteria: Verify the interfaces of interest have no inDiscards
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1
     - name: test_if_intf_mtu_is_correct_on_
       description: Verify the interfaces of interest MTU
       # Interface MTU size
       expected_output: 1500
       show_cmd: show interfaces
-    - name: test_if_interface_errors_on_
-      description: Verifies interfaces L1 errors (Rx, Giants, Tx, Runts, FCS, Align)
-      # Number of tolerable errrors
-      expected_output: 0
-      show_cmd: show interfaces
-    - name: test_interface_utilization_on_
-      description: Verifies interfaces L1 errors (Rx, Giants, Tx, Runts, FCS, Align)
-      # Number of tolerable errrors
-      expected_output: 70
-      show_cmd: show interfaces
+      report_style: modern
+      test_criteria: Verify the interfaces of interest MTU
+      criteria: names
+      filter: 
+        - DSR01
+        - DCBBW1

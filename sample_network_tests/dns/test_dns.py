@@ -81,9 +81,7 @@ class DNSTests:
                 """
                 TS: Running ping commands on the DUT
                 """
-                self.output = tops.run_show_cmds([show_cmd], encoding="text")[0][
-                    "result"
-                ]["output"]
+                self.output = tops.run_show_cmds([show_cmd], encoding="text")[0]["result"]["output"]
                 assert self.output, "PING Command details are not collected."
                 logging.info(
                     f"On device {tops.dut_name} output of {show_cmd} command is: {self.output}"
@@ -94,14 +92,12 @@ class DNSTests:
                 if tops.actual_output == tops.expected_output:
                     result = True
                     tops.output_msg += (
-                        f"\nOn router {tops.dut_name}, DNS resolution is"
-                        f"{result} for {url}.\n"
+                        f"\nOn router {tops.dut_name}, DNS resolution is {result} for {url}.\n"
                     )
                 else:
                     result = False
                     tops.output_msg += (
-                        f"\nOn router {tops.dut_name}, DNS resolution is"
-                        f"{result} for {url}.\n"
+                        f"\nOn router {tops.dut_name}, DNS resolution is {result} for {url}.\n"
                     )
 
                 tops.actual_results.append(tops.actual_output)
@@ -159,9 +155,7 @@ class DNSTests:
                 TS: Running ping commands on the DUT
                 """
 
-                self.output = tops.run_show_cmds([show_cmd], "text")[0]["result"][
-                    "output"
-                ]
+                self.output = tops.run_show_cmds([show_cmd], "text")[0]["result"]["output"]
                 assert self.output, "PING Command details are not collected."
                 logging.info(
                     f"On device {tops.dut_name} output of {show_cmd} command is: {self.output}"
@@ -173,15 +167,13 @@ class DNSTests:
                     result = True
                     tops.output_msg += (
                         f"\nOn router {tops.dut_name}, verifying DNS "
-                        f"server reachability for {dns_server} is "
-                        f"{result}.\n"
+                        f"server reachability for {dns_server} is {result}.\n"
                     )
                 else:
                     result = False
                     tops.output_msg += (
                         f"\nOn router {tops.dut_name}, verifying DNS "
-                        f"server reachability for {dns_server} is "
-                        f"{result}.\n"
+                        f"server reachability for {dns_server} is {result}.\n"
                     )
 
                 tops.actual_results.append(tops.actual_output)
@@ -253,9 +245,7 @@ class DNSTests:
                     tops.expected_results.append(tops.expected_output)
 
                 if dns_intf and dns_vrf:
-                    dns_server_cfg = (
-                        f"ip domain lookup vrf {dns_vrf} source-interface {dns_intf}"
-                    )
+                    dns_server_cfg = f"ip domain lookup vrf {dns_vrf} source-interface {dns_intf}"
                 elif dns_intf:
                     dns_server_cfg = f"ip domain lookup source-interface {dns_intf}"
                 else:
@@ -285,14 +275,13 @@ class DNSTests:
             if tops.actual_results == tops.expected_results:
                 tops.test_result = True
                 tops.output_msg += (
-                    f"{tops.dut_name} has the dns config "
-                    f"{dns_cfg} which is correct.\n\n"
+                    f"{tops.dut_name} has the dns config {dns_cfg} which is correct.\n\n"
                 )
             else:
                 tops.test_result = False
                 tops.output_msg += (
-                    f"{tops.dut_name} has the dns config\n"
-                    f"{dns_cfg}\nwhile the correct dns config is\n"
+                    f"{tops.dut_name} has actual dns config\n"
+                    f"{dns_cfg}\nwhile the expected dns config is\n"
                     f"{vane_dns_cfg}\n\n"
                 )
 

@@ -203,9 +203,7 @@ def show_markers():
             marker_description = i.split(": ")[1]
 
             if marker_name not in inbuilt_list:
-                marker_list.append(
-                    {"marker": marker_name, "description": marker_description}
-                )
+                marker_list.append({"marker": marker_name, "description": marker_description})
 
     return marker_list
 
@@ -243,7 +241,7 @@ def create_duts_from_topo(topology_file):
 def download_test_results():
     """
     function responsible for creating a zip of the
-    TEST RESULTS folder and storing it in ZIP:TEST RESULTS folder.
+    TEST RESULTS folder and storing it in TEST RESULTS ARCHIVE folder.
     """
     logging.info("Downloading a zip file of the TEST RESULTS folder")
 
@@ -252,7 +250,6 @@ def download_test_results():
 
     source = "reports/TEST RESULTS"
     destination = "reports/TEST RESULTS ARCHIVES/" + dt_string
-
     if os.path.exists(source):
         shutil.make_archive(destination, "zip", source)
 
@@ -267,13 +264,15 @@ def main():
         print(f"{show_markers()}")
 
     elif args.generate_test_steps:
+        logging.info(
+            f"Generating test steps for test cases within {args.generate_test_steps} "
+            f"test directory\n"
+        )
         write_test_steps(args.generate_test_steps)
 
     else:
         if args.definitions_file:
-            logging.warning(
-                f"Changing Definitions file name to {args.definitions_file}"
-            )
+            logging.warning(f"Changing Definitions file name to {args.definitions_file}")
             vane.config.DEFINITIONS_FILE = args.definitions_file
 
         if args.duts_file:
@@ -281,6 +280,10 @@ def main():
             vane.config.DUTS_FILE = args.duts_file
 
         if args.generate_duts_file:
+            logging.info(
+                f"Generating DUTS File from topology: {args.generate_duts_file[0]} and "
+                f"inventory: {args.generate_duts_file[1]} file.\n"
+            )
             vane.config.DUTS_FILE = tests_tools.create_duts_file(
                 args.generate_duts_file[0], args.generate_duts_file[1]
             )
@@ -289,6 +292,9 @@ def main():
             vane.config.ENVIRONMENT = args.environment
 
         if args.generate_duts_from_topo:
+            logging.info(
+                f"Generating DUTS File from topology: {args.generate_duts_from_topo[0]} file.\n"
+            )
             create_duts_from_topo(args.generate_duts_from_topo[0])
 
         run_tests(vane.config.DEFINITIONS_FILE, vane.config.DUTS_FILE)

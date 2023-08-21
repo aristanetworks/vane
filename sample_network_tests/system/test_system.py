@@ -96,9 +96,9 @@ class CrashTests:
         else:
             tops.test_result = False
             tops.output_msg = (
-                f"\nOn router {tops.dut_name} number of agent crashes is "
+                f"\nOn router {tops.dut_name} the actual number of agent crashes is "
                 f"{tops.actual_output} while "
-                "correct number of agent crashes is "
+                "the expected number of agent crashes is "
                 f"{tops.expected_output}.\n"
             )
 
@@ -155,8 +155,8 @@ class SystemTests:
         else:
             tops.test_result = False
             tops.output_msg = (
-                f"On router {tops.dut_name} EOS version is "
-                f"{tops.actual_output}%, while the correct version is "
+                f"On router {tops.dut_name} the actual EOS version is "
+                f"{tops.actual_output}%, while the expected EOS version is "
                 f"{tops.expected_output}%"
             )
         tops.parse_test_steps(self.test_if_eos_version_is_correct_on_)

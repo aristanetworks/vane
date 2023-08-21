@@ -1,0 +1,44 @@
+DSR01:
+  schema:
+  template: |
+   interface Ethernet5
+   no switchport
+   vrf DVT-2
+   ip address 192.168.2.1/31
+   ip route vrf DVT-2 0.0.0.0/0 192.168.2.0
+DCBBW1:
+  schema:
+  template: |
+   interface Ethernet16
+   no switchport
+   ip address 192.168.2.2/31
+DCBBW2:
+  schema:
+  template: |
+   interface Ethernet5
+   no switchport
+   vrf DVT-2
+   ip address 192.168.2.3/31
+   ip route vrf DVT-2 0.0.0.0/0 192.168.2.0
+UNCONFIGURED-DUT:
+  schema:
+  template: |
+   interface Ethernet10
+   no switchport
+   vrf DVT-2
+   ip address 192.168.2.10/31
+   ip route vrf DVT-2 0.0.0.0/0 192.168.2.0
+DCBBE1:
+  schema:
+  template: |
+   interface Ethernet16
+   no switchport
+   ip address 192.168.2.4/31
+DCBBE2:
+  schema:
+  template: |
+   interface Ethernet5
+   no switchport
+   vrf DVT-2
+   ip address 192.168.2.5/31
+   ip route vrf DVT-2 0.0.0.0/0 192.168.2.0

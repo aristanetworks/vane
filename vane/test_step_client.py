@@ -37,6 +37,7 @@ import re
 from pathlib import Path
 import datetime
 from mdutils.mdutils import MdUtils
+from vane.vane_logging import logging
 
 
 class TestStepClient:
@@ -50,17 +51,23 @@ class TestStepClient:
             test steps
         """
 
+        logging.info("Creating Test Step Client object")
+        logging.debug(f"Set Test Step Client object directory to {test_dir}")
         self._test_dirs = test_dir
 
     def write_test_steps(self):
         """starts the execution of writing test steps"""
+        logging.info("Start writing test case steps")
         self.walk_dir()
+        logging.info("Ending writing test case steps")
 
     def walk_dir(self):
         """Walks through each directory"""
         for test_dir in self._test_dirs:
+            logging.debug(f"Walking directory {test_dir} for test cases")
             test_files = []
             for root, _dirs, files in os.walk(test_dir, topdown=False):
+                logging.debug(f"Discovered files {files} in directory {test_dir}")
                 test_files.extend(
                     os.path.join(root, name)
                     for name in files
@@ -68,6 +75,8 @@ class TestStepClient:
                     and name.endswith(".py")
                     or name.endswith("_test.py")
                 )
+
+            logging.debug(f"Discovered test files: {test_files} for parsing")
             self.parse_file(test_files)
 
     def parse_file(self, test_files):
@@ -76,7 +85,9 @@ class TestStepClient:
         Args:
             test_files (list): List of test file names collected directory walk
         """
+        logging.info("Parsing files for test steps and definitions")
         for test_file in test_files:
+            logging.debug(f"Parsing file: {test_file} for test steps and definitions")
             comments = []
             with open(test_file, "r", encoding="utf_8") as infile:
                 content = infile.read()
@@ -90,6 +101,8 @@ class TestStepClient:
                 comments.append("N/a no Test Steps found")
             now = (datetime.datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
             comments.insert(0, now)
+
+            logging.debug(f"Create JSON and MD files for {test_file} using {comments}")
             self.output_json({test_file: comments})
             self.output_md({test_file: comments})
 
@@ -116,6 +129,7 @@ class TestStepClient:
             md_file.new_line(f"Date generated: {steps[0]}")
             test_steps_list = []
             for step in steps:
+                logging.debug(f"Checking step: {step} for TD or TS info")
                 # Create Title for Test Definition
                 if step.startswith("TD:"):
                     # Add Test steps to Document where

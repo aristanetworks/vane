@@ -70,43 +70,50 @@ class TacacsTests:
 
         if tacacs_servers:
             try:
+                self.output = dut["output"][tops.show_cmd]["json"]
                 """
                 TS: Run show command `show tacacs` on dut
                 """
-                self.output = dut["output"][tops.show_cmd]["json"]
-                assert self.output, "TACACS details are not collected."
+                output_1 = dut["output"][tops.show_cmd]["json"]
+                assert output_1, "TACACS details are not collected."
                 logging.info(
-                    f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+                    f"On device {tops.dut_name} output of {tops.show_cmd} command is: {output_1}"
                 )
-
-                eos_messages_sent_1 = self.output["tacacsServers"][0]["messagesSent"]
 
                 """
                 TS: Run `show tacacs` on dut again in order to see if messagesSent increments
                 """
-                self.output = tops.run_show_cmds(tops.show_cmd, "text")[0]["result"]
-                assert self.output, "TACACS details are not collected."
+                output_2 = tops.run_show_cmds(tops.show_cmd, "text")[0]["result"]
+                assert output_2, "TACACS details are not collected."
                 logging.info(
-                    f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+                    f"On device {tops.dut_name} output of {tops.show_cmd} command is: {output_2}"
                 )
 
-                eos_messages_sent_2 = self.output["tacacsServers"][0]["messagesSent"]
+                # Setting default value
+                tops.test_result = False
 
-                if eos_messages_sent_1 < eos_messages_sent_2:
-                    tops.test_result = True
+                for server in range(len(self.output["tacacsServers"])):
+                    eos_messages_sent_1 = output_1["tacacsServers"][server]["messagesSent"]
+
+                    eos_messages_sent_2 = output_2["tacacsServers"][server]["messagesSent"]
+
+                    # If passes for any server, we break and assert True
+                    if eos_messages_sent_1 < eos_messages_sent_2:
+                        tops.test_result = True
+                        tops.output_msg = (
+                            f"\nOn router {tops.dut_name} TACACS messages2 sent: "
+                            f"{eos_messages_sent_2} correctly increments from TACACS "
+                            f"messages1 sent: {eos_messages_sent_1}"
+                        )
+                        break
+
+                if not tops.test_result:
                     tops.output_msg = (
-                        f"\nOn router {tops.dut_name} TACACS messages2 sent: "
-                        f"{eos_messages_sent_2} increments from TACACS "
-                        f"messages1 sent: {tops.actual_output}"
+                        f"\nOn router {tops.dut_name} none of TACACS servers "
+                        f"messages sent are incrementing"
                     )
-                else:
-                    tops.test_result = False
-                    tops.output_msg = (
-                        f"\nOn router {tops.dut_name} TACACS messages2 sent: "
-                        f"{eos_messages_sent_2} doesn't increments from "
-                        f"TACACS messages1 sent: {eos_messages_sent_1}"
-                    )
-                assert eos_messages_sent_1 < eos_messages_sent_2
+
+                assert tops.test_result
 
             except (
                 AssertionError,
@@ -118,18 +125,14 @@ class TacacsTests:
                     f"Error occurred during the testsuite execution on dut: {tops.dut_name}"
                     f" is {str(exception)}"
                 )
+
         else:
-            """
-            TS: TACACS servers are not configured on the dut hence terminating the test
-            """
             tops.actual_output = "N/A"
             tops.expected_output = "N/A"
             tops.test_result = True
             self.output = (
                 tops.output_msg
-            ) = (
-                tops.comment
-            ) = f"\nRouter {tops.dut_name} does not have TACACS servers configured"
+            ) = tops.comment = f"\nRouter {tops.dut_name} does not have TACACS servers configured"
 
         tops.parse_test_steps(self.test_if_tacacs_is_sending_messages_on_)
         tops.generate_report(tops.dut_name, self.output)
@@ -149,47 +152,50 @@ class TacacsTests:
 
         if tacacs_servers:
             try:
+                self.output = dut["output"][tops.show_cmd]["json"]
                 """
                 TS: Run show command `show tacacs` on dut
                 """
-                self.output = dut["output"][tops.show_cmd]["json"]["tacacsServers"]
-                assert self.output, "TACACS details are not collected."
+                output_1 = dut["output"][tops.show_cmd]["json"]
+                assert output_1, "TACACS details are not collected."
                 logging.info(
-                    f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+                    f"On device {tops.dut_name} output of {tops.show_cmd} command is: {output_1}"
                 )
-
-                eos_messages_received_1 = self.output[0]["messagesReceived"]
 
                 """
                 TS: Run `show tacacs` on dut again in order to see if messagesSent increments
                 """
-                self.output = tops.run_show_cmds(tops.show_cmd, "text")[0]["result"]
-                assert self.output, "TACACS details are not collected."
+                output_2 = tops.run_show_cmds(tops.show_cmd, "text")[0]["result"]
+                assert output_2, "TACACS details are not collected."
                 logging.info(
-                    f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+                    f"On device {tops.dut_name} output of {tops.show_cmd} command is: {output_2}"
                 )
 
-                eos_messages_received_2 = self.output["tacacsServers"][0][
-                    "messagesReceived"
-                ]
+                # Setting default value
+                tops.test_result = False
 
-                if eos_messages_received_1 < eos_messages_received_2:
-                    tops.test_result = True
+                for server in range(len(self.output["tacacsServers"])):
+                    eos_messages_received_1 = output_1["tacacsServers"][server]["messagesReceived"]
+
+                    eos_messages_received_2 = output_2["tacacsServers"][server]["messagesReceived"]
+
+                    # If passes for any server, we break and assert True
+                    if eos_messages_received_1 < eos_messages_received_2:
+                        tops.test_result = True
+                        tops.output_msg = (
+                            f"\nOn router {tops.dut_name} TACACS messages2 received: "
+                            f"{eos_messages_received_2} correctly increments from TACACS "
+                            f"messages1 received: {eos_messages_received_1}"
+                        )
+                        break
+
+                if not tops.test_result:
                     tops.output_msg = (
-                        f"\nOn router {tops.dut_name} TACACS messages2 "
-                        f"received: {eos_messages_received_2} increments "
-                        "from TACACS messages1 received: "
-                        f"{eos_messages_received_1}"
+                        f"\nOn router {tops.dut_name} none of TACACS servers "
+                        f"messages received are incrementing"
                     )
-                else:
-                    tops.test_result = False
-                    tops.output_msg = (
-                        f"\nOn router {tops.dut_name} TACACS messages2 "
-                        f"received: {eos_messages_received_2} doesn't "
-                        "increments from TACACS messages1 received: "
-                        f"{eos_messages_received_1}"
-                    )
-                assert eos_messages_received_1 < eos_messages_received_2
+
+                assert tops.test_result
             except (
                 AssertionError,
                 AttributeError,
@@ -201,17 +207,12 @@ class TacacsTests:
                     f" is {str(exception)}"
                 )
         else:
-            """
-            TS: TACACS servers are not configured on the dut hence terminating the test
-            """
             tops.actual_output = "N/A"
             tops.expected_output = "N/A"
             tops.test_result = True
             self.output = (
                 tops.output_msg
-            ) = (
-                tops.comment
-            ) = f"\nRouter {tops.dut_name} does not have TACACS servers configured"
+            ) = tops.comment = f"\nRouter {tops.dut_name} does not have TACACS servers configured"
 
         tops.parse_test_steps(self.test_if_tacacs_is_receiving_messages_on_)
         tops.generate_report(tops.dut_name, self.output)

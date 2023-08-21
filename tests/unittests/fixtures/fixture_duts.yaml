@@ -1,0 +1,37 @@
+duts:
+- mgmt_ip: 10.255.50.212
+  name: DSR01
+  neighbors:
+  - neighborDevice: DCBBW1
+    neighborPort: Ethernet1
+    port: Ethernet1
+  - neighborDevice: DCBBW2
+    neighborPort: Ethernet1
+    port: Ethernet2
+  - neighborDevice: DCBBE1
+    neighborPort: Ethernet1
+    port: Ethernet3
+  - neighborDevice: DCBBE2
+    neighborPort: Ethernet1
+    port: Ethernet4
+  password: cvp123!
+  transport: https
+  username: cvpadmin
+  role: unknown
+- mgmt_ip: 10.255.31.234
+  name: DCBBW1
+  neighbors:
+  - neighborDevice: DSR01
+    neighborPort: Ethernet1
+    port: Ethernet1
+  - neighborDevice: BLFW1
+    neighborPort: Ethernet1
+    port: Ethernet3
+  - neighborDevice: BLFW2
+    neighborPort: Ethernet1
+    port: Ethernet4
+  password: cvp123!
+  transport: https
+  username: cvpadmin
+  role: unknown
+servers: []

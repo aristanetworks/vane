@@ -2,17 +2,73 @@
 
 Network Certification Tool
 
-![Coverage](./resources/coverage.svg)
+![Coverage](https://raw.githubusercontent.com/aristanetworks/vane/coverage-badge/coverage.svg)
 
 ## Description
 
-A weather vane is an instrument used for showing the direction of the wind.
-Just like a weather vane, Vane is a network certification tool that shows a
-network's readiness for production based on validation tests.
+Vane is an open source, network validation tool which runs tests against Arista networking 
+devices, by connecting to devices on a given network, executing commands and performing 
+tests against their output.  Vane eliminates repetitive testing tasks by automating network
+validation which can take users months to complete.
 
 ## Installation
 
-Let user know how to install
+The Vane application is installed using the Python poetry packaging system. 
+
+Install vane with the following command:
+```
+    vane # poetry install
+```
+
+This command always installs the package in a modifiable state, similar to the `pip install -e`
+option. Any changes made to the Vane source will be reflected in the poetry
+virtual environment.
+
+The virtual environment is also not active when the application is first installed.
+
+To start the poetry virtual environment, issue the following command:
+```
+    vane # poetry shell
+    ...
+    (vane-py3.9) vane #
+```
+An alias, `activate`, has also been created for the command `source $(poetry env info
+--path)/bin/activate`, which is an equivalent command to the `poetry shell` command.
+```
+    vane # activate
+    ...
+    (vane-py3.9) vane #
+```
+
+In either case, the prompt will change to indicate the virtual environment is active by prefixing
+the project name and python version, and Vane work can now be done in the environment.
+
+Running the unit tests (validating Vane Framework):
+```
+    (vane-py3.9) vane # make unittest
+```
+
+The system tests require virtual or physical EOS switches to test on. For
+testing the Vane package we typically use vEOS devices. The default Makefile
+uses the Arista Cloud Test environment for testing.
+
+Running the system tests:
+```
+    (vane-py3.9) vane # make sample_network_tests
+```
+
+Running the unit and system tests together.
+```
+    (vane-py3.9) vane # make tests
+```
+
+The coverage report is printed after running the unittest or systest. You can
+run the coverage report at any time after running the tests.
+```
+    (vane-py3.9) vane # make coverage_report
+```
+
+For detailed information on the installation, please refer to [Getting Started with Vane document](docs/GettingStartedwithVane.pdf)
 
 ## Development
 
@@ -32,13 +88,7 @@ Contributed pull requests are gladly welcomed for this project.
     python3 vane.py --definitions_file definitions.yaml
 ```
 
-3. Listing the inputs from excel_definitions file.
-
-```
-    python3 vane.py --input
-```
-
-4. Listing the available test markers.
+3. Listing the available test markers.
 
     filesystem
     daemons
@@ -76,154 +126,13 @@ Contributed pull requests are gladly welcomed for this project.
     python3 vane.py --marker
 ```
 
-5. Running specific markers (specific test suites)
+4. Running specific markers (specific test suites)
 	
 
     Change the 'mark' parameter value in definitions.yaml file to one of the above supported markers (for example, 'nrfu') and then run vane.py script
 
 ```
     python3 vane.py
-```
-
-### Testing Vane Package using Docker development container
-
-Build and run the docker development container using:
-```
-    make dev
-    ...
-    project # 
-```
-
-First step is to install Vane. If you are just running tests and will not be
-modifying the source, running in a pipeline, then use the following command:
-```
-    project # make install
-```
-
-If you are debugging and modifying the source then use the following command to
-install from source. You can use 'pip list' to check if vane was installed.
-ONLY USE ONE OF THE INSTALLATION APPROACHES.
-```
-    project # pip install -e .
-```
-
-Running the unit tests:
-```
-    project # make unittest
-```
-
-The system tests require virtual or physical EOS switches to test on. For
-testing the Vane package we typically use vEOS devices. The default Makefile
-uses the Arista Cloud Test environment for testing.
-
-Running the system tests:
-```
-    project # make systest
-```
-
-Running the unit and system tests together.
-```
-    project # make tests
-```
-
-The coverage report is printed after running the unittest or systest. You can
-run the coverage report at any time after running the tests.
-```
-    project # make coverage_report
-```
-
-### Testing Vane Package using python virtual env
-
-Build and run the docker development container using:
-```
-    python3.9 -m venv venv
-    source venv/bin/activate
-    ...
-    (venv) $ 
-```
-
-First step is to install Vane. If you are just running tests and will not be
-modifying the source, running in a pipeline, then use the following command:
-```
-    (venv) $ pip3.9 install -r requirements.txt
-    (venv) $ make install
-```
-Running the unit tests:
-```
-    (venv) $ pytest --cov-report term-missing --cov=vane tests/unittests
-```
-
-Running the system tests:
-```
-    (venv) $ vane --definitions_file tests/systests/fixtures/definitions.yaml --duts_file tests/fixtures/duts.yaml
-```
-
-The coverage report is printed after running the unittest or systest. You can
-run the coverage report at any time after running the tests.
-```
-   (venv) $ make coverage_report
-```
-
-### Test Directory Hierarchy
-
-```
-tests
-├── fixtures
-│   ├── spreadsheets
-│   └── templates
-├── systests
-│   ├── aaa
-│   ├── api
-│   ├── cpu
-│   ├── daemon
-│   ├── dns
-│   ├── environment
-│   ├── extension
-│   ├── filesystem
-│   ├── fixtures
-│   │   └── reports
-│   │       ├── assets
-│   │       └── results
-│   ├── host
-│   ├── interface
-│   ├── lldp
-│   ├── log
-│   ├── memory
-│   ├── ntp
-│   ├── system
-│   ├── tacacs
-│   ├── users
-│   └── ztp
-└── unittests
-    └── fixtures
-        ├── reports
-        │   └── results
-        └── spreadsheets
-```
-
-The tests/fixtures file contains fixtures that are used by both the unittest
-and the systest.
-
-### Build Docker Container
-
-The docker container approach for development can be used to ensure that
-everybody is using the same development environment while still being flexible
-enough to use the repo you are making changes in. You can inspect the
-Dockerfile to see what packages have been installed. Note that specifying the
-build arguments allows you to run the container as your user-id and not as the
-default user docker.
-
-```
-    $ docker build -t repo-name . --build-arg UID=$(id -u) --build-arg GID=$(id -g) --build-arg UNAME=$(id -un)
-```
-
-### Run the Docker Container
-
-Start up the docker container from the root of the repo directory with the
-following command.
-
-```
-    $ docker run -it --volume "$(pwd):/repo-name" repo-name
 ```
 
 ## Contributing
@@ -235,7 +144,7 @@ rejected.
 
 ## License
 
-Copyright (c) 2020, Arista Networks EOS+
+Copyright (c) 2023, Arista Networks EOS+
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

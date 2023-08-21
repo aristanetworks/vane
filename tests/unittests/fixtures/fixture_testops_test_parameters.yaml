@@ -1,0 +1,15 @@
+comment: null
+criteria: names
+description: Verify memory is not exceeding high utilization
+expected_output: 80
+filter:
+- DSR01
+- DCBBW1
+name: test_memory_utilization_on_
+report_style: modern
+result: true
+show_cmd: show version
+test_criteria: Verify memory is not exceeding high utilization
+test_suite: test_memory.py
+test_id: 1
+dut: "DSR01"

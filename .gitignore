@@ -63,3 +63,4 @@ cover/*
 MANIFEST
 venv
 tests/systests/fixtures/reports/*
+poetry.lock

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 #
-# Copyright (c) 2019, Arista Networks EOS+
+# Copyright (c) 2023, Arista Networks EOS+
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -32,10 +32,18 @@
 """ Tests to validate base feature status."""
 
 import pytest
+from pyeapi.eapilib import EapiError
 from vane import tests_tools
+from vane.vane_logging import logging
+from vane.config import dut_objs, test_defs
 
 
 TEST_SUITE = __file__
+LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
+
+dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
+test1_duts = dut_parameters["test_if_hostname_is_correcet_on_"]["duts"]
+test1_ids = dut_parameters["test_if_hostname_is_correcet_on_"]["ids"]
 
 
 @pytest.mark.demo
@@ -44,13 +52,13 @@ TEST_SUITE = __file__
 @pytest.mark.host
 @pytest.mark.virtual
 @pytest.mark.physical
-@pytest.mark.eos424
 # pylint: disable=too-few-public-methods
 class HostTests:
     """Host status Test Suite"""
 
+    @pytest.mark.parametrize("dut", test1_duts, ids=test1_ids)
     def test_if_hostname_is_correcet_on_(self, dut, tests_definitions):
-        """Verify hostname is set on device is correct
+        """TD: Verify hostname is set on device is correct
 
         Args:
           dut (dict): Encapsulates dut details including name, connection
@@ -59,18 +67,49 @@ class HostTests:
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        tops.expected_output = tops.dut_name
-        tops.actual_output = tops.run_show_cmds(["show hostname"])[0]["result"]["hostname"]
-        tops.test_result = tops.actual_output == tops.expected_output
+        try:
+            """
+            TS: Collecting the output of 'show hostname' command from DUT
+            """
+            self.output = dut["output"][tops.show_cmd]["json"]
+            assert self.output.get("hostname"), "Show hostname details are not found"
+            logging.info(
+                f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
+            )
 
-        tops.output_msg = (
-            f"On router |{tops.dut_name}| the configured hostname is "
-            f"|{tops.actual_output}| and the correct hostname is "
-            f"|{tops.expected_output}|"
-        )
+            tops.expected_output = {"hostname": tops.dut_name}
+            tops.actual_output = {"hostname": self.output["hostname"]}
 
-        print(f"{tops.output_msg}\n{tops.comment}")
+        except (AttributeError, LookupError, EapiError) as exp:
+            tops.actual_output = str(exp)
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: {str(exp)}"
+            )
+            tops.output_msg += (
+                f" EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating hostname name. Vane recorded error: {exp} "
+            )
 
-        tops.post_testcase()
+        """
+        TS: Verify LLDP system name
+        """
+        if tops.actual_output == tops.expected_output:
+            tops.test_result = True
+            tops.output_msg = (
+                f"On router {tops.dut_name} the hostname is correctly "
+                f"set to {tops.expected_output['hostname']}"
+            )
+        else:
+            tops.test_result = False
+            tops.output_msg = (
+                f"On router {tops.dut_name} the hostname is incorrectly "
+                f"set to {tops.actual_output['hostname']}.  Hostname should be set "
+                f"to {tops.expected_output['hostname']}"
+            )
 
+        """
+        TS: Creating test report based on results
+        """
+        tops.parse_test_steps(self.test_if_hostname_is_correcet_on_)
+        tops.generate_report(tops.dut_name, self.output)
         assert tops.actual_output == tops.expected_output

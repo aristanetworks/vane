@@ -97,7 +97,7 @@ class MemoryTests:
         else:
             tops.test_result = False
             tops.output_msg = (
-                f"On router {tops.dut_name} memory utilization percent is "
+                f"On router {tops.dut_name} the actual memory utilization percent is "
                 f"{tops.actual_output}% while it should be under "
                 f"{tops.expected_output}%"
             )

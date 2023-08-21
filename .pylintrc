@@ -26,6 +26,8 @@ disable=
     too-many-nested-blocks,
     too-many-branches,
     too-many-statements,
+    too-many-lines,
+    too-many-arguments,
 
 
 [MISCELLANEOUS]
@@ -52,3 +54,8 @@ max-locals=25
 
 # Minimum number of public methods for a class (see R0903).
 min-public-methods=1
+
+[BASIC]
+good-names=
+  i,
+  e,

@@ -99,9 +99,9 @@ class NTPTests:
             else:
                 tops.test_result = False
                 tops.output_msg = (
-                    f"\nOn router {tops.dut_name} NTP "
+                    f"\nOn router {tops.dut_name} the actual NTP "
                     f"synchronized status is {tops.actual_output} "
-                    f"while the correct status is {tops.expected_output}.\n"
+                    f"while the expected status is {tops.expected_output}.\n"
                 )
 
         except (AttributeError, LookupError, EapiError) as exception:
@@ -155,8 +155,8 @@ class NTPTests:
                 tops.test_result = False
                 tops.output_msg = (
                     f"\nOn router {tops.dut_name} has "
-                    f"{tops.actual_output} NTP peer associations, "
-                    f"while the correct associations is {tops.expected_output}"
+                    f"{tops.actual_output} actual NTP peer associations, "
+                    f"while the expected associations is {tops.expected_output}"
                 )
 
         except (AttributeError, LookupError, EapiError) as exception:
@@ -218,8 +218,8 @@ class NTPTests:
                 else:
                     tops.output_msg = (
                         f"\nOn router {tops.dut_name} has "
-                        f"{tops.actual_output} NTP processes, "
-                        " while correct processes is equal to or greater "
+                        f"{tops.actual_output} actual NTP processes, "
+                        " while expected processes is equal to or greater "
                         f"{tops.expected_output}.\n"
                     )
 
@@ -246,9 +246,7 @@ class NTPTests:
         """
 
         tops.parse_test_steps(self.test_if_process_is_running_on_)
-        tops.test_result = all(
-            x >= y for x, y in zip(tops.actual_output, tops.expected_output)
-        )
+        tops.test_result = all(x >= y for x, y in zip(tops.actual_output, tops.expected_output))
         tops.generate_report(tops.dut_name, self.output)
         assert tops.test_result
 
@@ -313,14 +311,13 @@ class NTPTests:
             if tops.actual_results == tops.expected_results:
                 tops.test_result = True
                 tops.output_msg += (
-                    f"{tops.dut_name} has the ntp config "
-                    f"{ntp_cfg} which is correct.\n\n"
+                    f"{tops.dut_name} has the ntp config {ntp_cfg} which is correct.\n\n"
                 )
             else:
                 tops.test_result = False
                 tops.output_msg += (
-                    f"{tops.dut_name} has the ntp config "
-                    f"{ntp_cfg}, while the correct ntp config is "
+                    f"{tops.dut_name} has actual ntp config "
+                    f"{ntp_cfg}, while the expected ntp config is "
                     f"{vane_ntp_cfg}.\n\n"
                 )
 

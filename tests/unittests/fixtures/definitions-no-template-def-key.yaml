@@ -1,25 +1,23 @@
 parameters:
   eapi_file: tests/unittests/fixtures/eapi.conf
   eapi_template: tests/fixtures/templates/eapi.conf.j2
-  eos_conn: eapi
   excel_report: null
-  html_report: reports/report
-  json_report: reports/report
+  html_report: tests/unittests/fixtures/reports/report
+  json_report: tests/unittests/fixtures/reports/report
   mark: demo
   processes: null
-  report_dir: reports
+  report_dir: tests/unittests/fixtures/reports
   results_file: result.yml
-  results_dir: reports/results
+  results_dir: tests/unittests/fixtures/reports/results
+  report_test_steps: false
   setup_show: false
   show_log: show_output.log
   stdout: false
   test_cases: All
-  test_dirs: 
-  - tests/systests
-  report_test_steps: true
-  generate_test_definitions: false
-  master_definitions: master_def.yaml
-  template_definitions: tests_definitions.yaml
+  test_dirs:
+    - .
+  generate_test_definitions: true
+  master_definitions: tests/unittests/fixtures/master_def.yaml
   test_definitions: test_definition.yaml
   verbose: true
   spreadsheet: tests/fixtures/spreadsheets/PS-LLD-Questionnaire-Template.xlsx

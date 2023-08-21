@@ -14,8 +14,7 @@
 #       make pylint -- source code checks
 #       make rpm -- build RPM package
 #       make sdist -- build python source distribution
-#       make systest -- runs the system tests
-#       make tests -- run all of the tests
+#       make sample_network_tests -- runs the system tests
 #       make unittest -- runs the unit tests
 #
 # Notes:
@@ -83,11 +82,11 @@ flake8:
 pylint:
 	pylint vane/ tests/
 
-.PHONY: systest
-systest: 
+.PHONY: sample_network_tests
+sample_network_tests: 
 	sudo openvpn --config ovpn_profiles/eosplus-act.ovpn --daemon
 	ping 10.255.74.38 -c 5
-	coverage run --source /project/vane -m vane.vane_cli --definitions_file tests/systests/fixtures/definitions.yaml --duts_file tests/fixtures/duts.yaml
+	coverage run --source /project/vane -m vane.vane_cli --definitions_file sample_network_tests/definitions.yaml --duts_file sample_network_tests/duts.yaml
 	coverage report -m /project/vane/*.py
 
 .PHONY: unittest
@@ -98,9 +97,6 @@ unittest:
 .PHONY: coverage_report
 coverage_report:
 	$(COVERAGE) report -m
-
-.PHONY: tests
-tests: unittest systest
 
 .PHONY: install
 install:

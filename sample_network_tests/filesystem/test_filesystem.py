@@ -103,8 +103,8 @@ class FileSystemTests:
 
             else:
                 tops.output_msg += (
-                    f"\nOn router {tops.dut_name}: {file_name} file isDir "
-                    f"state is {tops.actual_output}, while the correct state is "
+                    f"\nOn router {tops.dut_name}: {file_name} file isDir the"
+                    f"actual state is {tops.actual_output}, while the expected state is "
                     f"{tops.expected_output}.\n"
                 )
 

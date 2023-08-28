@@ -35,7 +35,7 @@ class PasswordConfiguredTests:
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         tops.actual_output = {}
         self.output = ""
-        enablePwFound = False
+        enable_password_found = False
 
         # Forming output message if test result is passed
         tops.output_msg = "Enable password is configured on device."
@@ -57,12 +57,12 @@ class PasswordConfiguredTests:
             self.output += f"\nOutput of {tops.show_cmd} command is:\n{output}\n"
 
             if output.startswith("enable password "):
-                enablePwFound = True
-            tops.actual_output = {"enable_password_found": enablePwFound}
+                enable_password_found = True
+            tops.actual_output = {"enable_password_found": enable_password_found}
 
             # Forming output message if test result is fail.
             if tops.expected_output != tops.actual_output:
-                if not enablePwFound:
+                if not enable_password_found:
                     tops.output_msg = f"Enable password is not configured on device {hostname}."
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:

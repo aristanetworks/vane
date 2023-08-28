@@ -144,13 +144,15 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_password_enable_functionality
+      description: Testcase for verification of enable password is configured.
       test_id: NRFU5.2
-      show_cmd: null
-      expected_output: null
-      report_style: modern
-      criteria: names
+      show_cmd: show running-config section enable
+      expected_output:
+        enable_password_found: true
+      test_criteria: Enable password should be configured on device. # Setting test case’s pass / fail criteria for reporting
+      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      criteria: null
       filter:
         - BLFE1
     - name: test_

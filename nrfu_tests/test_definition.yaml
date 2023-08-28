@@ -264,12 +264,15 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_system_hardware_free_memory
+      description: Testcase for verification of system hardware free memory functionality.
       test_id: NRFU6.7
-      show_cmd: null
-      expected_output: null
-      report_style: modern
+      show_cmd: show version
+      expected_output:
+        memory_utilization: True
+      verification_value: 70 # Verification value to verify the memory utilization of the device
+      test_criteria: The free memory percentage of hostname should be less than 70. # Setting test case’s pass / fail criteria for reporting
+      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
       criteria: names
       filter:
         - BLFE1

@@ -162,11 +162,24 @@ def test_cvp_application(mocker, loginfo, capsys):
     #     pass
     # def test_get_duts_data():
     #     pass
-    # def test_read_device_list_file():
-    #     pass
+
+
+def test_read_device_list_file(mocker, loginfo):
+    """Testing functionality which reads in list of device ip's from
+    given file"""
+
+    mocker.patch("vane.nrfu_client.NrfuClient.setup")
+    client = nrfu_client.NrfuClient()
+
+    device_list_file = "tests/unittests/fixtures/device_ip_file"
+    device_data = client.read_device_list_file(device_list_file)
+
+    expected_data = ["10.255.31.184", "10.255.31.185", "10.255.31.186", "10.255.31.187"]
+    assert device_data == expected_data
+
+    loginfo.assert_called_with("Reading in dut ip data from device list file")
+
     # def test_generate_duts_file():
-    #     pass
-    # def test_write_duts():
     #     pass
     # def test_generate_definitions_file():
     #     pass

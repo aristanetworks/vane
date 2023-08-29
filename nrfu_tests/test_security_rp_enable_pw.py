@@ -12,22 +12,22 @@ from vane import tests_tools
 TEST_SUITE = "nrfu_tests"
 
 
-@pytest.mark.nrfu_tests
+@pytest.mark.nrfu_test
 @pytest.mark.security
-class PasswordConfiguredTests:
+class SecurityEnablePasswordTests:
 
     """
     Testcase for verification of enable password is configured.
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
-    test_duts = dut_parameters["test_password_enable_functionality"]["duts"]
-    test_ids = dut_parameters["test_password_enable_functionality"]["ids"]
+    test_duts = dut_parameters["test_security_rp_enable_pw"]["duts"]
+    test_ids = dut_parameters["test_security_rp_enable_pw"]["ids"]
 
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
-    def test_password_enable_functionality(self, dut, tests_definitions):
+    def test_security_rp_enable_pw(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of NRFU5.2 enable password is configured.
+        TD: Testcase for verification of enable password is configured.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -43,10 +43,8 @@ class PasswordConfiguredTests:
         try:
             """
             TS: Running `show running-config section enable` command and verifying password is
-            configured on switch.
+            configured on device.
             """
-            show_cmd = "show hostname"
-            hostname = tops.run_show_cmds([show_cmd])[0]["result"]["hostname"]
             output = tops.run_show_cmds([tops.show_cmd])[0]["result"]["output"]
             logger.info(
                 "On device %s, output of %s command is:\n%s\n",
@@ -62,8 +60,12 @@ class PasswordConfiguredTests:
 
             # Forming output message if test result is fail.
             if tops.expected_output != tops.actual_output:
-                if not enable_password_found:
-                    tops.output_msg = f"Enable password is not configured on device {hostname}."
+                if tops.expected_output.get("enable_password_found") != tops.actual_output.get(
+                    "enable_password_found"
+                ):
+                    tops.output_msg = (
+                        f"Enable password is not configured on device {tops.dut_name}."
+                    )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
@@ -74,6 +76,6 @@ class PasswordConfiguredTests:
             )
 
         tops.test_result = tops.actual_output == tops.expected_output
-        tops.parse_test_steps(self.test_password_enable_functionality)
+        tops.parse_test_steps(self.test_security_rp_enable_pw)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.actual_output == tops.expected_output

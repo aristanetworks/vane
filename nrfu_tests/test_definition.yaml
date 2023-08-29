@@ -243,15 +243,16 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_system_hardware_fan_status
+      description: Testcases for verification of fan status.
       test_id: NRFU6.5
-      show_cmd: null
-      expected_output: null
-      report_style: modern
-      criteria: names
+      show_cmd: show system environment cooling detail
+      expected_output: null # Forming expected output dictinary for all power supplies in test.
+      test_criteria: For all fans, status should be ok and speed should be stable. # Setting test case’s pass / fail criteria for reporting
+      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      criteria: names # Criteria to run the test case.
       filter:
-        - BLFE1
+        - rtp-tp-leaf-2
     - name: test_
       description: null
       test_id: NRFU6.6

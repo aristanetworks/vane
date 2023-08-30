@@ -192,15 +192,16 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_telnet_is_disabled_for_all_vrfs
+      description: Test case to verify that Telnet is disabled for all the VRFs on the device.
       test_id: NRFU5.7
-      show_cmd: null
-      expected_output: null
-      report_style: modern
+      show_cmd: show vrf
+      expected_output: null # Expected output is set dynamically inside the testsuite file.
+      test_criteria: Telnet should be disabled for all the VRFs on the device. # Setting test case’s pass/fail criteria for reporting
+      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
-        - BLFE1
+        - DLFW1
     - name: test_
       description: null
       test_id: NRFU5.8

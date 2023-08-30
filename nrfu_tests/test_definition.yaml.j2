@@ -242,10 +242,10 @@
       expected_output:
         memory_utilization: True
       verification_value: 70
-      test_criteria: The free memory percentage of hostname should be less than 70.
-      report_style: modern
-      criteria: {{ global_dut_filter.criteria }}
-      filter: {{ global_dut_filter.filter }}
+      test_criteria: The expected memory utilization percentage of the device should be less than 70%.
+      report_style: {{ report_style }}
+      criteria: {{ test_data["criteria"] }}
+      filter: {{ test_data["filter"] }}
     - name: test_
       description:
       test_id: NRFU6.8

@@ -14,7 +14,7 @@ from vane import tests_tools
 TEST_SUITE = "nrfu_tests"
 
 
-@pytest.mark.nrfu_tests
+@pytest.mark.nrfu_test
 @pytest.mark.system
 class SystemHardwareFreeMemoryTests:
     """
@@ -40,8 +40,8 @@ class SystemHardwareFreeMemoryTests:
 
         # Forming output message if test result is passed
         tops.output_msg = (
-            "The free memory percentage of hostname is less than"
-            f" {test_params['verification_value']}."
+            "The expected memory utilization percentage of the device is less than"
+            f" {test_params['verification_value']}%."
         )
 
         try:
@@ -59,7 +59,7 @@ class SystemHardwareFreeMemoryTests:
 
             memory_total, memory_free = output["memTotal"], output["memFree"]
             memory_utilization = round(100 - int(memory_free) / int(memory_total) * 100, 2)
-            actual_memory_utilization = memory_utilization < test_params["verification_value"]
+            actual_memory_utilization = memory_utilization > test_params["verification_value"]
             tops.actual_output.update({"memory_utilization": actual_memory_utilization})
 
             # Output message formation in case of testcase fails.
@@ -67,11 +67,11 @@ class SystemHardwareFreeMemoryTests:
                 tops.output_msg = ""
                 if not tops.actual_output["memory_utilization"]:
                     tops.output_msg += (
-                        "The free memory percentage of hostname is not less than"
-                        f" {test_params['verification_value']}."
+                        "The expected memory utilization percentage of the device is not less than"
+                        f" {test_params['verification_value']}%."
                     )
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+        except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(
                 "On device %s, Error while running the testcase is:\n%s",

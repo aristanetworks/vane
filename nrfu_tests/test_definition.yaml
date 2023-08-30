@@ -271,7 +271,7 @@
       expected_output:
         memory_utilization: True
       verification_value: 70 # Verification value to verify the memory utilization of the device
-      test_criteria: The free memory percentage of hostname should be less than 70. # Setting test case’s pass / fail criteria for reporting
+      test_criteria: The expected memory utilization percentage of the device should be less than 70%. # Setting test case’s pass / fail criteria for reporting
       report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
       criteria: names
       filter:

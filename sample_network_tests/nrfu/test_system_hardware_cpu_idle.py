@@ -1,7 +1,7 @@
 # Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
-"""Testcase for verification of cpu idle time."""
+"""Testcase for verification of system hardware cpu idle time."""
 
 import pytest
 from pyeapi.eapilib import EapiError
@@ -16,7 +16,7 @@ TEST_SUITE = "sample_network_tests"
 @pytest.mark.nrfu_test
 class SystemHardwareCpuIdleTests:
     """
-    Testcase for verification of cpu idle time.
+    Testcase for verification of system hardware cpu idle time.
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -26,7 +26,7 @@ class SystemHardwareCpuIdleTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_system_hardware_cpu_idle(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of cpu idle time.
+        TD: Testcase for verification of system hardware cpu idle time.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.

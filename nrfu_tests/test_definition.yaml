@@ -155,12 +155,16 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_routing_multi_agent
+      description: Test case for verification of multi-agent routing model functionality.
       test_id: NRFU4.4
-      show_cmd: null
-      expected_output: null
-      report_style: modern
+      show_cmd: show ip route summary
+      expected_output:
+        multi_agent_routing_protocol:
+          configured: true
+          operational: true
+      test_criteria: Multi Agent Routing Model protocol should be configured and operational on the device.   # Setting test case’s pass/fail criteria for reporting
+      report_style: modern  # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
         - BLFE1

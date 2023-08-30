@@ -6,6 +6,7 @@
     show_cmd: show processes top once
     expected_output:
       cpu_idle_time_found: true
+    expected_cpu_idle_time: 25
     test_criteria: Cpu idle time should be configured on device. # Setting test case’s pass/fail criteria for reporting
     report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
     criteria: names

@@ -1,7 +1,9 @@
 # Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
-"""Testcase for verification of system hardware cpu idle time."""
+"""
+Testcase for verification of system hardware cpu idle time
+"""
 
 import pytest
 from pyeapi.eapilib import EapiError
@@ -14,7 +16,7 @@ TEST_SUITE = "sample_network_tests"
 
 @pytest.mark.system
 @pytest.mark.nrfu_test
-class SystemHardwareCpuIdleTests:
+class SystemHardwareCpuIdleTimeTests:
     """
     Testcase for verification of system hardware cpu idle time.
     """
@@ -34,6 +36,7 @@ class SystemHardwareCpuIdleTests:
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         tops.actual_output = {}
         self.output = ""
+        expected_time = tops.test_parameters["expected_cpu_idle_time"]
 
         # Forming output message if test result is passed
         tops.output_msg = "Cpu idle time is configured on device."
@@ -56,18 +59,20 @@ class SystemHardwareCpuIdleTests:
             # Skipping testcase if Cpu idle time is not configured on device.
             if not cpu_idle_details:
                 pytest.skip(f"Cpu idle time is not configured on device {tops.dut_name}.")
-            else:
-                cpu_idle_time_found = "Cpu idle time is low" if cpu_idle_details < 25 else True
-                tops.actual_output = {"cpu_idle_time_found": cpu_idle_time_found}
+
+            # Verifying cpu idle time and updating in actual output.
+            cpu_idle_time_found = (
+                "Cpu idle time is low" if cpu_idle_details < expected_time else True
+            )
+            tops.actual_output = {"cpu_idle_time_found": cpu_idle_time_found}
 
             # Output message formation in case of testcase fails.
             if tops.actual_output != tops.expected_output:
                 if tops.actual_output.get("cpu_idle_time_found") == "Cpu idle time is low":
                     tops.output_msg = (
-                        f"{tops.actual_output.get('cpu_idle_time_found')}: {cpu_idle_details} on"
-                        f" device {tops.dut_name}."
+                        "On Device, Expected CPU idle time is greater than "
+                        f"'{expected_time}' however actual found as '{cpu_idle_details}'."
                     )
-
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(

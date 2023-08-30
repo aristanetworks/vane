@@ -129,15 +129,21 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
 
     neighbors_matrix = {}
     for dut in dut_properties:
-        neighbors = dut["output"][lldp_cmd]["result"][0]["lldpNeighbors"]
-        for neighbor in neighbors:
-            del neighbor["ttl"]
-            fqdn = neighbor["neighborDevice"]
-            neighbor["neighborDevice"] = fqdn.split(".")[0]
-        neighbors_matrix[dut["name"]] = neighbors
+        try:
+            neighbors = dut["output"][lldp_cmd]["result"][0]["lldpNeighbors"]
+            for neighbor in neighbors:
+                del neighbor["ttl"]
+                fqdn = neighbor["neighborDevice"]
+                neighbor["neighborDevice"] = fqdn.split(".")[0]
+            neighbors_matrix[dut["name"]] = neighbors
+        except KeyError:
+            print(f'command "{lldp_cmd}" has not been collected from {dut["name"]}')
 
     for dut_property in dut_properties:
-        dut_property["neighbors"] = neighbors_matrix[dut_property["name"]]
+        try:
+            dut_property["neighbors"] = neighbors_matrix[dut_property["name"]]
+        except KeyError:
+            print(f'neighbors not known for {dut_property["name"]}')
         del dut_property["output"]
         del dut_property["connection"]
 
@@ -175,9 +181,11 @@ def dut_worker(dut, show_cmds):
     )
 
     for show_cmd in show_cmds:
-        output = dut["connection"].execute(show_cmd)
-        dut["output"][show_cmd] = output
-
+        try:
+            output = dut["connection"].execute(show_cmd)
+            dut["output"][show_cmd] = output
+        except Exception as err:
+            print(f'EAPI connection to {dut["mgmt_ip"]} failed - {type(err).__name__}: {err}')
 
 def main():
     """main function"""

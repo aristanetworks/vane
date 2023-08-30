@@ -133,7 +133,7 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
         for neighbor in neighbors:
             del neighbor["ttl"]
             fqdn = neighbor["neighborDevice"]
-            neighbor["neighborDeivce"] = fqdn.split(".")[0]
+            neighbor["neighborDevice"] = fqdn.split(".")[0]
         neighbors_matrix[dut["name"]] = neighbors
 
     for dut_property in dut_properties:

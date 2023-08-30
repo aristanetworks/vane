@@ -108,13 +108,14 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_bgp_ipv4_peers_state
       test_id: NRFU4.2
-      show_cmd: null
-      expected_output: null
+      description: Testcases for verification of BGP ipv4 peers are established.
+      show_cmd: show ip bgp summary vrf all
+      expected_output: null # Forming expected output in test case.
+      test_criteria: All BGP peers should be in established state. # Setting test case’s pass / fail criteria for reporting
       report_style: modern
-      criteria: names
+      criteria: names # Criteria to run the test case.
       filter:
         - BLFE1
     - name: test_

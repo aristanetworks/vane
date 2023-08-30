@@ -54,7 +54,16 @@ from requests.exceptions import HTTPError, ReadTimeout, Timeout, TooManyRedirect
 from vane.vane_logging import logging
 
 
-def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name, api_token=None, is_cvaas=None, dev_username=None, dev_password=None):
+def create_duts_file_from_cvp(
+    cvp_ip,
+    cvp_username,
+    cvp_password,
+    duts_file_name,
+    api_token=None,
+    is_cvaas=None,
+    dev_username=None,
+    dev_password=None,
+):
     """
     create_duts_file_from_cvp function:
         (1) Function to retrieve the inventory from cvp.
@@ -76,7 +85,7 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
     try:
         clnt = CvpClient()
         if api_token:
-            clnt.connect([cvp_ip], username='', password='', is_cvaas=is_cvaas, api_token=api_token)
+            clnt.connect([cvp_ip], username="", password="", is_cvaas=is_cvaas, api_token=api_token)
         else:
             clnt.connect([cvp_ip], cvp_username, cvp_password)
         logging.info("Pulling the inventory from CVP")
@@ -187,6 +196,7 @@ def dut_worker(dut, show_cmds):
         except Exception as err:
             print(f'EAPI connection to {dut["mgmt_ip"]} failed - {type(err).__name__}: {err}')
 
+
 def main():
     """main function"""
 
@@ -211,8 +221,8 @@ def main():
                     args.password,
                     args.duts_file,
                     dev_username=args.dev_username,
-                    dev_password=args.dev_password
-            )
+                    dev_password=args.dev_password,
+                )
             elif args.api_token:
                 if args.dev_username:
                     create_duts_file_from_cvp(
@@ -223,14 +233,18 @@ def main():
                         api_token=args.api_token,
                         is_cvaas=args.is_cvaas,
                         dev_username=args.dev_username,
-                        dev_password=args.dev_password
+                        dev_password=args.dev_password,
                     )
                 else:
-                    sys.exit('--dev-username is required for EAPI authentication when token authentication to CVP/CVaaS is used')
+                    sys.exit(
+                        "--dev-username is required for EAPI authentication when token authentication to CVP/CVaaS is used"
+                    )
             else:
-                sys.exit('Either --username and --password or --api-token must be specified.')
+                sys.exit("Either --username and --password or --api-token must be specified.")
         else:
-            sys.exit('IP address or hostname for CVP/CVaaS (--cvp-node) and output file (--duts-file) must be specified')
+            sys.exit(
+                "IP address or hostname for CVP/CVaaS (--cvp-node) and output file (--duts-file) must be specified"
+            )
 
 
 def parse_cli():
@@ -246,51 +260,37 @@ def parse_cli():
         )
     )
 
-    parser.add_argument(
-        '--cvp-node',
-        help='IP address or hostname of CVP/CVaaS'
+    parser.add_argument("--cvp-node", help="IP address or hostname of CVP/CVaaS")
+
+    password_auth = parser.add_argument_group(
+        "username/password authentication",
+        "Authenticate to CVP with a username and password.  Does not work with CVaaS.",
+    )
+    token_auth = parser.add_argument_group(
+        "API token authentication",
+        "Authenticate to CVP/CVaaS with a REST API token.  Required when OAuth is used (always for CVaaS).",
+    )
+    dev_auth = parser.add_argument_group(
+        "Device username/password authentication",
+        "Authenticate to EAPI devices with a different username and password than CVP.  Required when API token auth is used.",
     )
 
-    password_auth = parser.add_argument_group('username/password authentication', 'Authenticate to CVP with a username and password.  Does not work with CVaaS.')
-    token_auth = parser.add_argument_group('API token authentication', 'Authenticate to CVP/CVaaS with a REST API token.  Required when OAuth is used (always for CVaaS).')
-    dev_auth = parser.add_argument_group('Device username/password authentication', 'Authenticate to EAPI devices with a different username and password than CVP.  Required when API token auth is used.')
+    password_auth.add_argument("-u", "--username", help="Username for CVP authentication")
 
-    password_auth.add_argument(
-        '-u', '--username',
-        help='Username for CVP authentication'
-    )
-    
-    password_auth.add_argument(
-        '-p', '--password',
-        help='Password for CVP authentication'
-    )
+    password_auth.add_argument("-p", "--password", help="Password for CVP authentication")
 
     token_auth.add_argument(
-        '--api-token',
-        help='REST API token for CVP/CVaaS authentication',
-        metavar='TOKEN'
+        "--api-token", help="REST API token for CVP/CVaaS authentication", metavar="TOKEN"
     )
 
-    dev_auth.add_argument(
-        '--dev-username',
-        help='Username for EAPI device authentication'
-    )
-    
-    dev_auth.add_argument(
-        '--dev-password',
-        help='Password for EAPI device authentication'
-    )
+    dev_auth.add_argument("--dev-username", help="Username for EAPI device authentication")
+
+    dev_auth.add_argument("--dev-password", help="Password for EAPI device authentication")
+
+    parser.add_argument("--is-cvaas", help="enable connection to CVaaS", action="store_true")
 
     parser.add_argument(
-        '--is-cvaas',
-        help='enable connection to CVaaS',
-        action='store_true'
-    )
-
-    parser.add_argument(
-        '--duts-file',
-        help='output file for duts inventory in YAML format',
-        metavar='FILENAME'
+        "--duts-file", help="output file for duts inventory in YAML format", metavar="FILENAME"
     )
 
     parser.add_argument(

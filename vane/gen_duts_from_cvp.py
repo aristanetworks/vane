@@ -112,8 +112,12 @@ def create_duts_file_from_cvp(
     for dev in inventory:
         if dev["ztpMode"]:
             continue
+        
+        # if no device credentials provided, use CVP credentials
+        # if neither password provided, fall back to empty string (null causes tests to fail)
         dev_username = dev_username or cvp_username
-        dev_password = dev_password or cvp_password
+        dev_password = dev_password or cvp_password or ""
+        
         dut_properties.append(
             {
                 "mgmt_ip": dev["ipAddress"],

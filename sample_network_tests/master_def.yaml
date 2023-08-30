@@ -1,2 +1,8 @@
 loopback_ip: 103.37.123.7
 neighbor_ip: 192.168.254.5
+global_dut_filter:
+  criteria: names
+  filter:
+    - BLFE1
+testcase_data:
+  NRFU6.4: {}

@@ -282,5 +282,5 @@
       expected_output: null #Forming expected output in test case file.
       test_criteria: TACACS servers should not have errors, timeouts, failures or disconnects. # Setting test case’s pass / fail criteria for reporting
       report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: {{ global_dut_filter["criteria"] }}
-      filter: {{ global_dut_filter["filter"] }}
+      criteria: {{ global_dut_filter.criteria }}
+      filter: {{ global_dut_filter.filter }}

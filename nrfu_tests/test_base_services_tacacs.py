@@ -1,4 +1,4 @@
-# Copyright (c) 2022 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -54,43 +54,43 @@ class TacacsServersTests:
                 tops.show_cmd,
                 output,
             )
-            self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
-            tacacs_servers = output.get('tacacsServers')
+            self.output += f"Output of {tops.show_cmd} command is: \n{output}"
+            tacacs_servers = output.get("tacacsServers")
 
             # Skipping testcase if TACACS servers are not configured.
             if not tacacs_servers:
-                pytest.skip(f"No TACACS servers are configured on {tops.dut_name}.")
-            else:
-                for tacacs_server in tacacs_servers:
-                    tacacs_hostname = tacacs_server.get("serverInfo").get("hostname")
-                    tops.expected_output["tacacs_servers_info"].update(
-                        {
-                            tacacs_hostname: {
-                                "received_errors": 0,
-                                "connection_disconnects": 0,
-                                "dns_errors": 0,
-                                "send_timeouts": 0,
-                                "connection_timeouts": 0,
-                                "connection_failures": 0,
-                                "received_timeouts": 0,
-                            }
+                pytest.skip(f"TACACS servers are not configured on {tops.dut_name}.")
+
+            for tacacs_server in tacacs_servers:
+                tacacs_hostname = tacacs_server.get("serverInfo").get("hostname")
+                tops.expected_output["tacacs_servers_info"].update(
+                    {
+                        tacacs_hostname: {
+                            "received_errors": 0,
+                            "connection_disconnects": 0,
+                            "dns_errors": 0,
+                            "send_timeouts": 0,
+                            "connection_timeouts": 0,
+                            "connection_failures": 0,
+                            "received_timeouts": 0,
                         }
-                    )
-                    tops.actual_output["tacacs_servers_info"].update(
-                        {
-                            tacacs_hostname: {
-                                "received_errors": tacacs_server.get("receiveErrors"),
-                                "connection_disconnects": tacacs_server.get(
-                                    "connectionDisconnects"
-                                ),
-                                "dns_errors": tacacs_server.get("dnsErrors"),
-                                "send_timeouts": tacacs_server.get("sendTimeouts"),
-                                "connection_timeouts": tacacs_server.get("connectionTimeouts"),
-                                "connection_failures": tacacs_server.get("connectionFailures"),
-                                "received_timeouts": tacacs_server.get("receiveTimeouts"),
-                            }
+                    }
+                )
+                tops.actual_output["tacacs_servers_info"].update(
+                    {
+                        tacacs_hostname: {
+                            "received_errors": tacacs_server.get("receiveErrors"),
+                            "connection_disconnects": tacacs_server.get(
+                                "connectionDisconnects"
+                            ),
+                            "dns_errors": tacacs_server.get("dnsErrors"),
+                            "send_timeouts": tacacs_server.get("sendTimeouts"),
+                            "connection_timeouts": tacacs_server.get("connectionTimeouts"),
+                            "connection_failures": tacacs_server.get("connectionFailures"),
+                            "received_timeouts": tacacs_server.get("receiveTimeouts"),
                         }
-                    )
+                    }
+                )
 
                 # Forming output message if test result is fail.
                 if tops.expected_output != tops.actual_output:
@@ -113,7 +113,7 @@ class TacacsServersTests:
                                         f" '{actual_value}'."
                                     )
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+        except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(
                 "On device %s, Error while running the testcase is:\n%s",

@@ -54,7 +54,7 @@ from requests.exceptions import HTTPError, ReadTimeout, Timeout, TooManyRedirect
 from vane.vane_logging import logging
 
 
-def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name, api_token=None, is_cvaas=None):
+def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name, api_token=None, is_cvaas=None, dev_username=None, dev_password=None):
     """
     create_duts_file_from_cvp function:
         (1) Function to retrieve the inventory from cvp.
@@ -68,6 +68,8 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
         duts_file_name: name of the duts file to be written
         api_token: REST API token for CVP/CVaaS authentication
         is_cvaas: flag to specify target is CVaaS
+        dev_username: username to connect to devices (required when using api_token)
+        dev_password: password to connect to devices
     """
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -101,13 +103,15 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
     for dev in inventory:
         if dev["ztpMode"]:
             continue
+        dev_username = dev_username or cvp_username
+        dev_password = dev_password or cvp_password
         dut_properties.append(
             {
                 "mgmt_ip": dev["ipAddress"],
                 "name": dev["hostname"],
-                "password": cvp_password,
+                "password": dev_password,
                 "transport": "https",
-                "username": cvp_username,
+                "username": dev_username,
                 "role": "unknown",
                 "neighbors": [],
             }
@@ -197,17 +201,24 @@ def main():
                     args.cvp_node,
                     args.username,
                     args.password,
-                    args.duts_file
+                    args.duts_file,
+                    dev_username=args.dev_username,
+                    dev_password=args.dev_password
             )
             elif args.api_token:
-                create_duts_file_from_cvp(
-                    args.cvp_node,
-                    None,
-                    None,
-                    args.duts_file,
-                    api_token=args.api_token,
-                    is_cvaas=args.is_cvaas
-            )
+                if args.dev_username:
+                    create_duts_file_from_cvp(
+                        args.cvp_node,
+                        None,
+                        None,
+                        args.duts_file,
+                        api_token=args.api_token,
+                        is_cvaas=args.is_cvaas,
+                        dev_username=args.dev_username,
+                        dev_password=args.dev_password
+                    )
+                else:
+                    sys.exit('--dev-username is required for EAPI authentication when token authentication to CVP/CVaaS is used')
             else:
                 sys.exit('Either --username and --password or --api-token must be specified.')
         else:
@@ -234,6 +245,7 @@ def parse_cli():
 
     password_auth = parser.add_argument_group('username/password authentication', 'Authenticate to CVP with a username and password.  Does not work with CVaaS.')
     token_auth = parser.add_argument_group('API token authentication', 'Authenticate to CVP/CVaaS with a REST API token.  Required when OAuth is used (always for CVaaS).')
+    dev_auth = parser.add_argument_group('Device username/password authentication', 'Authenticate to EAPI devices with a different username and password than CVP.  Required when API token auth is used.')
 
     password_auth.add_argument(
         '-u', '--username',
@@ -249,6 +261,16 @@ def parse_cli():
         '--api-token',
         help='REST API token for CVP/CVaaS authentication',
         metavar='TOKEN'
+    )
+
+    dev_auth.add_argument(
+        '--dev-username',
+        help='Username for EAPI device authentication'
+    )
+    
+    dev_auth.add_argument(
+        '--dev-password',
+        help='Password for EAPI device authentication'
     )
 
     parser.add_argument(

@@ -54,7 +54,7 @@ from requests.exceptions import HTTPError, ReadTimeout, Timeout, TooManyRedirect
 from vane.vane_logging import logging
 
 
-def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name):
+def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name, api_token=None, is_cvaas=None):
     """
     create_duts_file_from_cvp function:
         (1) Function to retrieve the inventory from cvp.
@@ -62,16 +62,21 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
         devices.
         (3) All this info is dumped in file 'duts_file_name'.
     Args:
-        cvp_ip: ip address for CVP
+        cvp_ip: ip address or hostname for CVP
         cvp_username: username for CVP
         cvp_password: password for CVP
         duts_file_name: name of the duts file to be written
+        api_token: REST API token for CVP/CVaaS authentication
+        is_cvaas: flag to specify target is CVaaS
     """
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     try:
         clnt = CvpClient()
-        clnt.connect([cvp_ip], cvp_username, cvp_password)
+        if api_token:
+            clnt.connect([cvp_ip], username='', password='', is_cvaas=is_cvaas, api_token=api_token)
+        else:
+            clnt.connect([cvp_ip], cvp_username, cvp_password)
         logging.info("Pulling the inventory from CVP")
         print(f"Pull the inventory from CVP: {cvp_ip}")
         inventory = clnt.api.get_inventory()
@@ -175,6 +180,7 @@ def main():
 
     args = parse_cli()
 
+    # original syntax (all arguments of --generate_cvp_duts_file)
     if args.generate_cvp_duts_file:
         logging.info("Generating duts file from CVP")
         create_duts_file_from_cvp(
@@ -183,6 +189,29 @@ def main():
             args.generate_cvp_duts_file[2],
             args.generate_cvp_duts_file[3],
         )
+    # individual options syntax (better for token authentication)
+    else:
+        if args.cvp_node and args.duts_file:
+            if args.username and args.password:
+                create_duts_file_from_cvp(
+                    args.cvp_node,
+                    args.username,
+                    args.password,
+                    args.duts_file
+            )
+            elif args.api_token:
+                create_duts_file_from_cvp(
+                    args.cvp_node,
+                    None,
+                    None,
+                    args.duts_file,
+                    api_token=args.api_token,
+                    is_cvaas=args.is_cvaas
+            )
+            else:
+                sys.exit('Either --username and --password or --api-token must be specified.')
+        else:
+            sys.exit('IP address or hostname for CVP/CVaaS (--cvp-node) and output file (--duts-file) must be specified')
 
 
 def parse_cli():
@@ -194,8 +223,44 @@ def parse_cli():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Script to generate duts.yaml for vane from CVP and devices. Does not work for ACT env."
+            "Script to generate duts.yaml for vane from CVP/CVaaS and devices. Does not work for ACT env."
         )
+    )
+
+    parser.add_argument(
+        '--cvp-node',
+        help='IP address or hostname of CVP/CVaaS'
+    )
+
+    password_auth = parser.add_argument_group('username/password authentication', 'Authenticate to CVP with a username and password.  Does not work with CVaaS.')
+    token_auth = parser.add_argument_group('API token authentication', 'Authenticate to CVP/CVaaS with a REST API token.  Required when OAuth is used (always for CVaaS).')
+
+    password_auth.add_argument(
+        '-u', '--username',
+        help='Username for CVP authentication'
+    )
+    
+    password_auth.add_argument(
+        '-p', '--password',
+        help='Password for CVP authentication'
+    )
+
+    token_auth.add_argument(
+        '--api-token',
+        help='REST API token for CVP/CVaaS authentication',
+        metavar='TOKEN'
+    )
+
+    parser.add_argument(
+        '--is-cvaas',
+        help='enable connection to CVaaS',
+        action='store_true'
+    )
+
+    parser.add_argument(
+        '--duts-file',
+        help='output file for duts inventory in YAML format',
+        metavar='FILENAME'
     )
 
     parser.add_argument(

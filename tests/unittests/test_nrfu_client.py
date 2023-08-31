@@ -409,8 +409,85 @@ def test_generate_duts_file_non_cvp(mocker, loginfo):
     os.remove(client.duts_file)
 
 
-# def test_generate_definitions_file():
-#     pass
+def test_generate_definitions_file_default(mocker, loginfo):
+    """Testing functionality which generates default definitions_nrfu file"""
+
+    mocker.patch("vane.nrfu_client.NrfuClient.setup")
+    client = nrfu_client.NrfuClient()
+
+    mocker.patch("builtins.input", return_value="no")
+
+    client.definitions_file = "tests/unittests/fixtures/definitions_nrfu.yaml"
+    client.generate_definitions_file()
+
+    loginfo_calls = [
+        call("Generating definitions file for nrfu testing"),
+        call("Opening tests/unittests/fixtures/definitions_nrfu.yaml for write"),
+    ]
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+    assert read_yaml(client.definitions_file) == read_yaml(
+        "tests/unittests/fixtures/definitions_nrfu_default_expected.yaml"
+    )
+
+    os.remove(client.definitions_file)
+
+
+def test_generate_definitions_file_custom(mocker, loginfo):
+    """Testing functionality which generates custom definitions_nrfu file"""
+
+    mocker.patch("vane.nrfu_client.NrfuClient.setup")
+    client = nrfu_client.NrfuClient()
+
+    mocker.patch("builtins.input", return_value="yes")
+    mocker.patch("vane.nrfu_client.prompt", return_value="sample_network_tests/memory")
+
+    client.definitions_file = "tests/unittests/fixtures/definitions_nrfu.yaml"
+    client.generate_definitions_file()
+
+    loginfo_calls = [
+        call("Generating definitions file for nrfu testing"),
+        call("Opening tests/unittests/fixtures/definitions_nrfu.yaml for write"),
+    ]
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+    assert read_yaml(client.definitions_file) == read_yaml(
+        "tests/unittests/fixtures/definitions_nrfu_custom_expected.yaml"
+    )
+
+    os.remove(client.definitions_file)
+
+
+def test_generate_definitions_file_invalid_custom(mocker, loginfo):
+    """Testing functionality which generates definitions_nrfu file
+    with user entering invalid directories first"""
+
+    mocker.patch("vane.nrfu_client.NrfuClient.setup")
+    client = nrfu_client.NrfuClient()
+
+    mocker.patch("builtins.input", return_value="yes")
+    mocker_object = mocker.patch("vane.nrfu_client.prompt")
+    mocker_object.side_effect = [
+        "tests/unittests/fixtures/does_not_exist",
+        "tests/unittests/fixtures/definitions_nrfu.yaml",
+        "sample_network_tests/memory",
+    ]
+
+    client.definitions_file = "tests/unittests/fixtures/definitions_nrfu.yaml"
+    client.generate_definitions_file()
+
+    loginfo_calls = [
+        call("Generating definitions file for nrfu testing"),
+        call("Opening tests/unittests/fixtures/definitions_nrfu.yaml for write"),
+    ]
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+    assert mocker_object.call_count == 3
+    assert read_yaml(client.definitions_file) == read_yaml(
+        "tests/unittests/fixtures/definitions_nrfu_custom_expected.yaml"
+    )
+
+    os.remove(client.definitions_file)
 
 
 def test_is_valid_text_file(mocker):

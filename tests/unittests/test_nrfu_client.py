@@ -1,7 +1,9 @@
 """nrfu_client.py unit tests"""
 from unittest.mock import call
+import os
 import pytest
 from vane import nrfu_client
+from tests.unittests.test_tests_tools import read_yaml
 
 # Disable redefined-outer-name for using log fixture functions
 # pylint: disable=redefined-outer-name,no-member
@@ -31,8 +33,8 @@ def test_nrfu_constructor(mocker, loginfo):
 
     client = nrfu_client.NrfuClient()
 
-    assert client.definitions_file == ""
-    assert client.duts_file == ""
+    assert client.definitions_file == "nrfu_tests/definitions_nrfu.yaml"
+    assert client.duts_file == "nrfu_tests/duts_nrfu.yaml"
     assert client.username == ""
     assert client.password == ""
 
@@ -289,38 +291,12 @@ def test_get_duts_data(mocker, loginfo):
     inventory_data = [
         {
             "modelName": "DCS-7050SX3-48YC12",
-            "internalVersion": "4.28.7M",
-            "systemMacAddress": "74:83:ef:78:7d:64",
-            "bootupTimestamp": 0,
-            "version": "4.28.7M",
-            "architecture": "",
-            "internalBuild": "",
-            "hardwareRevision": "",
             "domainName": "rtp-pslab.com",
             "hostname": "ps-rtp1-leaf1",
-            "fqdn": "ps-rtp1-leaf1.rtp-pslab.com",
-            "serialNumber": "JPE18380270",
-            "deviceType": "eos",
-            "danzEnabled": False,
             "mlagEnabled": False,
             "streamingStatus": "active",
-            "parentContainerKey": "undefined_container",
-            "status": "Registered",
-            "complianceCode": "0000",
-            "complianceIndication": "",
-            "ztpMode": False,
             "unAuthorized": False,
             "ipAddress": "10.88.160.164",
-            "key": "74:83:ef:78:7d:64",
-            "deviceInfo": "Registered",
-            "deviceStatus": "Registered",
-            "isMLAGEnabled": False,
-            "isDANZEnabled": False,
-            "parentContainerId": "undefined_container",
-            "bootupTimeStamp": 0,
-            "internalBuildId": "",
-            "taskIdList": [],
-            "tempAction": None,
             "memTotal": 0,
             "memFree": 0,
             "sslConfigAvailable": False,
@@ -332,38 +308,12 @@ def test_get_duts_data(mocker, loginfo):
         },
         {
             "modelName": "CCS-720XP-48ZC2",
-            "internalVersion": "4.28.7M",
-            "systemMacAddress": "fc:bd:67:0f:33:f5",
-            "bootupTimestamp": 0,
-            "version": "4.28.7M",
-            "architecture": "",
-            "internalBuild": "",
-            "hardwareRevision": "",
             "domainName": "rtp-pslab.com",
             "hostname": "ps-rtp1-host3",
-            "fqdn": "ps-rtp1-host3.rtp-pslab.com",
-            "serialNumber": "JPE19161323",
-            "deviceType": "eos",
-            "danzEnabled": False,
             "mlagEnabled": False,
-            "streamingStatus": "active",
-            "parentContainerKey": "undefined_container",
-            "status": "Registered",
-            "complianceCode": "0000",
-            "complianceIndication": "",
-            "ztpMode": False,
+            "streamingStatus": "inactive",
             "unAuthorized": False,
             "ipAddress": "10.88.160.69",
-            "key": "fc:bd:67:0f:33:f5",
-            "deviceInfo": "Registered",
-            "deviceStatus": "Registered",
-            "isMLAGEnabled": False,
-            "isDANZEnabled": False,
-            "parentContainerId": "undefined_container",
-            "bootupTimeStamp": 0,
-            "internalBuildId": "",
-            "taskIdList": [],
-            "tempAction": None,
             "memTotal": 0,
             "memFree": 0,
             "sslConfigAvailable": False,
@@ -377,14 +327,21 @@ def test_get_duts_data(mocker, loginfo):
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
     client = nrfu_client.NrfuClient()
 
+    mocker_object_client = mocker.patch("vane.nrfu_client.CvpClient")
+    mocker_object_api = mocker.patch("vane.nrfu_client.CvpApi")
 
-    mocker_object = mocker.patch("vane.nrfu_client.CvpClient")
-    mocker.patch("vane.nrfu_client.CvpClient.connect")
-    client.get_duts_data("10.255.31.186")
+    # Create a MagicMock instance to simulate the return value
+    get_inventory_mock = mocker.MagicMock(return_value=inventory_data)
+
+    # Attach the mocked get_inventory method to the cvp_api_mock
+    mocker_object_api.return_value.get_inventory = get_inventory_mock
+
+    device_data = client.get_duts_data("10.255.31.186")
+
+    mocker_object_client.return_value.connect.assert_called_once_with(["10.255.31.186"], "", "")
+    assert device_data == [["ps-rtp1-leaf1", "10.88.160.164"]]
 
     loginfo.assert_called_with("Connecting to CVP to gather duts data")
-
-
 
 
 def test_read_device_list_file(mocker, loginfo):
@@ -403,8 +360,55 @@ def test_read_device_list_file(mocker, loginfo):
     loginfo.assert_called_with("Reading in dut ip data from device list file")
 
 
-# def test_generate_duts_file():
-#     pass
+def test_generate_duts_file_cvp(mocker, loginfo):
+    """Testing the functionality that generates duts_nrfu file from cvp data"""
+
+    mocker.patch("vane.nrfu_client.NrfuClient.setup")
+    client = nrfu_client.NrfuClient()
+
+    client.duts_file = "tests/unittests/fixtures/duts_nrfu.yaml"
+    client.generate_duts_file(
+        [
+            ["ps-rtp1-leaf1", "10.88.160.154"],
+            ["ps-rtp1-leaf2", "10.88.160.164"],
+            ["ps-rtp1-leaf3", "10.88.160.174"],
+        ],
+        "cvp",
+    )
+
+    loginfo_calls = [
+        call("Generating duts file for nrfu testing"),
+        call("Opening tests/unittests/fixtures/duts_nrfu.yaml for write"),
+    ]
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+    assert read_yaml(client.duts_file) == read_yaml(
+        "tests/unittests/fixtures/duts_nrfu_cvp_expected.yaml"
+    )
+    os.remove(client.duts_file)
+
+
+def test_generate_duts_file_non_cvp(mocker, loginfo):
+    """Testing the functionality that generates duts_nrfu file from non-cvp data"""
+
+    mocker.patch("vane.nrfu_client.NrfuClient.setup")
+    client = nrfu_client.NrfuClient()
+
+    client.duts_file = "tests/unittests/fixtures/duts_nrfu.yaml"
+    client.generate_duts_file(["10.88.160.154", "10.88.160.164", "10.88.160.174"], "non-cvp")
+
+    loginfo_calls = [
+        call("Generating duts file for nrfu testing"),
+        call("Opening tests/unittests/fixtures/duts_nrfu.yaml for write"),
+    ]
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+    assert read_yaml(client.duts_file) == read_yaml(
+        "tests/unittests/fixtures/duts_nrfu_non_cvp_expected.yaml"
+    )
+    os.remove(client.duts_file)
+
+
 # def test_generate_definitions_file():
 #     pass
 

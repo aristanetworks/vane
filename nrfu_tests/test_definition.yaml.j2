@@ -179,11 +179,12 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_security_rp_username_password
+      description: Test case for verification of password configuration for user accounts.
       test_id: NRFU5.8
-      show_cmd: null
+      show_cmd: show running-config all section ^username
       expected_output: null
+      test_criteria: All user accounts should be configured with a password.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

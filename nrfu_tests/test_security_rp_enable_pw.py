@@ -21,21 +21,20 @@ class SecurityEnablePasswordTests:
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
-    test_duts = dut_parameters["test_security_rp_enable_pw"]["duts"]
-    test_ids = dut_parameters["test_security_rp_enable_pw"]["ids"]
+    test_duts = dut_parameters["test_security_rp_enable_password"]["duts"]
+    test_ids = dut_parameters["test_security_rp_enable_password"]["ids"]
 
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
-    def test_security_rp_enable_pw(self, dut, tests_definitions):
+    def test_security_rp_enable_password(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of enable password is configured.
+        TD: Testcase to verify that the enable password is configured.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        tops.actual_output = {}
         self.output = ""
-        enable_password_found = False
+        tops.actual_output = {"enable_password_found": False}
 
         # Forming output message if test result is passed
         tops.output_msg = "Enable password is configured on device."
@@ -45,7 +44,7 @@ class SecurityEnablePasswordTests:
             TS: Running `show running-config section enable` command and verifying password is
             configured on device.
             """
-            output = tops.run_show_cmds([tops.show_cmd])[0]["result"]["output"]
+            output = tops.run_show_cmds([tops.show_cmd])
             logger.info(
                 "On device %s, output of %s command is:\n%s\n",
                 tops.dut_name,
@@ -53,16 +52,14 @@ class SecurityEnablePasswordTests:
                 output,
             )
             self.output += f"\nOutput of {tops.show_cmd} command is:\n{output}\n"
+            modified_output = output[0].get("result", {}).get("output")
 
-            if output.startswith("enable password "):
-                enable_password_found = True
-            tops.actual_output = {"enable_password_found": enable_password_found}
+            if modified_output.startswith("enable password"):
+                tops.actual_output = {"enable_password_found": True}
 
             # Forming output message if test result is fail.
             if tops.expected_output != tops.actual_output:
-                if tops.expected_output.get("enable_password_found") != tops.actual_output.get(
-                    "enable_password_found"
-                ):
+                if not tops.actual_output.get("enable_password_found"):
                     tops.output_msg = (
                         f"Enable password is not configured on device {tops.dut_name}."
                     )
@@ -76,6 +73,6 @@ class SecurityEnablePasswordTests:
             )
 
         tops.test_result = tops.actual_output == tops.expected_output
-        tops.parse_test_steps(self.test_security_rp_enable_pw)
+        tops.parse_test_steps(self.test_security_rp_enable_password)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.actual_output == tops.expected_output

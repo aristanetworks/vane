@@ -1,5 +1,6 @@
 - name: nrfu_tests
   testcases:
+<<<<<<< HEAD
     - name: test_
       description:
       test_id: NRFU1.1
@@ -128,8 +129,8 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_security_rp_enable_pw
-      description: Testcase for verification of enable password is configured.
+    - name: test_security_rp_enable_password
+      description: Testcase to verify that the enable password is configured.
       test_id: NRFU5.2
       show_cmd: show running-config section enable
       expected_output:

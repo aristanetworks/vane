@@ -144,8 +144,8 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_security_rp_enable_pw
-      description: Testcase for verification of enable password is configured.
+    - name: test_security_rp_enable_password
+      description: Testcase to verify that the enable password is configured.
       test_id: NRFU5.2
       show_cmd: show running-config section enable
       expected_output:

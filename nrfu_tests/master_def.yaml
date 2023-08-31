@@ -22,3 +22,5 @@ testcase_data:
       fail_on_missing_linecard_card_slots: False
   NRFU6.1:
     days_of_logs: 7 # Number of days used in show logging command
+  NRFU4.3:
+    vxlan_interface: Vxlan1

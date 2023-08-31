@@ -80,11 +80,15 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_misc_show_commands
+      description: Testcase for verification of misc show commands.
       test_id: NRFU3.1
       show_cmd: null
+      # Forming expected output in test case file.
       expected_output: null
+      # Setting test case’s pass / fail criteria for reporting
+      test_criteria: Show commands should be written to config directory.
+      # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
@@ -273,5 +277,3 @@
       show_cmd: null
       expected_output: null
       report_style: modern
-      criteria: {{ global_dut_filter.criteria }}
-      filter: {{ global_dut_filter.filter }}

@@ -216,12 +216,14 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_system_hardware_cooling_status
       test_id: NRFU6.2
-      show_cmd: null
-      expected_output: null
-      report_style: modern
+      description: Testcase for the verification of system cooling status.
+      show_cmd: show system environment cooling
+      expected_output:
+        system_cooling_status: coolingOk
+      test_criteria: System cooling status should be 'coolingOk'. # Setting test case’s pass / fail criteria for reporting
+      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
         - BLFE1

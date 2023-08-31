@@ -70,7 +70,7 @@ class SystemHardwareCpuIdleTimeTests:
             if tops.actual_output != tops.expected_output:
                 if tops.actual_output.get("cpu_idle_time_found") == "Cpu idle time is low":
                     tops.output_msg = (
-                        "On Device, Expected CPU idle time is greater than "
+                        f"On Device {tops.dut_name}, Expected CPU idle time is greater than "
                         f"'{expected_time}' however actual found as '{cpu_idle_details}'."
                     )
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:

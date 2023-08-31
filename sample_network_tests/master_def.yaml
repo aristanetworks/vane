@@ -5,3 +5,6 @@ global_dut_filter:
   criteria: names
   filter:
     - BLFE1
+testcase_data:
+  NRFU6.4:
+    expected_cpu_idle_time: 25 # Expected cpu idle time.

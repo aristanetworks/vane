@@ -229,12 +229,14 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_bad_syslog_events
+      description: Testcase for verification bad syslog event messages.
       test_id: NRFU6.1
       show_cmd: null
       expected_output: null
+      test_criteria: Bad syslog events(specific keywords) should not be found in the collected logs.
       report_style: modern
+      days_of_logs: {{ testcase_data["NRFU6.1"].days_of_logs }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_

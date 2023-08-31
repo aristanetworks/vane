@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Testcase for verification of system hardware fan status.
+Testcase for verification of fan status in the system.
 """
 
 import re
@@ -19,7 +19,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.system
 class SystemHardwareFanStatusTests:
     """
-    Testcase for verification of system hardware fan status.
+    Testcase for verification of fan status in the system.
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -29,45 +29,43 @@ class SystemHardwareFanStatusTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_system_hardware_fan_status(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of system hardware fan status.
+        TD: Testcase for verification of fan status in the system.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        test_params = tops.test_parameters
-        tops.expected_output = {"fan_status_details": {}}
-        tops.actual_output = {"fan_status_details": {}}
+        tops.expected_output = {"fans_slots": {}}
+        tops.actual_output = {"fans_slots": {}}
         self.output = ""
-        unstable_fans, notok_fans = {}, {}
+        fan_speed_details = {}
 
         # forming output message if test result is passed
         tops.output_msg = "For all fans, status is ok and speed is stable."
 
         try:
             """
-            TS: Running `show version` commands on DUT.
-            Verifying the 'vEOS' device is not present in output.
+            TS:  Running `show version` command on the device and skipping the test case if device
+            platform is 'vEOS'.
             """
-            show_version_command = "show version"
-            output = dut["output"][show_version_command]["json"]
+            self.show_version_command = "show version"
+            output = dut["output"][self.show_version_command]["json"]
             logger.info(
                 "On device %s, Output of %s command is: \n%s\n",
                 tops.dut_name,
-                show_version_command,
+                self.show_version_command,
                 output,
             )
             self.output = (
-                f"on device {tops.dut_name}, output of {show_version_command} is:\n{output}"
+                f"on device {tops.dut_name}, output of {self.show_version_command} is:\n{output}"
             )
-            model_name = output.get("modelName")
 
             # Skipping testcase if device is vEOS.
-            if "vEOS" in model_name:
+            if "vEOS" in output.get("modelName"):
                 pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
 
             """
-            TS: Running `show system environment cooling detail` command and verifying
+            TS: Running `show system environment cooling` command and verifying
             fan status and speed stability details.
             """
             output = tops.run_show_cmds([tops.show_cmd])
@@ -78,25 +76,24 @@ class SystemHardwareFanStatusTests:
                 output,
             )
             self.output = f"\nOutput of {tops.show_cmd} command is:\n{output}\n"
-            power_supplies = output[0]["result"]
+            self.fan_slot_details = output[0]["result"]
 
             # Checking power supply slot and Fan tray slot details.
-            power_supply_slots = power_supplies.get("powerSupplySlots")
-            fan_tray_slots = power_supplies.get("fanTraySlots")
-            assert power_supply_slots, "Power supply slot details are not found."
+            self.power_supply_slots = self.fan_slot_details.get("powerSupplySlots")
+            self.fan_tray_slots = self.fan_slot_details.get("fanTraySlots")
+            assert self.power_supply_slots, "Power supply slot details are not found in the output."
 
-            assert fan_tray_slots, "Fan tray slot details are not found."
+            assert self.fan_tray_slots, "Fan tray slot details are not found in the output."
 
-            # Splitting power slots with name, and updating actual and expected output.
-            for power_slots in ("powerSupplySlots", "fanTraySlots"):
-                splitted_power_slots = re.sub("([A-Z])", r"_\1", power_slots).lower()
-                notok_fans.update({splitted_power_slots: []})
-                unstable_fans.update({splitted_power_slots: []})
-                tops.expected_output["fan_status_details"].update({splitted_power_slots: {}})
-                tops.actual_output["fan_status_details"].update({splitted_power_slots: {}})
-                for power_supply in power_supplies.get(power_slots):
-                    for fan_data in power_supply["fans"]:
-                        tops.expected_output["fan_status_details"][splitted_power_slots].update(
+            # Collecting actual and expected output.
+            for fans_slots in ("powerSupplySlots", "fanTraySlots"):
+                # Converting fan slot name from camel case.
+                converted_slot_name = re.sub("([A-Z])", r"_\1", fans_slots).lower()
+                tops.expected_output["fans_slots"].update({converted_slot_name: {}})
+                tops.actual_output["fans_slots"].update({converted_slot_name: {}})
+                for fan_details in self.fan_slot_details.get(fans_slots):
+                    for fan_data in fan_details["fans"]:
+                        tops.expected_output["fans_slots"][converted_slot_name].update(
                             {
                                 fan_data["label"]: {
                                     "fan_status": "ok",
@@ -104,39 +101,50 @@ class SystemHardwareFanStatusTests:
                                 }
                             }
                         )
-
-                        tops.actual_output["fan_status_details"][splitted_power_slots].update(
+                        if fan_data.get("configuredSpeed"):
+                            fan_stability = int(fan_data.get("configuredSpeed")) < 80
+                        else:
+                            fan_stability = None
+                        tops.actual_output["fans_slots"][converted_slot_name].update(
                             {
                                 fan_data["label"]: {
                                     "fan_status": fan_data["status"],
-                                    "speed_stability_status": (
-                                        int(fan_data["configuredSpeed"])
-                                        < test_params["fan_speed_limit"]
-                                    ),
+                                    "speed_stability_status": fan_stability,
                                 }
                             }
                         )
-                        # Collecting fan which is not stable and ok
-                        if fan_data["status"] != "ok":
-                            notok_fans[splitted_power_slots].append(fan_data["label"])
-                        if int(fan_data["configuredSpeed"]) > test_params["fan_speed_limit"]:
-                            unstable_fans[splitted_power_slots].append(fan_data["label"])
+                        fan_speed_details.update({fan_data["label"]: fan_data["configuredSpeed"]})
 
             # Forming output message if test result is fail.
             if tops.expected_output != tops.actual_output:
                 tops.output_msg = "\n"
-                for slots, slot_details in tops.expected_output["fan_status_details"].items():
-                    if slot_details != tops.actual_output.get("fan_status_details").get(slots):
-                        tops.output_msg += f"For {slots}:\n"
-                    if notok_fans[slots]:
-                        fan_label = ", ".join(notok_fans[slots])
-                        tops.output_msg += f"State of following fans is not ok: {fan_label}.\n"
-                    if unstable_fans[slots]:
-                        fan_label = ", ".join(unstable_fans[slots])
-                        tops.output_msg += (
-                            f"Speed of following fans is not stable: {fan_label}, and their speed"
-                            f" is greater than {test_params['fan_speed_limit']}.\n\n"
-                        )
+                for slots, slot_details in tops.expected_output["fans_slots"].items():
+                    if slot_details != tops.actual_output["fans_slots"].get(slots):
+                        tops.output_msg += f"For {slots.replace('_', ' ')}:\n"
+                        for fan_lable, fan_details in slot_details.items():
+                            for fan_status_key, fan_status_value in fan_details.items():
+                                actual_fan_status = (
+                                    tops.actual_output["fans_slots"]
+                                    .get(slots)
+                                    .get(fan_lable)
+                                    .get(fan_status_key)
+                                )
+                                if fan_status_value != actual_fan_status:
+                                    if actual_fan_status is None:
+                                        tops.output_msg += (
+                                            f"For fan {fan_lable} status is 'Not ok',"
+                                            " and fan speed is not configured.\n"
+                                        )
+                                    else:
+                                        if fan_status_key == "speed_stability_status" and (
+                                            int(fan_speed_details[fan_lable]) > 80
+                                        ):
+                                            tops.output_msg += (
+                                                f"For fan {fan_lable} status is 'ok', but fan speed"
+                                                " is higher than '80' i.e"
+                                                f" '{fan_speed_details.get(fan_lable)}'.\n"
+                                            )
+                    tops.output_msg += "\n"
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]

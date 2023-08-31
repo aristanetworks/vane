@@ -71,16 +71,16 @@ class MultiAgentRoutingProtocolTests:
 
             # forming output message if test result is fail
             if tops.actual_output != tops.expected_output:
-                tops.output_msg = f"\nOn device {tops.dut_name}:\n"
+                tops.output_msg = "\n"
                 if not tops.actual_output["multi_agent_routing_protocol"]["operational"]:
                     if tops.actual_output["multi_agent_routing_protocol"]["configured"]:
                         tops.output_msg += (
-                            "Multi agent routing protocol is configured but not is in operational"
-                            " state."
+                            "Multi agent routing protocol is configured but it is not in the"
+                            " operational"
                         )
                     if not tops.actual_output["multi_agent_routing_protocol"]["configured"]:
                         tops.output_msg += (
-                            "Multi agent routing protocol is neither configured nor is in"
+                            "Multi agent routing protocol is neither configured nor in"
                             " operational state."
                         )
 

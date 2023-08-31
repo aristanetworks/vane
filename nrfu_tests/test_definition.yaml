@@ -163,7 +163,7 @@
         multi_agent_routing_protocol:
           configured: true
           operational: true
-      test_criteria: Multi Agent Routing Model protocol should be configured and operational on the device.   # Setting test case’s pass/fail criteria for reporting
+      test_criteria: Multi agent routing model protocol should be configured and operational on the device.   # Setting test case’s pass/fail criteria for reporting
       report_style: modern  # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:

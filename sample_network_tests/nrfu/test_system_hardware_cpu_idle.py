@@ -36,7 +36,7 @@ class SystemHardwareCpuIdleTimeTests:
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         tops.actual_output = {}
         self.output = ""
-        expected_time = tops.test_parameters["expected_cpu_idle_time"]
+        expected_time = tops.test_parameters["input"]["expected_cpu_idle_time"]
 
         # Forming output message if test result is passed
         tops.output_msg = "Cpu idle time is configured on device."

@@ -39,13 +39,13 @@ class MultiAgentRoutingProtocolTests:
 
         # Forming output message if test result is pass
         tops.output_msg = (
-            "Multi Agent Routing Model protocol is configured and operational on the device."
+            "Multi agent routing model protocol is configured and operational on the device."
         )
 
         try:
             """
-            TS: Running 'show ip route summary' command and Verifying Multi Agent Routing Model
-            is enabled.
+            TS: Running 'show ip route summary' command and verifying multi agent routing model
+            protocol is configured and operational on the device.
             """
             route_summary = dut["output"][tops.show_cmd]["text"]
             logger.info(
@@ -75,12 +75,12 @@ class MultiAgentRoutingProtocolTests:
                 if not tops.actual_output["multi_agent_routing_protocol"]["operational"]:
                     if tops.actual_output["multi_agent_routing_protocol"]["configured"]:
                         tops.output_msg += (
-                            "Multi Agent routing protocol is configured but not is in operational"
+                            "Multi agent routing protocol is configured but not is in operational"
                             " state."
                         )
                     if not tops.actual_output["multi_agent_routing_protocol"]["configured"]:
                         tops.output_msg += (
-                            "Multi Agent routing protocol is neither configured nor is in"
+                            "Multi agent routing protocol is neither configured nor is in"
                             " operational state."
                         )
 

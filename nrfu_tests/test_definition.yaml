@@ -171,12 +171,14 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_security_rp_login_banner
+      description: Testcase for verification of login banner.
       test_id: NRFU5.5
-      show_cmd: null
-      expected_output: null
-      report_style: modern
+      show_cmd: show banner login
+      expected_output:
+        login_banner_found: True
+      test_criteria: Login banner should be found on the device. # Setting test case’s pass / fail criteria for reporting
+      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
       criteria: names
       filter:
         - BLFE1

@@ -70,7 +70,7 @@ class SystemHardwareCoolingStatusTests:
                 output,
             )
 
-            self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
+            self.output += f"Output of {tops.show_cmd} command is: \n{output}"
             system_cooling_status = output.get("systemStatus")
             ambient_temperature = output.get("ambientTemperature")
             tops.actual_output.update({"system_cooling_status": system_cooling_status})

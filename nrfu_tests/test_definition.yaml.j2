@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 - name: nrfu_tests
   testcases:
     - name: test_
@@ -236,13 +235,12 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_system_hardware_free_memory
-      description: Testcase for verification of system hardware free memory functionality.
+    - name: test_system_free_memory
+      description: Testcase for verification of system hardware free memory utilization.
       test_id: NRFU6.7
-      show_cmd: show version
+      show_cmd: null
       expected_output:
-        memory_utilization: True
-      verification_value: 70
+        memory_utilization_under_range: True
       test_criteria: The expected memory utilization percentage of the device should be less than 70%.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}

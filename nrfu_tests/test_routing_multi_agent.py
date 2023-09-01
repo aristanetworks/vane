@@ -19,15 +19,15 @@ class MultiAgentRoutingProtocolTests:
     """Testcases for verification of multi-agent routing functionality"""
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
-    test_duts = dut_parameters["test_routing_multi_agent"]["duts"]
-    test_ids = dut_parameters["test_routing_multi_agent"]["ids"]
+    test_duts = dut_parameters["test_multi_agent_routing_protocol"]["duts"]
+    test_ids = dut_parameters["test_multi_agent_routing_protocol"]["ids"]
 
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
-    def test_routing_multi_agent(self, dut, tests_definitions):
+    def test_multi_agent_routing_protocol(self, dut, tests_definitions):
         """
         TD: Test case for verification of multi-agent routing model functionality
         Args:
-          dut(dict): Details related to the switches
+          dut(dict): Details related to particular DUT
           tests_definitions(dict): Test suite and test case parameters
         """
 
@@ -93,6 +93,6 @@ class MultiAgentRoutingProtocolTests:
             )
 
         tops.test_result = tops.expected_output == tops.actual_output
-        tops.parse_test_steps(self.test_routing_multi_agent)
+        tops.parse_test_steps(self.test_multi_agent_routing_protocol)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.expected_output == tops.actual_output

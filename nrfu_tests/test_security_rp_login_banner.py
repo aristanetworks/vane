@@ -16,7 +16,7 @@ TEST_SUITE = "nrfu_tests"
 
 @pytest.mark.nrfu_test
 @pytest.mark.security
-class SecurityRpLoginBannerTests:
+class LoginBannerTests:
     """
     Testcase for verification of security rp login banner
     """
@@ -38,12 +38,12 @@ class SecurityRpLoginBannerTests:
         tops.actual_output = {"login_banner_found": False}
 
         # Forming output message if test result is passed
-        tops.output_msg = "Expected login banner is present on the switch."
+        tops.output_msg = "Login banner is found on the device."
 
         try:
             """
-            TS: Running `show banner login` command on device and verifying that the expected
-            login banner is correct.
+            TS: Running `show banner login` command on device and verifying that the
+            login banner is found on the device.
             """
             output = dut["output"][tops.show_cmd]["json"]
             logger.info(
@@ -54,16 +54,12 @@ class SecurityRpLoginBannerTests:
             )
             self.output += f"\nOutput of {tops.show_cmd} command is: \n{output}"
             login_banner = output.get("loginBanner")
-
-            if login_banner:
-                tops.actual_output = {"login_banner_found": True}
+            tops.actual_output = {"login_banner_found": bool(login_banner)}
 
             # forming output message if test result is fail
             if tops.expected_output != tops.actual_output:
                 if not tops.actual_output["login_banner_found"]:
-                    tops.output_msg = (
-                        f"\nExpected login banner is not configured on {tops.dut_name}."
-                    )
+                    tops.output_msg = "\nLogin banner is not found on the device."
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]

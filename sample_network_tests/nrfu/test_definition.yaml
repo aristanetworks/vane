@@ -9,4 +9,4 @@
       report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
       criteria: names
       filter:
-        - DLFW1
+        - BLFE1

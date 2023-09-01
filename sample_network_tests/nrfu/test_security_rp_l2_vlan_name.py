@@ -62,15 +62,12 @@ class VlanNameTests:
             for vlan in static_vlans:
                 modified_vlan = vlan.zfill(4)
                 no_vlan_name = ""
-                tops.expected_output["vlans"].update({vlan: {"configured_vlan_name": True}})
-                if (
-                    vlans.get(vlan).get("name") == "VLAN%s" % vlan
-                    or vlans.get(vlan).get("name") == "VLAN%s" % modified_vlan
-                ):
+                tops.expected_output["vlans"].update({vlan: {"vlan_name_configured": True}})
+                if vlans.get(vlan).get("name") == "VLAN%s" % modified_vlan:
                     no_vlan_name = vlans.get(vlan).get("name")
 
                 tops.actual_output["vlans"].update(
-                    {vlan: {"configured_vlan_name": not bool(no_vlan_name)}}
+                    {vlan: {"vlan_name_configured": not bool(no_vlan_name)}}
                 )
 
             # Output message formation in case of testcase fails.
@@ -78,17 +75,14 @@ class VlanNameTests:
                 tops.output_msg = ""
                 no_name_configured = []
                 for vlan, vlan_status in tops.expected_output.get("vlans").items():
-                    for vlan_name_status in vlan_status:
-                        expected_vlan_name = (
-                            tops.expected_output.get("vlans").get(vlan).get(vlan_name_status)
-                        )
-                        actual_vlan_name = (
-                            tops.actual_output.get("vlans").get(vlan).get(vlan_name_status)
-                        )
-                        if expected_vlan_name != actual_vlan_name:
-                            no_name_configured.append(vlan)
+                    actual_vlan_naming = (
+                        tops.actual_output.get("vlans").get(vlan).get("vlan_name_configured")
+                    )
+                    if vlan_status["vlan_name_configured"] != actual_vlan_naming:
+                        no_name_configured.append(vlan)
                 tops.output_msg += (
-                    f"Following VLANs are no name configured: {', '.join(no_name_configured)}."
+                    "\nFor following VLANs name is not configured:"
+                    f" {', '.join(no_name_configured)}."
                 )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:

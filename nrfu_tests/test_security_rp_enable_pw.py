@@ -40,7 +40,7 @@ class EnablePasswordTests:
 
         try:
             """
-            TS: Running `show running-config section enable` command and verifying enable prompt 
+            TS: Running `show running-config section enable` command and verifying enable prompt
             password is configured on device.
             """
             output = dut["output"][tops.show_cmd]["text"]
@@ -56,9 +56,7 @@ class EnablePasswordTests:
 
             # Forming output message if test result is fail.
             if tops.expected_output != tops.actual_output:
-                tops.output_msg = (
-                    f"Enable password is not configured on device {tops.dut_name}."
-                )
+                tops.output_msg = f"Enable password is not configured on device {tops.dut_name}."
 
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]

@@ -22,11 +22,11 @@ class BadSyslogEventsTests:
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
-    test_duts = dut_parameters["test_bad_syslog_events"]["duts"]
-    test_ids = dut_parameters["test_bad_syslog_events"]["ids"]
+    test_duts = dut_parameters["test_system_hardware_bad_syslog_event"]["duts"]
+    test_ids = dut_parameters["test_system_hardware_bad_syslog_event"]["ids"]
 
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
-    def test_bad_syslog_events(self, dut, tests_definitions):
+    def test_system_hardware_bad_syslog_event(self, dut, tests_definitions):
         """
         TD: Testcase for verification bad syslog events messages.
         Args:
@@ -43,9 +43,12 @@ class BadSyslogEventsTests:
         bad_syslog = ""
 
         # Forming output message if test result is passed
-        tops.output_msg = "No bad syslog messages are found."
+        tops.output_msg = "No bad syslog events are found."
 
         try:
+            # Collecting expected output.
+            tops.expected_output.update({"bad_syslog_events_not_found": True})
+
             """
             TS: Running `show logging last <daysOfLogs> days` command on DUT and verifying
             the key words in syslog events that are generally considered to be bad.
@@ -57,7 +60,7 @@ class BadSyslogEventsTests:
                 syslog_events_cmd,
                 output,
             )
-            self.output += f"\n\nOutput of {syslog_events_cmd} command is: \n{output}"
+            self.output += f"Output of {syslog_events_cmd} command is: \n{output}"
 
             sys_log_events = output[0].get("result", {}).get("output")
             assert sys_log_events, f"logging details for last {days_of_logs} days are not found."
@@ -71,10 +74,8 @@ class BadSyslogEventsTests:
                 ):
                     bad_syslog += f"{event}\n"
 
-            # Collecting actual and expected output.
-            tops.actual_output.update({"bad_syslog_event_found": len(bad_syslog) > 0})
-
-            tops.expected_output.update({"bad_syslog_event_found": False})
+            # Collecting actual output.
+            tops.actual_output.update({"bad_syslog_events_not_found": len(bad_syslog) == 0})
 
             # Forming output message if test result is fail.
             if tops.actual_output != tops.expected_output:
@@ -91,6 +92,6 @@ class BadSyslogEventsTests:
             )
 
         tops.test_result = tops.expected_output == tops.actual_output
-        tops.parse_test_steps(self.test_bad_syslog_events)
+        tops.parse_test_steps(self.test_system_hardware_bad_syslog_event)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.expected_output == tops.actual_output

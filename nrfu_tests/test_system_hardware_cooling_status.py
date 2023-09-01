@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Testcase for verification system cooling status.
+Testcase for the verification of system cooling status.
 """
 
 import pytest
@@ -18,7 +18,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.system
 class SystemHardwareCoolingStatusTests:
     """
-    Testcase for verification system cooling status.
+    Testcase for the verification of system cooling status.
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -28,7 +28,7 @@ class SystemHardwareCoolingStatusTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_system_hardware_cooling_status(self, dut, tests_definitions):
         """
-        TD: Testcase for verification system cooling status.
+        TD: Testcase for the verification of system cooling status.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -77,8 +77,8 @@ class SystemHardwareCoolingStatusTests:
 
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = (
-                    "System cooling status is not ok.\nAmbient Temperature"
-                    f" is: {ambient_temperature} C"
+                    "System cooling status is not ok. Ambient Temperature: "
+                    f"{format(ambient_temperature,'.2f')}C')"
                 )
 
         except (AttributeError, LookupError, EapiError) as excep:

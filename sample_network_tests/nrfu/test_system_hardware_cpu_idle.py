@@ -16,7 +16,7 @@ TEST_SUITE = "sample_network_tests"
 
 @pytest.mark.system
 @pytest.mark.nrfu_test
-class SystemHardwareCpuIdleTimeTests:
+class CpuIdleTimeTests:
     """
     Testcase for verification of system hardware cpu idle time.
     """

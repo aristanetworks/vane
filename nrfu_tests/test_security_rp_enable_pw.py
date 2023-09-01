@@ -14,8 +14,7 @@ TEST_SUITE = "nrfu_tests"
 
 @pytest.mark.nrfu_test
 @pytest.mark.security
-class SecurityEnablePasswordTests:
-
+class EnablePasswordTests:
     """
     Testcase for verification of enable password is configured.
     """
@@ -34,17 +33,17 @@ class SecurityEnablePasswordTests:
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         self.output = ""
-        tops.actual_output = {"enable_password_found": False}
+        tops.actual_output = {"enable_password_configured": False}
 
         # Forming output message if test result is passed
         tops.output_msg = "Enable password is configured on device."
 
         try:
             """
-            TS: Running `show running-config section enable` command and verifying password is
-            configured on device.
+            TS: Running `show running-config section enable` command and verifying enable prompt 
+            password is configured on device.
             """
-            output = tops.run_show_cmds([tops.show_cmd])
+            output = dut["output"][tops.show_cmd]["text"]
             logger.info(
                 "On device %s, output of %s command is:\n%s\n",
                 tops.dut_name,
@@ -52,19 +51,16 @@ class SecurityEnablePasswordTests:
                 output,
             )
             self.output += f"\nOutput of {tops.show_cmd} command is:\n{output}\n"
-            modified_output = output[0].get("result", {}).get("output")
-
-            if modified_output.startswith("enable password"):
-                tops.actual_output = {"enable_password_found": True}
+            if output.startswith("enable password"):
+                tops.actual_output = {"enable_password_configured": True}
 
             # Forming output message if test result is fail.
             if tops.expected_output != tops.actual_output:
-                if not tops.actual_output.get("enable_password_found"):
-                    tops.output_msg = (
-                        f"Enable password is not configured on device {tops.dut_name}."
-                    )
+                tops.output_msg = (
+                    f"Enable password is not configured on device {tops.dut_name}."
+                )
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+        except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(
                 "On device %s, Error while running testcase is:\n%s",

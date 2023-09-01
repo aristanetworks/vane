@@ -1,6 +1,5 @@
 - name: nrfu_tests
   testcases:
-<<<<<<< HEAD
     - name: test_
       description:
       test_id: NRFU1.1
@@ -134,9 +133,9 @@
       test_id: NRFU5.2
       show_cmd: show running-config section enable
       expected_output:
-        enable_password_found: True
+        enable_password_configured: True
       test_criteria: Enable password should be configured on device. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_

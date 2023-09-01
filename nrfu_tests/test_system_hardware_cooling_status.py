@@ -34,16 +34,16 @@ class SystemHardwareCoolingStatusTests:
             tests_definitions(dict): test suite and test case parameters.
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        tops.expected_output = {}
+        tops.expected_output = {"system_cooling_status": "coolingOk"}
         tops.actual_output = {}
         self.output = ""
 
         # forming output message if test result is passed
-        tops.output_msg = "System cooling status is ok."
+        tops.output_msg = "System cooling status is 'coolingOk' with expected ambient temperature."
 
         try:
             """
-            TS: Running 'show version' command on device and Skipping the test case
+            TS: Running `show version` command on device and skipping the test case
             for device if platform is vEOS.
             """
             version_output = dut["output"]["show version"]["json"]
@@ -52,11 +52,11 @@ class SystemHardwareCoolingStatusTests:
                 tops.dut_name,
                 version_output,
             )
-            self.output += f"\n\nOutput of 'show version' command is: \n{version_output}"
+            self.output += f"Output of 'show version' command is: \n{version_output}"
 
             # Skipping testcase if device is vEOS.
             if "vEOS" in version_output.get("modelName"):
-                pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
+                pytest.skip(f"{tops.dut_name} is vEOS device, hence test is skipped.")
 
             """
             TS: Running `show system environment cooling` command and verifying
@@ -74,15 +74,14 @@ class SystemHardwareCoolingStatusTests:
             system_cooling_status = output.get("systemStatus")
             ambient_temperature = output.get("ambientTemperature")
             tops.actual_output.update({"system_cooling_status": system_cooling_status})
-            tops.expected_output.update({"system_cooling_status": "coolingOk"})
 
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = (
-                    f"System cooling status is not ok.\nAmbient Temperature"
+                    "System cooling status is not ok.\nAmbient Temperature"
                     f" is: {ambient_temperature} C"
                 )
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+        except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(
                 "On device %s, Error while running the testcase is:\n%s",

@@ -22,11 +22,11 @@ class SystemHardwareCpuIdleTimeTests:
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
-    test_duts = dut_parameters["test_system_hardware_cpu_idle"]["duts"]
-    test_ids = dut_parameters["test_system_hardware_cpu_idle"]["ids"]
+    test_duts = dut_parameters["test_system_cpu_idle_time"]["duts"]
+    test_ids = dut_parameters["test_system_cpu_idle_time"]["ids"]
 
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
-    def test_system_hardware_cpu_idle(self, dut, tests_definitions):
+    def test_system_cpu_idle_time(self, dut, tests_definitions):
         """
         TD: Testcase for verification of system hardware cpu idle time.
         Args:
@@ -36,17 +36,16 @@ class SystemHardwareCpuIdleTimeTests:
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         tops.actual_output = {}
         self.output = ""
-        expected_time = tops.test_parameters["input"]["expected_cpu_idle_time"]
 
         # Forming output message if test result is passed
-        tops.output_msg = "Cpu idle time is configured on device."
+        tops.output_msg = "CPU idle time is within the expected range."
 
         try:
             """
-            TS: Running `show processes top once` command and verifying cpu idle time is
-            configured on device.
+            TS: Running `show processes top once` command and verifying cpu idle time is within
+            expected range.
             """
-            output = tops.run_show_cmds([tops.show_cmd])
+            output = dut["output"][tops.show_cmd]["json"]
             logger.info(
                 "On device %s, output of %s command is:\n%s\n",
                 tops.dut_name,
@@ -54,26 +53,25 @@ class SystemHardwareCpuIdleTimeTests:
                 output,
             )
             self.output += f"Output of {tops.show_cmd} command is:\n{output}\n"
-            cpu_idle_details = output[0].get("result").get("cpuInfo").get("%Cpu(s)").get("idle")
+            cpu_idle_details = output.get("cpuInfo").get("%Cpu(s)").get("idle")
 
             # Skipping testcase if Cpu idle time is not configured on device.
             if not cpu_idle_details:
                 pytest.skip(f"Cpu idle time is not configured on device {tops.dut_name}.")
 
             # Verifying cpu idle time and updating in actual output.
-            cpu_idle_time_found = (
-                "Cpu idle time is low" if cpu_idle_details < expected_time else True
-            )
-            tops.actual_output = {"cpu_idle_time_found": cpu_idle_time_found}
+            cpu_idle_time_found = "Cpu idle time is low" if cpu_idle_details < 25 else True
+            tops.actual_output = {"cpu_idle_time_within_range": cpu_idle_time_found}
 
             # Output message formation in case of testcase fails.
             if tops.actual_output != tops.expected_output:
-                if tops.actual_output.get("cpu_idle_time_found") == "Cpu idle time is low":
-                    tops.output_msg = (
-                        f"On Device {tops.dut_name}, Expected CPU idle time is greater than "
-                        f"'{expected_time}' however actual found as '{cpu_idle_details}'."
-                    )
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+                tops.output_msg = (
+                    "CPU idle time is not correct. Expected idle time is above "
+                    "25(unit, sec or min) however in actual found as "
+                    f"{cpu_idle_details} (unit, sec or min)."
+                )
+
+        except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(
                 "On device %s, Error while running testcase is:\n%s",
@@ -82,6 +80,6 @@ class SystemHardwareCpuIdleTimeTests:
             )
 
         tops.test_result = tops.actual_output == tops.expected_output
-        tops.parse_test_steps(self.test_system_hardware_cpu_idle)
+        tops.parse_test_steps(self.test_system_cpu_idle_time)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.actual_output == tops.expected_output

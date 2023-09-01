@@ -1,16 +1,14 @@
 - name: sample_network_tests
   {% set master_data = testcase_data %}
   testcases:
-    - name: test_system_hardware_cpu_idle
+    - name: test_system_cpu_idle_time
       description: Testcase for verification of system hardware cpu idle time.
       test_id: NRFU6.4
       {% set test_data = master_data["NRFU6.4"] %}
       show_cmd: show processes top once
       expected_output:
-        cpu_idle_time_found: true
-      test_criteria: Cpu idle time should be configured on device. # Setting test case’s pass/fail criteria for reporting
+        cpu_idle_time_within_range: true
+      test_criteria: CPU idle time should be within the expected range. # Setting test case’s pass/fail criteria for reporting
       report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      input:
-        expected_cpu_idle_time: {{ test_data["expected_cpu_idle_time"] }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

@@ -28,7 +28,8 @@ class TacacsServersTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_base_services_tacacs(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of TACACS servers details.
+        TD: Testcase to verify that TACACS servers have no errors, timeouts, failures or
+        disconnects.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -80,9 +81,7 @@ class TacacsServersTests:
                     {
                         tacacs_hostname: {
                             "received_errors": tacacs_server.get("receiveErrors"),
-                            "connection_disconnects": tacacs_server.get(
-                                "connectionDisconnects"
-                            ),
+                            "connection_disconnects": tacacs_server.get("connectionDisconnects"),
                             "dns_errors": tacacs_server.get("dnsErrors"),
                             "send_timeouts": tacacs_server.get("sendTimeouts"),
                             "connection_timeouts": tacacs_server.get("connectionTimeouts"),
@@ -102,15 +101,17 @@ class TacacsServersTests:
                             hostname
                         )
                         if tacacs_servers_info != actual_servers_info:
-                            tops.output_msg = f"\nFor hostname {hostname}:"
+                            tops.output_msg += (
+                                f"\nFor TACACS server {hostname}, following"
+                                " errors/timeouts/disconnects were expected to"
+                                " '0' but in actual found as:\n"
+                            )
                             for (error_name, error_value), actual_value in zip(
                                 tacacs_servers_info.items(), actual_servers_info.values()
                             ):
                                 if error_value != actual_value:
                                     tops.output_msg += (
-                                        f"\nExpected value of {error_name.replace('_', ' ') } is"
-                                        f" '{error_value}' however actual found as"
-                                        f" '{actual_value}'."
+                                        f"{error_name.replace('_', ' ')}:{actual_value}\n"
                                     )
 
         except (AttributeError, LookupError, EapiError) as excep:

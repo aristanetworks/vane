@@ -279,8 +279,11 @@
       description: Testcase for verification of TACACS servers details.
       test_id: NRFU1.4
       show_cmd: show tacacs
-      expected_output: null #Forming expected output in test case file.
-      test_criteria: TACACS servers should not have errors, timeouts, failures or disconnects. # Setting test case’s pass / fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      # Forming expected output in test case file.
+      expected_output: null
+      # Setting test case’s pass/fail criteria for reporting.
+      test_criteria: TACACS servers should not have errors, timeouts, failures or disconnects.
+      # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

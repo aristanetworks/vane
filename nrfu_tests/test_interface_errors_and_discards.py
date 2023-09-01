@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Test cases for verification of errors on all the interfaces
+Test cases for verification of errors/discards on all the interfaces
 """
 
 import pytest
@@ -18,7 +18,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.interfaces
 class InterfaceErrorsAndDiscardsTests:
     """
-    Test cases for verification of errors on all the interfaces
+    Test cases for verification of errors/discards on all the interfaces
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -28,7 +28,7 @@ class InterfaceErrorsAndDiscardsTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_interface_errors_and_discards(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of errors on all the interfaces.
+        TD: Testcase for verification of errors/discards on all the interfaces.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -37,10 +37,9 @@ class InterfaceErrorsAndDiscardsTests:
         self.output = ""
         self.tops.actual_output = {}
         self.tops.expected_output = {}
-        test_params = self.tops.test_parameters
 
         # Forming output message if test result is passed
-        self.tops.output_msg = "Errors are not found on any of the interface."
+        self.tops.output_msg = "Errors/discards are not found on any of the interface."
 
         try:
             """
@@ -61,124 +60,93 @@ class InterfaceErrorsAndDiscardsTests:
             assert self.show_interfaces, "Interfaces details are not found."
 
             for ethernets in self.show_interfaces:
-                if "Ethernet" in ethernets:
+                if "Ethernet" in ethernets or "Management" in ethernets:
                     if "." in ethernets:
                         continue
-
-                    # Input error detail
-                    runts_frames = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("inputErrorsDetail")
-                        .get("runtFrames")
-                    )
-                    fcs_errors = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("inputErrorsDetail")
-                        .get("fcsErrors")
-                    )
-                    alignment_errors = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("inputErrorsDetail")
-                        .get("alignmentErrors")
-                    )
-                    giant_frames = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("inputErrorsDetail")
-                        .get("giantFrames")
-                    )
-                    symbol_errors = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("inputErrorsDetail")
-                        .get("symbolErrors")
-                    )
-
-                    # Output error detail
-                    deferred_transmissions = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("outputErrorsDetail")
-                        .get("deferredTransmissions")
-                    )
-                    collisions_error = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("outputErrorsDetail")
-                        .get("collisions")
-                    )
-                    late_collisions = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("outputErrorsDetail")
-                        .get("lateCollisions")
-                    )
-
-                    # Other Error details
-                    in_discards = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("inDiscards")
-                    )
-                    total_in_errors = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("totalInErrors")
-                    )
-                    out_discards = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("outDiscards")
-                    )
-                    total_out_errors = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("totalOutErrors")
-                    )
-                    link_status_changes = (
-                        self.show_interfaces.get(ethernets)
-                        .get("interfaceCounters")
-                        .get("linkStatusChanges")
-                    )
+                    if "Management0" in ethernets:
+                        continue
 
                     # Collecting actual and expected output.
                     self.tops.actual_output.update(
                         {
                             ethernets: {
-                                "input_error_details": {
-                                    "runts_frames": runts_frames > test_params["error_threshold"],
-                                    "fcs_errors": fcs_errors > test_params["error_threshold"],
-                                    "alignment_errors": (
-                                        alignment_errors > test_params["error_threshold"]
+                                "input_errors": {
+                                    "runts_frames": (
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("inputErrorsDetail")
+                                        .get("runtFrames")
                                     ),
-                                    "giant_frames": giant_frames > test_params["error_threshold"],
-                                    "symbol_errors": symbol_errors > test_params["error_threshold"],
+                                    "fcs_errors": (
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("inputErrorsDetail")
+                                        .get("fcsErrors")
+                                    ),
+                                    "alignment_errors": (
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("inputErrorsDetail")
+                                        .get("alignmentErrors")
+                                    ),
+                                    "giant_frames": (
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("inputErrorsDetail")
+                                        .get("giantFrames")
+                                    ),
+                                    "symbol_errors": (
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("inputErrorsDetail")
+                                        .get("symbolErrors")
+                                    ),
                                 },
-                                "output_error_details": {
+                                "output_errors": {
                                     "deferred_transmissions": (
-                                        deferred_transmissions > test_params["error_threshold"]
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("outputErrorsDetail")
+                                        .get("deferredTransmissions")
                                     ),
                                     "collisions_error": (
-                                        collisions_error > test_params["error_threshold"]
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("outputErrorsDetail")
+                                        .get("collisions")
                                     ),
                                     "late_collisions": (
-                                        late_collisions > test_params["error_threshold"]
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("outputErrorsDetail")
+                                        .get("lateCollisions")
                                     ),
                                 },
-                                "other_error_details": {
-                                    "in_discards": in_discards > test_params["error_threshold"],
-                                    "total_in_errors": (
-                                        total_in_errors > test_params["error_threshold"]
+                                "other_errors": {
+                                    "in_discards": (
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("inDiscards")
                                     ),
-                                    "out_discards": out_discards > test_params["error_threshold"],
+                                    "total_in_errors": (
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("totalInErrors")
+                                    ),
+                                    "out_discards": (
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("outDiscards")
+                                    ),
                                     "total_out_errors": (
-                                        total_out_errors > test_params["error_threshold"]
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("totalOutErrors")
                                     ),
                                     "link_status_changes": (
-                                        link_status_changes > test_params["error_threshold"]
+                                        self.show_interfaces.get(ethernets)
+                                        .get("interfaceCounters")
+                                        .get("linkStatusChanges")
                                     ),
                                 },
                             }
@@ -188,24 +156,24 @@ class InterfaceErrorsAndDiscardsTests:
                     self.tops.expected_output.update(
                         {
                             ethernets: {
-                                "input_error_details": {
-                                    "runts_frames": False,
-                                    "fcs_errors": False,
-                                    "alignment_errors": False,
-                                    "giant_frames": False,
-                                    "symbol_errors": False,
+                                "input_errors": {
+                                    "runts_frames": 0,
+                                    "fcs_errors": 0,
+                                    "alignment_errors": 0,
+                                    "giant_frames": 0,
+                                    "symbol_errors": 0,
                                 },
-                                "output_error_details": {
-                                    "deferred_transmissions": False,
-                                    "collisions_error": False,
-                                    "late_collisions": False,
+                                "output_errors": {
+                                    "deferred_transmissions": 0,
+                                    "collisions_error": 0,
+                                    "late_collisions": 0,
                                 },
-                                "other_error_details": {
-                                    "in_discards": False,
-                                    "total_in_errors": False,
-                                    "out_discards": False,
-                                    "total_out_errors": False,
-                                    "link_status_changes": False,
+                                "other_errors": {
+                                    "in_discards": 0,
+                                    "total_in_errors": 0,
+                                    "out_discards": 0,
+                                    "total_out_errors": 0,
+                                    "link_status_changes": 0,
                                 },
                             }
                         }

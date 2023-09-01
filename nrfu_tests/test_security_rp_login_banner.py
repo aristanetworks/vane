@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Testcase for verification of login banner is configured.
+Testcase for verification of security rp login banner
 """
 
 import pytest
@@ -18,7 +18,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.security
 class SecurityRpLoginBannerTests:
     """
-    Testcase for verification of login banner is configured.
+    Testcase for verification of security rp login banner
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -28,7 +28,7 @@ class SecurityRpLoginBannerTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_security_rp_login_banner(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of login banner is configured.
+        TD: Testcase for verification of security rp login banner
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters
@@ -42,7 +42,7 @@ class SecurityRpLoginBannerTests:
 
         try:
             """
-            TS: Running `show banner login` command on a DUT and verifying that the
+            TS: Running `show banner login` command on device and verifying that the expected
             login banner is correct.
             """
             output = dut["output"][tops.show_cmd]["json"]
@@ -61,7 +61,9 @@ class SecurityRpLoginBannerTests:
             # forming output message if test result is fail
             if tops.expected_output != tops.actual_output:
                 if not tops.actual_output["login_banner_found"]:
-                    tops.output_msg = f"Login banner is not configured on {tops.dut_name}"
+                    tops.output_msg = (
+                        f"\nExpected login banner is not configured on {tops.dut_name}."
+                    )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]

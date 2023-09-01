@@ -46,7 +46,7 @@ class BgpIpPeersStatusTests:
             TS: Running `show ip bgp summary vrf all` command and verifying
             state of BGP IPv4 peers.
             """
-            output = tops.run_show_cmds([tops.show_cmd])
+            output = dut["output"][tops.show_cmd]["json"]
             logger.info(
                 "On device %s, output of %s command is:\n%s\n",
                 tops.dut_name,
@@ -54,26 +54,27 @@ class BgpIpPeersStatusTests:
                 output,
             )
             self.output = f"Output of {tops.show_cmd} command is:\n{output}\n"
-            bgp_peers = output[0]["result"]["vrfs"]
+            bgp_peers = output.get("vrfs")
             assert bgp_peers, "BGP peer details are not found."
 
             # Collecting actual and expected output.
             for vrf in bgp_peers:
                 for peer in bgp_peers.get(vrf).get("peers"):
-                    tops.expected_output["bgp_peers"].update({peer: "Established"})
+                    tops.expected_output["bgp_peers"].update({peer: {"state": "Established"}})
                     peer_state = bgp_peers.get(vrf).get("peers").get(peer).get("peerState")
-                    tops.actual_output["bgp_peers"].update({peer: peer_state})
+                    tops.actual_output["bgp_peers"].update({peer: {"state": peer_state}})
 
             # Forming output message if test result is fail.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = "\n"
                 for interface, peer_state in tops.expected_output["bgp_peers"].items():
-                    actual_interface = tops.actual_output["bgp_peers"].get(interface)
-                    if peer_state != actual_interface:
+                    actual_peer_state = tops.actual_output["bgp_peers"].get(interface).get("state")
+                    expected_peer_state = peer_state.get("state")
+                    if expected_peer_state != actual_peer_state:
                         tops.output_msg += (
-                            f"For the BGP peer {interface}:\nExpected peer state is '{peer_state}',"
-                            " however actual is found as"
-                            f" '{actual_interface}'.\n\n"
+                            f"For the BGP peer {interface}:\nExpected peer state is"
+                            f" '{expected_peer_state}', however actual is found as"
+                            f" '{actual_peer_state}'.\n\n"
                         )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:

@@ -1,0 +1,11 @@
+- name: nrfu_tests
+  testcases:
+    - name: test_security_rp_l2_vlan_name
+      description: Test cases for verification of configured VLAN naming.
+      test_id: NRFU5.4
+      show_cmd: show vlan
+      expected_output: null
+      test_criteria: All configured VLANs should have a name configured.
+      report_style: modern
+      criteria: {{ global_dut_filter.criteria }}
+      filter: {{ global_dut_filter.filter }}

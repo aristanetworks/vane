@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Test cases for verification of misc show commands
+Testcase for verification of miscellaneous show commands support
 """
 
 import pytest
@@ -19,7 +19,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.misc
 class MiscShowCommandTests:
     """
-    Test cases for verification of misc show commands
+    Testcase for verification of miscellaneous show commands support
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -29,19 +29,17 @@ class MiscShowCommandTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_misc_show_commands(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of misc show commands.
+        TD: Testcase for verification of miscellaneous show commands support.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         self.output, output = "", ""
-        tops.actual_output, tops.expected_output = {"misc_show_commands": {}}, {
-            "misc_show_commands": {}
-        }
+        tops.actual_output, tops.expected_output = {"show_commands": {}}, {"show_commands": {}}
 
         # Forming output message if test result is passed
-        tops.output_msg = "Show commands are ran successfully on the device."
+        tops.output_msg = "Show commands are executed on device without any error."
 
         tops.show_cmd = [
             "show module all",
@@ -58,16 +56,17 @@ class MiscShowCommandTests:
             "show ip route vrf all summary",
         ]
 
-        output_msg = ""
+        output_msg, command_failed_msg = "", ""
+
         try:
             """
-            TS: Running misc show commands on DUT and verifying show commands are ran successfully
-            on the device.
+            TS: Running show commands on device and verifying show commands are executed
+            successfully on the device.
             """
             for command in tops.show_cmd:
                 try:
                     # Forming expected output as per show commands.
-                    tops.expected_output["misc_show_commands"].update(
+                    tops.expected_output["show_commands"].update(
                         {command: {"command_executed": True}}
                     )
                     output = tops.run_show_cmds([command], encoding="text")
@@ -78,12 +77,11 @@ class MiscShowCommandTests:
                         output,
                     )
                     self.output += f"Output of {command} command is: \n{output}"
-                    tops.actual_output["misc_show_commands"].update(
+                    tops.actual_output["show_commands"].update(
                         {command: {"command_executed": command in output[0]["command"]}}
                     )
 
                 except EapiError as error:
-                    tops.output_msg = "\n"
                     if "Unavailable command" in str(error):
                         output_msg += (
                             f"\nCommand '{command}' is not supported on this hardware"
@@ -92,10 +90,22 @@ class MiscShowCommandTests:
 
                         # Updating actual output for a perticular command to false when it
                         # throws exception
-                        tops.actual_output["misc_show_commands"].update(
+                        tops.actual_output["show_commands"].update(
                             {command: {"command_executed": False}}
                         )
-                tops.output_msg = output_msg
+                    else:
+                        command_failed_msg += (
+                            "\nCommand execution on device is failed with following"
+                            f" error:\n{error}\n"
+                        )
+
+                        # Updating actual output for a perticular command to false when it
+                        # throws exception
+                        tops.actual_output["show_commands"].update(
+                            {command: {"command_executed": False}}
+                        )
+            if output_msg or command_failed_msg:
+                tops.output_msg = output_msg + command_failed_msg
 
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]

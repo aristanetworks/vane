@@ -38,9 +38,7 @@ class FreeMemoryTests:
         tops.actual_output = {}
 
         # Forming output message if test result is passed
-        tops.output_msg = (
-            "The expected memory utilization percentage of the device is less than 70%"
-        )
+        tops.output_msg = "Memory utilization percentage of the device is less than 70%"
 
         try:
             """
@@ -61,10 +59,9 @@ class FreeMemoryTests:
 
             # Output message formation in case of testcase fails.
             if tops.actual_output != tops.expected_output:
-                tops.output_msg = "\n"
-                tops.output_msg += (
+                tops.output_msg = (
                     "Memory utilization on device is not correct. Expected memory utilization is"
-                    f" below '70%' however in actual found as '{memory_utilization}'."
+                    f" below '70%' however in actual found as '{memory_utilization}%'."
                 )
 
         except (AttributeError, LookupError, EapiError) as excep:

@@ -270,7 +270,7 @@
       show_cmd: null
       expected_output:
         memory_utilization_under_range: True
-      test_criteria: The expected memory utilization percentage of the device should be less than 70%. # Setting test case’s pass / fail criteria for reporting
+      test_criteria: Memory utilization percentage of the device should be less than 70%. # Setting test case’s pass / fail criteria for reporting
       report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
       criteria: names
       filter:

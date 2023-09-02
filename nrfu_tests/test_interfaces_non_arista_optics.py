@@ -57,13 +57,21 @@ class InterfaceOpticsTests:
             )
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{inventory_output}"
             transceiver_slots = inventory_output.get("xcvrSlots")
-            assert transceiver_slots, "Transceiver slots are not present on the device."
+            assert transceiver_slots, "Transceiver slots are not found on the device."
 
             # Updating expected and actual optics manufacturer for transceiver
             for transceiver, transceiver_details in transceiver_slots.items():
                 manufacturer_name = transceiver_details.get("mfgName")
-                tops.expected_output["transceiver_slots"].update({transceiver: "Arista Networks"})
-                tops.actual_output["transceiver_slots"].update({transceiver: manufacturer_name})
+                tops.expected_output["transceiver_slots"].update(
+                    {transceiver: {"manufacture_name": "Arista Networks"}}
+                )
+                if manufacturer_name in ["Arista Networks", "Not Present"]:
+                    tops.expected_output["transceiver_slots"].update(
+                        {transceiver: {"manufacture_name": manufacturer_name}}
+                    )
+                tops.actual_output["transceiver_slots"].update(
+                    {transceiver: {"manufacture_name": manufacturer_name}}
+                )
 
             # Forming output message in case of test case failure
             if tops.output_msg != tops.expected_output:
@@ -71,8 +79,10 @@ class InterfaceOpticsTests:
                 for transceiver, expected_transceiver_info in tops.expected_output[
                     "transceiver_slots"
                 ].items():
-                    actual_transceiver_info = tops.actual_output["transceiver_slots"][transceiver]
-                    if actual_transceiver_info == expected_transceiver_info:
+                    actual_transceiver_info = tops.actual_output["transceiver_slots"][transceiver][
+                        "manufacture_name"
+                    ]
+                    if actual_transceiver_info == expected_transceiver_info["manufacture_name"]:
                         continue
                     non_arista_optics.append(f"{transceiver} - {actual_transceiver_info}")
                 if non_arista_optics:

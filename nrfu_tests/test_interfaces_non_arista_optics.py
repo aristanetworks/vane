@@ -88,7 +88,7 @@ class InterfaceOpticsTests:
                 if non_arista_optics:
                     non_arista_optic = "\n".join(non_arista_optics)
                     tops.output_msg = (
-                        "Following transceiver optics are found as non-Arista and current"
+                        "\nFollowing transceiver optics are found as non-Arista and current"
                         f" manufacturer installed on them as follows:\n{non_arista_optic}"
                     )
 

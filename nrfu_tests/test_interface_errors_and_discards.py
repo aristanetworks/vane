@@ -191,7 +191,9 @@ class InterfaceErrorsAndDiscardsTests:
                             if err_details != self.tops.actual_output.get(interface).get(
                                 err_category
                             ):
-                                self.tops.output_msg += f"{err_category.replace('_', ' ')}: "
+                                self.tops.output_msg += (
+                                    f"{(err_category.replace('_', ' ')).capitalize()}: "
+                                )
                                 self.err_keys = []
                                 for err_key, err_values in err_details.items():
                                     if err_values != self.tops.actual_output.get(interface).get(

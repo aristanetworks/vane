@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Test cases for verification of system hardware free memory functionality
+Test cases for verification of bad syslog events messages
 """
 
 import pytest
@@ -22,11 +22,11 @@ class BadSyslogEventsTests:
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
-    test_duts = dut_parameters["test_system_hardware_bad_syslog_event"]["duts"]
-    test_ids = dut_parameters["test_system_hardware_bad_syslog_event"]["ids"]
+    test_duts = dut_parameters["test_bad_syslog_events"]["duts"]
+    test_ids = dut_parameters["test_bad_syslog_events"]["ids"]
 
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
-    def test_system_hardware_bad_syslog_event(self, dut, tests_definitions):
+    def test_bad_syslog_events(self, dut, tests_definitions):
         """
         TD: Testcase for verification bad syslog events messages.
         Args:
@@ -43,7 +43,9 @@ class BadSyslogEventsTests:
         bad_syslog = ""
 
         # Forming output message if test result is passed
-        tops.output_msg = "No bad syslog events are found."
+        tops.output_msg = (
+            "Bad syslog events(specific keywords) are not found in the collected logs."
+        )
 
         try:
             # Collecting expected output.
@@ -62,25 +64,26 @@ class BadSyslogEventsTests:
             )
             self.output += f"Output of {syslog_events_cmd} command is: \n{output}"
 
-            sys_log_events = output[0].get("result", {}).get("output")
-            assert sys_log_events, f"logging details for last {days_of_logs} days are not found."
+            syslog_events = output[0]["result"].get("output")
+            assert syslog_events, f"logging details for last {days_of_logs} days are not found."
 
-            for event in sys_log_events.split("\n"):
+            for event in syslog_events.split("\n"):
+                event = event.lower()
                 if (
-                    "error" in event.lower()
-                    or "not_available" in event.lower()
-                    or "unavailable" in event.lower()
-                    or "interrupt" in event.lower()
+                    "error" in event
+                    or "not_available" in event
+                    or "unavailable" in event
+                    or "interrupt" in event
                 ):
                     bad_syslog += f"{event}\n"
 
             # Collecting actual output.
-            tops.actual_output.update({"bad_syslog_events_not_found": len(bad_syslog) == 0})
+            tops.actual_output.update({"bad_syslog_events_not_found": not bool(bad_syslog)})
 
             # Forming output message if test result is fail.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = (
-                    f"The following syslog events should be investigated:\n{bad_syslog}"
+                    f"Following bad syslog events are found on the device: \n{bad_syslog}"
                 )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
@@ -92,6 +95,6 @@ class BadSyslogEventsTests:
             )
 
         tops.test_result = tops.expected_output == tops.actual_output
-        tops.parse_test_steps(self.test_system_hardware_bad_syslog_event)
+        tops.parse_test_steps(self.test_bad_syslog_events)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.expected_output == tops.actual_output

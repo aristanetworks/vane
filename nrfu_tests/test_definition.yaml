@@ -167,7 +167,7 @@
       report_style: modern  # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
-        - BLFE1
+        - BLFE1  # Device on which tests run
     - name: test_acls_api_vrfs_enabled
       description: Test case to verify that ACL is configured for each VRF on which API is enabled.
       test_id: NRFU5.1

@@ -55,7 +55,8 @@ class BgpIpPeersStatusTests:
             )
             self.output = f"Output of {tops.show_cmd} command is:\n{output}\n"
             bgp_peers = output.get("vrfs")
-            assert bgp_peers, "BGP peer details are not found."
+            if not bgp_peers:
+                pytest.skip(f"For {tops.dut_name}, no IP BGP peers configured.")
 
             # Collecting actual and expected output.
             for vrf in bgp_peers:

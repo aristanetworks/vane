@@ -95,7 +95,7 @@ class MiscShowCommandTests:
                         )
                     else:
                         command_failed_msg += (
-                            "\nCommand execution on device is failed with following"
+                            f"\nCommand '{command}' execution on device is failed with following"
                             f" error:\n{error}\n"
                         )
 

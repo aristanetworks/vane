@@ -60,7 +60,10 @@ class CpuIdleTimeTests:
                 pytest.skip(f"CPU idle time is not configured on device {tops.dut_name}.")
 
             # Verifying CPU idle time and updating in actual output.
-            cpu_idle_time_found = "CPU idle time is low" if cpu_idle_details < 25 else True
+            if cpu_idle_details < 25:
+                cpu_idle_time_found = False
+            else:
+                cpu_idle_time_found = True
             tops.actual_output = {"cpu_idle_time_within_range": cpu_idle_time_found}
 
             # Output message formation in case of testcase fails.

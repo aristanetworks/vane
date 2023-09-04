@@ -146,7 +146,8 @@
       test_criteria: Inclusive multicast Ethernet tag (IMET) routes should advertised for all VNI identifiers on device.
       report_style: modern
       input:
-      vxlan_interface: {{ testcase_data["NRFU4.3"]["vxlan_interface"] }}
+        vxlan_interface: {{ testcase_data["NRFU4.3"]["vxlan_interface"] }}
+      skip_on_command_unavailable_check: {{ testcase_data["NRFU4.3"]["skip_on_command_unavailable_check"] }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_multi_agent_routing_protocol

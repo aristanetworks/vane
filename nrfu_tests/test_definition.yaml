@@ -153,15 +153,16 @@
     - name: test_routing_evpn_l2vni_imet
       description: Test case for verification of L2 VNI VXLAN interface functionality.
       test_id: NRFU4.3
-      show_cmd: null
-      expected_output: null
-      test_criteria: Inclusive multicast Ethernet tag (IMET) routes should advertised for all VNI identifiers on device.
-      report_style: modern
+      show_cmd: null   # Forming show commands in test file.
+      expected_output: null  # Forming expected output dictionary in test file.
+      test_criteria: Inclusive multicast Ethernet tag (IMET) routes should advertised for all VNI identifiers on device.    # Setting test case’s pass/fail criteria for reporting
+      report_style: modern   # Setting report_style as modern. If report type is set as modern then it will update steps, assumptions, external systems in docx report
       input:
-        vxlan_interface: Vxlan1
+        vxlan_interface: Vxlan1   # Configured vxlan interface name
+      skip_on_command_unavailable_check: False   # If you need to skip the testcase on command unavailable, change this to True
       criteria: names
       filter:
-        - BLFE1
+        - DLFW3  # Device on which tests run
     - name: test_multi_agent_routing_protocol
       description: Test case for verification of multi-agent routing model functionality.
       test_id: NRFU4.4

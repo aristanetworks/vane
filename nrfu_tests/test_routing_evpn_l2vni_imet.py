@@ -35,7 +35,9 @@ class EvpnRoutingTests:
         self.output = ""
         tops.expected_output = {"vrfs": {}}
         tops.actual_output = {"vrfs": {}}
-        vxlan_interface = tops.test_parameters["input"]["vxlan_interface"]
+        test_params = tops.test_parameters
+        vxlan_interface = test_params["input"]["vxlan_interface"]
+        skip_on_command_unavailable_check = test_params["skip_on_command_unavailable_check"]
 
         # Forming output message if test result is pass
         tops.output_msg = (
@@ -48,15 +50,16 @@ class EvpnRoutingTests:
             TS: Running `show bgp evpn summary` command and verifying EVPN is configured
             on the device.
             """
-            evpn_summary = tops.run_show_cmds(["show bgp evpn summary"])
+            show_bgp_command = "show bgp evpn summary"
+            evpn_summary = tops.run_show_cmds([show_bgp_command])
             logger.info(
                 "On device %s, Output of %s command is:\n%s\n",
                 tops.dut_name,
-                tops.show_cmd,
+                show_bgp_command,
                 evpn_summary,
             )
             self.output += (
-                f"On device {tops.dut_name}, Output of {tops.show_cmd} is:\n{evpn_summary}\n"
+                f"On device {tops.dut_name}, Output of {show_bgp_command} is:\n{evpn_summary}\n"
             )
             vrf_details = evpn_summary[0]["result"].get("vrfs")
             assert vrf_details, "VRF details are not found in EVPN bgp route summary."
@@ -79,7 +82,7 @@ class EvpnRoutingTests:
                         bgp_evpn_peer = peer
                         break
 
-                assert bgp_evpn_peer, "No established EVPN peer found."
+                assert bgp_evpn_peer, "None of the BGP evpn peers state is Established."
 
                 """
                 TS: Running `show interfaces <vxlan interface>` command and verifying L2 VNIs are
@@ -103,7 +106,7 @@ class EvpnRoutingTests:
                     .get(vxlan_interface, {})
                     .get("vlanToVniMap")
                 )
-                assert vxlan_details, "No vlan to VNI mapping found in vxlan command details."
+                assert vxlan_details, "VLAN to VNI mapping is not found in vxlan command details."
 
                 for vlan in vxlan_details:
                     if not vxlan_details[vlan].get("source"):
@@ -130,7 +133,7 @@ class EvpnRoutingTests:
                         )
                         self.output += (
                             f"On device {tops.dut_name}, Output of"
-                            f" {show_vxlan_command} is:\n{advertised_route_details}\n"
+                            f" {route_show_command} is:\n{advertised_route_details}\n"
                         )
                         advertised_route_details = advertised_route_details[0]["result"].get(
                             "evpnRoutes"
@@ -145,23 +148,27 @@ class EvpnRoutingTests:
                 tops.output_msg = "\n"
                 for vrf in tops.actual_output["vrfs"]:
                     no_imet_routes_advertised = []
-                    for vni in tops.actual_output["vrfs"][vrf]["virtual_network_identifiers"]:
-                        if not tops.actual_output["vrfs"][vrf]["virtual_network_identifiers"][vni][
-                            "imet_routes_being_advertised"
-                        ]:
+                    vni_details = tops.actual_output["vrfs"][vrf]["virtual_network_identifiers"]
+                    for vni in vni_details:
+                        if not vni_details[vni]["imet_routes_being_advertised"]:
                             no_imet_routes_advertised.append(vni)
                     if no_imet_routes_advertised:
                         tops.output_msg += (
                             f"For vrf {vrf}, following VNIs has no IMET routes being"
-                            f" advertised:\n{', '.join(no_imet_routes_advertised)}\n"
+                            f" advertised: {', '.join(no_imet_routes_advertised)}\n"
                         )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
-            if "Not supported" in str(excep):
-                tops.output_msg = "Command unavailable, device might be in ribd mode."
-                pytest.skip(
-                    "Command unavailable, device might be in ribd mode. hence test skipped."
-                )
+            if skip_on_command_unavailable_check:
+                if "Not supported" in str(excep):
+                    tops.output_msg = "Command unavailable, device might be in ribd mode."
+                    pytest.skip(
+                        "Command unavailable, device might be in ribd mode. hence test skipped."
+                    )
+
+            if "Interface does not exist" in str(excep):
+                tops.output_msg = "Vxlan interface does not exist / no L2 VNIs."
+                pytest.skip("Vxlan interface does not exist / no L2 VNIs.")
 
             tops.actual_output = tops.output_msg = str(excep).split("\n", maxsplit=1)[0]
             logger.error(

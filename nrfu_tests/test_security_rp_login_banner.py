@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Testcase for verification of security rp login banner
+Testcase for verification of login banner
 """
 
 import pytest
@@ -18,7 +18,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.security
 class LoginBannerTests:
     """
-    Testcase for verification of security rp login banner
+    Testcase for verification of login banner
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -28,7 +28,7 @@ class LoginBannerTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_security_rp_login_banner(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of security rp login banner
+        TD: Testcase for verification of login banner.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters

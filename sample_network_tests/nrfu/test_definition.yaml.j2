@@ -1,10 +1,8 @@
 - name: sample_network_tests
-  {% set master_data = testcase_data %}
   testcases:
     - name: test_system_cpu_idle_time
-      description: Testcase for verification of system hardware cpu idle time.
+      description: Testcase for verification of system hardware CPU idle time.
       test_id: NRFU6.4
-      {% set test_data = master_data["NRFU6.4"] %}
       show_cmd: show processes top once
       expected_output:
         cpu_idle_time_within_range: true

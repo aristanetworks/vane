@@ -28,7 +28,7 @@ class CpuIdleTimeTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_system_cpu_idle_time(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of system hardware cpu idle time.
+        TD: Testcase for verification of system hardware CPU idle time.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -42,7 +42,7 @@ class CpuIdleTimeTests:
 
         try:
             """
-            TS: Running `show processes top once` command and verifying cpu idle time is within
+            TS: Running `show processes top once` command and verifying CPU idle time is within
             expected range.
             """
             output = dut["output"][tops.show_cmd]["json"]
@@ -55,20 +55,20 @@ class CpuIdleTimeTests:
             self.output += f"Output of {tops.show_cmd} command is:\n{output}\n"
             cpu_idle_details = output.get("cpuInfo").get("%Cpu(s)").get("idle")
 
-            # Skipping testcase if Cpu idle time is not configured on device.
+            # Skipping testcase if CPU idle time is not configured on device.
             if not cpu_idle_details:
-                pytest.skip(f"Cpu idle time is not configured on device {tops.dut_name}.")
+                pytest.skip(f"CPU idle time is not configured on device {tops.dut_name}.")
 
             # Verifying cpu idle time and updating in actual output.
-            cpu_idle_time_found = "Cpu idle time is low" if cpu_idle_details < 25 else True
+            cpu_idle_time_found = "CPU idle time is low" if cpu_idle_details < 25 else True
             tops.actual_output = {"cpu_idle_time_within_range": cpu_idle_time_found}
 
             # Output message formation in case of testcase fails.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = (
                     "CPU idle time is not correct. Expected idle time is above "
-                    "25(unit, sec or min) however in actual found as "
-                    f"{cpu_idle_details} (unit, sec or min)."
+                    "25 seconds however in actual found as "
+                    f"{cpu_idle_details} seconds."
                 )
 
         except (AttributeError, LookupError, EapiError) as excep:

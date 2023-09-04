@@ -45,7 +45,7 @@ class SystemHardwareFanStatusTests:
 
         try:
             """
-            TS:  Running `show version` command on the device and skipping the test case if device
+            TS: Running `show version` command on the device and skipping the test case if device
             platform is 'vEOS'.
             """
             self.show_version_command = "show version"
@@ -91,6 +91,7 @@ class SystemHardwareFanStatusTests:
                 converted_slot_name = re.sub("([A-Z])", r"_\1", fans_slots).lower()
                 tops.expected_output["fans_slots"].update({converted_slot_name: {}})
                 tops.actual_output["fans_slots"].update({converted_slot_name: {}})
+
                 for fan_details in self.fan_slot_details.get(fans_slots):
                     for fan_data in fan_details["fans"]:
                         tops.expected_output["fans_slots"][converted_slot_name].update(
@@ -101,6 +102,7 @@ class SystemHardwareFanStatusTests:
                                 }
                             }
                         )
+
                         if fan_data.get("configuredSpeed"):
                             fan_stability = int(fan_data.get("configuredSpeed")) < 80
                         else:
@@ -132,7 +134,7 @@ class SystemHardwareFanStatusTests:
                                 if fan_status_value != actual_fan_status:
                                     if actual_fan_status is None:
                                         tops.output_msg += (
-                                            f"For fan {fan_lable} status is 'Not ok',"
+                                            f"For fan {fan_lable}, status is 'Not ok',"
                                             " and fan speed is not configured.\n"
                                         )
                                     else:
@@ -140,8 +142,8 @@ class SystemHardwareFanStatusTests:
                                             int(fan_speed_details[fan_lable]) > 80
                                         ):
                                             tops.output_msg += (
-                                                f"For fan {fan_lable} status is 'ok', but fan speed"
-                                                " is higher than '80' i.e"
+                                                f"For fan {fan_lable}, status is 'ok', but fan"
+                                                " speed is higher than '80' i.e"
                                                 f" '{fan_speed_details.get(fan_lable)}'.\n"
                                             )
                     tops.output_msg += "\n"

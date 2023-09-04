@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Test case to verify that no non-Arista optics are installed on the device.
+Test case to verify that no non-Arista optics are installed on the device
 """
 
 import pytest
@@ -19,7 +19,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.interfaces
 class InterfaceOpticsTests:
     """
-    Test case to verify that no non-Arista optics are installed on the device.
+    Test case to verify that no non-Arista optics are installed on the device
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -89,7 +89,7 @@ class InterfaceOpticsTests:
                     non_arista_optic = "\n".join(non_arista_optics)
                     tops.output_msg = (
                         "\nFollowing transceiver optics are found as non-Arista and current"
-                        f" manufacturer installed on them as follows:\n{non_arista_optic}"
+                        f" manufacturer installed on them are as follows:\n{non_arista_optic}"
                     )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:

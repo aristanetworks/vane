@@ -1,2 +1,6 @@
 loopback_ip: 103.37.123.7
 neighbor_ip: 192.168.254.5
+global_dut_filter: # This stanza is optional. If it is not provided by users than all test cases should be run on each dut.
+  criteria: names
+  filter:
+    - BLFE1

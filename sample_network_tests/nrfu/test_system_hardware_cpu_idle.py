@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Testcase for verification of system hardware cpu idle time
+Testcase for verification of system hardware CPU idle time
 """
 
 import pytest
@@ -18,7 +18,7 @@ TEST_SUITE = "sample_network_tests"
 @pytest.mark.nrfu_test
 class CpuIdleTimeTests:
     """
-    Testcase for verification of system hardware cpu idle time.
+    Testcase for verification of system hardware CPU idle time.
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -59,7 +59,7 @@ class CpuIdleTimeTests:
             if not cpu_idle_details:
                 pytest.skip(f"CPU idle time is not configured on device {tops.dut_name}.")
 
-            # Verifying cpu idle time and updating in actual output.
+            # Verifying CPU idle time and updating in actual output.
             cpu_idle_time_found = "CPU idle time is low" if cpu_idle_details < 25 else True
             tops.actual_output = {"cpu_idle_time_within_range": cpu_idle_time_found}
 

@@ -59,122 +59,77 @@ class InterfaceErrorsAndDiscardsTests:
             self.show_interfaces = self.show_interfaces["interfaces"]
             assert self.show_interfaces, "Interfaces details are not found."
 
-            for ethernets in self.show_interfaces:
-                if "Ethernet" in ethernets or "Management" in ethernets:
-                    if "." in ethernets:
+            for interface in self.show_interfaces:
+                if "Ethernet" in interface or "Management" in interface:
+
+                    # sub-interfaces doesn't contain error information
+                    if "." in interface:
                         continue
-                    if "Management0" in ethernets:
+
+                    # Ma0 is a logical interface and doesn't contain error information
+                    if "Management0" in interface:
                         continue
+
+                    input_errors_details = (
+                        self.show_interfaces.get(interface)
+                        .get("interfaceCounters")
+                        .get("inputErrorsDetail")
+                    )
+                    output_errors_details = (
+                        self.show_interfaces.get(interface)
+                        .get("interfaceCounters")
+                        .get("outputErrorsDetail")
+                    )
+                    other_errors_details = self.show_interfaces.get(interface).get(
+                        "interfaceCounters"
+                    )
 
                     # Collecting actual and expected output.
                     self.tops.actual_output.update(
                         {
-                            ethernets: {
+                            interface: {
                                 "input_errors": {
-                                    "runts_frames": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("inputErrorsDetail")
-                                        .get("runtFrames")
-                                    ),
-                                    "fcs_errors": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("inputErrorsDetail")
-                                        .get("fcsErrors")
-                                    ),
-                                    "alignment_errors": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("inputErrorsDetail")
-                                        .get("alignmentErrors")
-                                    ),
-                                    "giant_frames": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("inputErrorsDetail")
-                                        .get("giantFrames")
-                                    ),
-                                    "symbol_errors": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("inputErrorsDetail")
-                                        .get("symbolErrors")
-                                    ),
+                                    "runts_frames": input_errors_details.get("runtFrames"),
+                                    "fcs_errors": input_errors_details.get("fcsErrors"),
+                                    "alignment_errors": input_errors_details.get("alignmentErrors"),
+                                    "giant_frames": input_errors_details.get("giantFrames"),
+                                    "symbol_errors": input_errors_details.get("symbolErrors"),
                                 },
                                 "output_errors": {
-                                    "deferred_transmissions": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("outputErrorsDetail")
-                                        .get("deferredTransmissions")
+                                    "deferred_transmissions": output_errors_details.get(
+                                        "deferredTransmissions"
                                     ),
-                                    "collisions_error": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("outputErrorsDetail")
-                                        .get("collisions")
-                                    ),
-                                    "late_collisions": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("outputErrorsDetail")
-                                        .get("lateCollisions")
-                                    ),
+                                    "collisions_error": output_errors_details.get("collisions"),
+                                    "late_collisions": output_errors_details.get("lateCollisions"),
                                 },
                                 "other_errors": {
-                                    "in_discards": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("inDiscards")
-                                    ),
-                                    "total_in_errors": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("totalInErrors")
-                                    ),
-                                    "out_discards": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("outDiscards")
-                                    ),
-                                    "total_out_errors": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("totalOutErrors")
-                                    ),
-                                    "link_status_changes": (
-                                        self.show_interfaces.get(ethernets)
-                                        .get("interfaceCounters")
-                                        .get("linkStatusChanges")
+                                    "in_discards": other_errors_details.get("inDiscards"),
+                                    "total_in_errors": other_errors_details.get("totalInErrors"),
+                                    "out_discards": other_errors_details.get("outDiscards"),
+                                    "total_out_errors": other_errors_details.get("totalOutErrors"),
+                                    "link_status_changes": other_errors_details.get(
+                                        "linkStatusChanges"
                                     ),
                                 },
                             }
                         }
                     )
 
+                    input_errors_keys = (
+                        self.tops.actual_output.get(interface).get("input_errors").keys()
+                    )
+                    output_errors_keys = (
+                        self.tops.actual_output.get(interface).get("output_errors").keys()
+                    )
+                    other_errors_keys = (
+                        self.tops.actual_output.get(interface).get("other_errors").keys()
+                    )
                     self.tops.expected_output.update(
                         {
-                            ethernets: {
-                                "input_errors": {
-                                    "runts_frames": 0,
-                                    "fcs_errors": 0,
-                                    "alignment_errors": 0,
-                                    "giant_frames": 0,
-                                    "symbol_errors": 0,
-                                },
-                                "output_errors": {
-                                    "deferred_transmissions": 0,
-                                    "collisions_error": 0,
-                                    "late_collisions": 0,
-                                },
-                                "other_errors": {
-                                    "in_discards": 0,
-                                    "total_in_errors": 0,
-                                    "out_discards": 0,
-                                    "total_out_errors": 0,
-                                    "link_status_changes": 0,
-                                },
+                            interface: {
+                                "input_errors": dict.fromkeys(input_errors_keys, 0),
+                                "output_errors": dict.fromkeys(output_errors_keys, 0),
+                                "other_errors": dict.fromkeys(other_errors_keys, 0),
                             }
                         }
                     )
@@ -183,22 +138,19 @@ class InterfaceErrorsAndDiscardsTests:
             if self.tops.actual_output != self.tops.expected_output:
                 self.tops.output_msg = "\n"
                 for interface, interface_details in self.tops.expected_output.items():
-                    if interface_details != self.tops.actual_output.get(interface):
+                    interface_name = self.tops.actual_output.get(interface)
+                    if interface_details != interface_name:
                         self.tops.output_msg += (
-                            f"\nFor {interface} following errors/discards are observed:\n"
+                            f"\nFor {interface}, following non-zero errors/discards are observed:\n"
                         )
                         for err_category, err_details in interface_details.items():
-                            if err_details != self.tops.actual_output.get(interface).get(
-                                err_category
-                            ):
+                            if err_details != interface_name.get(err_category):
                                 self.tops.output_msg += (
                                     f"{(err_category.replace('_', ' ')).capitalize()}: "
                                 )
                                 self.err_keys = []
                                 for err_key, err_values in err_details.items():
-                                    if err_values != self.tops.actual_output.get(interface).get(
-                                        err_category
-                                    ).get(err_key):
+                                    if err_values != interface_name.get(err_category).get(err_key):
                                         self.err_keys.append(err_key.replace("_", " "))
                                 self.tops.output_msg += f"{', '.join(self.err_keys)}\n"
 

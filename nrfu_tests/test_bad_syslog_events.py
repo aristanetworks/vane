@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Test cases for verification of bad syslog events messages
+Test cases for verification of bad syslog event messages
 """
 
 import pytest
@@ -18,7 +18,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.system
 class BadSyslogEventsTests:
     """
-    Test cases for verification of bad syslog events messages
+    Test cases for verification of bad syslog event messages
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -28,7 +28,7 @@ class BadSyslogEventsTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_bad_syslog_events(self, dut, tests_definitions):
         """
-        TD: Testcase for verification bad syslog events messages.
+        TD: Testcase for verification bad syslog event messages.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -83,7 +83,7 @@ class BadSyslogEventsTests:
             # Forming output message if test result is fail.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = (
-                    f"Following bad syslog events are found on the device: \n{bad_syslog}"
+                    f"\nFollowing bad syslog events are found on the device: \n{bad_syslog}"
                 )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:

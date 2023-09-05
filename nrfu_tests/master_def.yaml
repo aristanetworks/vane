@@ -23,5 +23,4 @@ testcase_data:
   NRFU6.1:
     days_of_logs: 7 # Number of days used in show logging command
   NRFU4.3:
-    vxlan_interface: Vxlan1   # Configured vxlan interface name
-    skip_on_command_unavailable_check: False  # If you need to skip the testcase on command unavailable, change this to True
+    skip_on_command_unavailable_check: False  # If you need to skip the testcase on 'show bgp evpn summary' command unavailable, change this to True

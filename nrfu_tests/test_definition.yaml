@@ -158,8 +158,7 @@
       test_criteria: Inclusive multicast Ethernet tag (IMET) routes should advertised for all VNI identifiers on device.    # Setting test case’s pass/fail criteria for reporting
       report_style: modern   # Setting report_style as modern. If report type is set as modern then it will update steps, assumptions, external systems in docx report
       input:
-        vxlan_interface: Vxlan1   # Configured vxlan interface name
-      skip_on_command_unavailable_check: False   # If you need to skip the testcase on command unavailable, change this to True
+        skip_on_command_unavailable_check: False   # If you need to skip the testcase on 'show bgp evpn summary' command unavailable, change this to True
       criteria: names
       filter:
         - DLFW3  # Device on which tests run

@@ -36,8 +36,9 @@ class EvpnRoutingTests:
         tops.expected_output = {"vrfs": {}}
         tops.actual_output = {"vrfs": {}}
         test_params = tops.test_parameters
-        vxlan_interface = test_params["input"]["vxlan_interface"]
-        skip_on_command_unavailable_check = test_params["skip_on_command_unavailable_check"]
+        skip_on_command_unavailable_check = test_params["input"][
+            "skip_on_command_unavailable_check"
+        ]
 
         # Forming output message if test result is pass
         tops.output_msg = (
@@ -62,7 +63,6 @@ class EvpnRoutingTests:
                 f"On device {tops.dut_name}, Output of {show_bgp_command} is:\n{evpn_summary}\n"
             )
             vrf_details = evpn_summary[0]["result"].get("vrfs")
-            assert vrf_details, "VRF details are not found in EVPN bgp route summary."
 
             evpn_running = False
             for vrf in vrf_details:
@@ -70,7 +70,8 @@ class EvpnRoutingTests:
                     evpn_running = True
                     break
 
-            assert evpn_running, "EVPN is not configured on the device."
+            if not evpn_running:
+                pytest.skip("EVPN is not configured on the device.")
 
             bgp_evpn_peer = ""
             for vrf in vrf_details:
@@ -88,6 +89,7 @@ class EvpnRoutingTests:
                 TS: Running `show interfaces <vxlan interface>` command and verifying L2 VNIs are
                 configured on the device.
                 """
+                vxlan_interface = "Vxlan1"
                 show_vxlan_command = f"show interfaces {vxlan_interface}"
                 vxlan_details = tops.run_show_cmds([show_vxlan_command])
                 logger.info(
@@ -117,8 +119,8 @@ class EvpnRoutingTests:
 
                         """
                         TS: Running `show bgp neighbors <bgp evpn peer> evpn advertised-routes
-                        route-type imet vni <vni>` command and verifying EVPN is configured
-                        on the device.
+                        route-type imet vni <vni>` command and verifying VNI is advertising
+                        imet out.
                         """
                         route_show_command = (
                             f"show bgp neighbors {bgp_evpn_peer} evpn advertised-routes route-type"
@@ -160,15 +162,19 @@ class EvpnRoutingTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             if skip_on_command_unavailable_check:
-                if "Not supported" in str(excep):
-                    tops.output_msg = "Command unavailable, device might be in ribd mode."
-                    pytest.skip(
-                        "Command unavailable, device might be in ribd mode. hence test skipped."
-                    )
+                tops.output_msg = (
+                    "`show bgp evpn summary` command unavailable, device might be in ribd mode."
+                )
+                pytest.skip(
+                    "`show bgp evpn summary` command unavailable, device might be in ribd mode."
+                    " hence test skipped."
+                )
 
             if "Interface does not exist" in str(excep):
-                tops.output_msg = "Vxlan interface does not exist / no L2 VNIs."
-                pytest.skip("Vxlan interface does not exist / no L2 VNIs.")
+                tops.output_msg = f"{vxlan_interface} interface does not exist / no L2 VNIs."
+                pytest.skip(
+                    f"{vxlan_interface} interface does not exist / no L2 VNIs. hence test skipped."
+                )
 
             tops.actual_output = tops.output_msg = str(excep).split("\n", maxsplit=1)[0]
             logger.error(

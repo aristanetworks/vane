@@ -119,7 +119,7 @@ class SystemHardwareFanStatusTests:
 
             # Forming output message if test result is fail.
             if tops.expected_output != tops.actual_output:
-                tops.output_msg = "\n"
+                tops.output_msg = "\nFollowing power supply slots, fans are in erroneous state :\n"
                 for slots, slot_details in tops.expected_output["fans_slots"].items():
                     if slot_details != tops.actual_output["fans_slots"].get(slots):
                         tops.output_msg += f"For {slots.replace('_', ' ')}:\n"
@@ -133,18 +133,15 @@ class SystemHardwareFanStatusTests:
                                 )
                                 if fan_status_value != actual_fan_status:
                                     if actual_fan_status is None:
-                                        tops.output_msg += (
-                                            f"For fan {fan_lable}, status is 'Not ok',"
-                                            " and fan speed is not configured.\n"
-                                        )
+                                        tops.output_msg += f"{fan_lable}: Fan status is 'Not ok'.\n"
                                     else:
                                         if fan_status_key == "speed_stability_status" and (
                                             int(fan_speed_details[fan_lable]) > 80
                                         ):
                                             tops.output_msg += (
-                                                f"For fan {fan_lable}, status is 'ok', but fan"
-                                                " speed is higher than '80' i.e"
-                                                f" '{fan_speed_details.get(fan_lable)}'.\n"
+                                                f"{fan_lable}: Fan status is 'ok', however current"
+                                                f" fan speed '{fan_speed_details.get(fan_lable)}'"
+                                                " is higher than the threshold fan speed '80'.\n"
                                             )
                     tops.output_msg += "\n"
 

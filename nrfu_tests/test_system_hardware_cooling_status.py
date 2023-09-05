@@ -16,7 +16,7 @@ TEST_SUITE = "nrfu_tests"
 
 @pytest.mark.nrfu_test
 @pytest.mark.system
-class SystemHardwareCoolingStatusTests:
+class SystemCoolingStatusTests:
     """
     Testcase for the verification of system cooling status.
     """
@@ -34,12 +34,11 @@ class SystemHardwareCoolingStatusTests:
             tests_definitions(dict): test suite and test case parameters.
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
-        tops.expected_output = {"system_cooling_status": "coolingOk"}
         tops.actual_output = {}
         self.output = ""
 
         # forming output message if test result is passed
-        tops.output_msg = "System cooling status is 'coolingOk' with expected ambient temperature."
+        tops.output_msg = "System cooling status is 'coolingOk'"
 
         try:
             """
@@ -78,7 +77,7 @@ class SystemHardwareCoolingStatusTests:
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = (
                     "System cooling status is not ok. Ambient Temperature: "
-                    f"{format(ambient_temperature,'.2f')}C')"
+                    f"{format(ambient_temperature,'.2f')} C'"
                 )
 
         except (AttributeError, LookupError, EapiError) as excep:

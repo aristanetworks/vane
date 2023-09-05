@@ -6,7 +6,6 @@ Testcases for verification of DNS base services.
 """
 
 import pytest
-import pyeapi.eapilib
 from pyeapi.eapilib import EapiError
 from vane.logger import logger
 from vane.config import dut_objs, test_defs
@@ -45,7 +44,7 @@ class DnsBaseServicesTests:
 
         try:
             """
-            TS: Running 'show ip name-server' command on the device and verifying the
+            TS: Running `show ip name-server` command on the device and verifying the
             DNS resolution by doing a reverse lookup for the IP of the first server configured.
             """
             output = dut["output"][tops.show_cmd]["json"]
@@ -85,7 +84,7 @@ class DnsBaseServicesTests:
                     )
                     tops.actual_output.update({f"{ip_version}_dns_request_successful": True})
 
-            except pyeapi.eapilib.CommandError:
+            except EapiError:
                 tops.actual_output.update({f"{ip_version}_dns_request_successful": False})
 
             # Forming the output message if the testcase is failed

@@ -95,7 +95,7 @@
       test_id: NRFU3.1
       show_cmd: null # Forming show command in test case file.
       expected_output: null # Forming expected output in test case file.
-      test_criteria: Show commands should be executed on device without any error. # Setting test case’s pass / fail criteria for reporting.
+      test_criteria: Show commands should be executed on device without any error. # Setting test case’s pass/fail criteria for reporting.
       report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
@@ -310,3 +310,5 @@
       criteria: names
       filter:
         - BLFE1
+=======
+>>>>>>> 1f00236 (issue_429:formmatting test def)

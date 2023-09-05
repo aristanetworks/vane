@@ -61,8 +61,11 @@ class BgpIpPeersStatusTests:
             for vrf in bgp_peers:
                 if bgp_peers.get(vrf).get("peers"):
                     bgp_peers_found = True
+                    break
             if not bgp_peers_found:
-                pytest.skip(f"For {tops.dut_name}, no IP BGP peers configured.")
+                pytest.skip(
+                    f"For {tops.dut_name}, BGP peers are not found hence skipped the testcase."
+                )
 
             # Collecting actual and expected output.
             for vrf in bgp_peers:
@@ -73,16 +76,12 @@ class BgpIpPeersStatusTests:
 
             # Forming output message if test result is fail.
             if tops.actual_output != tops.expected_output:
-                tops.output_msg = "\n"
+                tops.output_msg = "\nBGP neighbors state for following peers is not Established:\n"
                 for interface, peer_state in tops.expected_output["bgp_peers"].items():
                     actual_peer_state = tops.actual_output["bgp_peers"].get(interface).get("state")
                     expected_peer_state = peer_state.get("state")
                     if expected_peer_state != actual_peer_state:
-                        tops.output_msg += (
-                            f"For the BGP peer {interface}:\nExpected peer state is"
-                            f" '{expected_peer_state}', however actual is found as"
-                            f" '{actual_peer_state}'.\n\n"
-                        )
+                        tops.output_msg += f"Neighbor {interface} state is {actual_peer_state}.\n"
 
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]

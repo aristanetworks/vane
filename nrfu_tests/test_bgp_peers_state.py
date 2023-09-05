@@ -37,14 +37,15 @@ class BgpIpPeersStatusTests:
         tops.expected_output = {"bgp_peers": {}}
         tops.actual_output = {"bgp_peers": {}}
         self.output = ""
+        bgp_peers_found = False
 
         # forming output message if test result is passed
         tops.output_msg = "All BGP IPv4 peers are in established state."
 
         try:
             """
-            TS: Running `show ip bgp summary vrf all` command and verifying
-            state of BGP IPv4 peers.
+            TS: Running `show ip bgp summary vrf all` command on dut and verifying
+            state for all BGP IPv4 peers.
             """
             output = dut["output"][tops.show_cmd]["json"]
             logger.info(
@@ -55,7 +56,12 @@ class BgpIpPeersStatusTests:
             )
             self.output = f"Output of {tops.show_cmd} command is:\n{output}\n"
             bgp_peers = output.get("vrfs")
-            if not bgp_peers:
+
+            # Skipping, if no IP BGP peers configured.
+            for vrf in bgp_peers:
+                if bgp_peers.get(vrf).get("peers"):
+                    bgp_peers_found = True
+            if not bgp_peers_found:
                 pytest.skip(f"For {tops.dut_name}, no IP BGP peers configured.")
 
             # Collecting actual and expected output.
@@ -78,7 +84,7 @@ class BgpIpPeersStatusTests:
                             f" '{actual_peer_state}'.\n\n"
                         )
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+        except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(
                 "On device %s, Error while running the testcase is:\n%s",

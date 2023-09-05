@@ -28,7 +28,8 @@ class DnsBaseServicesTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_dns_base_services(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of DNS base services.
+        TD: Testcase for verification of DNS resolution by doing a reverse lookup for the IP
+        of the first server configured.
         Args:
             dut(dict): details related to a particular device.
             tests_definitions(dict): test suite and test case parameters.
@@ -36,11 +37,14 @@ class DnsBaseServicesTests:
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         self.output = ""
         test_params = tops.test_parameters["dns_name_server_check"]
-        tops.actual_output = {}
-        tops.expected_output = {}
+        tops.actual_output = {"name_servers": {}}
+        tops.expected_output = {"name_servers": {}}
+        actual_output, expected_output = {}, {}
 
         # Forming output message if test result is passed
-        tops.output_msg = "IPv4 and IPv6 name servers are configured on the device."
+        tops.output_msg = (
+            "Reverse name server lookup works for name servers configured on the device."
+        )
 
         try:
             """
@@ -56,48 +60,71 @@ class DnsBaseServicesTests:
             )
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
 
-            # Skipping testcase if SSO protocol is not configured on the device.
-            version_verification = [element for element in [test_params.values()] if bool(element)]
-            if all(list(version_verification)[0]):
+            # Skipping testcase if name servers are not configured on the device.
+            version_verification = list(test_params.values())
+            if not any(version_verification):
                 pytest.skip(
-                    f"Name server is not configured on {tops.dut_name}, hence skipping the"
+                    f"Name servers are not configured on {tops.dut_name}, hence skipping the"
                     " testcase."
                 )
 
             try:
                 for ip_version_verification, verification_status in test_params.items():
-                    if verification_status and "ipv4" in ip_version_verification:
-                        ip_version = ip_version_verification.split("_")[0]
-                        vx_name_servers = output["v4NameServers"]
-                    elif verification_status and "ipv6" in ip_version_verification:
-                        ip_version = ip_version_verification.split("_")[0]
-                        vx_name_servers = output["v6NameServers"]
-                    tops.expected_output.update({f"{ip_version}_dns_request_successful": True})
-                    reverse_resolution_ip = vx_name_servers[0]
-                    bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
-                    bash_cmd_output = tops.run_show_cmds([bash_cmd])
-                    logger.info(
-                        "On device %s, output of %s command is: \n%s\n",
-                        tops.dut_name,
-                        bash_cmd,
-                        bash_cmd_output,
-                    )
-                    tops.actual_output.update({f"{ip_version}_dns_request_successful": True})
+                    if verification_status:
+                        if "ipv4" in ip_version_verification:
+                            ip_version = ip_version_verification.split("_")[0]
+                            vx_name_servers = output.get("v4NameServers")
+                        else:
+                            ip_version = ip_version_verification.split("_")[0]
+                            vx_name_servers = output.get("v6NameServers")
+                        assert (
+                            vx_name_servers
+                        ), f"Name server details are not found for {ip_version}.\n"
+                        reverse_resolution_ip = vx_name_servers[0]
+                        expected_output.update(
+                            {
+                                ip_version: {
+                                    reverse_resolution_ip: {"reverse_nslookup_successful": True}
+                                }
+                            }
+                        )
+                        bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
+                        bash_cmd_output = tops.run_show_cmds([bash_cmd])
+                        logger.info(
+                            "On device %s, output of %s command is: \n%s\n",
+                            tops.dut_name,
+                            bash_cmd,
+                            bash_cmd_output,
+                        )
+                        actual_output.update(
+                            {
+                                ip_version: {
+                                    reverse_resolution_ip: {"reverse_nslookup_successful": True}
+                                }
+                            }
+                        )
 
             except EapiError:
-                tops.actual_output.update({f"{ip_version}_dns_request_successful": False})
+                actual_output.update(
+                    {ip_version: {reverse_resolution_ip: {"reverse_nslookup_successful": False}}}
+                )
+
+            # Updating the actual and expected output dictionaries.
+            tops.actual_output.update({"name_servers": actual_output})
+            tops.expected_output.update({"name_servers": expected_output})
 
             # Forming the output message if the testcase is failed
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = "\n"
-                for name_server_details, dns_status in tops.actual_output.items():
-                    ip_version = name_server_details.split("_")[0]
-                    if not dns_status:
-                        tops.output_msg += (
-                            f"DNS request is not successful for {ip_version} version.\n"
-                        )
+                for ip_version, version_status in tops.actual_output["name_servers"].items():
+                    for dns_status in version_status.values():
+                        if not dns_status["reverse_nslookup_successful"]:
+                            tops.output_msg += (
+                                f"Reverse name server lookup failed for {ip_version} name servers"
+                                " configured on the device\n"
+                            )
 
-        except (AttributeError, LookupError, EapiError) as excep:
+        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(
                 "On device %s, Error while running the testcase is:\n%s",

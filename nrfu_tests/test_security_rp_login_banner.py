@@ -59,7 +59,7 @@ class LoginBannerTests:
             # forming output message if test result is fail
             if tops.expected_output != tops.actual_output:
                 if not tops.actual_output["login_banner_found"]:
-                    tops.output_msg = "\nLogin banner is not found on the device."
+                    tops.output_msg = "Login banner is not found on the device."
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]

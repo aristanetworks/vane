@@ -28,8 +28,7 @@ class DnsBaseServicesTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_dns_base_services(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of DNS resolution by doing a reverse lookup for the IP
-        of the first server configured.
+        TD: Testcase for verification of DNS resolution functionality.
         Args:
             dut(dict): details related to a particular device.
             tests_definitions(dict): test suite and test case parameters.
@@ -39,11 +38,10 @@ class DnsBaseServicesTests:
         test_params = tops.test_parameters["dns_name_server_check"]
         tops.actual_output = {"name_servers": {}}
         tops.expected_output = {"name_servers": {}}
-        actual_output, expected_output = {}, {}
 
         # Forming output message if test result is passed
         tops.output_msg = (
-            "Reverse name server lookup works for name servers configured on the device."
+            "Reverse name server lookup is successful for name servers configured on the device."
         )
 
         try:
@@ -71,23 +69,26 @@ class DnsBaseServicesTests:
             try:
                 for ip_version_verification, verification_status in test_params.items():
                     if verification_status:
+                        ip_version = ip_version_verification.split("_")[0]
+                        tops.actual_output["name_servers"].update({ip_version: {}})
+                        tops.expected_output["name_servers"].update({ip_version: {}})
                         if "ipv4" in ip_version_verification:
-                            ip_version = ip_version_verification.split("_")[0]
                             vx_name_servers = output.get("v4NameServers")
                         else:
-                            ip_version = ip_version_verification.split("_")[0]
                             vx_name_servers = output.get("v6NameServers")
                         assert (
                             vx_name_servers
                         ), f"Name server details are not found for {ip_version}.\n"
+
                         reverse_resolution_ip = vx_name_servers[0]
-                        expected_output.update(
+                        tops.expected_output["name_servers"].update(
                             {
                                 ip_version: {
                                     reverse_resolution_ip: {"reverse_nslookup_successful": True}
                                 }
                             }
                         )
+
                         bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
                         bash_cmd_output = tops.run_show_cmds([bash_cmd])
                         logger.info(
@@ -96,7 +97,7 @@ class DnsBaseServicesTests:
                             bash_cmd,
                             bash_cmd_output,
                         )
-                        actual_output.update(
+                        tops.actual_output["name_servers"].update(
                             {
                                 ip_version: {
                                     reverse_resolution_ip: {"reverse_nslookup_successful": True}
@@ -105,23 +106,19 @@ class DnsBaseServicesTests:
                         )
 
             except EapiError:
-                actual_output.update(
+                tops.actual_output["name_servers"].update(
                     {ip_version: {reverse_resolution_ip: {"reverse_nslookup_successful": False}}}
                 )
-
-            # Updating the actual and expected output dictionaries.
-            tops.actual_output.update({"name_servers": actual_output})
-            tops.expected_output.update({"name_servers": expected_output})
 
             # Forming the output message if the testcase is failed
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = "\n"
-                for ip_version, version_status in tops.actual_output["name_servers"].items():
-                    for dns_status in version_status.values():
+                for version_status in tops.actual_output["name_servers"].values():
+                    for ip_address, dns_status in version_status.items():
                         if not dns_status["reverse_nslookup_successful"]:
                             tops.output_msg += (
-                                f"Reverse name server lookup failed for {ip_version} name servers"
-                                " configured on the device\n"
+                                "Reverse name server lookup is failed for name server"
+                                f" {ip_address}.\n"
                             )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:

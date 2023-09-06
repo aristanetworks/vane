@@ -1,7 +1,7 @@
 # Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
-""" Test case for verification of Telnet is disabled on the device """
+""" Test case to verify that Telnet is disabled for all the VRFs on the device """
 
 import pytest
 from pyeapi.eapilib import EapiError
@@ -15,7 +15,7 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.nrfu_test
 @pytest.mark.security
 class TelnetStateTests:
-    """Test case for verification of Telnet is disabled for all VRFs on the device"""
+    """Test case to verify that Telnet is disabled for all the VRFs on the device"""
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
     test_duts = dut_parameters["test_telnet_is_disabled_for_all_vrfs"]["duts"]
@@ -33,12 +33,13 @@ class TelnetStateTests:
         self.output = ""
         tops.actual_output = {"vrfs": {}}
         tops.expected_output = {"vrfs": {}}
+
         # Forming output message if test result is pass
         tops.output_msg = "Telnet is disabled for all the VRFs on the device."
 
         try:
             """
-            TS: Running `show vrf` on device and collecting the all vrfs.
+            TS: Running `show vrf` on device and collecting the all the vrfs.
             """
             output = dut["output"][tops.show_cmd]["json"]
             logger.info(
@@ -75,19 +76,16 @@ class TelnetStateTests:
                     if f"VRF {vrf} not found" in str(exception):
                         tops.actual_output["vrfs"].update({vrf: {"telnet_state": "disabled"}})
 
-            # Forming output message if test result is pass
+            # Forming output message if test result is fail
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = ""
                 telnet_enabled_vrfs = []
 
                 for vrf, telnet_state in tops.expected_output["vrfs"].items():
                     vrf_data = tops.actual_output["vrfs"][vrf]
-
-                    if isinstance(vrf_data, dict):
-                        actual_state = vrf_data["telnet_state"]
-
-                        if telnet_state["telnet_state"] != actual_state:
-                            telnet_enabled_vrfs.append(vrf)
+                    actual_state = vrf_data["telnet_state"]
+                    if telnet_state["telnet_state"] != actual_state:
+                        telnet_enabled_vrfs.append(vrf)
 
                 if telnet_enabled_vrfs:
                     tops.output_msg += (

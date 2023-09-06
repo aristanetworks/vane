@@ -208,11 +208,13 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_cpu_idle_time
+      description: Testcase for verification of system hardware CPU idle time.
       test_id: NRFU6.4
-      show_cmd: null
-      expected_output: null
+      show_cmd: show processes top once
+      expected_output:
+        cpu_idle_time_within_range: true
+      test_criteria: CPU idle time should be within the expected range. # Setting test case’s pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

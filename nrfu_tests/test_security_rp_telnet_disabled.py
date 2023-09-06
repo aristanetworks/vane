@@ -89,7 +89,7 @@ class TelnetStateTests:
 
                 if telnet_enabled_vrfs:
                     tops.output_msg += (
-                        "Telnet state is not disabled for following VRFs:"
+                        "Telnet is not disabled for following VRFs::"
                         f" {', '.join(telnet_enabled_vrfs)}\n"
                     )
 

@@ -303,3 +303,7 @@
       test_id: NRFU6.11
       show_cmd: null
       expected_output: null
+      report_style: modern
+      criteria: names
+      filter:
+        - BLFE1

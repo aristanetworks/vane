@@ -61,7 +61,6 @@ class InterfaceErrorsAndDiscardsTests:
 
             for interface in self.show_interfaces:
                 if "Ethernet" in interface or "Management" in interface:
-
                     # sub-interfaces doesn't contain error information
                     if "." in interface:
                         continue
@@ -70,19 +69,11 @@ class InterfaceErrorsAndDiscardsTests:
                     if "Management0" in interface:
                         continue
 
-                    input_errors_details = (
-                        self.show_interfaces.get(interface)
-                        .get("interfaceCounters")
-                        .get("inputErrorsDetail")
-                    )
-                    output_errors_details = (
-                        self.show_interfaces.get(interface)
-                        .get("interfaceCounters")
-                        .get("outputErrorsDetail")
-                    )
-                    other_errors_details = self.show_interfaces.get(interface).get(
+                    inter_face_counters = self.show_interfaces.get(interface).get(
                         "interfaceCounters"
                     )
+                    input_errors_details = inter_face_counters.get("inputErrorsDetail")
+                    output_errors_details = inter_face_counters.get("outputErrorsDetail")
 
                     # Collecting actual and expected output.
                     self.tops.actual_output.update(
@@ -103,11 +94,11 @@ class InterfaceErrorsAndDiscardsTests:
                                     "late_collisions": output_errors_details.get("lateCollisions"),
                                 },
                                 "other_errors": {
-                                    "in_discards": other_errors_details.get("inDiscards"),
-                                    "total_in_errors": other_errors_details.get("totalInErrors"),
-                                    "out_discards": other_errors_details.get("outDiscards"),
-                                    "total_out_errors": other_errors_details.get("totalOutErrors"),
-                                    "link_status_changes": other_errors_details.get(
+                                    "in_discards": inter_face_counters.get("inDiscards"),
+                                    "total_in_errors": inter_face_counters.get("totalInErrors"),
+                                    "out_discards": inter_face_counters.get("outDiscards"),
+                                    "total_out_errors": inter_face_counters.get("totalOutErrors"),
+                                    "link_status_changes": inter_face_counters.get(
                                         "linkStatusChanges"
                                     ),
                                 },

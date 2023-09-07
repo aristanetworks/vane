@@ -297,12 +297,13 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_system_temperature_sensors
+      description: Testcase for verification of system temperature sensors.
       test_id: NRFU6.11
-      show_cmd: null
-      expected_output: null
-      report_style: modern
+      show_cmd: show system environment temperature
+      expected_output: null # Expected output is formed inside a test case file dynamically
+      test_criteria: System temperature should be 'ok'. Hardware status of all sensors should be 'ok' and overheat threshold should not be met. # Setting test case’s pass/fail criteria for reporting
+      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
         - BLFE1

@@ -264,11 +264,12 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_temperature_sensors
+      description: Testcase for verification of system temperature sensors.
       test_id: NRFU6.11
-      show_cmd: null
+      show_cmd: show system environment temperature
       expected_output: null
+      test_criteria: System temperature should be 'ok'. Hardware status of all sensors should be 'ok' and overheat threshold should not be met. # Setting test case's pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

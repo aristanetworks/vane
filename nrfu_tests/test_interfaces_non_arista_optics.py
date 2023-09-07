@@ -42,7 +42,7 @@ class InterfaceOpticsTests:
         tops.expected_output = {"transceiver_slots": {}}
 
         # Output message if the test result is passed
-        tops.output_msg = "Non Arista optics are not installed on the device."
+        tops.output_msg = "Non-Arista optics are not installed on the device."
 
         try:
             """

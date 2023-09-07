@@ -2,7 +2,7 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Testcase for verification of system temperature sensors
+Test case for verification of system temperature sensors
 """
 
 import pytest
@@ -18,16 +18,16 @@ TEST_SUITE = "nrfu_tests"
 @pytest.mark.system
 class SystemHardwareTemperatureTests:
     """
-    Testcase for verification of system temperature sensors
+    Test case for verification of system temperature sensors
     """
 
     def get_sensor_detail(self, sensor_detail, temp_sensor=False):
         """
         Utility to get temperature and hardware status for power supply and temperature sensors
         Args:
-            sensor_detail(dict): Power supply and temperature sensors details.
-            temp_sensor(bool): Flag to check hardware status of temperature sensor. If it is set
-            True then hardware status for particular sensor will check
+            sensor_detail(dict): Power supply and temperature sensor details.
+            temp_sensor(bool): Flag to check the hardware status of the temperature sensor.
+            If it is set to True then the hardware status for a particular sensor will check
         Return:
             dict: Actual output of hardware status
             dict: Current and overheat threshold temperature detail for power supply
@@ -61,8 +61,8 @@ class SystemHardwareTemperatureTests:
             current_threshold_temp_detail(dict): Current and threshold temperature details
             for power supply and temperature sensors
         Return:
-            (string): Output message for testcase failure scenario. This message will be
-            added in observation section of docx report
+            (string): Output message for test case failure scenario. This message will be
+            added in the observation section of the docx report
         """
 
         output_msg = ""
@@ -134,7 +134,7 @@ class SystemHardwareTemperatureTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_system_temperature_sensors(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of system temperature sensors
+        TD: Test case for verification of system temperature sensors
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -144,7 +144,7 @@ class SystemHardwareTemperatureTests:
         tops.expected_output = {"power_supplies_sensors": {}, "temperature_sensors": {}}
         tops.actual_output = {"power_supplies_sensors": {}, "temperature_sensors": {}}
 
-        # Forming output message if test result is passed
+        # Forming output message if the test result is passed
         tops.output_msg = (
             "System temperature is 'ok'. Hardware status of all sensors are 'ok' and overheat"
             " threshold are not met."
@@ -153,7 +153,7 @@ class SystemHardwareTemperatureTests:
         try:
             """
             TS: Running "show version" commands on DUT.
-            Verifying the 'vEOS' device is not present in output.
+            Verifying the 'vEOS' device is not present in the output.
             """
             self.version_output = dut["output"]["show version"]["json"]
             logger.info(
@@ -163,14 +163,14 @@ class SystemHardwareTemperatureTests:
             )
             self.output += f"\nOutput of 'show version' command is: \n{self.version_output}"
 
-            # Skipping testcase if device is vEOS.
+            # Skipping test case if the device is vEOS.
             if "vEOS" in self.version_output.get("modelName"):
                 pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
 
             """
-            TS: Running "show system environment temperature" command on DUT and
-            Verifying the system status, power supplies sensors and temperature sensors details
-            are present in output.
+            TS: Running the "show system environment temperature" command on DUT and
+            Verifying the system status, power supply sensors and temperature sensors details
+            are present in the output.
             """
             output = dut["output"][tops.show_cmd]["json"]
             logger.info(
@@ -182,8 +182,10 @@ class SystemHardwareTemperatureTests:
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
             power_supplies_sensors = output.get("powerSupplySlots")
             temperature_sensors = output.get("tempSensors")
-            assert power_supplies_sensors, "Power supplies sensors detail are not found on device."
-            assert temperature_sensors, "Temperature sensors detail are not found on device."
+            assert (
+                power_supplies_sensors
+            ), "Power supplies sensor details are not found on the device."
+            assert temperature_sensors, "Temperature sensors detail are not found on the device."
 
             tops.expected_output.update({"system_status": "temperatureOk"})
             tops.actual_output.update({"system_status": output.get("systemStatus")})
@@ -247,7 +249,7 @@ class SystemHardwareTemperatureTests:
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
+                "On device %s, Error while running the test case is:\n%s",
                 tops.dut_name,
                 tops.actual_output,
             )

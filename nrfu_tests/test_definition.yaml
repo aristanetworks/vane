@@ -76,8 +76,8 @@
       description: Test case to verify that no non-Arista optics are installed on the device.
       test_id: NRFU2.5
       show_cmd: show inventory
-      expected_output: null # Expected output is formed inside test case
-      test_criteria: Non Arista optics should not be installed on the device.
+      expected_output: null # Expected output is formed inside the test case
+      test_criteria: Non-Arista optics should not be installed on the device.
       report_style: modern
       criteria: names
       filter:

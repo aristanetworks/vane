@@ -7,12 +7,13 @@ Test case to verify that no non-Arista optics are installed on the device
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
+from vane import test_case_logger
 from vane.config import dut_objs, test_defs
 from vane import tests_tools
 
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -40,20 +41,20 @@ class InterfaceOpticsTests:
         tops.actual_output = {"transceiver_slots": {}}
         tops.expected_output = {"transceiver_slots": {}}
 
-        # Output message if test result is passed
+        # Output message if the test result is passed
         tops.output_msg = "Non Arista optics are not installed on the device."
 
         try:
             """
-            TS: Running 'show inventory' command on device and verifying
+            TS: Running 'show inventory' command on the device and verifying
             that non-Arista optics should not be installed on the device.
             """
             inventory_output = dut["output"][tops.show_cmd]["json"]
-            logger.info(
-                "On device %s, output of %s command is: \n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                inventory_output,
+            logging.info(
+                (
+                    f"On device {tops.dut_name}, output of {tops.show_cmd} command is:"
+                    f" \n{inventory_output}\n"
+                ),
             )
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{inventory_output}"
             transceiver_slots = inventory_output.get("xcvrSlots")
@@ -94,10 +95,9 @@ class InterfaceOpticsTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                f"On device {tops.dut_name}, Error while running the test case"
+                f" is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

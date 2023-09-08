@@ -93,7 +93,7 @@ class SystemHardwareTemperatureTests:
                     )
                     if details_value == actual_sensor:
                         continue
-                    output_msg += f"For {sensor_detail}:"
+                    output_msg += f"{sensor_detail}:"
                     if details_value["hardware_status"] != actual_sensor["hardware_status"]:
                         output_msg += (
                             " Expected hardware status should be"
@@ -104,7 +104,7 @@ class SystemHardwareTemperatureTests:
                     output_msg += (
                         " Current sensor temperature is"
                         f" '{temperature_detail['current_temperature']}(c)' which is greater"
-                        " than Threshold temperature"
+                        " than threshold temperature"
                         f" '{temperature_detail['threshold_temperature']}(c)'\n"
                     )
 
@@ -117,9 +117,9 @@ class SystemHardwareTemperatureTests:
                         sensor
                     )
                     temperature_msgs.append(
-                        f"{sensor}: current sensor temperature is"
+                        f"{sensor}: Current sensor temperature is"
                         f" '{temperature_detail['current_temperature']}(c)' which is greater"
-                        " than Threshold temperature"
+                        " than threshold temperature"
                         f" '{temperature_detail['threshold_temperature']}(c)'.\n"
                     )
             if temperature_msgs:

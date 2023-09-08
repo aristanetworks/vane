@@ -60,7 +60,7 @@ class MiscShowCommandTests:
 
         try:
             """
-            TS: Running show commands on device and verifying show commands are executed
+            TS: Running show commands on the device and verifying show commands are executed
             successfully on the device.
             """
             for command in tops.show_cmd:
@@ -88,18 +88,18 @@ class MiscShowCommandTests:
                             f" platform:\n{error}\n"
                         )
 
-                        # Updating actual output for a perticular command to false when it
+                        # Updating actual output for a particular command to false when it
                         # throws exception
                         tops.actual_output["show_commands"].update(
                             {command: {"command_executed": False}}
                         )
                     else:
                         command_failed_msg += (
-                            f"\nCommand '{command}' execution on device is failed with following"
+                            f"\nCommand '{command}' execution on the device is failed with the following"
                             f" error:\n{error}\n"
                         )
 
-                        # Updating actual output for a perticular command to false when it
+                        # Updating actual output for a particular command to false when it
                         # throws exception
                         tops.actual_output["show_commands"].update(
                             {command: {"command_executed": False}}

@@ -7,7 +7,6 @@ Testcase for verification of miscellaneous show commands support
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
 from vane import tests_tools, test_case_logger
 

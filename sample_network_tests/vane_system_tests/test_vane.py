@@ -32,6 +32,7 @@
 """ Tests to validate vane functionality."""
 
 import pprint
+import time
 import pytest
 from pyeapi.eapilib import EapiError
 from vane import tests_tools
@@ -292,3 +293,303 @@ class VaneTests:
         """TD: Verifies if invalid cmd in setup is handled properly"""
 
         """ This function is never called since the setup fails"""
+
+    def test_run_show_cmds_timeout_func(self, dut, tests_definitions):
+        """TD: Verifies run_show_cmds() timeout func
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            tops.show_cmds[tops.dut_name] = ["show ntp status", "show bgp summary"]
+
+            """
+            TS: Run cmds using eapi and ssh run_commands
+            """
+            ssh_output = tops.run_show_cmds(
+                tops.show_cmds[tops.dut_name], conn_type="ssh", timeout=120
+            )
+            eapi_output = tops.run_show_cmds(
+                tops.show_cmds[tops.dut_name], conn_type="eapi", timeout=120
+            )
+            eapi_op = []
+            for output in eapi_output:
+                eapi_op.append(output["result"])
+
+            """
+            TS: Compare eapi and ssh outputs
+            """
+            tops.actual_output, tops.expected_output = (ssh_output, eapi_output)
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if ssh can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_run_show_cmds_timeout_func)
+        tops.test_result = tops.actual_output == tops.expected_output
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.actual_output == tops.expected_output
+
+    def test_run_cfg_cmds_ssh_func(self, dut, tests_definitions):
+        """TD: Verifies run_cfg_cmds() ssh functionality
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            description = "test"
+            cfg_cmds = ["interface eth16", f"description {description}"]
+
+            """
+            TS: Run cmds using ssh run_cfg_cmds
+            """
+            tops.run_cfg_cmds(cfg_cmds, conn_type="ssh")
+
+            """
+            TS: check if config is present
+            """
+
+            show_cmds = ["show running-config interfaces ethernet 16"]
+
+            tops.actual_output = tops.run_show_cmds(show_cmds, encoding="text")
+
+            tops.expected_output = f"description {description}"
+
+            cfg_cmds = ["interface eth16", f"no description {description}"]
+
+            tops.run_cfg_cmds(cfg_cmds, conn_type="ssh")
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if ssh can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_run_cfg_cmds_ssh_func)
+        tops.test_result = tops.expected_output in tops.actual_output[0]["result"]["output"]
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.expected_output in tops.actual_output[0]["result"]["output"]
+
+    def test_run_cfg_cmds_eapi_func(self, dut, tests_definitions):
+        """TD: Verifies run_cfg_cmds() eapi functionality
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            description = "test"
+            cfg_cmds = ["interface eth16", f"description {description}"]
+
+            """
+            TS: Run cmds using eapi run_cfg_cmds
+            """
+            tops.run_cfg_cmds(cfg_cmds, conn_type="eapi")
+
+            """
+            TS: check if config is present
+            """
+
+            show_cmds = ["show running-config interfaces ethernet 16"]
+
+            tops.actual_output = tops.run_show_cmds(show_cmds, encoding="text")
+
+            tops.expected_output = f"description {description}"
+
+            cfg_cmds = ["interface eth16", f"no description {description}"]
+
+            tops.run_cfg_cmds(cfg_cmds, conn_type="ssh")
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if eapi can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_run_cfg_cmds_eapi_func)
+        tops.test_result = tops.expected_output in tops.actual_output[0]["result"]["output"]
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.expected_output in tops.actual_output[0]["result"]["output"]
+
+    def test_file_transfer(self, dut, tests_definitions):
+        """TD: Verifies transfer_file() ssh functionality
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            """
+            TS: Transfer file named "sample.txt"
+            """
+            src_file = "sample_network_tests/vane_system_tests/sample.txt"
+            timestr = time.strftime("%Y%m%d-%H%M%S")
+            dest_file = f"sample-{timestr}.txt"
+
+            file_system = "/mnt/flash"
+            operation = "put"
+            tops.expected_output = {
+                "file_exists": True,
+                "file_transferred": True,
+                "file_verified": True,
+            }
+            tops.actual_output = tops.transfer_file(
+                src_file=src_file, dest_file=dest_file, file_system=file_system, operation=operation
+            )
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating file transfer over ssh functionality. Vane "
+                f"recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_file_transfer)
+        tops.test_result = tops.expected_output == tops.actual_output
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.expected_output == tops.actual_output
+
+    def test_file_transfer_using_sftp(self, dut, tests_definitions):
+        """TD: Verifies transfer_file() sftp functionality
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            """
+            TS: Transfer file named "sample-sftp.txt"
+            """
+            src_file = "sample_network_tests/vane_system_tests/sample-sftp.txt"
+            timestr = time.strftime("%Y%m%d-%H%M%S")
+            dest_file = f"sample-{timestr}.txt"
+
+            file_system = "/mnt/flash"
+            operation = "put"
+            tops.expected_output = {
+                "file_exists": True,
+                "file_transferred": True,
+                "file_verified": True,
+            }
+            tops.actual_output = tops.transfer_file(
+                src_file=src_file,
+                dest_file=dest_file,
+                file_system=file_system,
+                operation=operation,
+                sftp=True,
+            )
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating file transfer over sftp functionality. Vane "
+                f"recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_file_transfer_using_sftp)
+        tops.test_result = tops.expected_output == tops.actual_output
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert tops.expected_output == tops.actual_output
+
+    def test_cmd_template(self, dut, tests_definitions):
+        """
+        Test case to check cmd template
+        """
+
+        # Initializing the TestOps class and initializing the variables
+        self.tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+        test_params = self.tops.test_parameters
+        self.tops.actual_output = {}
+        self.output = ""
+        test_params["input"] = {"local_interface": None, "snmp_local_interface_ip": None}
+        self.tops.output_msg = (
+            "SNMP traps are generated and returned no errors when snmpwalk command is executed"
+            " locally on switch."
+        )
+
+        try:
+            """
+            TS: Running 'bash timeout <cmd wait time> snmpwalk -v <snmp_version> -a SHA -A
+            <snmp_authentication_protocol_passphrase> -x AES -X <snmp_privacy_protocol_passphrase>
+            -u <snmp_username> -l authPriv <snmp_local_interface_ip>
+            HOST-RESOURCES-MIB::hrProcessorLoad' command and verifying SNMP traps are generated
+            on device.
+            """
+            snmp_walk_cmd = (
+                "bash timeout 5 snmpwalk -v"
+                " 3 -a SHA -A {{ snmp_authentication_protocol_passphrase }}"
+                " -x AES -X {{ snmp_privacy_protocol_passphrase }} -u"
+                " {{ snmp_username }} -l authPriv"
+                " {{ snmp_local_interface_ip }} HOST-RESOURCES-MIB::hrProcessorLoad"
+            )
+            dut["snmp_authentication_protocol_passphrase"] = "arista123"
+            dut["snmp_privacy_protocol_passphrase"] = "arista123"
+            dut["snmp_username"] = "Arista"
+            dut["snmp_local_interface_ip"] = "192.168.0.9"
+            output = self.tops.run_show_cmds([snmp_walk_cmd], dut=dut, hidden_cmd=True)
+            snmp_output = output[0]["result"]["messages"][0].split("hrProcessorLoad\n")
+
+            # Verifying the snmpwalk command output is not empty and updating the actual output
+            # with snmp status
+            snmp_output = snmp_output[0].split("\t")
+            self.output += "\n\n The snmpwalk output is:\n " + str(snmp_output)
+            self.tops.actual_output.update({"snmp_walk_successful": "INTEGER" in snmp_output[0]})
+
+            # forming output message if test result is fail
+            if self.tops.expected_output != self.tops.actual_output:
+                self.tops.output_msg = (
+                    "SNMP traps are not generated and returned invalid output when snmpwalk command"
+                    " is executed locally on switch."
+                )
+
+        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+            logging.error(
+                "On device %s: Error while running the testcase is:\n%s",
+                self.tops.dut_name,
+                str(excep),
+            )
+            self.tops.output_msg = self.tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
+
+        self.tops.test_result = self.tops.actual_output == self.tops.expected_output
+        self.tops.parse_test_steps(self.test_cmd_template)
+        self.tops.generate_report(dut["name"], self.output)
+        assert self.tops.expected_output == self.tops.actual_output

@@ -35,9 +35,9 @@ import os
 import json
 import re
 from pathlib import Path
-import datetime
 from mdutils.mdutils import MdUtils
 from vane.vane_logging import logging
+from vane.utils import return_date
 
 
 class TestStepClient:
@@ -47,7 +47,7 @@ class TestStepClient:
         """Initializes the Test Step Client
 
         Args:
-            test_dir (str): directory of test cases for which to generate
+            test_dir (list): directory of test cases for which to generate
             test steps
         """
 
@@ -99,7 +99,7 @@ class TestStepClient:
             comments = [x.strip() for x in comments]
             if not comments:
                 comments.append("N/a no Test Steps found")
-            now = (datetime.datetime.now()).strftime("%d/%m/%Y %H:%M:%S")
+            now, _ = return_date()
             comments.insert(0, now)
 
             logging.debug(f"Create JSON and MD files for {test_file} using {comments}")

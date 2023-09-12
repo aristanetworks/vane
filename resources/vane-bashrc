@@ -1,0 +1,70 @@
+# .bashrc for Vane containers
+
+# Set some colors for the prompts
+RED="\[\033[0;31m\]"
+GREEN="\[\033[1;32m\]"
+CYAN="\[\033[0;36m\]"
+BLUE="\[\033[0;34m\]"
+PURPLE="\[\033[0;35m\]"
+NORMAL="\[\033[0m\]"
+
+# Set the prompt string (using PROMPT_COMMAND)
+#   Create a VANE_MSG_BORDERED which will instruct the user how to
+#   enter the Vane operational environment if the poetry shell is not started
+MSG_BORDER="  --------------------------------------------------------------"
+VANE_MSG="Run ${GREEN}activate ${RED}to enter the Vane operational environment"
+VANE_BORDERED_MSG="\n${RED}${MSG_BORDER}\n  --- ${VANE_MSG} ---\n${MSG_BORDER}${NORMAL}\n\n"
+#   And set the standard prompt configuration
+STD_PROMPT="${CYAN}\h ${BLUE}\W ${PURPLE}# ${NORMAL}"
+
+PROMPT_COMMAND=set_prompt_string
+set_prompt_string() {
+  if [ -n "$VIRTUAL_ENV_PROMPT" ] || [ -n "$POETRY_ACTIVE" ]; then
+    # If either VIRTUAL_ENV_PROMPT (set when activate is called) or POETRY_ACTIVE (set when
+    # poetry shell is called) are set, then set the prompt to show the POETRY_VIRTUALENVS_PROMPT
+    # and the standard prompt, to indicate we are in the Vane operational environment
+    PS1="(${POETRY_VIRTUALENVS_PROMPT}) ${STD_PROMPT}"
+  else
+    # Otherwise post the Vane bordered message (to prompt the user to run 'activate') and
+    # the standard prompt
+    PS1="${VANE_BORDERED_MSG}${STD_PROMPT}"
+  fi
+}
+
+# Create an alias to activate the Vane virtual environment (poetry shell)
+#   Ensure the poetry lock file exists
+#   Use poetry to determine the path to the poetry environment
+#   Use 'source ../bin/activate' so the user can exit easily rather than 'poetry shell' where
+#     the user would have to exit twice, once for the poetry shell and once from the container
+if [ ! -f /project/poetry.lock ]; then
+  PREV_DIR=$CWD
+  cd /project && poetry lock
+  cd $PREV_DIR
+fi
+PENV_PATH=$(cd /project && poetry show -v | head -n 1 | awk '{print $NF}')
+alias activate='source ${PENV_PATH}/bin/activate'
+
+# Apply changes specific to the vane-cvp environment
+if [ -n "$VANE_CVP" ]; then
+  # Copy the sample network tests if they do not exist in the vane-data directory
+  if [ -d "/vane-data" ] && [ ! -d "/vane-data/sample_network_tests" ]; then
+    cp -r /project/sample_network_tests /vane-data/.
+  fi
+  # Copy the nrfu tests if they do not exist in the vane-data directory
+  if [ -d "/vane-data" ] && [ ! -d "/vane-data/nrfu_tests" ]; then
+    cp -r /project/nrfu_tests /vane-data/.
+  fi
+  # Copy pytest.ini to the vane-data directory
+  if [ -d "/vane-data" ] && [ ! -f "/vane-data/pytest.ini" ]; then
+    cp -r /project/pytest.ini /vane-data/.
+  fi
+
+  # Check the stty size result
+  #   Avoids instances where unusual screen wrapping occurs while typing a command, and the
+  #     Vane help (for example) gets wrapped at really short lengths
+  #   If stty size reports 'standard input' call resize to reconfigure the rows/cols values
+  sizeResult=$(stty size 2>&1)
+  if [ "$sizeResult" == "stty: standard input" ]; then
+    eval $(resize)
+  fi
+fi

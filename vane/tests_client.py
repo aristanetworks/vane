@@ -54,6 +54,7 @@ from jinja2 import Template, Undefined
 from pytest import ExitCode
 from vane.vane_logging import logging
 from vane import tests_tools
+from vane.utils import return_date
 
 
 class NullUndefined(Undefined):
@@ -153,6 +154,7 @@ class TestsClient:
         logging.info("Starting test setup")
         self._remove_result_files()
         self._remove_test_results_dir()
+        self._remove_test_case_logs()
         self._set_test_parameters()
 
     def test_runner(self):
@@ -246,9 +248,14 @@ class TestsClient:
         """Set html_report for test run"""
 
         html_report = self.data_model["parameters"].get("html_report")
-        html_name = f"--html={html_report}.html"
+        self_contained = self.data_model["parameters"].get("self_contained")
+        _, dt_string = return_date()
+        html_title = html_report + "_" + dt_string
+        html_name = f"--html={html_title}.html"
         list_out = [x for x in self.test_parameters if "--html" in x]
 
+        if self_contained:
+            self.test_parameters.append("--self-contained-html")
         if html_report and html_name not in self.test_parameters:
             logging.info(f"Set HTML report name to: {html_name}")
             self.test_parameters.append(html_name)
@@ -383,9 +390,26 @@ class TestsClient:
     def _remove_test_results_dir(self):
         """Removing the subdirectories and the files within them belonging to TEST RESULTS dir"""
 
-        test_results_dir = "reports/TEST RESULTS"
+        test_results_dir = self.data_model["parameters"]["report_dir"] + "/TEST RESULTS"
 
         if os.path.exists(test_results_dir):
             # Deleting a non-empty folder
             shutil.rmtree(test_results_dir, ignore_errors=True)
             logging.info(f"Deleted {test_results_dir} directory successfully")
+
+    def _remove_test_case_logs(self):
+        """Removing the test case logs"""
+
+        logging.info("Remove any existing log files in logs directory: logs")
+
+        # Get the list of files in the logs folder
+        # This folder will always exist as it gets created
+        # in the root logging configuration file
+        files = os.listdir("logs")
+
+        # Iterate over the files and delete each one
+        for file_name in files:
+            if file_name != "vane.log":
+                file_path = os.path.join("logs", file_name)
+                if os.path.isfile(file_path):
+                    os.remove(file_path)

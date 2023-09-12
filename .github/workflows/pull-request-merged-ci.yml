@@ -77,19 +77,45 @@ jobs:
           echo -e "\n----------------"
           echo "Coverage is ${cov_score}%"
           echo -e "----------------\n"
-          coverage-badge -f -o resources/coverage.svg
+          coverage-badge -f -o coverage.svg
 
       - name: Commit the coverage badge
-        # Check the git diff for coverage.svg. If the file has been modified
-        # due to a change in coverage, commit the changes to the current branch
-        # (which should be develop)
+        # Commit the coverage badge file to the coverage-badge branch, if it was created
+        #   This process empties out the repo except for the README and the coverage badge file,
+        #   then copies the README from the coverage-badge branche over the current README. Then
+        #   a commit is made, but not pushed to the current branch but pushed to the coverage-badge
+        #   branch instead. Since we're working in a container, all the changes are discarded and do
+        #   not affect develop or the branch that was merged.
         run: |
           git status || true
           git config --local user.name actions-user
           git config --local user.email "actions@github.com"
-          if ! git diff --quiet resources/coverage.svg; then
+          #
+          # List the files in the repo
+          #
+          ls -la
+          #
+          # Show the current repo status
+          #
+          git status
+          #
+          # Remove all the files in the repo except the .git folder,
+          # the README file, and the coverage file. 'or' the command
+          # to true since it will fail when trying to delete '.' and '..'
+          #
+          shopt -s dotglob extglob
+          rm -rf !(.git|README.md|coverage.svg) || true
+          #
+          if [ $(git ls-files --others | grep coverage.svg ) ] ; then
             echo "Updating coverage badge"
-            git add resources/coverage.svg
+            # Copy the version of README from the coverage-badge branch
+            curl https://raw.githubusercontent.com/aristanetworks/vane/coverage-badge/README.md -o README.md
+            # Add and commit all the changes we just made, so we end up committing
+            # just the README and the coverage badge to the coverage-badge branch
+            git add --all
+            git status
+            # Make the commit, but it will not be saved in GitHub on the working branch
             git commit -am "Updating coverage badge"
-            git push -f origin ${{ github.base_ref }}
+            # Push the commit to the coverage-badge branch (not to the working branch or develop)
+            git push -f origin ${{ github.ref }}:coverage-badge
           fi

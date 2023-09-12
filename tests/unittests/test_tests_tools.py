@@ -1351,13 +1351,8 @@ def test_test_ops_run_show_cmds_json(mocker):
         ],
         [
             {
-                "command": "show lldp neighbors",
-                "result": {"output": "TEXT_result"},
-                "encoding": "text",
-            },
-            {
                 "command": "show interfaces status",
-                "result": {"output": "TEXT_result"},
+                "result": {"output": "TEXT_INTERFACE_STATUS_result"},
                 "encoding": "text",
             },
         ],
@@ -1383,21 +1378,14 @@ def test_test_ops_run_show_cmds_json(mocker):
     assert tops.show_cmds == show_cmds
     assert tops._show_cmds == {
         "DCBBW1": ["show version", "show version"],
-        "neighbor": ["show clock", "show lldp neighbors", "show interfaces status"],
+        "neighbor": ["show clock", "show interfaces status"],
     }
 
-    assert tops.show_cmd_txts == {
-        "DCBBW1": [
-            OUTPUT,
-        ],
-        "neighbor": ["TEXT_result", "TEXT_result"],
-    }
     assert tops._show_cmd_txts == {
         "DCBBW1": [OUTPUT, OUTPUT],
         "neighbor": [
             "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n",
-            "TEXT_result",
-            "TEXT_result",
+            "TEXT_INTERFACE_STATUS_result",
         ],
     }
 
@@ -1450,12 +1438,6 @@ def test_test_ops_run_show_cmds_text(mocker):
         "neighbor": ["show lldp neighbors", "show interfaces status"],
     }
 
-    assert tops.show_cmd_txts == {
-        "DCBBW1": [
-            OUTPUT,
-        ],
-        "neighbor": ["TEXT_result", "TEXT_result"],
-    }
     assert tops._show_cmd_txts == {
         "DCBBW1": [
             OUTPUT,
@@ -1486,7 +1468,7 @@ def test_test_ops_run_show_cmds_json_exception_fail(mocker):
         tops.run_show_cmds(show_cmds, dut, "json")
 
     # verify that _show_cmds still got updated with commands that failed
-    assert tops._show_cmds["neighbor"] == [["show interfaces status"]]
+    assert tops._show_cmds["neighbor"] == ["show interfaces status"]
 
     assert tops._show_cmd_txts["neighbor"] == ["Error [1000]: Invalid command [None]"]
 
@@ -1513,6 +1495,206 @@ def test_test_ops_run_show_cmds_text_exception_fail(mocker):
         tops.run_show_cmds(show_cmds, dut, "text")
 
     # verify that _show_cmds still got updated with commands that failed
-    assert tops._show_cmds["neighbor"] == [["show interfaces status"]]
+    assert tops._show_cmds["neighbor"] == ["show interfaces status"]
 
     assert tops._show_cmd_txts["neighbor"] == ["Error [1000]: Invalid command [None]"]
+
+
+def test_test_ops_run_cfg_cmds_pyeapi(mocker):
+    """Validates the functionality of run_show_cmds method"""
+    mocker.patch(
+        "vane.tests_tools.TestOps._get_parameters",
+        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
+    )
+    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+
+    mocker_object = mocker.patch("vane.device_interface.PyeapiConn.enable")
+    mocker_object.side_effect = [
+        [
+            {
+                "command": "show clock",
+                "result": {
+                    "output": "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n"
+                },
+                "encoding": "text",
+            }
+        ],
+    ]
+
+    mocker_object = mocker.patch("vane.device_interface.PyeapiConn.config")
+    mocker_object.side_effect = [
+        [{}, {}],
+    ]
+
+    tops = create_test_ops_instance(mocker)
+
+    dut = {"connection": vane.device_interface.PyeapiConn, "name": "neighbor"}
+    dut["eapi_conn"] = dut["connection"]
+    tops.show_clock_flag = True
+    cfg_cmds = ["interface eth16", "description unittest"]
+
+    actual_output = tops.run_cfg_cmds(cfg_cmds, dut)
+
+    # assert return values
+    assert actual_output == [
+        {},
+        {},
+    ]
+    assert tops._show_cmds == {
+        "DCBBW1": ["show version", "show version"],
+        "neighbor": ["show clock", "interface eth16", "description unittest"],
+    }
+
+    assert tops._show_cmd_txts == {
+        "DCBBW1": [OUTPUT, OUTPUT],
+        "neighbor": ["Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n", "", ""],
+    }
+
+
+def test_test_ops_run_cfg_cmds_ssh(mocker):
+    """Validates the functionality of run_show_cmds method"""
+    mocker.patch(
+        "vane.tests_tools.TestOps._get_parameters",
+        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
+    )
+    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+
+    mocker_object = mocker.patch("vane.device_interface.NetmikoConn.enable")
+    mocker_object.side_effect = [
+        [
+            {
+                "command": "show clock",
+                "result": {
+                    "output": "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n"
+                },
+                "encoding": "text",
+            }
+        ],
+    ]
+
+    mocker_object = mocker.patch("vane.device_interface.NetmikoConn.config")
+    config_return_value = (
+        "configure terminal\nneighbor(config)#"
+        "interface eth16\nneighbor(config-if-Et16)#"
+        "description unittest\nneighbor(config-if-Et16)#end\nneighbor#"
+    )
+    mocker_object.side_effect = [config_return_value]
+
+    tops = create_test_ops_instance(mocker)
+
+    dut = {"connection": vane.device_interface.NetmikoConn, "name": "neighbor"}
+    dut["ssh_conn"] = dut["connection"]
+    tops.show_clock_flag = True
+    cfg_cmds = ["interface eth16", "description unittest"]
+
+    actual_output = tops.run_cfg_cmds(cfg_cmds, dut, conn_type="ssh")
+
+    # assert return values
+    assert actual_output == config_return_value
+
+    assert tops._show_cmds == {
+        "DCBBW1": ["show version", "show version"],
+        "neighbor": ["show clock", "interface eth16", "description unittest"],
+    }
+
+    assert tops._show_cmd_txts == {
+        "DCBBW1": [OUTPUT, OUTPUT],
+        "neighbor": [
+            "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n",
+            config_return_value,
+            config_return_value,
+        ],
+    }
+
+
+def test_test_ops_transfer_file(mocker):
+    """Validates the functionality of transfer_file method"""
+    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+
+    mocker.patch(
+        "vane.device_interface.NetmikoConn.set_up_conn",
+        return_value=vane.device_interface.NetmikoConn,
+    )
+    mocker_object = mocker.patch("vane.device_interface.NetmikoConn.enable")
+    mocker_object.side_effect = [
+        [
+            {
+                "command": "show clock",
+                "result": {
+                    "output": "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n"
+                },
+                "encoding": "text",
+            }
+        ],
+    ]
+
+    transfer_file_return = {
+        "file_exists": True,
+        "file_transferred": True,
+        "file_verified": True,
+    }
+    mocker.patch(
+        "vane.device_interface.NetmikoConn.transfer_file", return_value=transfer_file_return
+    )
+
+    tops = create_test_ops_instance(mocker)
+    file_tranfer_log = (
+        "Last login: Wed Aug 16 20:51:31 2023 from 10.8.0.14\n\n\nDSR01#\nDSR01"
+        "#terminal width 511\nWidth set to 511 columns.\nDSR01#terminal length 0"
+        "\nPagination disabled.\nDSR01#\nDSR01#\nDSR01#bash\n\nArista Networks "
+        "EOS shell\n\n[XXXXX@DSR01 ~]$ /bin/ls /mnt/flash/sample-20230816-145133"
+        ".txt 2> /dev/null\n[XXXXX@DSR01 ~]$ exit\nlogout\nDSR01#bash\n\nArista "
+        "Networks EOS shell\n\n[XXXXX@DSR01 ~]$ /bin/df -k /mnt/flash\nFilesystem     "
+        "1K-blocks    Used Available Use% Mounted on\n/dev/nvme0n1p1   "
+        "8124856 1146708   6961764  15% /mnt/flash\n[XXXXX@DSR01 ~]$ exit\nlogout"
+        "\nDSR01#\nDSR01#verify /md5 file:/mnt/flash/sample-20230816-145133.txt\nverify "
+        "/md5 (file:/mnt/flash/sample-20230816-145133.txt) = 3c5fd98f35b7e6b24a07c"
+        "f3fc3220352\nDSR01#"
+    )
+
+    mocked_file_data = mocker.mock_open(read_data=file_tranfer_log)
+    mocker.patch("builtins.open", mocked_file_data)
+    mocker.patch("os.remove")
+
+    dut = {
+        "connection": vane.device_interface.NetmikoConn,
+        "name": "neighbor",
+        "transport": "https",
+        "mgmt_ip": "1.1.1.1",
+        "username": "user1",
+        "password": "pass1",
+    }
+    tops.dut = dut
+    tops._show_cmds["neighbor"] = []
+    tops._show_cmd_txts["neighbor"] = []
+    tops.show_clock_flag = True
+
+    actual_output = tops.transfer_file(
+        src_file="sample.txt",
+        dest_file="sample-20230816-145133.txt",
+        file_system="/mnt/flash",
+        operation="get",
+        sftp=True,
+    )
+
+    # assert return values
+    assert actual_output == {
+        "file_exists": True,
+        "file_transferred": True,
+        "file_verified": True,
+    }
+    assert tops._show_cmds == {
+        "DCBBW1": ["show version", "show version"],
+        "neighbor": [
+            "show clock",
+            "sftp src_file: sample.txt dest_file: sample-20230816-145133.txt op: get",
+        ],
+    }
+
+    assert tops._show_cmd_txts == {
+        "DCBBW1": [OUTPUT, OUTPUT],
+        "neighbor": [
+            "Thu Jun  1 14:03:59 2023\nTimezone: UTC\nClock source: local\n",
+            file_tranfer_log,
+        ],
+    }

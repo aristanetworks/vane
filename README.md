@@ -2,20 +2,21 @@
 
 Network Certification Tool
 
-![Coverage](./resources/coverage.svg)
+![Coverage](https://raw.githubusercontent.com/aristanetworks/vane/coverage-badge/coverage.svg)
 
 ## Description
 
-Vane is an open source, network validation tool which runs tests against Arista networking 
-devices, by connecting to devices on a given network, executing commands and performing 
+Vane is an open source, network validation tool which runs tests against Arista networking
+devices, by connecting to devices on a given network, executing commands and performing
 tests against their output.  Vane eliminates repetitive testing tasks by automating network
 validation which can take users months to complete.
 
 ## Installation
 
-The Vane application is installed using the Python poetry packaging system. 
+Once cloned, the Vane application is installed using the Python poetry packaging system.
 
-Install vane with the following command:
+Execute the following commands to set up Vane within your poetry virtual environment
+
 ```
     vane # poetry install
 ```
@@ -68,7 +69,7 @@ run the coverage report at any time after running the tests.
     (vane-py3.9) vane # make coverage_report
 ```
 
-For detailed information on the installation, please refer to [Getting Started with Vane docuement](docs/GettingStartedwithVane.pdf)
+For detailed information on the installation, please refer to [Getting Started with Vane document](docs/GettingStartedwithVane.pdf)
 
 ## Development
 

@@ -1,0 +1,22 @@
+duts:
+- mgmt_ip: 10.88.160.154
+  name: 10.88.160.154
+  neighbors: []
+  password: ''
+  role: unknown
+  transport: https
+  username: ''
+- mgmt_ip: 10.88.160.164
+  name: 10.88.160.164
+  neighbors: []
+  password: ''
+  role: unknown
+  transport: https
+  username: ''
+- mgmt_ip: 10.88.160.174
+  name: 10.88.160.174
+  neighbors: []
+  password: ''
+  role: unknown
+  transport: https
+  username: ''

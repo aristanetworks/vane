@@ -1,3 +1,5 @@
+# Create a container for general Vane development
+
 # Use official Python3 supported container
 FROM python:3.9
 MAINTAINER Professional Service: Software Services <eos-cs-sw@arista.com>
@@ -12,6 +14,12 @@ ENV PIP_NO_CACHE_DIR 1
 
 # Set the poetry version to use
 ENV POETRY_VERSION 1.5.1
+
+# Set the poetry virtual environment prompt
+ENV POETRY_VIRTUALENVS_PROMPT vane-dev-shell
+
+# Set the container home (the directory where the container will start)
+ENV CONTAINER_HOME /project
 
 # Install necessary packages
 RUN apt-get update \
@@ -31,7 +39,7 @@ RUN pip3 install --upgrade pip
 RUN pip install poetry==${POETRY_VERSION}
 
 # Create the /project directory and add it as a mountpoint
-WORKDIR /project
+WORKDIR ${CONTAINER_HOME}
 COPY . .
 
 # Set the poetry lock file as root first
@@ -54,13 +62,16 @@ RUN echo "%sudo   ALL=(ALL:ALL) ALL" >> /etc/sudoers \
 
 # Switch to the new user for when the container is run
 USER $UNAME
-RUN echo "PS1='🐳  \[\033[1;36m\]\h \[\033[1;34m\]\W\[\033[0;35m\] \[\033[1;36m\]# \[\033[0m\]'" >> /home/${UNAME}/.bashrc
+
+# Copy the custom bashrc data to the docker user's bashrc file and ensure it is
+# owned by the docker user
+#   This creates a custom prompt with a notice to start the poetry shell (activate)
+#   along with the 'activate' alias to activate the poetry shell
+COPY resources/vane-bashrc /home/${UNAME}/.bashrc
+#RUN sudo chown ${UNAME}:${UNAME} /home/${UNAME}/.bashrc
 
 # Install dependencies required by the repo (as the docker user)
-RUN poetry install --no-root
+RUN poetry install
 
-# Create an alias for activating the poetry shell
-RUN echo "alias activate='source `poetry env info --path`/bin/activate'" >> /home/${UNAME}/.bashrc
-
-# Start the container
+# Start the container running the poetry shell
 CMD ["/bin/bash"]

@@ -46,3 +46,39 @@
       report_style: modern
       test_criteria: Verify ssh conn run_commands func
       test_setup: test_setup_garbage.yaml
+    - name: test_run_show_cmds_timeout_func
+      description: Verify run_show_cmds timeout functionality
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify ssh and eapi conn run_show_cmds timeout func
+    - name: test_run_cfg_cmds_ssh_func
+      description: Verify run_cfg_cmds ssh functionality
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify ssh conn run_cfg_cmds func
+    - name: test_run_cfg_cmds_eapi_func
+      description: Verify run_cfg_cmds eapi functionality
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify eapi conn run_cfg_cmds func
+    - name: test_file_transfer
+      description: Verify file transfer ssh functionality
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify file transfer ssh func
+    - name: test_file_transfer_using_sftp
+      description: Verify file transfer sftp functionality
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify file transfer sftp func
+    - name: test_cmd_template
+      description: Verify cmd template works
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify cmd template works

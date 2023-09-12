@@ -1,0 +1,20 @@
+parameters:
+  generate_test_definitions: true
+  html_report: reports/report
+  json_report: reports/report
+  mark: null
+  master_definitions: nrfu_tests/master_def.yaml
+  processes: null
+  report_dir: reports
+  report_summary_style: modern
+  results_dir: reports/results
+  results_file: result.yml
+  setup_show: false
+  show_log: show_output.log
+  stdout: false
+  template_definitions: test_definition.yaml.j2
+  test_cases: All
+  test_definitions: test_definition.yaml
+  test_dirs:
+  - nrfu_tests
+  verbose: true

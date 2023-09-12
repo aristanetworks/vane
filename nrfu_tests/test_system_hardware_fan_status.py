@@ -8,11 +8,11 @@ Testcase for verification of fan status in the system.
 import re
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -40,7 +40,7 @@ class SystemHardwareFanStatusTests:
         self.output = ""
         fan_speed_details = {}
 
-        # forming output message if test result is passed
+        # Forming output message if the test result is passed.
         tops.output_msg = "For all fans, status is ok and speed is stable."
 
         try:
@@ -50,7 +50,7 @@ class SystemHardwareFanStatusTests:
             """
             self.show_version_command = "show version"
             output = dut["output"][self.show_version_command]["json"]
-            logger.info(
+            logging.info(
                 "On device %s, Output of %s command is: \n%s\n",
                 tops.dut_name,
                 self.show_version_command,
@@ -60,7 +60,7 @@ class SystemHardwareFanStatusTests:
                 f"on device {tops.dut_name}, output of {self.show_version_command} is:\n{output}"
             )
 
-            # Skipping testcase if device is vEOS.
+            # Skipping test case if the device is vEOS.
             if "vEOS" in output.get("modelName"):
                 pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
 
@@ -69,7 +69,7 @@ class SystemHardwareFanStatusTests:
             fan status and speed stability details.
             """
             output = tops.run_show_cmds([tops.show_cmd])
-            logger.info(
+            logging.info(
                 "On device %s, output of %s command is:\n%s\n",
                 tops.dut_name,
                 tops.show_cmd,
@@ -117,7 +117,7 @@ class SystemHardwareFanStatusTests:
                         )
                         fan_speed_details.update({fan_data["label"]: fan_data["configuredSpeed"]})
 
-            # Forming output message if test result is fail.
+            # Forming output message if the test result is failed.
             if tops.expected_output != tops.actual_output:
                 tops.output_msg = "\nFollowing power supply slots, fans are in erroneous state :\n"
                 for slots, slot_details in tops.expected_output["fans_slots"].items():
@@ -147,7 +147,7 @@ class SystemHardwareFanStatusTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
+            logging.error(
                 "On device %s, Error while running the testcase is:\n%s",
                 tops.dut_name,
                 tops.actual_output,

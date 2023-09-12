@@ -10,14 +10,14 @@ from vane import test_step_client
 TEST_DIR = "tests/unittests/fixtures/host"
 TEST_FILE = ["tests/unittests/fixtures/host/test_host.py"]
 TEST_STEP = [
-    "01/01/2023 00:00:00",
-    "TD: Verify hostname is set on device is correct",
+    "September 07, 2023 06:22:55PM",
+    "TD: Verify hostname set on device is correct",
     "TS: Collecting the output of 'show hostname' command from DUT",
     "TS: Verify LLDP system name",
     "TS: Creating test report based on results",
 ]
 NO_TEST_STEPS = [
-    "01/01/2023 00:00:00",
+    "September 07, 2023 06:22:55PM",
     "N/a no Test Steps found",
 ]
 # find if using github actions
@@ -114,8 +114,8 @@ def test_parse_file(loginfo, logdebug, mocker):
 
     # Set datetime to a known value
     mocker.patch(
-        "vane.test_step_client.now",
-        return_value="01/01/2023 00:00:00",
+        "vane.test_step_client.return_date",
+        return_value=("September 07, 2023 06:22:55PM", "not_used"),
     )
     mocker_object_one = mocker.patch("vane.test_step_client.TestStepClient.output_json")
     mocker_object_two = mocker.patch("vane.test_step_client.TestStepClient.output_md")
@@ -140,8 +140,8 @@ def test_parse_file_no_steps(loginfo, logdebug, mocker):
 
     # Set datetime to a known value
     mocker.patch(
-        "vane.test_step_client.now",
-        return_value="01/01/2023 00:00:00",
+        "vane.test_step_client.return_date",
+        return_value=("September 07, 2023 06:22:55PM", "not_used"),
     )
     mocker_object_one = mocker.patch("vane.test_step_client.TestStepClient.output_json")
     mocker_object_two = mocker.patch("vane.test_step_client.TestStepClient.output_md")
@@ -224,7 +224,7 @@ def test_output_md_multiple_tests():
     test_dirs = ["tests/unittests/fixtures/api"]
     test_files = "tests/unittests/fixtures/api/api.py"
     test_step = [
-        "01/01/2023 00:00:00",
+        "September 07, 2023 06:22:55PM",
         "TD: Verify management api https server is running",
         "TS: Collecting the output of 'show management api http-commands' command from DUT",
         "TS: Check HTTPS Server running status",

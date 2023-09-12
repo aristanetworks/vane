@@ -32,7 +32,6 @@
 
 """Utilities for using PyTest in network testing"""
 
-import datetime
 import json
 import os
 import re
@@ -44,6 +43,7 @@ from docx.shared import Inches, Pt, RGBColor
 from vane.report_templates import REPORT_TEMPLATES
 from vane.tests_tools import yaml_read
 from vane.vane_logging import logging
+from vane.utils import return_date
 
 TABLE_GRID = "Table Grid"
 TOTAL_TESTS = "Total Tests"
@@ -183,29 +183,17 @@ class ReportClient:
         self._write_tests_case_report()
         self._write_detail_report()
 
-        _, file_date = self._return_date()
+        _, file_date = return_date()
         reports_dir = self._reports_dir
         file_name = f"{reports_dir}/report_{file_date}.docx"
         logging.info(f"Writing docx report to file: {file_name}")
         self._document.save(file_name)
 
-    def _return_date(self):
-        """Genreate a formatted date and return to calling
-        function.
-        """
-
-        date_obj = datetime.datetime.now()
-        format_date = date_obj.strftime("%B %d, %Y %I:%M:%S%p")
-        file_date = date_obj.strftime("%y%m%d%H%M")
-
-        logging.debug(f"Returning formatted date: {format_date}")
-        return format_date, file_date
-
     def _write_title_page(self):
         """Write report title page"""
 
         logging.info("Creating report title page")
-        format_date, _ = self._return_date()
+        format_date, _ = return_date()
         self._document.add_heading("Test Report", 0)
         para = self._document.add_paragraph()
         self._write_text(para, format_date, align="right")

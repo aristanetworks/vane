@@ -37,7 +37,7 @@ import re
 from pathlib import Path
 from mdutils.mdutils import MdUtils
 from vane.vane_logging import logging
-from vane.utils import now
+from vane.utils import return_date
 
 
 class TestStepClient:
@@ -99,7 +99,8 @@ class TestStepClient:
             comments = [x.strip() for x in comments]
             if not comments:
                 comments.append("N/a no Test Steps found")
-            comments.insert(0, now())
+            now, _ = return_date()
+            comments.insert(0, now)
 
             logging.debug(f"Create JSON and MD files for {test_file} using {comments}")
             self.output_json({test_file: comments})

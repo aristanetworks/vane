@@ -114,3 +114,15 @@ def now():
     """Return current date and time"""
 
     return (datetime.datetime.now()).strftime("%d-%m-%Y %H:%M:%S")
+
+
+def return_date():
+    """Generate a formatted date and return to calling
+    function.
+    """
+
+    date_obj = datetime.datetime.now()
+    format_date = date_obj.strftime("%B %d, %Y %I:%M:%S%p")
+    file_date = date_obj.strftime("%y%m%d%H%M")
+
+    return format_date, file_date

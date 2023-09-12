@@ -9,10 +9,11 @@ import pytest
 from pyeapi.eapilib import EapiError
 from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -38,7 +39,7 @@ class MiscShowCommandTests:
         self.output, output = "", ""
         tops.actual_output, tops.expected_output = {"show_commands": {}}, {"show_commands": {}}
 
-        # Forming output message if test result is passed
+        # Forming output message if the test result is passed
         tops.output_msg = "Show commands are executed on device without any error."
 
         tops.show_cmd = [
@@ -70,11 +71,8 @@ class MiscShowCommandTests:
                         {command: {"command_executed": True}}
                     )
                     output = tops.run_show_cmds([command], encoding="text")
-                    logger.info(
-                        "On device %s, output of %s command is: \n%s\n",
-                        tops.dut_name,
-                        command,
-                        output,
+                    logging.info(
+                        f"On device {tops.dut_name}, output of {command} command is: \n{output}\n"
                     )
                     self.output += f"Output of {command} command is: \n{output}"
                     tops.actual_output["show_commands"].update(
@@ -95,7 +93,7 @@ class MiscShowCommandTests:
                         )
                     else:
                         command_failed_msg += (
-                            f"\nCommand '{command}' execution on the device is failed with the"
+                            f"\nCommand '{command}' execution on the device failed with the"
                             f" following error:\n{error}\n"
                         )
 
@@ -109,8 +107,8 @@ class MiscShowCommandTests:
 
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
+            logging.error(
+                "On device %s, Error while running the test case is:\n%s",
                 tops.dut_name,
                 tops.actual_output,
             )

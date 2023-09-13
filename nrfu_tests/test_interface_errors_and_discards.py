@@ -7,11 +7,11 @@ Test cases for verification of errors/discards on all the interfaces
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -38,8 +38,8 @@ class InterfaceErrorsAndDiscardsTests:
         self.tops.actual_output = {}
         self.tops.expected_output = {}
 
-        # Forming output message if test result is passed
-        self.tops.output_msg = "Errors/discards are not found on any of the interface."
+        # Forming output message if the test result is passed
+        self.tops.output_msg = "Errors/discards are not found on any of the interfaces."
 
         try:
             """
@@ -47,11 +47,11 @@ class InterfaceErrorsAndDiscardsTests:
             errors and discards.
             """
             self.show_interfaces = dut["output"][self.tops.show_cmd]["json"]
-            logger.info(
-                "On device %s, output of %s command is:\n%s\n",
-                self.tops.dut_name,
-                self.tops.show_cmd,
-                self.show_interfaces,
+            logging.info(
+                (
+                    f"On device {self.tops.dut_name}, output of {self.tops.show_cmd} command"
+                    f" is:\n{self.show_interfaces}\n"
+                ),
             )
             self.output += (
                 f"\n\nOutput of {self.tops.show_cmd} command is: \n{self.show_interfaces }"
@@ -61,7 +61,7 @@ class InterfaceErrorsAndDiscardsTests:
 
             for interface in self.show_interfaces:
                 if "Ethernet" in interface or "Management" in interface:
-                    # sub-interfaces doesn't contain error information
+                    # Sub-interfaces doesn't contain error information
                     if "." in interface:
                         continue
 
@@ -125,7 +125,7 @@ class InterfaceErrorsAndDiscardsTests:
                         }
                     )
 
-            # Forming output message if test result is fail.
+            # Forming output message if the test result fails.
             if self.tops.actual_output != self.tops.expected_output:
                 self.tops.output_msg = "\n"
                 for interface, interface_details in self.tops.expected_output.items():
@@ -147,10 +147,11 @@ class InterfaceErrorsAndDiscardsTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             self.tops.output_msg = self.tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                self.tops.dut_name,
-                self.tops.actual_output,
+            logging.error(
+                (
+                    f"On device {self.tops.dut_name}, Error while running the testcase"
+                    f" is:\n{self.tops.actual_output}"
+                ),
             )
 
         self.tops.test_result = self.tops.expected_output == self.tops.actual_output

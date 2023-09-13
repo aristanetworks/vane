@@ -83,8 +83,8 @@
       test_id: NRFU2.3
       show_cmd: show interfaces
       expected_output: null # Forming expected output in test case.
-      test_criteria: Errors/discards should not be found on any of the interface. # Setting test case’s pass / fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      test_criteria: Errors/discards should not be found on any of the interfaces. # Setting test case’s pass/fail criteria for reporting
+      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names # Criteria to run the test case.
       filter:
         - BLFE1

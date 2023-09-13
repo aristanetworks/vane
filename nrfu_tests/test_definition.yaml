@@ -309,13 +309,13 @@
       criteria: names
       filter:
         - BLFE1
-  - name: test_base_services_tacacs
-    description: Testcase for verification of TACACS servers details.
-    test_id: NRFU1.4
-    show_cmd: show tacacs
-    expected_output: null # Forming expected output in test case file.
-    test_criteria: TACACS servers should not have errors, timeouts, failures or disconnects. # Setting test case’s pass/fail criteria for reporting.
-    report_style: modern  # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-    criteria: names
-    filter:
-    - BLFE1
+    - name: test_base_services_tacacs
+      description: Testcase for verification of TACACS servers details.
+      test_id: NRFU1.4
+      show_cmd: show tacacs
+      expected_output: null # Forming expected output in the test case file.
+      test_criteria: TACACS servers should not have errors, timeouts, failures or disconnects. # Setting test case’s pass/fail criteria for reporting.
+      report_style: modern  # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      criteria: names
+      filter:
+        - BLFE1

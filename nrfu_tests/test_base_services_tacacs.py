@@ -2,23 +2,23 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Test cases for verification of TACACS servers details
+Test cases for verification of TACACS server details
 """
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
 @pytest.mark.base_services
 class TacacsServersTests:
     """
-    Test cases for verification of TACACS servers details
+    Test cases for verification of TACACS server details
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -40,7 +40,7 @@ class TacacsServersTests:
             "tacacs_servers_info": {}
         }
 
-        # Forming output message if test result is passed
+        # Forming output message if the test result is passed
         tops.output_msg = "TACACS servers have no errors, timeouts, failures or disconnects."
 
         try:
@@ -49,16 +49,13 @@ class TacacsServersTests:
             is correct.
             """
             output = dut["output"][tops.show_cmd]["json"]
-            logger.info(
-                "On device %s, output of %s command is: \n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+            logging.info(
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is: \n{output}\n"
             )
             self.output += f"Output of {tops.show_cmd} command is: \n{output}"
             tacacs_servers = output.get("tacacsServers")
 
-            # Skipping testcase if TACACS servers are not configured.
+            # Skipping test case if TACACS servers are not configured.
             if not tacacs_servers:
                 pytest.skip(f"TACACS servers are not configured on {tops.dut_name}.")
 
@@ -91,7 +88,7 @@ class TacacsServersTests:
                     }
                 )
 
-                # Forming output message if test result is fail.
+                # Forming output message if the test result fails.
                 if tops.expected_output != tops.actual_output:
                     tops.output_msg = ""
                     for hostname, tacacs_servers_info in tops.expected_output[
@@ -116,8 +113,8 @@ class TacacsServersTests:
 
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
+            logging.error(
+                "On device %s, Error while running the test case is:\n%s",
                 tops.dut_name,
                 tops.actual_output,
             )

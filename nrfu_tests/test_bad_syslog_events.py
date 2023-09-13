@@ -7,7 +7,6 @@ Test cases for verification of bad syslog event messages
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
 from vane import tests_tools, test_case_logger
 
@@ -58,10 +57,7 @@ class BadSyslogEventsTests:
             """
             output = tops.run_show_cmds(syslog_events_cmd)
             logging.info(
-                "On device %s, output of %s command is:\n%s\n",
-                tops.dut_name,
-                syslog_events_cmd,
-                output,
+                f"On device {tops.dut_name}, output of {syslog_events_cmd} command is:\n{output}\n",
             )
             self.output += f"Output of {syslog_events_cmd} command is: \n{output}"
 
@@ -90,9 +86,10 @@ class BadSyslogEventsTests:
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+                (
+                    f"On device {tops.dut_name}, Error while running the testcase"
+                    f" is:\n{tops.actual_output}"
+                ),
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

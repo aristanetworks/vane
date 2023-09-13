@@ -249,9 +249,9 @@
       filter:
         - BLFE1
     - name: test_bad_syslog_events
-      description: Testcase for verification bad syslog event messages.
+      description: Testcase for verification of bad syslog event messages.
       test_id: NRFU6.1
-      show_cmd: null # Forming show command in test case.
+      show_cmd: null # Forming show command in the test case.
       expected_output: null # Forming expected output in test case.# Setting test case’s pass / fail criteria for reporting
       test_criteria: Bad syslog events(specific keywords) should not be found in the collected logs. # Setting test case’s pass/fail criteria for reporting
       report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report

@@ -9,9 +9,10 @@ import pytest
 from pyeapi.eapilib import EapiError
 from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -28,7 +29,7 @@ class BadSyslogEventsTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_bad_syslog_events(self, dut, tests_definitions):
         """
-        TD: Testcase for verification bad syslog event messages.
+        TD: Testcase for verification of bad syslog event messages.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -42,7 +43,7 @@ class BadSyslogEventsTests:
         syslog_events_cmd = [f"show logging last {days_of_logs} days"]
         bad_syslog = ""
 
-        # Forming output message if test result is passed
+        # Forming output message if the test result is passed
         tops.output_msg = (
             "Bad syslog events(specific keywords) are not found in the collected logs."
         )
@@ -53,10 +54,10 @@ class BadSyslogEventsTests:
 
             """
             TS: Running `show logging last <daysOfLogs> days` command on DUT and verifying
-            the key words in syslog events that are generally considered to be bad.
+            the keywords in syslog events that are generally considered to be bad.
             """
             output = tops.run_show_cmds(syslog_events_cmd)
-            logger.info(
+            logging.info(
                 "On device %s, output of %s command is:\n%s\n",
                 tops.dut_name,
                 syslog_events_cmd,
@@ -80,15 +81,15 @@ class BadSyslogEventsTests:
             # Collecting actual output.
             tops.actual_output.update({"bad_syslog_events_not_found": not bool(bad_syslog)})
 
-            # Forming output message if test result is fail.
+            # Forming output message if the test result fails.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = (
-                    f"\nFollowing bad syslog events are found on the device: \n{bad_syslog}"
+                    f"\nFollowing bad syslog events are found on the device: \n{bad_syslog}."
                 )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
+            logging.error(
                 "On device %s, Error while running the testcase is:\n%s",
                 tops.dut_name,
                 tops.actual_output,

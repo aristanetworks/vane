@@ -84,21 +84,24 @@ class SystemHardwareTemperatureTests:
                     f"\nFor {sensor.replace('_', ' ')}, following sensors are in erroneous state:\n"
                 )
 
-                for sensor_detail, details_value in sensor_details.items():
-                    actual_sensor = actual_sensor_details.get(sensor_detail)
+                for sensor_detail, expected_sensor_details in sensor_details.items():
+                    actual_sensor_info = actual_sensor_details.get(sensor_detail)
                     temperature_detail = (
                         current_threshold_temp_detail["power_supplies_sensors"]
                         .get(sensor)
                         .get(sensor_detail)
                     )
-                    if details_value == actual_sensor:
+                    if expected_sensor_details == actual_sensor_info:
                         continue
                     output_msg += f"{sensor_detail}:"
-                    if details_value["hardware_status"] != actual_sensor["hardware_status"]:
+                    if (
+                        expected_sensor_details["hardware_status"]
+                        != actual_sensor_info["hardware_status"]
+                    ):
                         output_msg += (
                             " Expected hardware status should be"
-                            f" '{details_value['hardware_status']}' however in actual it is"
-                            f" found as '{actual_sensor['hardware_status']}'\n"
+                            f" '{expected_sensor_details['hardware_status']}' however in actual it"
+                            f" is found as '{actual_sensor_info['hardware_status']}'\n"
                         )
                         continue
                     output_msg += (

@@ -7,11 +7,11 @@ Test case for verification of system temperature sensors
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -156,10 +156,11 @@ class SystemHardwareTemperatureTests:
             Verifying the 'vEOS' device is not present in the output.
             """
             self.version_output = dut["output"]["show version"]["json"]
-            logger.info(
-                "On device %s, Output of 'show version' command is: \n%s\n",
-                tops.dut_name,
-                self.version_output,
+            logging.info(
+                (
+                    f"On device {tops.dut_name}, Output of 'show version' command is:"
+                    f" \n{self.version_output}\n"
+                ),
             )
             self.output += f"\nOutput of 'show version' command is: \n{self.version_output}"
 
@@ -173,11 +174,8 @@ class SystemHardwareTemperatureTests:
             are present in the output.
             """
             output = dut["output"][tops.show_cmd]["json"]
-            logger.info(
-                "On device %s, output of %s command is: \n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+            logging.info(
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is: \n{output}\n",
             )
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
             power_supplies_sensors = output.get("powerSupplySlots")
@@ -248,10 +246,9 @@ class SystemHardwareTemperatureTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the test case is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                f"On device {tops.dut_name}, Error while running the test case"
+                f" is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

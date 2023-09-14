@@ -155,7 +155,7 @@ class EvpnRoutingTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             if skip_on_command_unavailable_check:
-                if excep == EapiError:
+                if (show_bgp_command and "Not supported") in str(excep):
                     tops.output_msg = (
                         f"{show_bgp_command} command unavailable, device might be in ribd mode."
                     )

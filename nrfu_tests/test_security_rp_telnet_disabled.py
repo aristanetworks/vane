@@ -5,11 +5,11 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
-from vane.logger import logger
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -42,11 +42,8 @@ class TelnetStateTests:
             TS: Running `show vrf` on device and collecting the all the vrfs.
             """
             output = dut["output"][tops.show_cmd]["json"]
-            logger.info(
-                "On device %s, output of %s command is:\n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+            logging.info(
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n"
             )
             self.output += f"Output of {tops.show_cmd} command is: \n{output}\n"
 
@@ -63,11 +60,11 @@ class TelnetStateTests:
                     telnet_cmd = f"show management telnet vrf {vrf}"
                 try:
                     cmd_output = tops.run_show_cmds([telnet_cmd])
-                    logger.info(
-                        "On device %s, output of %s command is:\n%s\n",
-                        tops.dut_name,
-                        telnet_cmd,
-                        cmd_output,
+                    logging.info(
+                        (
+                            f"On device {tops.dut_name}, output of {telnet_cmd} command"
+                            f" is:\n{cmd_output}\n"
+                        ),
                     )
                     self.output += f"Output of {telnet_cmd} command is: \n{cmd_output}\n"
                     telnet_state = cmd_output[0]["result"].get("serverState")
@@ -76,7 +73,7 @@ class TelnetStateTests:
                     if f"VRF {vrf} not found" in str(exception):
                         tops.actual_output["vrfs"].update({vrf: {"telnet_state": "disabled"}})
 
-            # Forming output message if test result is fail
+            # Forming an output message if a test result is fail
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = ""
                 telnet_enabled_vrfs = []
@@ -95,10 +92,9 @@ class TelnetStateTests:
 
         except (AttributeError, LookupError, EapiError) as excp:
             tops.actual_output = tops.output_msg = str(excp).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s: Error occurred while running testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                f"On device {tops.dut_name}: Error occurred while running testcase"
+                f" is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

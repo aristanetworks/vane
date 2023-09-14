@@ -2,23 +2,23 @@
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
-Testcases for verification of DNS base services.
+Test case for verification of DNS base services.
 """
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
 @pytest.mark.base_services
 class DnsBaseServicesTests:
     """
-    Testcases for verification of DNS base services.
+    Test case for verification of DNS base services.
     """
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -28,7 +28,7 @@ class DnsBaseServicesTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_dns_base_services(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of DNS resolution functionality.
+        TD: Test case for verification of DNS resolution functionality.
         Args:
             dut(dict): details related to a particular device.
             tests_definitions(dict): test suite and test case parameters.
@@ -39,7 +39,7 @@ class DnsBaseServicesTests:
         tops.actual_output = {"name_servers": {}}
         tops.expected_output = {"name_servers": {}}
 
-        # Forming output message if test result is passed
+        # Forming output message if the test result is passed
         tops.output_msg = (
             "Reverse name server lookup is successful for name servers configured on the device."
         )
@@ -50,7 +50,7 @@ class DnsBaseServicesTests:
             DNS resolution by doing a reverse lookup for the IP of the first server configured.
             """
             output = dut["output"][tops.show_cmd]["json"]
-            logger.info(
+            logging.info(
                 "On device %s, output of %s command is: \n%s\n",
                 tops.dut_name,
                 tops.show_cmd,
@@ -58,12 +58,12 @@ class DnsBaseServicesTests:
             )
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
 
-            # Skipping testcase if name servers are not configured on the device.
+            # Skipping test case if name servers are not configured on the device.
             version_verification = list(test_params.values())
             if not any(version_verification):
                 pytest.skip(
                     f"Name servers are not configured on {tops.dut_name}, hence skipping the"
-                    " testcase."
+                    " test case."
                 )
 
             try:
@@ -91,7 +91,7 @@ class DnsBaseServicesTests:
 
                         bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
                         bash_cmd_output = tops.run_show_cmds([bash_cmd])
-                        logger.info(
+                        logging.info(
                             "On device %s, output of %s command is: \n%s\n",
                             tops.dut_name,
                             bash_cmd,
@@ -110,7 +110,7 @@ class DnsBaseServicesTests:
                     {ip_version: {reverse_resolution_ip: {"reverse_nslookup_successful": False}}}
                 )
 
-            # Forming the output message if the testcase is failed
+            # Forming the output message if the test case failed
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = "\n"
                 for version_status in tops.actual_output["name_servers"].values():
@@ -123,8 +123,8 @@ class DnsBaseServicesTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
+            logging.error(
+                "On device %s, Error while running the test case is:\n%s",
                 tops.dut_name,
                 tops.actual_output,
             )

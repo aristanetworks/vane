@@ -1,13 +1,13 @@
 - name: nrfu_tests
   testcases:
     - name: test_dns_base_services
-      description: Testcase for verification of DNS resolution functionality.
+      description: Test case for the verification of DNS resolution functionality.
       test_id: NRFU1.1
       show_cmd: show ip name-server
-      expected_output: null # Forming the expected output dynamically in the testcase file.
+      expected_output: null # Forming the expected output dynamically in the test case file.
       test_criteria: Reverse name server lookup should be successful for name servers configured on the device. # Setting test case pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern. If report type is set as modern then it will update steps, assumptions, external systems in docx report
-      dns_name_server_check: # If you want test case to fail when a name-server is not configured on device, change these parameters to True for the IP version you need.
+      report_style: modern # Setting report_style as modern. If the report type is set as modern then it will update steps, assumptions and external systems in docx report
+      dns_name_server_check: # If you want the test case to fail when a name-server is not configured on the device, change these parameters to True for the IP version you need.
         ipv4_fail_if_not_configured: True
         ipv6_fail_if_not_configured: False
       criteria: names

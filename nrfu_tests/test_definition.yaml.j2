@@ -1,7 +1,7 @@
 - name: nrfu_tests
   testcases:
     - name: test_dns_base_services
-      description: Testcase for verification of DNS resolution by doing a reverse lookup for the IP of the first server configured.
+      description: Test case for the verification of DNS resolution functionality.
       test_id: NRFU1.1
       {% set test_data = testcase_data["NRFU1.1"].dns_name_server_check %}
       show_cmd: show ip name-server

@@ -114,9 +114,10 @@ class TacacsServersTests:
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
-                "On device %s, Error while running the test case is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+                (
+                    f"On device {tops.dut_name}, Error while running the testcase"
+                    f" is:\n{tops.actual_output}"
+                ),
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

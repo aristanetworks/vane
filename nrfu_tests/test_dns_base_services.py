@@ -51,10 +51,10 @@ class DnsBaseServicesTests:
             """
             output = dut["output"][tops.show_cmd]["json"]
             logging.info(
-                "On device %s, output of %s command is: \n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+                (
+                    f"On device {tops.dut_name}, the output of the `{tops.show_cmd}` command"
+                    f" is: \n{output}\n"
+                ),
             )
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
 
@@ -92,10 +92,10 @@ class DnsBaseServicesTests:
                         bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
                         bash_cmd_output = tops.run_show_cmds([bash_cmd])
                         logging.info(
-                            "On device %s, output of %s command is: \n%s\n",
-                            tops.dut_name,
-                            bash_cmd,
-                            bash_cmd_output,
+                            (
+                                f"On device {tops.dut_name}, the output of the `{bash_cmd}` command"
+                                f" is: \n{bash_cmd_output}\n"
+                            ),
                         )
                         tops.actual_output["name_servers"].update(
                             {
@@ -124,9 +124,8 @@ class DnsBaseServicesTests:
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
-                "On device %s, Error while running the test case is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+                f"On device {tops.dut_name}, Error while running the test case"
+                f" is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

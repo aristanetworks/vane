@@ -161,7 +161,7 @@
         skip_on_command_unavailable_check: False   # If you need to skip the testcase on 'show bgp evpn summary' command unavailable, change this to True
       criteria: names
       filter:
-        - DLFW3  # Device on which tests run
+        - BLFE1  # Device on which tests run
     - name: test_multi_agent_routing_protocol
       description: Test case for verification of multi-agent routing model functionality.
       test_id: NRFU4.4

@@ -51,10 +51,8 @@ class SystemHardwareFanStatusTests:
             self.show_version_command = "show version"
             output = dut["output"][self.show_version_command]["json"]
             logging.info(
-                "On device %s, Output of %s command is: \n%s\n",
-                tops.dut_name,
-                self.show_version_command,
-                output,
+                f"On device {tops.dut_name}, Output of {self.show_version_command} command is:"
+                f" \n{output}\n"
             )
             self.output = (
                 f"on device {tops.dut_name}, output of {self.show_version_command} is:\n{output}"
@@ -70,10 +68,7 @@ class SystemHardwareFanStatusTests:
             """
             output = tops.run_show_cmds([tops.show_cmd])
             logging.info(
-                "On device %s, output of %s command is:\n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n"
             )
             self.output = f"\nOutput of {tops.show_cmd} command is:\n{output}\n"
             self.fan_slot_details = output[0]["result"]
@@ -148,9 +143,10 @@ class SystemHardwareFanStatusTests:
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+                (
+                    f"On device {tops.dut_name}, Error while running the testcase"
+                    f" is:\n{tops.actual_output}"
+                ),
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

@@ -263,7 +263,7 @@
         primary_supervisor_flash_utilization_within_range: True
         peer_supervisor_flash_utilization_within_range: True
       test_criteria: Primary and peer supervisor flash file system utilization should be below 70%. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
         - BLFE1

@@ -7,11 +7,11 @@ Test case for verification of free space on flash file system
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -28,7 +28,7 @@ class FlashFreeSpaceTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_system_flash_free_space(self, dut, tests_definitions):
         """
-        TD: Test case for verification of free space on flash file system
+        TD: Test case for verification of free space on the flash file system
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -46,15 +46,12 @@ class FlashFreeSpaceTests:
 
         try:
             """
-            TS: Running `show file systems` command on dut and verifying that primary supervisor
+            TS: Running `show file systems` command on dut and verifying that the primary supervisor
             flash file system utilization is within the range.
             """
             output = dut["output"][tops.show_cmd]["json"]
-            logger.info(
-                "On device %s, output of %s command is:\n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+            logging.info(
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n"
             )
             self.output += f"Output of {tops.show_cmd} command is:\n{output}\n"
 
@@ -74,11 +71,9 @@ class FlashFreeSpaceTests:
             within the range.
             """
             output = tops.run_show_cmds([peer_supervisor_cmd])
-            logger.info(
-                "On device %s, output of %s command is:\n%s\n",
-                tops.dut_name,
-                peer_supervisor_cmd,
-                output,
+            logging.info(
+                f"On device {tops.dut_name}, output of {peer_supervisor_cmd} command"
+                f" is:\n{output}\n"
             )
             self.output += f"\nOutput of {peer_supervisor_cmd} command is:\n{output}"
             output = output[0]["result"]["messages"][0].split("\n")
@@ -94,7 +89,7 @@ class FlashFreeSpaceTests:
                 peer_flash_utilization <= 70
             )
 
-            # Output message formation in case of testcase fails.
+            # Output message formation in case of test case fails.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = "\n"
                 for utilization, supervisor in zip(
@@ -109,10 +104,9 @@ class FlashFreeSpaceTests:
 
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                f"On device {tops.dut_name}, Error while running the test case"
+                f" is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

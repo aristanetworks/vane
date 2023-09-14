@@ -5,16 +5,16 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
-from vane.logger import logger
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
 @pytest.mark.base_services
-class NtpAssociationsTests:
+class NtpAssocitionsTests:
     """Testcases for verification of NTP association functionality"""
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -35,7 +35,7 @@ class NtpAssociationsTests:
             "primary_ntp_association": "Not found",
             "secondary_ntp_association": "Not found",
         }
-        # Forming output message if test result is pass
+        # Forming an output message if a test result is pass
         tops.output_msg = (
             "NTP server is configured on the device. Primary and secondary NTP association is"
             " correct on the device."
@@ -46,11 +46,8 @@ class NtpAssociationsTests:
             TS: Running `show ntp status` on device and verifying the NTP is configured.
             """
             output = dut["output"][tops.show_cmd]["json"]
-            logger.info(
-                "On device %s, output of %s command is:\n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+            logging.info(
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n"
             )
             self.output = f"Output of {tops.show_cmd} command is: \n{output}\n"
 
@@ -65,11 +62,8 @@ class NtpAssociationsTests:
             primary and secondary NTP association is correct on the host.
             """
             output = tops.run_show_cmds([ntp_association_cmd])
-            logger.info(
-                "On device %s output of %s command is:\n%s\n",
-                tops.dut_name,
-                ntp_association_cmd,
-                output,
+            logging.info(
+                f"On device {tops.dut_name} output of {ntp_association_cmd} command is:\n{output}\n"
             )
             self.output += f"Output of {ntp_association_cmd} command is: \n{output}"
             ntp_associations = output[0]["result"].get("peers")
@@ -81,7 +75,7 @@ class NtpAssociationsTests:
                 elif ntp_associations[peer].get("condition") == "candidate":
                     tops.actual_output["secondary_ntp_association"] = "candidate"
 
-            # Forming output message if test result is fail
+            # Forming an output message if a test result is fail
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = ""
                 not_primary_ntp_association = (
@@ -103,10 +97,9 @@ class NtpAssociationsTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excp:
             tops.actual_output = tops.output_msg = str(excp).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s: Error occurred while running testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                f"On device {tops.dut_name}: Error occurred while running testcase"
+                f" is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

@@ -61,19 +61,6 @@ class TacacsServersTests:
 
             for tacacs_server in tacacs_servers:
                 tacacs_hostname = tacacs_server.get("serverInfo").get("hostname")
-                tops.expected_output["tacacs_servers_info"].update(
-                    {
-                        tacacs_hostname: {
-                            "received_errors": 0,
-                            "connection_disconnects": 0,
-                            "dns_errors": 0,
-                            "send_timeouts": 0,
-                            "connection_timeouts": 0,
-                            "connection_failures": 0,
-                            "received_timeouts": 0,
-                        }
-                    }
-                )
                 tops.actual_output["tacacs_servers_info"].update(
                     {
                         tacacs_hostname: {
@@ -86,6 +73,14 @@ class TacacsServersTests:
                             "received_timeouts": tacacs_server.get("receiveTimeouts"),
                         }
                     }
+                )
+
+                # Forming expected output
+                expected_output = dict.fromkeys(
+                    tops.actual_output.get("tacacs_servers_info").get(tacacs_hostname).keys(), 0
+                )
+                tops.expected_output["tacacs_servers_info"].update(
+                    {tacacs_hostname: expected_output}
                 )
 
                 # Forming output message if the test result fails.

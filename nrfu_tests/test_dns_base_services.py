@@ -7,8 +7,9 @@ Test case for verification of DNS base services.
 
 import pytest
 from pyeapi.eapilib import EapiError
+from vane import test_case_logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools, test_case_logger
+from vane import tests_tools
 
 TEST_SUITE = "nrfu_tests"
 logging = test_case_logger.setup_logger(__file__)

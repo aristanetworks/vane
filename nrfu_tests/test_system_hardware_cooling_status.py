@@ -7,11 +7,11 @@ Testcase for the verification of system cooling status.
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -46,10 +46,11 @@ class SystemCoolingStatusTests:
             for device if platform is vEOS.
             """
             version_output = dut["output"]["show version"]["json"]
-            logger.info(
-                "On device %s: Output of 'show version' command is: \n%s\n",
-                tops.dut_name,
-                version_output,
+            logging.info(
+                (
+                    f"On device {tops.dut_name}: Output of 'show version' command is:"
+                    f" \n{version_output}\n"
+                ),
             )
             self.output += f"Output of 'show version' command is: \n{version_output}"
 
@@ -62,11 +63,9 @@ class SystemCoolingStatusTests:
             system status is ok.
             """
             output = dut["output"][tops.show_cmd]["json"]
-            logger.info(
-                "On device %s, output of %s command is:\n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+
+            logging.info(
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n",
             )
 
             self.output += f"Output of {tops.show_cmd} command is: \n{output}"
@@ -82,10 +81,11 @@ class SystemCoolingStatusTests:
 
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                (
+                    f"On device {tops.dut_name}, Error while running the testcase"
+                    f" is:\n{tops.actual_output}"
+                ),
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

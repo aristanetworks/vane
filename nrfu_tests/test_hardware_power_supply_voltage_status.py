@@ -7,12 +7,13 @@ Test case for verification of system power supply voltage sensor status on the d
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
+from vane import test_case_logger
 from vane.config import dut_objs, test_defs
 from vane import tests_tools
 
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -40,42 +41,38 @@ class PowerSupplyVoltageTests:
         tops.actual_output = {"power_supply_voltage_sensors": {}}
         tops.expected_output = {"power_supply_voltage_sensors": {}}
 
-        # Output message if test result is passed
+        # Output message if the test result is passed
         tops.output_msg = "Status of all power supply voltage sensors is 'Ok'"
 
         try:
             """
-            TS: Running 'show version' command on device and skipping the test case
-            for device if platform is vEOS.
+            TS: Running 'show version' command on the device and skipping the test case
+            for devices if the platform is vEOS.
             """
             version_output = dut["output"]["show version"]["json"]
-            logger.info(
-                "On device %s, output of show version command is:\n%s\n",
-                tops.dut_name,
-                version_output,
+            logging.info(
+                f"On device {tops.dut_name}, output of show version command is:\n{version_output}\n"
             )
             self.output += f"\nOutput of {tops.show_cmd} command is:\n{version_output}\n"
 
-            # Skipping testcase if device is vEOS.
+            # Skipping test case if the device is vEOS.
             if "vEOS" in version_output.get("modelName"):
                 pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
 
             """
             TS: Running `show system environment power voltage` command on the device and
-            verifying status for all power supply voltage sensor should be 'OK'.
+            verifying status for all power supply voltage sensors should be 'OK'.
             """
             power_supply_cmd = "show system environment power voltage"
             voltage_cmd_output = tops.run_show_cmds([power_supply_cmd])
-            logger.info(
-                "On device %s, output of %s command is: \n%s\n",
-                tops.dut_name,
-                power_supply_cmd,
-                voltage_cmd_output,
+            logging.info(
+                f"On device {tops.dut_name}, output of {power_supply_cmd} command is:"
+                f" \n{voltage_cmd_output}\n"
             )
             self.output += f"\nOutput of {power_supply_cmd} command is:\n{voltage_cmd_output}\n"
             voltage_sensors = voltage_cmd_output[0]["result"].get("voltageSensors")
 
-            # Collecting power supply sensors from list of sensor
+            # Collecting power supply sensors from the list of sensor
             power_voltage_sensor = [
                 {sensor: sensor_data}
                 for sensor, sensor_data in voltage_sensors.items()
@@ -85,12 +82,14 @@ class PowerSupplyVoltageTests:
                 power_voltage_sensor
             ), "Power supply voltage sensor details are not found on the device."
 
-            # Updating actual and expected state of power supply sensor
+            # Updating the actual and expected state of the power supply sensor
             for voltage_sensor in power_voltage_sensor:
                 for sensor, sensor_data in voltage_sensor.items():
-                    tops.expected_output["power_supply_voltage_sensors"].update({sensor: "ok"})
+                    tops.expected_output["power_supply_voltage_sensors"].update(
+                        {sensor: {"status": "ok"}}
+                    )
                     tops.actual_output["power_supply_voltage_sensors"].update(
-                        {sensor: sensor_data.get("status")}
+                        {sensor: {"status": sensor_data.get("status")}}
                     )
 
             # Forming output message in case of test case failure
@@ -104,20 +103,22 @@ class PowerSupplyVoltageTests:
                     ]
                     if actual_status == expected_status:
                         continue
-                    unhealthy_power_supplies.append(f"{power_supply_sensor} - {actual_status}")
+                    unhealthy_power_supplies.append(
+                        f"{power_supply_sensor} - {actual_status['status']}"
+                    )
                 if unhealthy_power_supplies:
                     power_supply_status = "\n".join(unhealthy_power_supplies)
                     tops.output_msg = (
                         "Status for following power supply voltage sensors is not found as 'OK'"
-                        f" and current status on them is found as follows:\n{power_supply_status}"
+                        " and the current status on them is found as"
+                        f" follows:\n{power_supply_status}"
                     )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                f"On device {tops.dut_name}, Error while running the test case"
+                f" is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

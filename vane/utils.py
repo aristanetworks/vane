@@ -35,6 +35,7 @@ Collection of misc functions that dont fit anywhere else but are still required.
 import sys
 import collections
 import datetime
+from jinja2 import Template
 
 
 def make_iterable(value):
@@ -114,3 +115,32 @@ def now():
     """Return current date and time"""
 
     return (datetime.datetime.now()).strftime("%d-%m-%Y %H:%M:%S")
+
+
+def return_date():
+    """Generate a formatted date and return to calling
+    function.
+    """
+
+    date_obj = datetime.datetime.now()
+    format_date = date_obj.strftime("%B %d, %Y %I:%M:%S%p")
+    file_date = date_obj.strftime("%y%m%d%H%M")
+
+    return format_date, file_date
+
+
+def render_cmds(dut, cmds):
+    """
+    Method to convert cmds from jinja template using dut data
+
+    Args: dut - data used in template rendering
+    cmds - list of cmds that could be jinja template
+    Returns: actual_cmds - rendered cmds
+    """
+    actual_cmds = []
+    for cmd in cmds:
+        cmd_template = Template(cmd)
+        actual_cmd = cmd_template.render(dut)
+        actual_cmds.append(actual_cmd)
+
+    return actual_cmds

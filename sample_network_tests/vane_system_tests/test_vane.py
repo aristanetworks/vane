@@ -529,3 +529,67 @@ class VaneTests:
         tops.test_result = tops.expected_output == tops.actual_output
         tops.generate_report(tops.dut_name, tops.output_msg)
         assert tops.expected_output == tops.actual_output
+
+    def test_cmd_template(self, dut, tests_definitions):
+        """
+        Test case to check cmd template
+        """
+
+        # Initializing the TestOps class and initializing the variables
+        self.tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+        test_params = self.tops.test_parameters
+        self.tops.actual_output = {}
+        self.output = ""
+        test_params["input"] = {"local_interface": None, "snmp_local_interface_ip": None}
+        self.tops.output_msg = (
+            "SNMP traps are generated and returned no errors when snmpwalk command is executed"
+            " locally on switch."
+        )
+
+        try:
+            """
+            TS: Running 'bash timeout <cmd wait time> snmpwalk -v <snmp_version> -a SHA -A
+            <snmp_authentication_protocol_passphrase> -x AES -X <snmp_privacy_protocol_passphrase>
+            -u <snmp_username> -l authPriv <snmp_local_interface_ip>
+            HOST-RESOURCES-MIB::hrProcessorLoad' command and verifying SNMP traps are generated
+            on device.
+            """
+            snmp_walk_cmd = (
+                "bash timeout 5 snmpwalk -v"
+                " 3 -a SHA -A {{ snmp_authentication_protocol_passphrase }}"
+                " -x AES -X {{ snmp_privacy_protocol_passphrase }} -u"
+                " {{ snmp_username }} -l authPriv"
+                " {{ snmp_local_interface_ip }} HOST-RESOURCES-MIB::hrProcessorLoad"
+            )
+            dut["snmp_authentication_protocol_passphrase"] = "arista123"
+            dut["snmp_privacy_protocol_passphrase"] = "arista123"
+            dut["snmp_username"] = "Arista"
+            dut["snmp_local_interface_ip"] = "192.168.0.9"
+            output = self.tops.run_show_cmds([snmp_walk_cmd], dut=dut, hidden_cmd=True)
+            snmp_output = output[0]["result"]["messages"][0].split("hrProcessorLoad\n")
+
+            # Verifying the snmpwalk command output is not empty and updating the actual output
+            # with snmp status
+            snmp_output = snmp_output[0].split("\t")
+            self.output += "\n\n The snmpwalk output is:\n " + str(snmp_output)
+            self.tops.actual_output.update({"snmp_walk_successful": "INTEGER" in snmp_output[0]})
+
+            # forming output message if test result is fail
+            if self.tops.expected_output != self.tops.actual_output:
+                self.tops.output_msg = (
+                    "SNMP traps are not generated and returned invalid output when snmpwalk command"
+                    " is executed locally on switch."
+                )
+
+        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+            logging.error(
+                "On device %s: Error while running the testcase is:\n%s",
+                self.tops.dut_name,
+                str(excep),
+            )
+            self.tops.output_msg = self.tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
+
+        self.tops.test_result = self.tops.actual_output == self.tops.expected_output
+        self.tops.parse_test_steps(self.test_cmd_template)
+        self.tops.generate_report(dut["name"], self.output)
+        assert self.tops.expected_output == self.tops.actual_output

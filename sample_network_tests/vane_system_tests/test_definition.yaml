@@ -76,3 +76,9 @@
       expected_output: null
       report_style: modern
       test_criteria: Verify file transfer sftp func
+    - name: test_cmd_template
+      description: Verify cmd template works
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify cmd template works

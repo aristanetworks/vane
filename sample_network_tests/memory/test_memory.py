@@ -34,7 +34,7 @@
 import pytest
 from pyeapi.eapilib import EapiError
 from vane import tests_tools
-from vane.vane_logging import logging
+from vane import test_case_logger
 from vane.config import dut_objs, test_defs
 
 
@@ -44,6 +44,7 @@ LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
 dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
 test1_duts = dut_parameters["test_memory_utilization_on_"]["duts"]
 test1_ids = dut_parameters["test_memory_utilization_on_"]["ids"]
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.demo

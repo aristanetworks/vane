@@ -161,11 +161,14 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_security_rp_ssh_access_list
+      description: Test case to verify that ACL is configured for each VRF on which SSH is enabled
       test_id: NRFU5.6
-      show_cmd: null
+      show_cmds:
+        - show vrf
+        - show management ssh ip access-list summary
       expected_output: null
+      test_criteria: All VRFs that the API is active on should have an ACL to be configured.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

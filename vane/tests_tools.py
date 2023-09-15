@@ -43,8 +43,10 @@ import pprint
 import yaml
 
 from jinja2 import Template
+from pyeapi.eapilib import EapiError
 from vane import config, device_interface
 from vane.vane_logging import logging
+from vane.utils import render_cmds
 
 
 DEFAULT_EOS_CONN = "eapi"
@@ -1290,7 +1292,14 @@ class TestOps:
         )
 
     def run_show_cmds(
-        self, show_cmds, dut=None, encoding="json", conn_type="eapi", timeout=0, new_conn=False
+        self,
+        show_cmds,
+        dut=None,
+        encoding="json",
+        conn_type="eapi",
+        timeout=0,
+        new_conn=False,
+        hidden_cmd=False,
     ):
         """run_show_cmds is a wrapper which runs the 'show_cmds'
         conn_type determines how the cmds are being run
@@ -1324,10 +1333,19 @@ class TestOps:
             conn_type=conn_type,
             timeout=timeout,
             new_conn=new_conn,
+            hidden_cmd=hidden_cmd,
         )
 
     def _run_and_record_cmds(
-        self, cmds, conn_type, timeout, new_conn, encoding="json", cmd_type="show", dut=None
+        self,
+        cmds,
+        conn_type,
+        timeout,
+        new_conn,
+        encoding="json",
+        cmd_type="show",
+        dut=None,
+        hidden_cmd=False,
     ):
         """_run_and_record_cmds runs both config and show cmds and records the output
         of these commands
@@ -1391,23 +1409,32 @@ class TestOps:
         # then run commands
         try:
             if cmd_type == "show":
+                # see if hidden cmd, cmds might be jinja2 template
+                # render the cmds using dut object
+                run_cmds = cmds
+                if hidden_cmd:
+                    run_cmds = render_cmds(dut, cmds)
                 # if encoding is json run the commands, store the results
                 if encoding == "json":
-                    json_results = conn.enable(cmds)
+                    json_results = conn.enable(run_cmds)
                 # also run the commands in text mode
-                txt_results = conn.enable(cmds, encoding="text")
+                txt_results = conn.enable(run_cmds, encoding="text")
             else:
                 # run the config cmd
                 txt_results = conn.config(cmds)
-        except BaseException as e:
+        except BaseException as e:  # pylint: disable=broad-except
             logging.error(f"Following cmds {cmds} generated exception {str(e)}")
             # add the cmds to _show_cmds cmds list
             # add the exception result for all the cmds in cmds list
             for cmd in cmds:
                 self._show_cmds[dut_name].append(cmd)
-                self._show_cmd_txts[dut_name].append(str(e))
-
-            raise e
+                if hidden_cmd:
+                    self._show_cmd_txts[dut_name].append(f"{cmd} failed")
+                    msg = f"{cmd} failed to run. See logs for more details"
+                    raise EapiError(message=msg) from e
+                if not hidden_cmd:
+                    self._show_cmd_txts[dut_name].append(str(e))
+                    raise e
 
         # add the cmds to _show_cmds list
         for cmd in cmds:

@@ -5,11 +5,12 @@ tests_client.py unit tests
 # Disable redefined-outer-name for using loginfo and logerr fixture functions
 # Disable protected-access for testing hidden class functions
 # Disable import-error for missing vane imports (avoid requiring install of vane just for linting)
-# pylint: disable=redefined-outer-name, protected-access, import-error
+# pylint: disable=redefined-outer-name, protected-access, import-error, disable=consider-using-with
 
 import os
 import tempfile
 import unittest
+import shutil
 
 from unittest.mock import call
 
@@ -276,7 +277,7 @@ def test_test_runner_usage_err(mocker, capsys):
     assert pytest_exit.value.code == 1
 
 
-def test__set_test_parameters(loginfo, logwarn):
+def test__set_test_parameters(loginfo, logwarn, mocker):
     """Validate _set_test_parameters with various values"""
 
     # pylint: disable-next=fixme
@@ -289,6 +290,8 @@ def test__set_test_parameters(loginfo, logwarn):
         "tests/unittests/fixtures/defs_set_test_params.yaml", DUTS
     )
 
+    mocker.patch("vane.tests_client.return_date", return_value=("not_used", "2309071824"))
+
     # Run _set_test_parameters
     client._set_test_parameters()
 
@@ -299,7 +302,10 @@ def test__set_test_parameters(loginfo, logwarn):
         call("Initialize test parameter values"),
         call("Run the following tests: All"),
         call("Running All test cases."),
-        call("Set HTML report name to: --html=tests/unittests/fixtures/reports/report.html"),
+        call(
+            "Set HTML report name to: --html=tests/unittests/fixtures/reports/"
+            "report_2309071824.html"
+        ),
         call("Set --json report name to: --json=tests/unittests/fixtures/reports/report.json"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=True)
@@ -422,7 +428,7 @@ def test_remove_test_results_dir(loginfo):
     client = vane.tests_client.TestsClient(DEFAULT_DEFS, DUTS)
 
     # Make sure the reports/TEST RESULTS dir exists
-    results_dir = "reports/TEST RESULTS"
+    results_dir = "tests/unittests/fixtures/reports/TEST RESULTS"
     if not os.path.exists(results_dir):
         os.makedirs(results_dir)
 
@@ -444,3 +450,45 @@ def test_remove_test_results_dir(loginfo):
 
     # Verify the removal was logged
     loginfo.assert_called_with(f"Deleted {results_dir} directory successfully")
+
+
+def test_remove_test_case_logs(loginfo, mocker):
+    """Validate _remove_test_case_logs removes pre-existing log files"""
+
+    # Create a tests_client client
+    client = vane.tests_client.TestsClient(DEFAULT_DEFS, DUTS)
+
+    # Make sure the logs dir exists
+    logs_dir = "tests/unittests/fixtures/logs"
+    os.makedirs(logs_dir)
+
+    # Create the vane.log file
+    vane_log = open(logs_dir + "/vane.log", "a", encoding="utf-8")
+    vane_log.close()
+
+    # Pre-populate the logs dir with temporary files
+    files = []
+    for _ in range(10):
+        # pylint: disable-next=consider-using-with
+        tmpf = tempfile.NamedTemporaryFile(dir=logs_dir, delete=False)
+        files.append(tmpf.name)
+
+    # patch the call to os.listdir
+    mocker.patch("vane.tests_client.os.listdir", return_value=files)
+
+    # Call the function to remove the results files
+    client._remove_test_case_logs()
+
+    # Verify the result files were deleted
+    for filename in files:
+        if filename != "vane.log":
+            assert not os.path.exists(filename)
+    assert os.path.exists(logs_dir + "/vane.log")
+
+    os.remove(logs_dir + "/vane.log")
+
+    # Delete the logs directory from fixtures
+    shutil.rmtree(logs_dir, ignore_errors=True)
+
+    # Verify the introductory log was logged
+    loginfo.assert_called_with("Remove any existing log files in logs directory: logs")

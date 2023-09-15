@@ -181,11 +181,14 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_security_rp_ssh_access_list
+      description: Test case to verify that ACL is configured for each VRF on which SSH is enabled
       test_id: NRFU5.6
-      show_cmd: null
-      expected_output: null
+      show_cmds:
+        - show vrf
+        - show management ssh ip access-list summary
+      expected_output: null # Expected output is formed inside a test case file dynamically.
+      test_criteria: All VRFs that the API is active on should have an ACL to be configured.
       report_style: modern
       criteria: names
       filter:

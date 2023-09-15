@@ -53,16 +53,17 @@ class BgpIpPeersStatusTests:
             )
             self.output = f"Output of {tops.show_cmd} command is:\n{output}\n"
             bgp_peers = output.get("vrfs")
+            if not bgp_peers:
+                pytest.skip(
+                    f"For {tops.dut_name}, BGP is not configured, hence skipped the testcase."
+                )
 
             # Skipping, if no IP BGP peers configured.
             for vrf in bgp_peers:
                 if bgp_peers.get(vrf).get("peers"):
                     bgp_peers_found = True
                     break
-            if not bgp_peers_found:
-                pytest.skip(
-                    f"For {tops.dut_name}, BGP peers are not found hence skipped the testcase."
-                )
+            assert bgp_peers_found, "BGP peers are not found in the testcase."
 
             # Collecting actual and expected output.
             for vrf in bgp_peers:
@@ -80,7 +81,7 @@ class BgpIpPeersStatusTests:
                     if expected_peer_state != actual_peer_state:
                         tops.output_msg += f"Neighbor {interface} state is {actual_peer_state}.\n"
 
-        except (AttributeError, LookupError, EapiError) as excep:
+        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}, Error while running the testcase"

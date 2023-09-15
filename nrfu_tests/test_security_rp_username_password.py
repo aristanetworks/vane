@@ -7,11 +7,11 @@ Test case for verification of password configuration for user accounts.
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -38,27 +38,24 @@ class UsernamePasswordTests:
         tops.actual_output = {}
         tops.expected_output = {}
 
-        # Forming output message if test result is passed
+        # Forming output message if the test result is passed
         tops.output_msg = "All user accounts are configured with a password."
 
         try:
             """
-            TS: Running `show running-config all section ^username` command on device and verifying
+            TS: Running `show running-config all section ^username` command on the device and verifying
             all usernames are configured with a password.
             """
             output = dut["output"][tops.show_cmd]["text"]
-            logger.info(
-                "On device %s, output of %s command is:\n%s\n",
-                tops.dut_name,
-                tops.show_cmd,
-                output,
+            logging.info(
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n"
             )
             self.output += (
                 f"\nOn device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n"
             )
             assert output, "User account details are not found in the output."
 
-            # Collecting username and password for each user accounts and
+            # Collecting username and password for each user account and
             # creating expected and actual output dictionaries
             usernames = output.split("\n")
             for user in usernames:
@@ -70,7 +67,7 @@ class UsernamePasswordTests:
                     if password == "nopassword":
                         tops.actual_output.update({username: {"password_configured": False}})
 
-            # Forming output message if test result is failed
+            # Forming output message if the test result is failed
             if tops.expected_output != tops.actual_output:
                 tops.output_msg = "\n"
                 password_not_configured = []
@@ -90,10 +87,8 @@ class UsernamePasswordTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                f"On device {tops.dut_name}, Error while running the test case is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

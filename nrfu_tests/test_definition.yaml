@@ -174,9 +174,9 @@
       description: Test cases for verification of configured VLAN naming.
       test_id: NRFU5.4
       show_cmd: show vlan
-      expected_output: null # Forming expected output dynamically in python file
-      test_criteria: All configured VLANs should have a name configured. # Setting test case’s pass / fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
+      expected_output: null # Forming expected output dynamically in Python file
+      test_criteria: All configured VLANs should have a name configured. # Setting test case’s pass/fail criteria for reporting
+      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
       criteria: names
       filter:
         - BLFE1

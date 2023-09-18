@@ -43,8 +43,8 @@ class UsernamePasswordTests:
 
         try:
             """
-            TS: Running `show running-config all section ^username` command on the device and verifying
-            all usernames are configured with a password.
+            TS: Running `show running-config all section ^username` command on the device and
+            verifying all usernames are configured with a password.
             """
             output = dut["output"][tops.show_cmd]["text"]
             logging.info(

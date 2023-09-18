@@ -11,7 +11,7 @@ from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 
-TEST_SUITE = "sample_network_tests"
+TEST_SUITE = "nrfu_tests"
 logging = test_case_logger.setup_logger(__file__)
 
 

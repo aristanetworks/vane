@@ -59,7 +59,7 @@ class VlanNameTests:
                 modified_vlan = vlan.zfill(4)
                 no_vlan_name = ""
                 tops.expected_output["vlans"].update({vlan: {"vlan_name_configured": True}})
-                if vlans.get(vlan).get("name") == "VLAN%s" % modified_vlan:
+                if vlans.get(vlan).get("name") == f"VLAN{modified_vlan}":
                     no_vlan_name = vlans.get(vlan).get("name")
 
                 tops.actual_output["vlans"].update(

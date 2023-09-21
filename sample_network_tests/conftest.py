@@ -35,6 +35,7 @@
 import re
 import pytest
 from py.xml import html
+from vane.config import test_defs
 
 pytest_plugins = "vane.fixtures"
 
@@ -85,6 +86,28 @@ def find_nodeid(nodeid):
     return "NONE"
 
 
+def read_test_id(report):
+    """Returns test id for the test case being executed
+
+    Args:
+        report: pytest report
+    """
+    last_double_colon_index = report.nodeid.rfind("::")
+    last_open_bracket_index = report.nodeid.rfind("[")
+    test_case_name = report.nodeid[
+        last_double_colon_index + 2 : last_open_bracket_index  # noqa: E203
+    ]
+
+    for test_suite in test_defs["test_suites"]:
+        for test_case in test_suite["testcases"]:
+            if test_case_name == test_case["name"]:
+                if "test_id" in test_case:
+                    return test_case["test_id"]
+                return ""
+
+    return ""
+
+
 def pytest_html_results_table_header(cells):
     """Create custom PyTest-HTML Header Row
 
@@ -93,6 +116,7 @@ def pytest_html_results_table_header(cells):
     """
 
     cells.insert(2, html.th("Description"))
+    cells.insert(1, html.th("Test ID"))
     cells.insert(1, html.th("Device", class_="sortable string", col="device"))
     cells.pop()
 
@@ -106,6 +130,7 @@ def pytest_html_results_table_row(report, cells):
     """
 
     cells.insert(2, html.td(getattr(report, "description", "")))
+    cells.insert(1, html.td(getattr(report, "test_id", "")))
     cells.insert(1, html.td(find_nodeid(report.nodeid), class_="col-device"))
     cells.pop()
 
@@ -119,6 +144,8 @@ def pytest_runtest_makereport(item):
 
     outcome = yield
     report = outcome.get_result()
+
+    report.test_id = read_test_id(report)
 
     if str(item.function.__doc__).split("Args:", maxsplit=1)[0]:
         report.description = str(item.function.__doc__).split("Args:", maxsplit=1)[0]

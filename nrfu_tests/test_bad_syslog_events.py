@@ -39,7 +39,7 @@ class BadSyslogEventsTests:
         tops.expected_output = {}
         test_params = tops.test_parameters
         days_of_logs = test_params["days_of_logs"]
-        syslog_events_cmd = [f"show logging last {days_of_logs} days"]
+        syslog_events_cmd = [["show logging"], [f"show logging last {days_of_logs} days"]]
         bad_syslog = ""
 
         # Forming output message if the test result is passed
@@ -52,14 +52,38 @@ class BadSyslogEventsTests:
             tops.expected_output.update({"bad_syslog_events_not_found": True})
 
             """
+            TS: Running 'show logging' command on DUT and verifying that the SysLog is configured
+            on the device.
+            """
+            syslog_output = tops.run_show_cmds(syslog_events_cmd[0])
+            logging.info(
+                (
+                    f"On device {tops.dut_name}, output of {syslog_events_cmd[0]} command"
+                    f" is:\n{syslog_output}\n"
+                ),
+            )
+            self.output += f"Output of {syslog_events_cmd[0]} command is: \n{syslog_output}"
+            syslog_output_details = syslog_output[0]["result"].get("output")
+
+            # Skipping, if SysLog is not configured.
+            for detail in syslog_output_details.split("\n"):
+                if "Syslog logging: disabled" in detail:
+                    pytest.skip(
+                        f"For {tops.dut_name} SysLog is not configured, hence test skipped."
+                    )
+
+            """
             TS: Running `show logging last <daysOfLogs> days` command on DUT and verifying
             the keywords in syslog events that are generally considered to be bad.
             """
-            output = tops.run_show_cmds(syslog_events_cmd)
+            output = tops.run_show_cmds(syslog_events_cmd[1])
             logging.info(
-                f"On device {tops.dut_name}, output of {syslog_events_cmd} command is:\n{output}\n",
+                (
+                    f"On device {tops.dut_name}, output of {syslog_events_cmd[1]} command"
+                    f" is:\n{output}\n"
+                ),
             )
-            self.output += f"Output of {syslog_events_cmd} command is: \n{output}"
+            self.output += f"Output of {syslog_events_cmd[1]} command is: \n{output}"
 
             syslog_events = output[0]["result"].get("output")
             assert syslog_events, f"logging details for last {days_of_logs} days are not found."
@@ -80,7 +104,7 @@ class BadSyslogEventsTests:
             # Forming output message if the test result fails.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = (
-                    f"\nFollowing bad syslog events are found on the device: \n{bad_syslog}."
+                    f"\nFollowing bad syslog events are found on the device: \n{bad_syslog}"
                 )
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:

@@ -48,6 +48,7 @@ from vane import test_step_client
 import vane.config
 from vane.vane_logging import logging
 from vane import nrfu_client
+import app
 
 
 logging.info("Starting vane.log file")
@@ -112,6 +113,12 @@ def parse_cli():
     parser.add_argument(
         "--nrfu",
         help=("Starts NRFU tests and will prompt users for required input."),
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--run",
+        help=("run flask server"),
         action="store_true",
     )
 
@@ -276,6 +283,9 @@ def main():
             f"test directory\n"
         )
         write_test_steps(args.generate_test_steps)
+
+    elif args.run:
+        app.app.run()
 
     else:
         if args.nrfu:

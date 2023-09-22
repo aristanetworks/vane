@@ -8,6 +8,7 @@ report_client.py unit tests
 import datetime
 
 from vane import report_client
+from vane import utils
 
 
 DEFINITIONS = "tests/unittests/fixtures/report_definitions.yaml"
@@ -33,7 +34,7 @@ def test_date_creation():
     old_format_date = date_obj.strftime("%B %d, %Y %I:%M:%S%p")
     old_file_date = date_obj.strftime("%y%m%d%H%M")
 
-    format_date, file_date = RC._return_date()
+    format_date, file_date = utils.return_date()
 
     assert old_file_date == file_date
     assert old_format_date == format_date

@@ -1386,8 +1386,13 @@ class TestOps:
 
         self.set_evidence_default(dut_name)
 
+        # check 'show clock' is first cmd then dont add show clock cmd
+        dont_add_show_clock = False
+        if cmds.len >=1 and cmds[0].strip() == "show clock":
+            dont_add_show_clock = True
+
         # first run show clock if flag is set
-        if self.show_clock_flag:
+        if not dont_add_show_clock and self.show_clock_flag:
             show_clock_cmds = ["show clock"]
             # run the show_clock_cmds
             try:

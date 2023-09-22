@@ -5,7 +5,7 @@ from setuptools import setup
 
 
 def read(rel_path):
-    """ Read function to read rel_path """
+    """Read function to read rel_path"""
 
     here = os.path.abspath(os.path.dirname(__file__))
     with codecs.open(os.path.join(here, rel_path), "r") as file:
@@ -13,7 +13,7 @@ def read(rel_path):
 
 
 def get(attribute, rel_path):
-    """ get(): gets the attribute value from file at rel_path """
+    """get(): gets the attribute value from file at rel_path"""
 
     for line in read(rel_path).splitlines():
         if line.startswith(attribute):

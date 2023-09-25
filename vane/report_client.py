@@ -1206,9 +1206,6 @@ class ReportClient:
 
         logging.debug(f"Test suite name is {ts_name}")
         ts_name = ts_name.split(".")[0]
-        if "_" in ts_name:
-            ts_name = ts_name.split("_")
-            ts_name = ts_name[1].capitalize()
         logging.debug(f"Formatted test suite name is {ts_name}")
 
         return ts_name

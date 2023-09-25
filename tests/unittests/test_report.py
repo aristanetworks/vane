@@ -38,8 +38,19 @@ def test_formatting_test_case(test_names, report_names):
         assert format_name == report_name
 
 
-def test_format_test_suite_name(test_suites):
+def test_format_test_suite_name():
     """Verify object can format a test suite name correctly"""
+
+    test_suites = {
+        "input": [
+            "test_api.py",
+            "test_daemon.py",
+            "test_interface.py",
+            "test_tacacs.py",
+            "test_environment.py",
+        ],
+        "result": ["test_api", "test_daemon", "test_interface", "test_tacacs", "test_environment"],
+    }
 
     ts_inputs = test_suites["input"]
     ts_results = test_suites["result"]

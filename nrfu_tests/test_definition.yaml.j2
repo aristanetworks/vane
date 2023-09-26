@@ -8,11 +8,14 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_ntp_clocks
+      description: Test case to verify that 2 NTP clocks(a peer and a candidate) are locked on the device.
       test_id: NRFU1.2
-      show_cmd: null
-      expected_output: null
+      show_cmd: show ntp status
+      expected_output:
+        primary_ntp_association: sys.peer
+        secondary_ntp_association: candidate
+      test_criteria: NTP server should be configured on the device. Primary and secondary NTP association should be correct on the device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

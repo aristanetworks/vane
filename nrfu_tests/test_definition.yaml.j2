@@ -263,11 +263,13 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_free_memory
+      description: Test case for verification of system hardware-free memory utilization.
       test_id: NRFU6.7
       show_cmd: null
-      expected_output: null
+      expected_output:
+        memory_utilization_under_range: True
+      test_criteria: Memory utilization percentage of the device should be less than 70%.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

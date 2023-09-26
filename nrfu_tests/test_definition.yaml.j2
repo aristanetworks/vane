@@ -158,11 +158,13 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_security_rp_enable_password
+      description: Testcase to verify that the enable password is configured.
       test_id: NRFU5.2
-      show_cmd: null
-      expected_output: null
+      show_cmd: show running-config section enable
+      expected_output:
+        enable_password_configured: True
+      test_criteria: Enable password should be configured on device. # Setting test case’s pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

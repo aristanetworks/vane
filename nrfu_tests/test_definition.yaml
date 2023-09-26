@@ -174,11 +174,13 @@
       criteria: names # Criteria to run the test case.
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_security_rp_enable_password
+      description: Testcase to verify that the enable password is configured.
       test_id: NRFU5.2
-      show_cmd: null
-      expected_output: null
+      show_cmd: show running-config section enable
+      expected_output:
+        enable_password_configured: true
+      test_criteria: Enable password should be configured on device. # Setting test case’s pass / fail criteria for reporting
       report_style: modern
       criteria: names
       filter:

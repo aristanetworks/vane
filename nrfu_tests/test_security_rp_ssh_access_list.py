@@ -7,11 +7,11 @@ Test case to verify that ACL is configured for each VRF on which SSH is enabled
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane.logger import logger
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = "nrfu_tests"
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_tests
@@ -46,12 +46,7 @@ class VrfSshAclTests:
             TS: Running `show vrf` command on dut and collecting the list of VRFs.
             """
             vrfs = dut["output"][show_cmds[0]]["json"]
-            logger.info(
-                "On device %s, %s command output is:\n%s\n",
-                tops.dut_name,
-                show_cmds[0],
-                vrfs,
-            )
+            logging.info(f"On device {tops.dut_name}, {show_cmds[0]} command output is:\n{vrfs}\n")
             self.output += f"Output of {show_cmds[0]} command is: \n{vrfs}\n"
 
             """
@@ -59,11 +54,8 @@ class VrfSshAclTests:
             that VRF has SSH ACL configured.
             """
             ssh_acls = dut["output"][show_cmds[1]]["json"]
-            logger.info(
-                "On device %s, %s command output is:\n%s\n",
-                tops.dut_name,
-                show_cmds[1],
-                ssh_acls,
+            logging.info(
+                f"On device {tops.dut_name}, {show_cmds[1]} command output is:\n{ssh_acls}\n"
             )
             self.output += f"Output of {show_cmds[1]} command is: \n{ssh_acls}\n"
             ssh_acls = ssh_acls["ipAclList"]["aclList"]
@@ -78,25 +70,20 @@ class VrfSshAclTests:
                 try:
                     """
                     TS: Running `show management ssh` or `show management ssh vrf <vrf name>`
-                    command on dut and verifying that SSH is enabled.
+                    command on dut and verify that SSH is enabled.
                     """
                     ssh_status = tops.run_show_cmds([ssh_cmd])
-                    logger.info(
-                        "On device %s, %s command output is:\n%s\n",
-                        tops.dut_name,
-                        ssh_cmd,
-                        ssh_status,
+                    logging.info(
+                        f"On device {tops.dut_name}, {ssh_cmd} command output is:\n{ssh_status}\n"
                     )
                     self.output += f"Output of {ssh_cmd} command is: \n{ssh_status}\n"
                 except EapiError as error:
                     if "not found under SSH" in str(error):
-                        logger.info(
-                            "On device %s, SSH on VRF %s is disabled.\n", tops.dut_name, vrf
-                        )
+                        logging.info(f"On device {tops.dut_name}, SSH on VRF {vrf} is disabled.\n")
 
                 if ssh_status:
                     for line in ssh_status[0]["result"]["output"].split("\n"):
-                        # Example of line it is looking for: SSHD status for Default VRF is enabled
+                        # Example of line it is looking for SSHD status for Default VRF is enabled
                         if "SSHD status" in line:
                             ssh_enabled = line.split(" ")[-1]
                             if ssh_enabled == "enabled":
@@ -107,7 +94,7 @@ class VrfSshAclTests:
                                         acl_found = True
                                 tops.actual_output["vrfs"][vrf] = {"ssh_acl_configured": acl_found}
 
-            # Output message formation in case of testcase fails.
+            # Output message formation in case of test case fails.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = ""
                 incorrect_acl_vrfs = []
@@ -122,10 +109,9 @@ class VrfSshAclTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logger.error(
-                "On device %s, Error while running the testcase is:\n%s",
-                tops.dut_name,
-                tops.actual_output,
+            logging.error(
+                f"On device {tops.dut_name}, Error while running the test case"
+                f" is:\n{tops.actual_output}"
             )
 
         tops.test_result = tops.expected_output == tops.actual_output

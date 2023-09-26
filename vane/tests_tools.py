@@ -269,7 +269,8 @@ def login_duts(test_parameters, test_duts):
         login_ptr["username"] = dut["username"]
         login_ptr["password"] = dut["password"]
         login_ptr["role"] = dut["role"]
-        login_ptr["neighbors"] = dut["neighbors"]
+        if "neighbors" in dut:
+            login_ptr["neighbors"] = dut["neighbors"]
         login_ptr["transport"] = dut["transport"]
         login_ptr["results_dir"] = test_parameters["parameters"]["results_dir"]
         login_ptr["report_dir"] = test_parameters["parameters"]["report_dir"]
@@ -448,19 +449,22 @@ def return_interfaces(hostname, test_parameters):
         if dut_name == hostname:
             logging.info(f"Discovering interface parameters for: {hostname}")
 
-            neighbors = dut["neighbors"]
+            if "neighbors" in dut:
+                neighbors = dut["neighbors"]
 
-            for neighbor in neighbors:
-                interface = {}
+                for neighbor in neighbors:
+                    interface = {}
 
-                logging.debug(f"Adding interface parameters: {neighbor} neighbor for: {dut_name}")
+                    logging.debug(
+                        f"Adding interface parameters: {neighbor} neighbor for: {dut_name}"
+                    )
 
-                interface["hostname"] = dut_name
-                interface["interface_name"] = neighbor["port"]
-                interface["z_hostname"] = neighbor["neighborDevice"]
-                interface["z_interface_name"] = neighbor["neighborPort"]
-                interface["media_type"] = ""
-                interface_list.append(interface)
+                    interface["hostname"] = dut_name
+                    interface["interface_name"] = neighbor["port"]
+                    interface["z_hostname"] = neighbor["neighborDevice"]
+                    interface["z_interface_name"] = neighbor["neighborPort"]
+                    interface["media_type"] = ""
+                    interface_list.append(interface)
 
     logging.info("Returning interface list.")
     logging.debug(f"Returning interface list: {interface_list}")

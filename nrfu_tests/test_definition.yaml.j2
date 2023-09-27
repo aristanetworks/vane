@@ -254,11 +254,12 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_hardware_fan_status
+      description: Testcase for verification of fan status in the system.
       test_id: NRFU6.5
-      show_cmd: null
+      show_cmd: show system environment cooling
       expected_output: null
+      test_criteria: For all fans, status should be ok and speed should be stable.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

@@ -118,24 +118,24 @@ class SystemHardwareFanStatusTests:
                 for slots, slot_details in tops.expected_output["fans_slots"].items():
                     if slot_details != tops.actual_output["fans_slots"].get(slots):
                         tops.output_msg += f"For {slots.replace('_', ' ')}:\n"
-                        for fan_lable, fan_details in slot_details.items():
+                        for fan_label, fan_details in slot_details.items():
                             for fan_status_key, fan_status_value in fan_details.items():
                                 actual_fan_status = (
                                     tops.actual_output["fans_slots"]
                                     .get(slots)
-                                    .get(fan_lable)
+                                    .get(fan_label)
                                     .get(fan_status_key)
                                 )
                                 if fan_status_value != actual_fan_status:
                                     if actual_fan_status is None:
-                                        tops.output_msg += f"{fan_lable}: Fan status is 'Not ok'.\n"
+                                        tops.output_msg += f"{fan_label}: Fan status is 'Not ok'.\n"
                                     else:
                                         if fan_status_key == "speed_stability_status" and (
-                                            int(fan_speed_details[fan_lable]) > 80
+                                            int(fan_speed_details[fan_label]) > 80
                                         ):
                                             tops.output_msg += (
-                                                f"{fan_lable}: Fan status is 'ok', however current"
-                                                f" fan speed '{fan_speed_details.get(fan_lable)}'"
+                                                f"{fan_label}: Fan status is 'ok', however current"
+                                                f" fan speed '{fan_speed_details.get(fan_label)}'"
                                                 " is higher than the threshold fan speed '80'.\n"
                                             )
                     tops.output_msg += "\n"

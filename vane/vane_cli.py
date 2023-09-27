@@ -37,6 +37,7 @@ import argparse
 from io import StringIO
 from contextlib import redirect_stdout
 from datetime import datetime
+from importlib import metadata
 import shutil
 import os
 import yaml
@@ -60,6 +61,13 @@ def parse_cli():
         args (obj): An object containing the CLI arguments.
     """
     parser = argparse.ArgumentParser(description="Network Certification Tool")
+
+    parser.add_argument(
+        "--version",
+        "--v",  # Alias for version
+        help=("Current Version of Vane"),
+        action="store_true",
+    )
 
     parser.add_argument(
         "--definitions-file",
@@ -276,6 +284,9 @@ def main():
             f"test directory\n"
         )
         write_test_steps(args.generate_test_steps)
+
+    elif args.version:
+        print(f"Vane Framework Version: {metadata.version(__package__)}")
 
     else:
         if args.nrfu:

@@ -5,7 +5,7 @@ target-version = ['py39']
 
 [tool.poetry]
 name = "vane"
-version = "0.91"
+version = "1.1.0rc1"
 description = "Network Certification Tool"
 authors = ["Arista Networks, Inc."]
 readme = "README.md"

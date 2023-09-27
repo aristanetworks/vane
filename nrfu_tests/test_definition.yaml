@@ -114,12 +114,13 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_misc_show_commands
+      description: Testcase for verification of miscellaneous show commands support.
       test_id: NRFU3.1
-      show_cmd: null
-      expected_output: null
-      report_style: modern
+      show_cmd: null # Forming show command in the test case file.
+      expected_output: null # Forming expected output in the test case file.
+      test_criteria: Show commands should be executed on the device without any error. # Setting test case’s pass/fail criteria for reporting.
+      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
         - BLFE1

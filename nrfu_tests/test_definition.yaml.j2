@@ -214,12 +214,13 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_telnet_is_disabled_for_all_vrfs
+      description: Test case to verify that Telnet is disabled for all the VRFs on the device.
       test_id: NRFU5.7
-      show_cmd: null
+      show_cmd: show vrf
       expected_output: null
       report_style: modern
+      test_criteria: Telnet should be disabled for all the VRFs on the device.
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_

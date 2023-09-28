@@ -17,6 +17,9 @@ on:
     branches:
       - example-rpm-package-testing-branch
 
+  # Trigger a build manually from the browser interface
+  workflow-dispatch: {}
+
 # Variables
 env:
   CVP_BUILD_IMAGE: ghcr.io/aristanetworks/vane-cvp-build:latest

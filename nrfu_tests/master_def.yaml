@@ -1,4 +1,4 @@
-global_dut_filter: # This stanza is optional. If it is not provided by users then all test cases should be run on each dut.
+# global_dut_filter: This stanza is optional. If it is not provided by users then all test cases should be run on each dut.
   # criteria: names
   # filter:
   #   - BLFE1

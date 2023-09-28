@@ -159,15 +159,19 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_multi_agent_routing_protocol
+      description: Test case for verification of multi-agent routing model functionality.
       test_id: NRFU4.4
-      show_cmd: null
-      expected_output: null
-      report_style: modern
+      show_cmd: show ip route summary
+      expected_output:
+        multi_agent_routing_protocol:
+          configured: true
+          operational: true
+      test_criteria: Multi agent routing model protocol should be configured and operational on the device.   # Setting test case’s pass/fail criteria for reporting
+      report_style: modern  # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       criteria: names
       filter:
-        - BLFE1
+        - BLFE1  # Device on which tests run
     - name: test_acls_api_vrfs_enabled
       description: Test case to verify that ACL is configured for each VRF on which API is enabled.
       test_id: NRFU5.1

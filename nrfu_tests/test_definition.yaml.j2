@@ -146,11 +146,15 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_multi_agent_routing_protocol
+      description: Test case for verification of multi-agent routing model functionality.
       test_id: NRFU4.4
-      show_cmd: null
-      expected_output: null
+      show_cmd: show ip route summary
+      expected_output:
+        multi_agent_routing_protocol:
+          configured: True
+          operational: True
+      test_criteria: Multi agent routing model protocol should be configured and operational on the device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

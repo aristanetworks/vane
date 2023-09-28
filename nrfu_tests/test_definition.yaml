@@ -77,11 +77,15 @@
         - BLFE1  # Device on which tests run
     - name: test_
       description: null
+        - BLFE1
+    - name: test_interface_errors_and_discards
+      description: Testcase for verification of errors/discards on all the interfaces.
       test_id: NRFU2.3
-      show_cmd: null
-      expected_output: null
-      report_style: modern
-      criteria: names
+      show_cmd: show interfaces
+      expected_output: null # Forming expected output in test case.
+      test_criteria: Errors/discards should not be found on any of the interfaces. # Setting test case’s pass/fail criteria for reporting
+      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      criteria: names # Criteria to run the test case.
       filter:
         - BLFE1
     - name: test_interfaces_mlag_status

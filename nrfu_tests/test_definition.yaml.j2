@@ -68,11 +68,12 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_interface_errors_and_discards
+      description: Testcase for verification of errors/discards on all the interfaces.
       test_id: NRFU2.3
-      show_cmd: null
+      show_cmd: show interfaces
       expected_output: null
+      test_criteria: Errors/discards should not be found on any of the interface.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

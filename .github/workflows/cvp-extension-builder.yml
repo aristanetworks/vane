@@ -16,6 +16,7 @@ on:
   push:
     branches:
       - example-rpm-package-testing-branch
+      - gar-dispatch
 
   # Trigger a build manually from the browser interface
   workflow_dispatch: {}

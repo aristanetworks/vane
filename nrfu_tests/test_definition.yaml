@@ -354,11 +354,12 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_system_hardware_power_supply_voltage_status
+      description: Test case for verification of system power supply voltage sensor status on the device.
       test_id: NRFU6.10
-      show_cmd: null
-      expected_output: null
+      show_cmd: null # Show command is added in the test case file as need to skip test execution devices based on platform
+      expected_output: null # Expected output is formed inside a test case file dynamically.
+      test_criteria: Status of all power supply voltage sensors should be 'Ok'
       report_style: modern
       criteria: names
       filter:

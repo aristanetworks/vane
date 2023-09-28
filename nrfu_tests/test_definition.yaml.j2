@@ -245,11 +245,13 @@
       days_of_logs: {{ testcase_data["NRFU6.1"].days_of_logs }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_hardware_cooling_status
       test_id: NRFU6.2
-      show_cmd: null
-      expected_output: null
+      description: Testcase for the verification of system cooling status.
+      show_cmd: show system environment cooling
+      expected_output:
+        system_cooling_status: coolingOk
+      test_criteria: System cooling status should be 'coolingOk'.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

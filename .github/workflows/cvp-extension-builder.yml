@@ -18,7 +18,7 @@ on:
       - example-rpm-package-testing-branch
 
   # Trigger a build manually from the browser interface
-  workflow-dispatch: {}
+  workflow_dispatch: {}
 
 # Variables
 env:

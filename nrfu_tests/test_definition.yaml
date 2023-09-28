@@ -252,13 +252,15 @@
       criteria: names
       filter:
         - BLFE1
-    - name: test_
-      description: null
+    - name: test_bad_syslog_events
+      description: Testcase for verification of bad syslog event messages.
       test_id: NRFU6.1
-      show_cmd: null
-      expected_output: null
-      report_style: modern
-      criteria: names
+      show_cmd: null # Forming show command in the test case.
+      expected_output: null # Forming expected output in test case.# Setting test case’s pass / fail criteria for reporting
+      test_criteria: Bad syslog events(specific keywords) should not be found in the collected logs. # Setting test case’s pass/fail criteria for reporting
+      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
+      days_of_logs: 7 # Number of days used in show logging command.
+      criteria: names # Criteria to run the test case.
       filter:
         - BLFE1
     - name: test_

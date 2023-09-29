@@ -291,6 +291,7 @@ class NrfuClient:
                 "template_definitions": "test_definition.yaml.j2",
                 "test_definitions": "test_definition.yaml",
                 "report_summary_style": "modern",
+                "self_contained": True
             }
         }
 

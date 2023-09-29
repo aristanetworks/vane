@@ -311,11 +311,12 @@
       hardware_inventory_checks: {{ test_data.hardware_inventory_checks }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_hardware_power_supply_status
+      description: Test case for the verification of system hardware power supply status.
       test_id: NRFU6.9
-      show_cmd: null
+      show_cmd: show system environment power
       expected_output: null
+      test_criteria: Status of all power supplies should be 'Ok'. # Setting test case's pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

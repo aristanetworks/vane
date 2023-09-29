@@ -138,12 +138,15 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_routing_evpn_l2vni_imet
+      description: Test case for verification of L2 VNI VXLAN interface functionality.
       test_id: NRFU4.3
       show_cmd: null
       expected_output: null
+      test_criteria: Inclusive multicast Ethernet tag (IMET) routes should advertised for all VNI identifiers on device.
       report_style: modern
+      input:
+        skip_on_command_unavailable_check: {{ testcase_data["NRFU4.3"]["skip_on_command_unavailable_check"] }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_multi_agent_routing_protocol

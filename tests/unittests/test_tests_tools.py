@@ -352,7 +352,7 @@ def test_login_duts(loginfo, mocker):
     test_parameters["parameters"]["eos_conn"] = "ssh"
     actual_output = tests_tools.login_duts(test_parameters, test_duts)
     dut_info = actual_output[0]
-    assert "neighbors" not in dut_info
+    assert dut_info["neighbors"] == ""
 
 
 def test_send_cmds_json(loginfo, logdebug, mocker):

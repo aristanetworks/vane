@@ -631,12 +631,10 @@ class TestcaseSkipTests:
                 pytest.skip(output_msg)
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
-            logging.error(
-                f"On device {tops.dut_name}, Error while testing skip: {excep}"
-            )
+            logging.error(f"On device {tops.dut_name}, Error while testing skip: {excep}")
 
         # Normal post processing logic that won't be used
         tops.test_result = tops.expected_output == tops.actual_output
-        tops.parse_test_steps(self.test_system_hardware_fan_status)
+        tops.parse_test_steps(self.test_testcase_skip)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.expected_output == tops.actual_output

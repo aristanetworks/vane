@@ -594,3 +594,49 @@ class VaneTests:
         self.tops.parse_test_steps(self.test_cmd_template)
         self.tops.generate_report(dut["name"], self.output)
         assert self.tops.expected_output == self.tops.actual_output
+
+
+@pytest.mark.vane_system_tests
+class TestcaseSkipTests:
+    """Suite of testcases to validate PyTest skip"""
+
+    def test_testcase_skip(self, dut, tests_definitions):
+        """
+        TD: Verify correct behavior when PyTest skip occurs.
+        Args:
+            dut(dict): details related to a particular DUT
+            tests_definitions(dict): test suite and test case parameters.
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        """
+        TS: Set skip condition to True so test case is skipped
+        """
+        skip = True
+        self.output = None
+        tops.output_msg = "Not skipping test case."
+
+        try:
+            """
+            TS: Implement PyTest skip logic
+            """
+            if skip:
+                output_msg = f"Skipping test case on {tops.dut_name}"
+                tops.output_msg = output_msg
+                """
+                TS: Use skip post processing logic
+                """
+                tests_tools.post_process_skip(tops, self.test_testcase_skip, self.output)
+                pytest.skip(output_msg)
+
+        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+            logging.error(
+                f"On device {tops.dut_name}, Error while testing skip: {excep}"
+            )
+
+        # Normal post processing logic that won't be used
+        tops.test_result = tops.expected_output == tops.actual_output
+        tops.parse_test_steps(self.test_system_hardware_fan_status)
+        tops.generate_report(tops.dut_name, self.output)
+        assert tops.expected_output == tops.actual_output

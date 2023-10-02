@@ -47,9 +47,15 @@ def test_format_test_suite_name():
             "test_daemon.py",
             "test_interface.py",
             "test_tacacs.py",
-            "test_environment.py",
+            "test_environment_mock.py",
         ],
-        "result": ["test_api", "test_daemon", "test_interface", "test_tacacs", "test_environment"],
+        "result": [
+            "test api",
+            "test daemon",
+            "test interface",
+            "test tacacs",
+            "test environment mock",
+        ],
     }
 
     ts_inputs = test_suites["input"]

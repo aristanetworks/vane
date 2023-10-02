@@ -1206,6 +1206,8 @@ class ReportClient:
 
         logging.debug(f"Test suite name is {ts_name}")
         ts_name = ts_name.split(".")[0]
+        # handling the "_" if it exists by replacing it with " "
+        ts_name = ts_name.replace("_", " ")
         logging.debug(f"Formatted test suite name is {ts_name}")
 
         return ts_name

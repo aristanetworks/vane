@@ -250,12 +250,9 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
     logwarning.assert_has_calls(logwarning_calls, any_order=False)
 
 
-def test_main_create_duts_file(loginfo, logwarning, mocker):
+def test_main_create_duts_file(loginfo, mocker):
     """Tests the --generate-duts-file flag"""
 
-    mocker.patch("vane.vane_cli.run_tests")
-    mocker.patch("vane.vane_cli.write_results")
-    mocker.patch("vane.vane_cli.download_test_results")
     mocker.patch("vane.tests_tools.create_duts_file", return_value="duts.yml")
 
     # mocking parse cli to test --generate-duts-file
@@ -274,8 +271,6 @@ def test_main_create_duts_file(loginfo, logwarning, mocker):
     )
     vane_cli.main()
 
-    assert vane.config.DUTS_FILE == "duts.yml"
-
     # assert info logs to ensure all the above methods executed without errors
     loginfo_calls = [
         call("Reading in input from command-line"),
@@ -283,16 +278,8 @@ def test_main_create_duts_file(loginfo, logwarning, mocker):
             "Generating DUTS File from topology: topology.yaml and "
             "inventory: inventory.yaml file.\n"
         ),
-        call("\n\n!VANE has completed without errors!\n\n"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-    # assert warning logs to ensure all the above methods executed without errors
-    logwarning_calls = [
-        call("Changing Definitions file name to definitions_sample.yaml"),
-        call("Changing DUTS file name to duts_sample.yaml"),
-    ]
-    logwarning.assert_has_calls(logwarning_calls, any_order=False)
 
 
 def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):

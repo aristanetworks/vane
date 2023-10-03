@@ -40,6 +40,7 @@ import docx
 from docx.oxml.ns import qn, nsdecls
 from docx.oxml import OxmlElement, parse_xml
 from docx.shared import Inches, Pt, RGBColor
+from docx.table import Table
 from vane.report_templates import REPORT_TEMPLATES
 from vane.tests_tools import yaml_read
 from vane.vane_logging import logging
@@ -50,6 +51,44 @@ TOTAL_TESTS = "Total Tests"
 TOTAL_PASSED = "Total Passed"
 TOTAL_FAILED = "Total Failed"
 TOTAL_SKIPPED = "Total Skipped"
+
+
+class CachedTable(Table):
+    """Caches Docx table in memory
+    Args:
+        Table(obj): Fully defined table
+    """
+
+    def __init__(self, tbl, parent):
+        """Initialize CachedTable instance
+        Args:
+            tbl(obj), Cached table
+            parent(obj), Parent object
+        """
+
+        super(Table, self).__init__(parent)
+        self._element = self._tbl = tbl
+        self._cached_cells = None
+
+    @property
+    def _cells(self):
+        """Cache table cells"""
+
+        if self._cached_cells is None:
+            # pylint: disable-next=super-with-arguments
+            self._cached_cells = super(CachedTable, self)._cells
+        return self._cached_cells
+
+    @staticmethod
+    def transform(table):
+        """Create cached table
+        Args:
+            Table(obj): Fully defined table
+        """
+
+        # pylint: disable-next=protected-access
+        cached_table = CachedTable(table._tbl, table._parent)
+        return cached_table
 
 
 # pylint: disable=too-few-public-methods
@@ -471,7 +510,10 @@ class ReportClient:
             report_template (dict): Data structure describing reports fields
         """
         columns = len(summary_headers)
-        table = self._document.add_table(rows=1, cols=columns, style="Table Grid")
+        rows = len(testcase_results) + 1
+        table = CachedTable.transform(
+            self._document.add_table(rows=rows, cols=columns, style="Table Grid")
+        )
 
         if testcase_results:
             self._create_header_row(table, summary_headers, report_template)
@@ -518,7 +560,6 @@ class ReportClient:
         """
 
         for row, testcase_result in enumerate(testcase_results):
-            _ = table.add_row().cells
             for column, testcase_data in enumerate(testcase_result):
                 logging.debug(
                     f"Writing test field: {testcase_data}"

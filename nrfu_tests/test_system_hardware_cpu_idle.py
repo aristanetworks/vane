@@ -52,10 +52,6 @@ class CpuIdleTimeTests:
             self.output += f"Output of {tops.show_cmd} command is:\n{output}\n"
             cpu_idle_details = output.get("cpuInfo").get("%Cpu(s)").get("idle")
 
-            # Skipping testcase if CPU idle time is not configured on device.
-            if not cpu_idle_details:
-                pytest.skip(f"CPU idle time is not configured on device {tops.dut_name}.")
-
             # Verifying CPU idle time and updating in actual output.
             if cpu_idle_details < 25:
                 cpu_idle_time_found = False

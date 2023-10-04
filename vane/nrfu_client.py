@@ -204,9 +204,9 @@ class NrfuClient:
             with open(device_list_file, "r", encoding="utf-8") as text_in:
                 logging.info("Reading in dut ip data from device list file")
                 line = text_in.readline()
-                while line.strip():  # ensure no empty lines are read
-                    # Process each line here, use strip() to remove newline characters
-                    device_data.append(line.strip())
+                while line:
+                    if line.strip():  # ensure no empty lines are read
+                        device_data.append(line.strip())
                     line = text_in.readline()
         except OSError as err:
             logging.error(f"ERROR OPENING DEVICE LIST FILE: {err}")

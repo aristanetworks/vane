@@ -75,9 +75,6 @@
       criteria: names
       filter:
         - BLFE1  # Device on which tests run
-    - name: test_
-      description: null
-        - BLFE1
     - name: test_interface_errors_and_discards
       description: Testcase for verification of errors/discards on all the interfaces.
       test_id: NRFU2.3

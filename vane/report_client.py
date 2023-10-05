@@ -130,7 +130,13 @@ class ReportClient:
 
         logging.info("Compiling test case results into data model")
         logging.debug(f"yaml directory is {yaml_dir}\n")
-        yaml_files = os.listdir(yaml_dir)
+
+        try:
+            yaml_files = os.listdir(yaml_dir)
+        except FileNotFoundError:
+            logging.error(f"dir not found {yaml_dir}")
+            return
+
         logging.debug(f"yaml input files are {yaml_files}")
 
         for name in yaml_files:

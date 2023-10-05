@@ -30,7 +30,7 @@
 #
 
 
-"""TD: Verify hostname is set on device is correct"""
+"""TD: Verify hostname set on device is correct"""
 
 """
 TS: Collecting the output of 'show hostname' command from DUT

@@ -130,6 +130,8 @@ def test_parse_file(loginfo, logdebug, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
     logdebug_calls = [
+        call(f"Set Test Step Client object directory to ['{TEST_DIR}']"),
+        call(f"Parsing file: {TEST_FILE[0]} for test steps and definitions"),
         call(f"Create JSON and MD files for {TEST_FILE[0]} using {TEST_STEP}"),
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)

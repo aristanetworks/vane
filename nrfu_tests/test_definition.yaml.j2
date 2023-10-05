@@ -1,11 +1,16 @@
 - name: nrfu_tests
   testcases:
-    - name: test_
-      description:
+    - name: test_dns_base_services
+      description: Test case for the verification of DNS resolution functionality.
       test_id: NRFU1.1
-      show_cmd: null
+      {% set test_data = testcase_data["NRFU1.1"].dns_name_server_check %}
+      show_cmd: show ip name-server
       expected_output: null
+      test_criteria: Reverse name server lookup should be successful for name servers configured on the device.
       report_style: modern
+      dns_name_server_check:
+        ipv4_fail_if_not_configured: {{ test_data.ipv4_fail_if_not_configured }}
+        ipv6_fail_if_not_configured: {{ test_data.ipv6_fail_if_not_configured }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_ntp_clocks

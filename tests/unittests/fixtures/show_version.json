@@ -1,0 +1,2 @@
+ '{\n    "memTotal": 4006912,\n    "uptime": 639730.57,\n    "modelName": "vEOS",\n    "internalVersion": "4.24.2F-18436385.4242F",\n    "mfgName": "",\n    "serialNumber": "",\n    "systemMacAddress": "54:15:c8:72:11:5f",\n    "bootupTimestamp": 1695907804.0,\n    "memFree": 2958704,\n    "version": "4.24.2F",\n    "configMacAddress": "00:00:00:00:00:00",\n    "isIntlVersion": false,\n    "internalBuildId": "03cdce3a-550e-46a8-88e5-4b27656fd2e5",\n    "hardwareRevision": "",\n    "hwMacAddress": "00:00:00:00:00:00",\n    "architecture": "i686"\n}\n'
+

@@ -861,7 +861,7 @@ def generate_duts_file(dut, file, username, password):
         print(f"DUTs creation for {file} failed due to exception {err}")
 
 
-def create_duts_file(topology_file, inventory_file):
+def create_duts_file(topology_file, inventory_file, duts_file_name):
     """Automatically generate a DUTs file
 
     Args:
@@ -914,10 +914,8 @@ def create_duts_file(topology_file, inventory_file):
                 continue
         if dut_properties or server_properties:
             dut_file.update({"duts": dut_properties, "servers": server_properties})
-            with open(config.DUTS_FILE, "w", encoding="utf-8") as yamlfile:
+            with open(duts_file_name, "w", encoding="utf-8") as yamlfile:
                 yaml.dump(dut_file, yamlfile, sort_keys=False)
-
-                return config.DUTS_FILE
 
     # pylint: disable-next=broad-exception-caught
     except Exception as excep:
@@ -925,8 +923,6 @@ def create_duts_file(topology_file, inventory_file):
         logging.error("EXITING TEST RUNNER")
         print(">>> ERROR While creating duts file")
         sys.exit(1)
-
-    return None
 
 
 # pylint: disable-next=too-many-instance-attributes

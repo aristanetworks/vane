@@ -19,7 +19,7 @@ INSTALL_OPTION=""
 
 # Function to install Homebrew (macOS) if not already installed
 function install_homebrew() {
-    echo "Installing Homebrew..."
+    echo -e  "\e[33mInstalling Homebrew...\e[0m"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 }
 
@@ -30,13 +30,13 @@ function set_up_package_manager() {
 
     # Debian based Linux distribution
     if command -v apt-get &>/dev/null; then
-        echo "Using apt-get as found Linux Subsystem"
+        echo -e  "\e[33mUsing apt-get as found Linux Subsystem\e[0m"
         PACKAGE_MANAGER="apt-get"
         INSTALL_OPTION="-y"
         apt update
     # CentOS and older versions
     elif command -v yum &>/dev/null; then
-        echo "Using yum as found CentOS"
+        echo -e  "\e[33mUsing yum as found CentOS\e[0m"
         PACKAGE_MANAGER="yum"
         INSTALL_OPTION="-y"
         path=$(pwd)
@@ -47,7 +47,7 @@ function set_up_package_manager() {
         yum install -y glibc-langpack-en
     # For MacOs
     elif command -v brew &>/dev/null; then
-        echo "Using brew as found MacOS"
+        echo -e  "\e[33mUsing brew as found MacOS\e[0m"
         PACKAGE_MANAGER="brew"
         INSTALL_OPTION="--force"
     else
@@ -58,7 +58,7 @@ function set_up_package_manager() {
             INSTALL_OPTION="--force"
 	    else
             # Add support for other package managers if needed, like chocolatey for Windows
-            echo "Error: Package manager not found."
+            echo -e  "\e[31mError: Package manager not found."
             exit 1
         fi
     fi
@@ -69,27 +69,33 @@ set_up_package_manager
 
 # (2) Check if Git is installed
 if command -v git &>/dev/null; then
-    echo "Git is installed."
+    echo -e  "\e[33mGit is installed.\e[0m"
 else
-    echo "Git is not installed. Installing Git"
+    echo -e  "\e[33mGit is not installed. Installing Git\e[0m"
     $PACKAGE_MANAGER install $INSTALL_OPTION git
+    if [ $? -eq 0 ]; then
+        echo -e  "\e[32mGit installed successfully.\e[0m"
+    else
+        echo -e  "\e[31mFailed to install git. Exiting script.\e[0m"
+        exit 1  # Exit the script with a non-zero status
+    fi
 fi
 
 # (3) Download Vane repo into current directory
-echo "Cloning Vane Repo"
+echo -e  "\e[33mCloning Vane Repo\e[0m"
 git clone https://github.com/aristanetworks/vane.git $DESTINATION_FOLDER
 
 # Exit the script if cloning fails
 if [ $? -eq 0 ]; then
-    echo "Repository cloned successfully."
+    echo -e  "\e[32mRepository cloned successfully.\e[0m"
 else
-    echo "Failed to clone repository. Exiting script."
+    echo -e  "\e[31mFailed to clone repository. Exiting script.\e[0m"
     exit 1  # Exit the script with a non-zero status
 fi
 
 # (4) Install Python 3.9 if version does not exist
 if ! command -v python3.9 &>/dev/null; then
-    echo "Python 3.9 not found. Installing Python 3.9"
+    echo -e  "\e[33mPython 3.9 not found. Installing Python 3.9\e[0m"
     if [ "$PACKAGE_MANAGER" = "brew" ]; then
         brew install $INSTALL_OPTION python@3.9
     elif [ "$PACKAGE_MANAGER" = "apt-get" ]; then
@@ -100,26 +106,56 @@ if ! command -v python3.9 &>/dev/null; then
     else
         $PACKAGE_MANAGER install $INSTALL_OPTION python3.9
     fi
+    if [ $? -eq 0 ]; then
+        echo -e  "\e[32mPython3.9 installed successfully.\e[0m"
+    else
+        echo -e  "\e[31mFailed to install Python3.9. Exiting script.\e[0m"
+        exit 1  # Exit the script with a non-zero status
+    fi
+
 else
-    echo "Python 3.9 is already installed."
+    echo -e  "\e[33mPython 3.9 is already installed.\e[0m"
 fi
 
 # (5) Check if Poetry is installed using pip3
 if pip3 show poetry &>/dev/null; then
-    echo "Poetry is installed."
+    echo -e  "\e[33mPoetry is already installed.\e[0m"
 else
-    echo "Poetry is not installed. Installing Poetry 1.4.2"
-    pip3 install poetry==1.4.2
+    echo -e  "\e[33mPoetry is not installed. Installing Poetry 1.4.2 via pipx\e[0m"
+    if command -v pipx &> /dev/null; then
+        echo -e  "\e[33mpipx is already installed\e[0m"
+    else
+        echo -e  "\e[33mpipx is not installed. Installing pipx via pip\e[0m"
+        python3 -m pip install --user pipx
+        if [ $? -eq 0 ]; then
+            echo -e  "\e[32mpipx installed successfully.\e[0m"
+        else
+            echo -e  "\e[31mFailed to install pipx. Exiting script.\e[0m"
+            exit 1  # Exit the script with a non-zero status
+        fi
+    fi
+    echo -e "\e[33mAdding pipx to PATH environment variable\e[0m"
+    python3 -m pipx ensurepath
+    pipx install poetry==1.4.2
+    # Error handling in case poetry is not installed correctly
+    if [ $? -eq 0 ]; then
+        echo -e  "\e[32mPoetry installed successfully.\e[0m"
+    else
+        echo -e  "\e[31mFailed to install Poetry. Exiting script.\e[0m"
+        exit 1  # Exit the script with a non-zero status
+    fi
 fi
 
 # (6) Set up virtual environment in downloaded vane folder
 cd $DESTINATION_FOLDER
-echo "cd $DESTINATION_FOLDER"
+echo -e  "\e[33mcd $DESTINATION_FOLDER\e[0m"
 path=$(pwd)
 poetry config virtualenvs.path "$path"
 python=$(command -v python3.9)
 poetry env use "$python"
+echo -e  "\e[32mActivating the poetry virtual environment\e[0m"
 poetry install 
 
 # (7) Activate poetry environment within the root folder
+echo -e  "\e[32mEntering the poetry virtual environment\e[0m"
 poetry shell

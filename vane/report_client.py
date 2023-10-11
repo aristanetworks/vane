@@ -37,6 +37,7 @@ import os
 import re
 import yaml
 import docx
+from tqdm import tqdm
 from docx.oxml.ns import qn, nsdecls
 from docx.oxml import OxmlElement, parse_xml
 from docx.shared import Inches, Pt, RGBColor
@@ -51,6 +52,11 @@ TOTAL_TESTS = "Total Tests"
 TOTAL_PASSED = "Total Passed"
 TOTAL_FAILED = "Total Failed"
 TOTAL_SKIPPED = "Total Skipped"
+
+# Define ANSI escape codes for colors
+YELLOW = "\x1b[33m"
+GREEN = "\x1b[32m"
+DEFAULT = "\033[0m"
 
 
 class CachedTable(Table):
@@ -819,21 +825,38 @@ class ReportClient:
 
         test_suites = self._results_datamodel["test_suites"]
 
+        # Calculating total dut sections to be written and using that as the mark for progress
+        total_dut_sections = 0
         for test_suite in test_suites:
-            self._write_detail_major_section(test_suite)
-            minor_section = 1
-
             for test_case in test_suite["test_cases"]:
-                self._write_detail_minor_section(test_case, minor_section)
-                dut_section = 1
-
                 for dut in test_case["duts"]:
-                    self._write_detail_dut_section(dut, minor_section, dut_section)
-                    dut_section += 1
+                    total_dut_sections += 1
 
-                minor_section += 1
+        custom_format = (
+            f"{YELLOW}{{desc}}: {{percentage:.0f}}%| {GREEN}{{bar}}{YELLOW} |"
+            f"elapsed time: {{elapsed}} | remaining time: {{remaining}}{DEFAULT}"
+        )
 
-            self._major_section += 1
+        with tqdm(
+            total=total_dut_sections,
+            desc="Writing detailed report",
+            unit="iteration",
+            bar_format=custom_format,
+        ) as pbar:
+            for test_suite in test_suites:
+                self._write_detail_major_section(test_suite)
+                minor_section = 1
+
+                for test_case in test_suite["test_cases"]:
+                    self._write_detail_minor_section(test_case, minor_section)
+                    dut_section = 1
+
+                    for dut in test_case["duts"]:
+                        self._write_detail_dut_section(dut, minor_section, dut_section)
+                        dut_section += 1
+                        pbar.update(1)
+                    minor_section += 1
+                self._major_section += 1
 
     def _write_detail_major_section(self, test_suite):
         """Write detailed major report section

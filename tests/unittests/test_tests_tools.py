@@ -910,7 +910,6 @@ def test_create_duts_file():
                 "role": "unknown",
             }
         ],
-        "servers": [],
     }
 
     file = tests_tools.create_duts_file(topology_data, inventory_data)

@@ -107,18 +107,11 @@ jobs:
         run: |
           cp resources/vane-cvp-*install.sh rpms/
           chmod +x rpms/vane-cvp-*install.sh
+          cd rpms
+          tar cvzf vane-cvp.tar.gz *.rpm vane-cvp-*install.sh
 
       - name: Save the rpm package as an artifact
         uses: actions/upload-artifact@v3
         with:
           name: vane-cvp-rpm
-          path: rpms/
-
-      # - name: Save the rpm package as an artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: vane-cvp-rpm
-      #     path: |
-      #       rpms/vane-cvp-*.rpm
-      #       resources/vane-cvp-install.sh
-      #       resources/vane-cvp-uninstall.sh
+          path: rpms/vane-cvp.tar.gz

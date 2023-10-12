@@ -1,0 +1,27 @@
+{
+  "jsonrpc": "2.0",
+  "id": "EapiExplorer-1",
+  "result": [
+    {
+      "tablesLastChangeTime": 1697130990.5465367,
+      "tablesAgeOuts": 0,
+      "tablesInserts": 2,
+      "lldpNeighbors": [
+        {
+          "ttl": 120,
+          "neighborDevice": "DC1-LEAF1A",
+          "neighborPort": "Ethernet5",
+          "port": "Ethernet1"
+        },
+        {
+          "ttl": 120,
+          "neighborDevice": "DC1-LEAF1B",
+          "neighborPort": "Ethernet5",
+          "port": "Ethernet2"
+        }
+      ],
+      "tablesDeletes": 0,
+      "tablesDrops": 0
+    }
+  ]
+}

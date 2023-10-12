@@ -20,26 +20,29 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # Handle errors then exit
 trap exit_trap EXIT
 
-echo -e $divider
-echo -e "Remove the container images\n"
 # Remove the container images first
 #  - If the uninstallation fails for some reason, at least the containers are removed
 #  - If the containers do not exist, the commands do not fail and the uninstallation will
 #    still proceed afterwards
+echo -e $divider
+echo -e "Remove the container images\n"
 img_id=`nerdctl images | grep vane-cvp | awk '{print $3}'`
 nerdctl rmi -f vane-cvp
 if [ ! -z ${img_id:+x} ]; then
   nerdctl rmi -f ${img_id}
 fi
 
+# Stop the extension
 echo -e $divider
 echo -e "Stop the extension\n"
 cvpi stop -f vane-cvp
 
+# Disable the extension
 echo -e $divider
 echo -e "Disable the extension\n"
 cvpi disable -f vane-cvp
 
+# Uninstall the extension
 echo -e $divider
 echo -e "Uninstall the extension\n"
 cvpi uninstall -f vane-cvp
@@ -49,6 +52,9 @@ echo -e $divider
 echo -e "Remove the cron job from the crontab\n"
 croncmd=$(realpath $0)
 ( crontab -l | grep -v -F "$croncmd" ) | crontab -
+
+# Print a final divider before finishing
+echo -e $divider
 
 # Exit the script
 # (this triggers the exit_trap to give our final success/failure message)

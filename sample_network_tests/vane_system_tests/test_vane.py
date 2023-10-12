@@ -613,6 +613,10 @@ class TestcaseSkipTests:
         """
         TS: Set skip condition to True so test case is skipped
         """
+        # Skip variable simulates a test case condition that needs to be skipped
+        # In a test case this condition could be testing for vEOS on a hardware test or
+        # testing for tacacs configuration before a tacacs test
+        # Also skip variable is only simulating condition and should not be confused with tops.skip
         skip = True
         self.output = None
         tops.output_msg = "Not skipping test case."
@@ -623,7 +627,6 @@ class TestcaseSkipTests:
             """
             if skip:
                 tops.output_msg = f"Skipping test case on {tops.dut_name}"
-                tops.output_msg = output_msg
                 """
                 TS: Use skip post processing logic
                 """

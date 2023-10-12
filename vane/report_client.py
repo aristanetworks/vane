@@ -723,7 +723,7 @@ class ReportClient:
                 tbl_value = "SKIPPING"
             else:
                 tbl_value = dut[tbl_header]
-            logging.info(f"{tbl_header} set to {tbl_value} in dut structure")
+            logging.debug(f"{tbl_header} set to {tbl_value} in dut structure")
         else:
             logging.warning(f"{tbl_header} NOT in dut structure")
             tbl_value = "Value NOT set in test case"

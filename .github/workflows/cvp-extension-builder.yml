@@ -103,11 +103,21 @@ jobs:
         run: |
           make rpm-cvp
 
+      - name: Copy the installation scripts into the rpms directory for packaging
+        run: |
+          cp resources/vane-cvp-*install.sh rpms/
+
       - name: Save the rpm package as an artifact
         uses: actions/upload-artifact@v3
         with:
           name: vane-cvp-rpm
-          path: |
-            rpms/vane-cvp-*.rpm
-            resources/vane-cvp-install.sh
-            resources/vane-cvp-uninstall.sh
+          path: rpms/
+
+      # - name: Save the rpm package as an artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: vane-cvp-rpm
+      #     path: |
+      #       rpms/vane-cvp-*.rpm
+      #       resources/vane-cvp-install.sh
+      #       resources/vane-cvp-uninstall.sh

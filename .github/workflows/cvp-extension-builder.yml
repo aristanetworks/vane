@@ -107,4 +107,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: vane-cvp-rpm
-          path: rpms/
+          path: |
+            rpms/vane-cvp-*.rpm
+            resources/vane-cvp-install.sh
+            resources/vane-cvp-uninstall.sh

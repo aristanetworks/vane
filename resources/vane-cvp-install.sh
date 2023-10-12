@@ -12,6 +12,7 @@ function exit_trap {
     echo -e "\n-- Vane CVP extension installed --\n"
   else
     echo -e "\n\"${last_command}\" command failed with exit code $?.\n"
+    rm -f /home/cvp/vane-cvp*.rpm
   fi
 }
 
@@ -22,7 +23,10 @@ trap exit_trap EXIT
 
 echo -e $divider
 echo -e "Install the rpm\n"
-cvpi install -f /home/cvp/vane*.rpm
+rm -f /home/cvp/vane-cvp*.rpm
+cp /root/vane-cvp*.rpm /home/cvp/
+cvpi install -f /home/cvp/vane-cvp*.rpm
+rm -f /home/cvp/vane-cvp*.rpm
 
 echo -e $divider
 echo -e "Enable the extension\n"

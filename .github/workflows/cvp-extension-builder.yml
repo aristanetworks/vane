@@ -106,6 +106,7 @@ jobs:
       - name: Copy the installation scripts into the rpms directory for packaging
         run: |
           cp resources/vane-cvp-*install.sh rpms/
+          chmod +x rpms/vane-cvp-*install.sh
 
       - name: Save the rpm package as an artifact
         uses: actions/upload-artifact@v3

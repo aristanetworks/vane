@@ -622,7 +622,7 @@ class TestcaseSkipTests:
             TS: Implement PyTest skip logic
             """
             if skip:
-                output_msg = f"Skipping test case on {tops.dut_name}"
+                tops.output_msg = f"Skipping test case on {tops.dut_name}"
                 tops.output_msg = output_msg
                 """
                 TS: Use skip post processing logic

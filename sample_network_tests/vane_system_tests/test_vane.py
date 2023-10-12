@@ -628,7 +628,7 @@ class TestcaseSkipTests:
                 TS: Use skip post processing logic
                 """
                 tests_tools.post_process_skip(tops, self.test_testcase_skip, self.output)
-                pytest.skip(output_msg)
+                pytest.skip(tops.output_msg)
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             logging.error(f"On device {tops.dut_name}, Error while testing skip: {excep}")

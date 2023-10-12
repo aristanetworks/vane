@@ -942,6 +942,8 @@ class TestOps:
             dut (dict): device under test
         """
         test_case = inspect.stack()[1][3]
+        # Test cases that skip will change skip to True
+        self.skip = False
         self.test_case = test_case
         self.test_parameters = self._get_parameters(tests_definitions, test_suite, self.test_case)
         self.expected_output = self.test_parameters["expected_output"]
@@ -1132,6 +1134,7 @@ class TestOps:
         self.test_parameters["show_cmd_txts"] = self._show_cmd_txts
         self.test_parameters["test_steps"] = self.test_steps
         self.test_parameters["show_cmds"] = self._show_cmds
+        self.test_parameters["skip"] = self.skip
 
         if str(self.show_cmd_txt):
             self.test_parameters["show_cmd"] += ":\n\n" + self.show_cmd_txt
@@ -1530,3 +1533,17 @@ class TestOps:
         except OSError:
             pass
         return result
+
+
+def post_process_skip(tops, steps, output=""):
+    """Post processing for test case that encounters a PyTest Skip
+
+    Args:
+        tops(obj): Test case object
+        steps(func): Test case
+        output(str): Test case show output
+    """
+
+    tops.skip = True
+    tops.parse_test_steps(steps)
+    tops.generate_report(tops.dut_name, output)

@@ -82,7 +82,6 @@ class HardwareInventoryTests:
             # If the hardware inventory check is True, verifying that the card slot is inserted
             # Otherwise skipping the check for the particular hardware card slot.
             for slot, verify_slot in test_params["hardware_inventory_checks"].items():
-
                 # Converting slot name from snake case to camel case.
                 slot = slot.split("missing_")[1]
                 converted_slot_name = re.sub(

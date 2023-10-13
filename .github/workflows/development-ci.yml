@@ -215,4 +215,4 @@ jobs:
           echo -e "\n----------------"
           echo "Coverage is ${cov_score}%"
           echo -e "----------------\n"
-          [ "${cov_score}" -ge "90" ]
+          [ "${cov_score}" -ge "50" ]

@@ -107,6 +107,9 @@ jobs:
 
   unittest:
     # Run the Vane unittests
+    #   If the tests pass, coverage will be calculaged and reported to the output to be used
+    #   by a later job. If the tests fail, the job will fail, coverage will not be calculated,
+    #   and the coverage job will not run.
 
     runs-on: ubuntu-latest
 
@@ -143,14 +146,14 @@ jobs:
       - name: Run the unittests
         # Install vane in "editable/developer" mode, so the executable is using
         # the source files and coverage can monitor the proper directory
-        continue-on-error: true
+        #   If the unit tests fail, we do not continue on to get the coverage
         run: |
           eval "${{ env.poetry_home }}"
           mkdir -p $PWD/tests/unittests/fixtures/reports/results
           pytest --cov-report term-missing --cov=$PWD/vane $PWD/tests/unittests
 
       - name: Calculate the coverage
-        # Get the coverage score and return success if the value is >= 90
+        # Get the coverage score and send it to the GITHUB_OUTPUT for the next job to use
         id: coverage
         run: |
           eval "${{ env.poetry_home }}"
@@ -163,9 +166,7 @@ jobs:
   coverage:
     # Report the unittest coverage
     # Test coverage is compared with a 90% target goal and the check will fail
-    # if below that point, however the branch is allowed to be merged with
-    # develop regardless of the coverage score and whether the unittest check
-    # passes or fails.
+    # if below that point.
 
     runs-on: ubuntu-latest
 
@@ -173,46 +174,13 @@ jobs:
 
     steps:
 
-      # - name: Check out the repository
-      #   uses: actions/checkout@v3
-      #   with:
-      #     fetch-depth: 0
-      #
-      # - name: Install Python 3.9
-      #   uses: actions/setup-python@v4
-      #   with:
-      #     python-version: '3.9'
-      #     # architecture: 'x64' # The default
-      #
-      # - name: Display the Python version
-      #   run: python -c "import sys; print(sys.version)"
-      #
-      # - name: Install dependencies
-      #   # Use poetry to install Vane and its dependencies
-      #   #   Later stages that require Vane or dependencies must activate the virtual environment
-      #   #   so we export `source $(poetry env info --path)/bin/activate` as env.poetry_home and
-      #   #   eval that value in the stages that need it
-      #   run: |
-      #     python -m pip install --upgrade pip
-      #     pip install poetry==$POETRY_VERSION
-      #     poetry install
-      #     echo "poetry_home=source $(poetry env info --path)/bin/activate" >> $GITHUB_ENV
-      #
-      # - name: Run the unittests
-      #   # Install vane in "editable/developer" mode, so the executable is using
-      #   # the source files and coverage can monitor the proper directory
-      #   continue-on-error: true
-      #   run: |
-      #     eval "${{ env.poetry_home }}"
-      #     mkdir -p $PWD/tests/unittests/fixtures/reports/results
-      #     pytest --cov-report term-missing --cov=$PWD/vane $PWD/tests/unittests
-
       - name: Report the coverage
-        # Get the coverage score and return success if the value is >= 90
+        # Get the coverage score from the previous unit tests and
+        # return success if the value is >= 90
         run: |
           eval "${{ env.poetry_home }}"
           cov_score=${{ needs.unittest.outputs.coverage }}
           echo -e "\n----------------"
           echo "Coverage is ${cov_score}%"
           echo -e "----------------\n"
-          [ "${cov_score}" -ge "50" ]
+          [ "${cov_score}" -ge "90" ]

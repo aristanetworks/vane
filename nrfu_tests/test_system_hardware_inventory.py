@@ -82,60 +82,66 @@ class HardwareInventoryTests:
             # If the hardware inventory check is True, verifying that the card slot is inserted
             # Otherwise skipping the check for the particular hardware card slot.
             for slot, verify_slot in test_params["hardware_inventory_checks"].items():
-                if verify_slot:
-                    # Converting slot name from snake case to camel case.
-                    slot = slot.split("missing_")[1]
-                    converted_slot_name = re.sub(
-                        r"(?!^)_([a-zA-Z])", lambda name: name.group(1).upper(), slot
-                    )
 
-                    # Verifying that the fan tray and power supply slots are inserted into the
-                    # device by checking the name is present for the slot.
-                    if "CardSlots" not in converted_slot_name:
-                        slot_output = output[converted_slot_name]
-                        assert slot_output, f"{converted_slot_name} are not inserted on the device."
+                # Converting slot name from snake case to camel case.
+                slot = slot.split("missing_")[1]
+                converted_slot_name = re.sub(
+                    r"(?!^)_([a-zA-Z])", lambda name: name.group(1).upper(), slot
+                )
 
-                        expected_output.update({slot: {}})
-                        actual_output.update({slot: {}})
+                # Verifying that the fan tray and power supply slots are inserted into the
+                # device by checking the name is present for the slot.
+                if "CardSlots" not in converted_slot_name:
+                    slot_output = output[converted_slot_name]
 
-                        # Updating the actual and expected output dictionaries.
-                        for slot_name, slot_details in slot_output.items():
-                            expected_output[slot].update({slot_name: {"card_slot_inserted": True}})
-                            actual_output[slot].update(
-                                {
-                                    slot_name: {
-                                        "card_slot_inserted": (
-                                            "Not Inserted" not in slot_details["name"]
-                                        )
-                                    }
-                                }
-                            )
+                    expected_output.update({slot: {}})
+                    actual_output.update({slot: {}})
 
-                    else:
-                        # Verifying the card slots (Supervisor, Fabric and Line cards) are inserted
-                        # into the device by checking the model name is present for the slot.
-                        card_name = slot.split("_")[0]
-                        slot_output = output["cardSlots"]
-                        assert slot_output, f"{converted_slot_name} is not inserted on the device."
-
-                        expected_output.update({slot: {}})
-                        actual_output.update({slot: {}})
-
-                        # Updating the actual and expected output dictionaries.
-                        for slot_name, slot_details in slot_output.items():
-                            if card_name.capitalize() in slot_name:
+                    # Updating the actual and expected output dictionaries.
+                    for slot_name, slot_details in slot_output.items():
+                        name = slot_details["name"]
+                        if "Not Inserted" in name:
+                            if verify_slot:
+                                actual_output[slot].update(
+                                    {slot_name: {"card_slot_inserted": False}}
+                                )
                                 expected_output[slot].update(
                                     {slot_name: {"card_slot_inserted": True}}
                                 )
-                                actual_output[slot].update(
-                                    {
-                                        slot_name: {
-                                            "card_slot_inserted": (
-                                                "Not Inserted" not in slot_details["modelName"]
-                                            )
-                                        }
-                                    }
-                                )
+                        else:
+                            actual_output[slot].update({slot_name: {"card_slot_inserted": True}})
+                            expected_output[slot].update({slot_name: {"card_slot_inserted": True}})
+
+                else:
+                    # Verifying the card slots (Supervisor, Fabric and Line cards) are inserted
+                    # into the device by checking the model name is present for the slot.
+                    card_name = slot.split("_")[0]
+                    slot_output = output["cardSlots"]
+
+                    # Skipping the verification of slots if there are no "cardSlots" reported.
+                    if slot_output:
+                        expected_output.update({slot: {}})
+                        actual_output.update({slot: {}})
+
+                        # Updating the actual and expected output dictionaries.
+                        for slot_name, slot_details in slot_output.items():
+                            name = slot_details["modelName"]
+                            if card_name.capitalize() in slot_name:
+                                if "Not Inserted" in name:
+                                    if verify_slot:
+                                        expected_output[slot].update(
+                                            {slot_name: {"card_slot_inserted": True}}
+                                        )
+                                        actual_output[slot].update(
+                                            {slot_name: {"card_slot_inserted": False}}
+                                        )
+                                else:
+                                    expected_output[slot].update(
+                                        {slot_name: {"card_slot_inserted": True}}
+                                    )
+                                    actual_output[slot].update(
+                                        {slot_name: {"card_slot_inserted": True}}
+                                    )
 
             tops.actual_output["hardware_inventory_details"].update(actual_output)
             tops.expected_output["hardware_inventory_details"].update(expected_output)

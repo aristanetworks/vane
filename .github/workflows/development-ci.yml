@@ -107,7 +107,7 @@ jobs:
 
   unittest:
     # Run the Vane unittests
-    #   If the tests pass, coverage will be calculaged and reported to the output to be used
+    #   If the tests pass, coverage will be calculated and reported to the output to be used
     #   by a later job. If the tests fail, the job will fail, coverage will not be calculated,
     #   and the coverage job will not run.
 

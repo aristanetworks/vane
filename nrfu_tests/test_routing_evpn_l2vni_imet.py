@@ -137,7 +137,7 @@ class EvpnRoutingTests:
                             "evpnRoutes"
                         )
                         if not advertised_route_details:
-                            no_imet_routes_advertised[vrf].append(vni)
+                            no_imet_routes_advertised[vrf].append(str(vni))
 
                         tops.actual_output["vrfs"][vrf]["virtual_network_identifiers"][str(vni)] = {
                             "imet_routes_being_advertised": bool(advertised_route_details)
@@ -157,18 +157,21 @@ class EvpnRoutingTests:
             if skip_on_command_unavailable_check:
                 if (show_bgp_command and "Not supported") in str(excep):
                     tops.output_msg = (
-                        f"{show_bgp_command} command unavailable, device might be in ribd mode."
+                        f"Skipping test case on {tops.dut_name} as {show_bgp_command} command"
+                        " unavailable, device might be in ribd mode."
                     )
-                    pytest.skip(
-                        f"{show_bgp_command} command unavailable, device might be in ribd mode."
-                        " hence test skipped."
+                    tests_tools.post_process_skip(
+                        tops, self.test_routing_evpn_l2vni_imet, self.output
                     )
+                    pytest.skip(tops.output_msg)
 
             if "Interface does not exist" in str(excep):
-                tops.output_msg = f"{vxlan_interface} interface does not exist / no L2 VNIs."
-                pytest.skip(
-                    f"{vxlan_interface} interface does not exist / no L2 VNIs. hence test skipped."
+                tops.output_msg = (
+                    f"Skipping test case on {tops.dut_name} as {vxlan_interface} interface does not"
+                    " exist / no L2 VNIs."
                 )
+                tests_tools.post_process_skip(tops, self.test_routing_evpn_l2vni_imet, self.output)
+                pytest.skip(tops.output_msg)
 
             tops.actual_output = tops.output_msg = str(excep).split("\n", maxsplit=1)[0]
             logging.error(

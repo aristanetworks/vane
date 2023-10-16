@@ -831,36 +831,6 @@ def export_text(text_file, text_data, dut_name):
         sys.exit(1)
 
 
-def generate_duts_file(dut, file, username, password):
-    """Util function to take in an individual dut and print
-    its relevant data to a given file.
-
-    Args:
-        dut (dict): device structure
-        file (io): file to write duts data to
-        username, password (str): user credentials
-    """
-    dut_dict = {}
-    try:
-        for data in dut:
-            if dut[data]["node_type"] == "veos":
-                dut_dict = [
-                    {
-                        "mgmt_ip": dut[data]["ip_addr"],
-                        "name": data,
-                        "neighbors": dut[data]["neighbors"],
-                        "password": password,
-                        "transport": "https",
-                        "username": username,
-                        "role": "",
-                    }
-                ]
-        if dut_dict:
-            yaml.dump(dut_dict, file)
-    except yaml.YAMLError as err:
-        print(f"DUTs creation for {file} failed due to exception {err}")
-
-
 def create_duts_file(topology_file, inventory_file):
     """Automatically generate a DUTs file
 

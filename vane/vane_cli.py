@@ -39,7 +39,6 @@ from contextlib import redirect_stdout
 from datetime import datetime
 import shutil
 import os
-import yaml
 import pytest
 from vane import tests_client
 from vane import report_client
@@ -84,13 +83,6 @@ def parse_cli():
         help="Create a duts file from topology and inventory file",
         nargs=2,
         metavar=("topology_file", "inventory_file"),
-    )
-
-    parser.add_argument(
-        "--generate-duts-from-topo",
-        help="Generate a duts file from an ACT topology file.",
-        nargs=1,
-        metavar=("topology_file"),
     )
 
     parser.add_argument(
@@ -215,36 +207,6 @@ def show_markers():
     return marker_list
 
 
-def create_duts_from_topo(topology_file):
-    """
-    Util function responsible for reading in topology file,
-    calling on test tools to create duts file from the data
-    gathered from the topo file.
-
-    Args:
-        topology_file (str): Path and name of topology file
-    """
-    # Open the topology file in read only
-    try:
-        with open(topology_file, "r", encoding="utf-8") as file:
-            topology = yaml.safe_load(file)
-    except FileNotFoundError:
-        print("No valid topology file provided.")
-        return
-
-    # Output data to duts file
-    if topology["nodes"]:
-        username = topology["veos"]["username"]
-        password = topology["veos"]["password"]
-        topo_name = topology_file.split(".yml")[0]
-        output_file = topo_name + "_duts.yaml"
-
-        with open(output_file, "w", encoding="utf-8") as file:
-            file.write("duts: \n")
-            for node in topology["nodes"]:
-                tests_tools.generate_duts_file(node, file, username, password)
-
-
 def download_test_results():
     """
     function responsible for creating a zip of the
@@ -304,12 +266,6 @@ def main():
 
             if args.environment:
                 vane.config.ENVIRONMENT = args.environment
-
-            if args.generate_duts_from_topo:
-                logging.info(
-                    f"Generating DUTS File from topology: {args.generate_duts_from_topo[0]} file.\n"
-                )
-                create_duts_from_topo(args.generate_duts_from_topo[0])
 
         run_tests(vane.config.DEFINITIONS_FILE, vane.config.DUTS_FILE)
         write_results(vane.config.DEFINITIONS_FILE)

@@ -174,19 +174,6 @@ def test_show_markers(mocker):
     assert actual_output == expected_output
 
 
-def test_create_duts_from_topo():
-    """Validates functionality of create_duts_from_topo method.
-    REQUIRES there to be a tests/unittests/fixtures/test_topology.yaml
-    in this folder for test to pass"""
-
-    topology_file = "tests/unittests/fixtures/test_topology.yaml"
-    vane_cli.create_duts_from_topo(topology_file)
-    # validates the creation of the duts file, its content is tested in the test
-    # written for test_tools.generate_duts_file
-    assert os.path.isfile("tests/unittests/fixtures/test_topology.yaml_duts.yaml")
-    os.remove("tests/unittests/fixtures/test_topology.yaml_duts.yaml")
-
-
 def test_download_test_results(loginfo):
     """Validates if a zip archive got created and stored in the TEST RESULTS
     ARCHIVE folder"""
@@ -223,7 +210,6 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
             duts_file="duts_sample.yaml",
             environment="test",
             generate_duts_file=None,
-            generate_duts_from_topo=None,
             generate_test_steps=None,
             markers=False,
             nrfu=False,
@@ -266,7 +252,6 @@ def test_main_create_duts_file(loginfo, logwarning, mocker):
             duts_file="duts_sample.yaml",
             environment="test",
             generate_duts_file=["topology.yaml", "inventory.yaml"],
-            generate_duts_from_topo=None,
             generate_test_steps=None,
             markers=False,
             nrfu=False,
@@ -301,7 +286,6 @@ def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):
     mocker.patch("vane.vane_cli.run_tests")
     mocker.patch("vane.vane_cli.write_results")
     mocker.patch("vane.vane_cli.download_test_results")
-    mocker.patch("vane.vane_cli.create_duts_from_topo")
 
     # mocking parse cli to test --generate-duts-from-topo
     mocker.patch(
@@ -311,7 +295,6 @@ def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):
             duts_file="duts_sample.yaml",
             environment="test",
             generate_duts_file=None,
-            generate_duts_from_topo=["topology.yaml"],
             generate_test_steps=None,
             markers=False,
             nrfu=False,
@@ -322,7 +305,6 @@ def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):
     # assert info logs to ensure all the above methods executed without errors
     loginfo_calls = [
         call("Reading in input from command-line"),
-        call("Generating DUTS File from topology: topology.yaml file.\n"),
         call("\n\n!VANE has completed without errors!\n\n"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
@@ -351,7 +333,6 @@ def test_main_write_test_steps(loginfo, mocker):
             duts_file="duts_sample.yaml",
             environment="test",
             generate_duts_file=None,
-            generate_duts_from_topo=None,
             generate_test_steps="test_directory",
             markers=False,
         ),

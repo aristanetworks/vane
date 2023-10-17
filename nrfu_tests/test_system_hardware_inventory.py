@@ -59,23 +59,12 @@ class HardwareInventoryTests:
             )
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{version_output}"
 
-            inventory_verification_status = list(test_params["hardware_inventory_checks"].values())
-            if not any(inventory_verification_status):
-                # Skipping the test case if all the inventory slots are not inserted by verifying
-                # the inventory check values from the master def file.
-                tops.output_msg = (
-                    f"Skipping test case on {tops.dut_name} because the inventory slots are not"
-                    " inserted."
-                )
-                tests_tools.post_process_skip(
-                    tops, self.test_hardware_inventory_status, self.output
-                )
-                pytest.skip(tops.output_msg)
-
             if "vEOS" in version_output.get("modelName"):
-                # Skipping test case if the device is vEOS.
+                # Skipping test case if the device is vEOS as the show command does
+                # not work on the vEOS devices.
                 tops.output_msg = (
-                    f"Skipping test case on {tops.dut_name} because the device is a vEOS device."
+                    f"Skipping test case on {tops.dut_name} because the device is a vEOS device"
+                    f" and the `{tops.show_cmd}` command does not work on vEOS devices."
                 )
                 tests_tools.post_process_skip(
                     tops, self.test_hardware_inventory_status, self.output
@@ -131,7 +120,7 @@ class HardwareInventoryTests:
                     card_name = slot.split("_")[0]
                     slot_output = output["cardSlots"]
 
-                    # Skipping the verification of slots if there are no "cardSlots" reported.
+                    # Ignoring the verification of slots if there are no "cardSlots" reported.
                     if slot_output:
                         expected_output.update({slot: {}})
                         actual_output.update({slot: {}})

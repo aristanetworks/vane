@@ -155,6 +155,7 @@ class EvpnRoutingTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             if skip_on_command_unavailable_check:
+                # Skipping the testcase as EVPN is not configured or device might be in ribd mode.
                 if (show_bgp_command and "Not supported") in str(excep):
                     tops.output_msg = (
                         f"Skipping test case on {tops.dut_name} as {show_bgp_command} command"
@@ -166,6 +167,7 @@ class EvpnRoutingTests:
                     pytest.skip(tops.output_msg)
 
             if "Interface does not exist" in str(excep):
+                # Skipping the testcase as Vxlan interfaces not configured / no L2 VNIs.
                 tops.output_msg = (
                     f"Skipping test case on {tops.dut_name} as {vxlan_interface} interface does not"
                     " exist / no L2 VNIs."

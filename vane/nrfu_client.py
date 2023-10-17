@@ -87,7 +87,7 @@ class NrfuClient:
         self.generate_definitions_file()
 
         # Run Vane with the generated duts and definitions file
-        print("\x1b[32mStarting Execution of NRFU tests via Vane\x1b[0m")
+        print("\x1b[32m\nStarting Execution of NRFU tests via Vane\x1b[0m")
 
     def get_credentials(self):
         """Ask user to enter credentials for EOS/CloudVision

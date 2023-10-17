@@ -162,7 +162,7 @@ class TestsClient:
 
         joined_params = " ".join(self.test_parameters)
         logging.info(f"Starting Test with parameters: {self.test_parameters}")
-        print(f"Starting test with command: pytest {joined_params}\n")
+        print(f"\x1b[33mStarting Tests with command: pytest {joined_params}\n\x1b[0m")
 
         pytest_result = pytest.main(self.test_parameters)
 

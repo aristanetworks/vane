@@ -35,6 +35,8 @@ pytest-json = "^0.4.0"
 pytest-xdist = "^3.2.1"
 pytest-mock = "^3.10.0"
 prompt-toolkit = "^3.0.39"
+tqdm = "^4.66.1"
+
 
 [tool.poetry.dev-dependencies]
 pylint = "2.17.0"

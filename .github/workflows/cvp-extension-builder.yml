@@ -118,7 +118,7 @@ jobs:
 
       - name: Create a vane-cvp distribution directory based on the version being built
         env:
-          PUB_BRANCH: ${{ contains(github.ref, ['main', 'develop']) }}
+          PUB_BRANCH: ${{ contains(fromJSON('["main", "develop"]'), github.ref) }}
         run: |
           version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
           if ${PUB_BRANCH} == true; then

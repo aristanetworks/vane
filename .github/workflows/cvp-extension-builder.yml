@@ -103,15 +103,73 @@ jobs:
         run: |
           make rpm-cvp
 
-      - name: Copy the installation scripts into the rpms directory for packaging
-        run: |
-          cp resources/vane-cvp-*.sh rpms/
-          chmod +x rpms/vane-cvp-*.sh
-          cd rpms
-          tar cvzf vane-cvp-rpm.tar.gz *.rpm vane-cvp-*.sh
+      # - name: Copy the installation scripts into the rpms directory for packaging
+      #   run: |
+      #     cp resources/vane-cvp-*.sh rpms/
+      #     chmod +x rpms/vane-cvp-*.sh
+      #     cd rpms
+      #     tar cvzf vane-cvp-rpm.tar.gz *.rpm vane-cvp-*.sh
+      #
+      # - name: Save the rpm package as an artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: vane-cvp-rpm
+      #     path: rpms/vane-cvp-rpm.tar.gz
 
-      - name: Save the rpm package as an artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: vane-cvp-rpm
-          path: rpms/vane-cvp-rpm.tar.gz
+      - name: Create a vane-cvp distribution directory based on the version being built
+        env:
+          PUB_BRANCH: ${{ contains(github.ref, ['main', 'develop']) }}
+        run: |
+          version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
+          if ${PUB_BRANCH} == true; then
+            tag=""
+          else
+            tag="provisional"
+          fi
+          distro_dir="vane-cvp-${version_str}${tag}"
+          mkdir ${distro_dir}
+          echo "distro_dir=${distro_dir}" >> $GITHUB_ENV
+
+      - name: Copy the installation scripts and the rpm into the distribution directory
+        run: |
+          cp resources/vane-cvp-*.sh ${env.distro_dir}/
+          cp rpms/*.rpm ${env.distro_dir}/
+
+      - name: Archive the distribution directory
+        run: |
+          tar czvf ${env.distro_dir}.tgz ${env.distro_dir}
+
+      - name: Save the tarball to the RPM branch
+        git status || true
+        git config --local user.name actions-user
+        git config --local user.email "actions@github.com"
+        #
+        # List the files in the repo
+        #
+        ls -la
+        #
+        # Show the current repo status
+        #
+        git status
+        #
+        # Remove all the files in the repo except the .git folder,
+        # the README file, and the coverage file. 'or' the command
+        # to true since it will fail when trying to delete '.' and '..'
+        #
+        shopt -s dotglob extglob
+        rm -rf !(.git|${env.distro_dir}.tgz) || true
+        #
+        if [ $(git ls-files --others | grep ${env.distro_dir}.tgz ) ] ; then
+          echo "Uploading new RPM package"
+          # XXX
+          # # Copy the version of README from the coverage-badge branch
+          # curl https://raw.githubusercontent.com/aristanetworks/vane/coverage-badge/README.md -o README.md
+          # Add and commit all the changes we just made, so we end up committing
+          # just the README and the coverage badge to the coverage-badge branch
+          git add --all
+          git status
+          # Make the commit, but it will not be saved in GitHub on the working branch
+          git commit -am "Uploading new RPM package"
+          # Push the commit to the rpm-packages branch (not to the working branch or develop)
+          git push -f origin ${{ github.ref }}:gar-rpm-packages
+        fi

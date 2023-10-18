@@ -60,12 +60,8 @@ class HardwareInventoryTests:
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{version_output}"
 
             if "vEOS" in version_output.get("modelName"):
-                # Skipping test case if the device is vEOS as the show command does
-                # not work on the vEOS devices.
-                tops.output_msg = (
-                    f"Skipping test case on {tops.dut_name} because the device is a vEOS device"
-                    f" and the `{tops.show_cmd}` command does not work on vEOS devices."
-                )
+                # Skipping test case if the device is vEOS.
+                tops.output_msg = f"{tops.dut_name} is a vEOS device, hence test case skipped."
                 tests_tools.post_process_skip(
                     tops, self.test_hardware_inventory_status, self.output
                 )

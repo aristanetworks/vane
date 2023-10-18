@@ -91,9 +91,9 @@ def test_walk_dir(logdebug, mocker):
     # This test will fail if ran locally
     files2 = [
         "test_definition.yaml",
+        "test_host.py",
         "test_definition_regenerated.yaml",
         "__init__.py",
-        "test_host.py",
     ]
 
     logdebug_calls = [

@@ -87,8 +87,6 @@ def test_walk_dir(logdebug, mocker):
     test_steps.walk_dir()
     mocker_object.assert_called_once()
 
-    # These files are unique to git actions ci environment
-    # This test will fail if ran locally
     files2 = [
         "__init__.py",
         "test_definition.yaml",

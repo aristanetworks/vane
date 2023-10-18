@@ -90,10 +90,10 @@ def test_walk_dir(logdebug, mocker):
     # These files are unique to git actions ci environment
     # This test will fail if ran locally
     files2 = [
+        "__init__.py",
         "test_definition.yaml",
         "test_definition_regenerated.yaml",
         "test_host.py",
-        "__init__.py",
     ]
 
     logdebug_calls = [
@@ -102,8 +102,8 @@ def test_walk_dir(logdebug, mocker):
         (f"Discovered files {files2} in directory {TEST_DIR}"),
         (f"Discovered test files: {TEST_FILE} for parsing"),
     ]
-    for c in logdebug_calls:
-        logdebug.assert_any_call(c)
+    for debug_msg in logdebug_calls:
+        logdebug.assert_any_call(debug_msg)
 
 
 def test_parse_file(loginfo, logdebug, mocker):

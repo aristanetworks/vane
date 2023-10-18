@@ -159,7 +159,7 @@ class EvpnRoutingTests:
                 if (show_bgp_command and "Not supported") in str(excep):
                     tops.output_msg = (
                         f"Skipping test case on {tops.dut_name} as {show_bgp_command} command"
-                        " unavailable, device might be in ribd mode."
+                        " is unavailable or device might be in ribd mode."
                     )
                     tests_tools.post_process_skip(
                         tops, self.test_routing_evpn_l2vni_imet, self.output
@@ -169,7 +169,7 @@ class EvpnRoutingTests:
             if "Interface does not exist" in str(excep):
                 # Skipping the testcase as Vxlan interfaces not configured / no L2 VNIs.
                 tops.output_msg = (
-                    f"Skipping test case on {tops.dut_name} as {vxlan_interface} interface does not"
+                    f"Skipping test case on {tops.dut_name} as interface {vxlan_interface} does not"
                     " exist / no L2 VNIs."
                 )
                 tests_tools.post_process_skip(tops, self.test_routing_evpn_l2vni_imet, self.output)

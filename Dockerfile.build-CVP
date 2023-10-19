@@ -24,11 +24,14 @@ ENV PS1='cvp-rpm-build # '
 RUN yum install -y yum-utils epel-release centos-release-scl-rh \
 	&& yum-config-manager --enable epel
 
+# Add this repo to enable installing git236, needed for packaging operations
+RUN rpm -U https://repo.ius.io/ius-release-el7.rpm
+
 # Update yum and install the needed packages
 #   Use skip-broken to bypass errors
 RUN yum -y update --skip-broken \
   && yum -y install --skip-broken \
-    git \
+    git236 \
     make \
     python3-pip \
     rpmdevtools \

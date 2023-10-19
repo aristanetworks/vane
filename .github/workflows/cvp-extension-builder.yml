@@ -87,7 +87,6 @@ jobs:
       # We can't use the CVP_BUILD_IMAGE variable here, because the context is not
       # available in the "job" scope
       image: ghcr.io/aristanetworks/vane-cvp-build:latest
-      options: --user root
 
     steps:
       - name: Check out the repository

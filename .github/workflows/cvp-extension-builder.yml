@@ -101,6 +101,7 @@ jobs:
 
       - name: Build the CVP rpm package
         run: |
+          ls -la
           make rpm-cvp
 
       # - name: Copy the installation scripts into the rpms directory for packaging
@@ -146,6 +147,8 @@ jobs:
 
       - name: Save the tarball to the RPM branch
         run: |
+          ls -la
+          pwd
           git status || true
           git config --local user.name actions-user
           git config --local user.email "actions@github.com"

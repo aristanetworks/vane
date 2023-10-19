@@ -124,20 +124,25 @@ jobs:
           if ${PUB_BRANCH} == true; then
             tag=""
           else
-            tag="provisional"
+            tag="-provisional"
           fi
           distro_dir="vane-cvp-${version_str}${tag}"
           mkdir ${distro_dir}
-          echo "distro_dir=${distro_dir}" >> $GITHUB_ENV
+          #
+          # Put the distro_dir in the environment
+          #
+          echo "DISTRO_DIR=${distro_dir}" >> $GITHUB_ENV
+          # XXX
+          ls -la
 
       - name: Copy the installation scripts and the rpm into the distribution directory
         run: |
-          cp resources/vane-cvp-*.sh ${env.distro_dir}/
-          cp rpms/*.rpm ${env.distro_dir}/
+          cp resources/vane-cvp-*.sh ${DISTRO_DIR}/
+          cp rpms/*.rpm ${DISTRO_DIR}/
 
       - name: Archive the distribution directory
         run: |
-          tar czvf ${env.distro_dir}.tgz ${env.distro_dir}
+          tar czvf ${DISTRO_DIR}.tgz ${DISTRO_DIR}
 
       - name: Save the tarball to the RPM branch
         run: |
@@ -158,9 +163,9 @@ jobs:
           # to true since it will fail when trying to delete '.' and '..'
           #
           shopt -s dotglob extglob
-          rm -rf !(.git|${env.distro_dir}.tgz) || true
+          rm -rf !(.git|${DISTRO_DIR}.tgz) || true
           #
-          if [ $(git ls-files --others | grep ${env.distro_dir}.tgz ) ] ; then
+          if [ $(git ls-files --others | grep ${DISTRO_DIR}) ] ; then
             echo "Uploading new RPM package"
             # XXX
             # # Copy the version of README from the coverage-badge branch

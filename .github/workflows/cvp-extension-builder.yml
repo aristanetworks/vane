@@ -206,6 +206,8 @@ jobs:
 
       - name: Save the tarball to the RPM branch
         run: |
+          git config --global --add safe.directory /__w/vane/vane
+          pwd
           #
           # Define the vane_package name
           #

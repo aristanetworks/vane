@@ -11,15 +11,18 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Set the prompt
 ENV PS1='cvp-rpm-build # '
 
-# Disable the mirrorlist because they are useless
-RUN sed -i 's/^mirrorlist=/#mirrorlist=/' /etc/yum.repos.d/CentOS-Base.repo \
-  && sed -i 's/^#baseurl=/baseurl=/' /etc/yum.repos.d/CentOS-Base.repo
+# # Disable the mirrorlist because they are useless
+# RUN sed -i 's/^mirrorlist=/#mirrorlist=/' /etc/yum.repos.d/CentOS-Base.repo \
+#   && sed -i 's/^#baseurl=/baseurl=/' /etc/yum.repos.d/CentOS-Base.repo
+#
+# # Yum
+# RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
+#   && yum localinstall -y https://yum.jc21.com/jc21-yum.rpm \
+#   && yum -y install deltarpm centos-release-scl \
+#   && yum-config-manager --enable rhel-server-rhscl-7-rpms
 
-# Yum
-RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
-  && yum localinstall -y https://yum.jc21.com/jc21-yum.rpm \
-  && yum -y install deltarpm centos-release-scl \
-  && yum-config-manager --enable rhel-server-rhscl-7-rpms
+RUN yum install -y yum-utils epel-release centos-release-scl-rh \
+	&& yum-config-manager --enable epel
 
 # Update yum and install the needed packages
 #   Use skip-broken to bypass errors

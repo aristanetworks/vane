@@ -19,6 +19,9 @@ set -e
 
 divider="\n--------------------------------------------------------------\n"
 
+# Get the path to where the script is located
+script_path=$(dirname "$0")
+
 function exit_trap {
   # Check the failed command. If it was an exit command, we finished what we were doing.
   # Otherwise, log the command and the error code.
@@ -39,7 +42,7 @@ trap exit_trap EXIT
 echo -e $divider
 echo -e "Install the rpm\n"
 rm -f /home/cvp/vane-cvp*.rpm
-cp /root/vane-cvp*.rpm /home/cvp/
+cp ${script_path}/vane-cvp*.rpm /home/cvp/
 cvpi install -f /home/cvp/vane-cvp*.rpm
 rm -f /home/cvp/vane-cvp*.rpm
 

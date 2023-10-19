@@ -29,9 +29,65 @@ env:
 # Job definitions
 jobs:
 
+  # Create the RPM package and upload the package as an artifact
+  test_git_commands:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        # with:
+        #   fetch-depth: 0
+
+      - name: Save the tarball to the RPM branch
+        run: |
+          ls -la
+          pwd
+          git status || true
+          git config user.name actions-user
+          git config user.email "actions@github.com"
+          #
+          # List the files in the repo
+          #
+          ls -la
+          #
+          # edit a file
+          #
+          echo "blah" > gartest.txt
+          #
+          # Show the current repo status
+          #
+          git status
+          #
+          # Remove all the files in the repo except the .git folder,
+          # the README file, and the test file. 'or' the command
+          # to true since it will fail when trying to delete '.' and '..'
+          #
+          shopt -s dotglob extglob
+          rm -rf !(.git|gartest.txt) || true
+          #
+          if [ $(git ls-files --others | grep gartest.txt) ] ; then
+            echo "Uploading new RPM package"
+            # XXX
+            # # Copy the version of README from the coverage-badge branch
+            # curl https://raw.githubusercontent.com/aristanetworks/vane/coverage-badge/README.md -o README.md
+            # Add and commit all the changes we just made, so we end up committing
+            # just the README and the distribution package to the rpm-packages branch
+            git add --all
+            git status
+            # Make the commit, but it will not be saved in GitHub on the working branch
+            git commit -am "Uploading new RPM package"
+            # Push the commit to the rpm-packages branch (not to the working branch or develop)
+            git push -f origin ${{ github.ref }}:gar-rpm-packages
+          fi
+
   # Create the container we use to build the RPM
   #   This is a Centos container to match the CVP environment
   create_centos_build_container:
+
+    # XXX
+    needs: [test_git_commands]
 
     runs-on: ubuntu-latest
     steps:
@@ -55,6 +111,9 @@ jobs:
   # Create the container that will be running in the CVP environment
   #   This is a minimal container with Vane and its requirements installed
   create_cvp_container:
+
+    # XXX
+    needs: [test_git_commands]
 
     runs-on: ubuntu-latest
     steps:

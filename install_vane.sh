@@ -2,7 +2,7 @@
 
 # Declare global variables
 
-# initialising variables for color formatting messages
+# Initialising variables for color formatting messages
 
 default="\e[0m"
 yellow="\e[33m"
@@ -119,50 +119,69 @@ if ! command -v python3.9 &>/dev/null; then
         echo -e  "${red}Failed to install Python3.9. Exiting script.${default}"
         exit 1  # Exit the script with a non-zero status
     fi
-
 else
     echo -e  "${yellow}Python 3.9 is already installed.${default}"
 fi
 
-# (5) Check if Poetry is installed using pip3
-if pip3 show poetry &>/dev/null; then
+# (5) Check if Poetry is installed
+if poetry --version &>/dev/null; then
     echo -e  "${yellow}Poetry is already installed.${default}"
+    poetry="poetry"
 else
-    echo -e  "${yellow}Poetry is not installed. Installing Poetry 1.4.2 via pipx${default}"
-    if command -v pipx &> /dev/null; then
-        echo -e  "${yellow}pipx is already installed${default}"
+    echo -e  "${yellow}Poetry is not installed. Installing Poetry via installation script${default}"
+    # Check if curl exists on the system
+    if command -v curl &> /dev/null; then
+        echo -e "${green}Curl is already installed on your system.${default}"
     else
-        echo -e  "${yellow}pipx is not installed. Installing pipx via pip${default}"
-        python3 -m pip install --user pipx
+        echo -e "${yellow}Curl is not installed on your system. Installing curl.${default}"
+        # Installing curl
+        $PACKAGE_MANAGER install $INSTALL_OPTION curl
+        # Check if curl installation was succesfull
         if [ $? -eq 0 ]; then
-            echo -e  "${green}pipx installed successfully.${default}"
+            echo -e "${green}Curl installation was successful.${default}"
         else
-            echo -e  "${red}Failed to install pipx. Exiting script.${default}"
+            echo -e  "${red}Failed to install Curl. Exiting script.${default}"
             exit 1  # Exit the script with a non-zero status
         fi
     fi
-    echo -e "${yellow}Adding pipx to PATH environment variable${default}"
-    python3 -m pipx ensurepath
-    pipx install poetry==1.4.2
-    # Error handling in case poetry is not installed correctly
+    # Install poetry
+    curl -sSL https://install.python-poetry.org | python3.9 -
+    # Check if installation of poetry was succesfull
     if [ $? -eq 0 ]; then
-        echo -e  "${green}Poetry installed successfully.${default}"
+        echo -e  "${green}Poetry installed successfully by curling installation script.${default}"
     else
         echo -e  "${red}Failed to install Poetry. Exiting script.${default}"
         exit 1  # Exit the script with a non-zero status
+    fi
+    current_user=$(whoami)
+    # Initialise the path of poetry bin (where poetry got installed)
+    # depending on the user
+    if [ "$current_user" == "root" ]; then
+        poetry="/root/.local/bin/poetry"
+        echo -e  "${green}Invoking Poetry using ${poetry}.${default}"
+    else
+        poetry="/home/${current_user}/.local/bin/poetry"
+        echo -e  "${green}Invoking Poetry using ${poetry}.${default}"
     fi
 fi
 
 # (6) Set up virtual environment in downloaded vane folder
 cd $DESTINATION_FOLDER
-echo -e  "${yellow}cd $DESTINATION_FOLDER${default}"
+echo -e  "${yellow}Entering $DESTINATION_FOLDER folder${default}"
 path=$(pwd)
-poetry config virtualenvs.path "$path"
+$poetry config virtualenvs.path "$path"
 python=$(command -v python3.9)
-poetry env use "$python"
+$poetry env use "$python"
+# Check if python virtual environment got created with correct version
+if [ $? -eq 0 ]; then
+        echo -e  "${green}Python version set correctly.${default}"
+    else
+        echo -e  "${red}Failed to set Python version for environment correctly. exiting script${default}"
+        exit 1  # Exit the script with a non-zero status
+fi
 echo -e  "${green}Activating the poetry virtual environment${default}"
-poetry install 
+$poetry install 
 
 # (7) Activate poetry environment within the root folder
 echo -e  "${green}Entering the poetry virtual environment${default}"
-poetry shell
+$poetry shell

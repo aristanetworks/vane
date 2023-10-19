@@ -149,7 +149,7 @@ jobs:
         run: |
           ls -la
           pwd
-          # git status || true
+          git status || true
           git config --local user.name actions-user
           git config --local user.email "actions@github.com"
           #

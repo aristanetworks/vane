@@ -51,12 +51,12 @@ class CoreDumpFilesTests:
             self.output = f"Output of {tops.show_cmd} command is:\n{core_dump}"
             core_dump = core_dump["coreFiles"]
 
-            # If arBGP is enabled then ignoring minidump directory
-            if core_dump == ["minidump"]:
-                core_dump = []
+            # If arBGP is enabled then ignore minidump directory
+            if "minidump" in core_dump:
+                core_dump.remove("minidump")
             tops.actual_output["core_dump_files_not_found"] = not bool(core_dump)
 
-            # Output message formation in case test case fails.
+            # Output message formation in case the test case fails.
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = "Core dump files are found on the device."
 

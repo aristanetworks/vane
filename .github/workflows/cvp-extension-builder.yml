@@ -150,8 +150,6 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
-        # with:
-        #   fetch-depth: 0
 
       - name: Download the CVP Vane image file artifact we created in the previous job
         uses: actions/download-artifact@v3
@@ -169,85 +167,93 @@ jobs:
       #     chmod +x rpms/vane-cvp-*.sh
       #     cd rpms
       #     tar cvzf vane-cvp-rpm.tar.gz *.rpm vane-cvp-*.sh
-      #
-      # - name: Save the rpm package as an artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: vane-cvp-rpm
-      #     path: rpms/vane-cvp-rpm.tar.gz
 
       - name: Create a vane-cvp distribution directory based on the version being built
         env:
+          # Check if we are on a published branch (main or develop)
           PUB_BRANCH: ${{ contains(fromJSON('["main", "develop"]'), github.ref) }}
         run: |
           version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
           if ${PUB_BRANCH} == true; then
+            # If on a published branch, the tag is empty
             tag=""
           else
+            # If not on a published branch, append "-provisional" to the distribution name
             tag="-provisional"
           fi
-          distro_dir="vane-cvp-${version_str}${tag}"
-          mkdir ${distro_dir}
           #
-          # Put the distro_dir in the environment
+          # Create the distribution directory
           #
-          echo "DISTRO_DIR=${distro_dir}" >> $GITHUB_ENV
-          # XXX
+          dist_name="vane-cvp-${version_str}${tag}"
+          mkdir ${dist_name}
+          #
+          # List the current directory to show the newly created directory
+          #
           ls -la
+          #
+          # Put the dist_name in the environment as DIST_NAME
+          #
+          echo "DIST_NAME=${dist_name}" >> $GITHUB_ENV
 
       - name: Copy the installation scripts and the rpm into the distribution directory
         run: |
-          cp resources/vane-cvp-*.sh ${DISTRO_DIR}/
-          cp rpms/*.rpm ${DISTRO_DIR}/
+          cp resources/vane-cvp-*.sh ${DIST_NAME}/
+          cp rpms/*.rpm ${DIST_NAME}/
 
       - name: Archive the distribution directory
         run: |
-          tar czvf ${DISTRO_DIR}.tgz ${DISTRO_DIR}
+          tar czvf ${DIST_NAME}.tgz ${DIST_NAME}
 
-      - name: Save the tarball to the RPM branch
-        run: |
-          git config --global --add safe.directory /__w/vane/vane
-          pwd
-          #
-          # Define the vane_package name
-          #
-          vane_package=${DISTRO_DIR}.tgz
-          #
-          # Set some git values
-          #
-          git status || true
-          git config user.name actions-user
-          git config user.email "actions@github.com"
-          #
-          # List the files in the repo
-          #
-          ls -la
-          #
-          # Show the current repo status
-          #
-          git status
-          #
-          # Remove all the files in the repo except the .git folder,
-          # the README file, and the coverage file. 'or' the command
-          # to true since it will fail when trying to delete '.' and '..'
-          #
-          shopt -s dotglob extglob
-          rm -rf !(.git|${vane_package}) || true
-          #
-          # If the vane_package exists, push it to the rpm-packages branch
-          #
-          if [ $(git ls-files --others | grep ${vane_package}) ] ; then
-            echo "Uploading new RPM package"
-            # XXX
-            # Copy the version of README from the rpm-packages branch
-            #
-            # curl https://raw.githubusercontent.com/aristanetworks/vane/coverage-badge/README.md -o README.md
-            # Add and commit all the changes we just made, so we end up committing
-            # just the README and the RPM package to the coverage-badge branch
-            git add --all
-            git status
-            # Make the commit, but it will not be saved in GitHub on the working branch
-            git commit -am "Uploading new RPM package"
-            # Push the commit to the rpm-packages branch (not to the working branch or develop)
-            git push -f origin ${{ github.ref }}:gar-rpm-packages
-          fi
+      - name: Save the rpm package as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.DIST_NAME }}
+          path: ${{ env.DIST_NAME }}.tgz
+
+      # - name: Save the tarball to the RPM branch
+      #   run: |
+      #     git config --global --add safe.directory /__w/vane/vane
+      #     pwd
+      #     #
+      #     # Define the vane_package name
+      #     #
+      #     vane_package=${DIST_NAME}.tgz
+      #     #
+      #     # Set some git values
+      #     #
+      #     git status || true
+      #     git config user.name actions-user
+      #     git config user.email "actions@github.com"
+      #     #
+      #     # List the files in the repo
+      #     #
+      #     ls -la
+      #     #
+      #     # Show the current repo status
+      #     #
+      #     git status
+      #     #
+      #     # Remove all the files in the repo except the .git folder,
+      #     # the README file, and the coverage file. 'or' the command
+      #     # to true since it will fail when trying to delete '.' and '..'
+      #     #
+      #     shopt -s dotglob extglob
+      #     rm -rf !(.git|${vane_package}) || true
+      #     #
+      #     # If the vane_package exists, push it to the rpm-packages branch
+      #     #
+      #     if [ $(git ls-files --others | grep ${vane_package}) ] ; then
+      #       echo "Uploading new RPM package"
+      #       # XXX
+      #       # Copy the version of README from the rpm-packages branch
+      #       #
+      #       # curl https://raw.githubusercontent.com/aristanetworks/vane/coverage-badge/README.md -o README.md
+      #       # Add and commit all the changes we just made, so we end up committing
+      #       # just the README and the RPM package to the coverage-badge branch
+      #       git add --all
+      #       git status
+      #       # Make the commit, but it will not be saved in GitHub on the working branch
+      #       git commit -am "Uploading new RPM package"
+      #       # Push the commit to the rpm-packages branch (not to the working branch or develop)
+      #       git push -f origin ${{ github.ref }}:gar-rpm-packages
+      #     fi

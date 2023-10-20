@@ -44,7 +44,8 @@ import yaml
 
 from jinja2 import Template
 from pyeapi.eapilib import EapiError
-from vane import config, device_interface
+from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
+from vane import config, device_interface, ixia
 from vane.vane_logging import logging
 from vane.utils import render_cmds
 
@@ -1533,6 +1534,110 @@ class TestOps:
         except OSError:
             pass
         return result
+
+    # def setup_ixia(self, ixia_configuration):
+    #     """Module to call configure_ixia api which authenticates and
+    #     configures ixia and returns back traffic statistics
+
+    #     Args:
+    #         ixia_configuration (str): path of ixia config file
+
+    #     Returns:
+    #         traffic_item_stats (list): traffic stats collected from traffic generation
+    #         flow_stats (list): flow stats collected from traffic generation
+    #     """
+
+    #     traffic_item_stats, flow_stats = self.configure_ixia(ixia_configuration)
+
+    #     # If setting up of ixia was successful
+
+    #     if traffic_item_stats and flow_stats:
+
+    #         return traffic_item_stats, flow_stats
+
+    #     # If Ixia setup failed, default values of (None,None) will be used
+    #     # which when passed to the test case cause it to be skipped
+
+    #     else:
+
+    #         return None, None
+
+    def setup_ixia(self, ixia_configuration):
+        """Module to authenticate into Ixia Web Api, configure a session
+        with passed in configuration file, generate traffic and return
+        traffic and flow stats to validate test criteria
+
+        Args:
+            ixia_configuration (str): path of ixia config file
+
+        Returns:
+            traffic_item_stats (list): traffic stats collected from traffic generation
+            flow_stats (list): flow stats collected from traffic generation"""
+
+        ixia_traffic_item_stats = []
+        self.traffic_item_stats = []
+        ixia_flow_stats = []
+        self.flow_stats = []
+        ix_network = None
+        session = None
+
+        try:
+            # Module 1 : Authentication: Connect to the IxNetwork API Server
+
+            session, ix_network = ixia.authenticate()
+
+            # Module 2 : Configuration
+
+            ix_network = ixia.configure(ix_network, ixia_configuration)
+
+            # Module 3 : Generating traffic
+
+            ix_network = ixia.generate_traffic(ix_network)
+
+            # Get the traffic item and flow statistics
+
+            ixia_traffic_item_stats = StatViewAssistant(ix_network, "Traffic Item Statistics")
+
+            ixia_flow_stats = StatViewAssistant(ix_network, "Flow Statistics")
+
+            # Generate a deep copy of traffic and flow stats to store in tops object
+
+            # TODO: CHECK TRANSLATION OF DATA # pylint: disable=W0511
+
+            index = 0
+            for traffic_item_stat in ixia_traffic_item_stats.Rows:
+                self.traffic_item_stats.append({})
+                for column, data in zip(
+                    traffic_item_stat._column_headers, traffic_item_stat._row_data[0]
+                ):
+                    self.traffic_item_stats[index].update({column: data})
+                index += 1
+
+            index = 0
+            for flow_stat in ixia_flow_stats.Rows:
+                self.flow_stats.append({})
+                for column, data in zip(flow_stat._column_headers, flow_stat._row_data[0]):
+                    self.flow_stats[index].update({column: data})
+                index += 1
+
+        except Exception as exception:  # pylint: disable=W0718
+            logging.error(
+                f"Exception: Setting up of Ixia errored out due"
+                f"to the following reason: {format(exception)}"
+            )
+
+        finally:
+            logging.info("Checking if there is a session to be cleared")
+
+            if (ix_network and session) is not None:
+                # TODO: OTHER OPTION IS TO CLEAR LATER,  # pylint: disable=W0511
+                # WHICH THEN INVOLVES US HAVING TO WRITE
+                # EVIDENCE TO SOME FILE AND NOT HAVING TO TRANSLATE DATA
+
+                ixia.clear_session(ix_network, session)
+
+            else:
+                logging.info("No Session to clear")
 
 
 def post_process_skip(tops, steps, output=""):

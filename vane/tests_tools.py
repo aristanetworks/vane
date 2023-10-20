@@ -1535,33 +1535,6 @@ class TestOps:
             pass
         return result
 
-    # def setup_ixia(self, ixia_configuration):
-    #     """Module to call configure_ixia api which authenticates and
-    #     configures ixia and returns back traffic statistics
-
-    #     Args:
-    #         ixia_configuration (str): path of ixia config file
-
-    #     Returns:
-    #         traffic_item_stats (list): traffic stats collected from traffic generation
-    #         flow_stats (list): flow stats collected from traffic generation
-    #     """
-
-    #     traffic_item_stats, flow_stats = self.configure_ixia(ixia_configuration)
-
-    #     # If setting up of ixia was successful
-
-    #     if traffic_item_stats and flow_stats:
-
-    #         return traffic_item_stats, flow_stats
-
-    #     # If Ixia setup failed, default values of (None,None) will be used
-    #     # which when passed to the test case cause it to be skipped
-
-    #     else:
-
-    #         return None, None
-
     def setup_ixia(self, ixia_configuration):
         """Module to authenticate into Ixia Web Api, configure a session
         with passed in configuration file, generate traffic and return

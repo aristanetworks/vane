@@ -1,7 +1,5 @@
-# This is a sample duts.yaml file which can be used to run vane.
-# This file has been generated from the Vane Demo Lab Topology.
-# Explore the vane --help command options to view ways to 
-# generate a duts.yaml from customized topologies.
+# This is a sample duts.yaml file showing how
+# ixia information should be inputted
 
 duts:
 - mgmt_ip: aa.bbb.ccc.dd

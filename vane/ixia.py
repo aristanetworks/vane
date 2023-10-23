@@ -31,12 +31,13 @@
 
 """Ixia modules to interact with IXIA API"""
 
+import time
 from ixnetwork_restpy.testplatform.testplatform import TestPlatform
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from ixnetwork_restpy.files import Files
 from vane.vane_logging import logging
 from vane import config
-import time
+
 
 """
 Module 1
@@ -47,23 +48,22 @@ starts a session after specifying license details
 
 
 def authenticate():
-    # Initialise credentials and other details required to connect to Ixia Web API
+    """Initialise credentials and other details required
+    to connect to Ixia Web API"""
 
-    API_SERVER_IP = config.test_duts["ixia"][0]["api_server_ip"]
-    LICENSING_SERVERS = config.test_duts["ixia"][0]["licensing_servers_ip"]
-    LICENSING_MODE = config.test_duts["ixia"][0]["licensing_mode"]
-    LICENSING_TIER = config.test_duts["ixia"][0]["licensing_tier"]
-    REST_PORT = config.test_duts["ixia"][0]["rest_port"]
-    USERNAME = config.test_duts["ixia"][0]["username"]
-    PASSWORD = config.test_duts["ixia"][0]["password"]
+    api_server_ip = config.test_duts["ixia"][0]["api_server_ip"]
+    licensing_servers = config.test_duts["ixia"][0]["licensing_servers_ip"]
+    licensing_mode = config.test_duts["ixia"][0]["licensing_mode"]
+    licensing_tier = config.test_duts["ixia"][0]["licensing_tier"]
+    rest_port = config.test_duts["ixia"][0]["rest_port"]
+    username = config.test_duts["ixia"][0]["username"]
+    password = config.test_duts["ixia"][0]["password"]
 
     # Connect to the IxNetwork API Server
 
     logging.info("Authenticating into Ixia API")
 
-    api_server_ip = API_SERVER_IP
-
-    test_platform = TestPlatform(api_server_ip, rest_port=REST_PORT)
+    test_platform = TestPlatform(api_server_ip, rest_port=rest_port)
 
     # Set the console output verbosity (none, info, request, request_response)
 
@@ -71,30 +71,31 @@ def authenticate():
 
     # Authenticate with the Linux-based API server and start a new session
 
-    # TODO: Handle passing in credentials to Ixia (Single user, multiple users)
+    # TODO: Handle passing in credentials to Ixia # pylint: disable=W0511
+    # (Single user, multiple users)
     # Affects the handling of shared resources
 
-    test_platform.Authenticate(USERNAME, PASSWORD)
+    test_platform.Authenticate(username, password)
 
     new_session = test_platform.Sessions.add()
 
-    ixNetwork = new_session.Ixnetwork
+    ix_network = new_session.Ixnetwork
 
-    ixNetwork.NewConfig()
+    ix_network.NewConfig()
 
     # Specify the license server details
 
-    ixNetwork.Globals.Licensing.LicensingServers = [LICENSING_SERVERS]
+    ix_network.Globals.Licensing.LicensingServers = [licensing_servers]
 
     # Specify the license mode (mixed, subscription, perpetual)
 
-    ixNetwork.Globals.Licensing.Mode = LICENSING_MODE
+    ix_network.Globals.Licensing.Mode = licensing_mode
 
     # Specify the license tier (tier1, tier2, tier3, tier3-10g, etc.)
 
-    ixNetwork.Globals.Licensing.Tier = LICENSING_TIER
+    ix_network.Globals.Licensing.Tier = licensing_tier
 
-    return new_session, ixNetwork
+    return new_session, ix_network
 
 
 """
@@ -105,37 +106,37 @@ Starts and verifies protocols
 """
 
 
-def configure(ixNetwork, fileName):
-    # Load the saved configuration :
-    # Sets up the physical ports, the stacks to be tested,
-    # and the traffic item details
+def configure(ix_network, file_name):
+    """Load the saved configuration :
+    Sets up the physical ports, the stacks to be tested,
+    and the traffic item details"""
 
     logging.info("Loading in test config")
 
-    ixNetwork.LoadConfig(Files(fileName))
+    ix_network.LoadConfig(Files(file_name))
 
     # Connect to ports and error out if port is already occupied
 
-    ports = ixNetwork.Vport.find()
+    ports = ix_network.Vport.find()
     ports.ConnectPorts(False)
 
     # Start the protocols
 
     logging.info("Starting Protocols")
 
-    ixNetwork.StartAllProtocols(Arg1="sync")
+    ix_network.StartAllProtocols(Arg1="sync")
 
     # Verify generic protocol sessions
 
-    protocols = StatViewAssistant(ixNetwork, "Protocols Summary")
+    protocols = StatViewAssistant(ix_network, "Protocols Summary")
 
     protocols.CheckCondition("Sessions Not Started", StatViewAssistant.EQUAL, 0)
 
     protocols.CheckCondition("Sessions Down", StatViewAssistant.EQUAL, 0)
 
-    logging.info("Protocols Summary Statistics:\n%s" % protocols)
+    logging.info(f"Protocols Summary Statistics:\n{protocols}")
 
-    return ixNetwork
+    return ix_network
 
 
 """
@@ -145,26 +146,26 @@ Generates and starts traffic
 """
 
 
-def generate_traffic(ixNetwork):
-    # Generate, apply and start the traffic item
+def generate_traffic(ix_network):
+    """Generate, apply and start the traffic item"""
 
     logging.info("Starting Traffic generation")
 
-    traffic_item = ixNetwork.Traffic.TrafficItem.find()
+    traffic_item = ix_network.Traffic.TrafficItem.find()
 
     traffic_item.Generate()
 
-    ixNetwork.Traffic.Apply()
+    ix_network.Traffic.Apply()
 
     time.sleep(5)
 
-    ixNetwork.Traffic.Start()
+    ix_network.Traffic.Start()
 
-    # TODO: Decide on how to handle continuous traffic if allowed
+    # TODO: Decide on how to handle continuous traffic if allowed # pylint: disable=W0511
 
     # We can loop and check the state of the traffic item until the transmission stops
 
-    while ixNetwork.Traffic.State in [
+    while ix_network.Traffic.State in [
         "started",
         "startedWaitingForStats",
         "startedWaitingForStreams",
@@ -175,7 +176,7 @@ def generate_traffic(ixNetwork):
 
     logging.info("Stopped Traffic Generation")
 
-    return ixNetwork
+    return ix_network
 
 
 """
@@ -185,11 +186,12 @@ Releases the ports and clears the session
 """
 
 
-def clear_session(ixNetwork, session):
+def clear_session(ix_network, session):
+    """Clears the Ixia seassion and releases the ports occupied"""
     logging.info("Clearing Session")
 
     if "ixNetwork" in locals():
-        ixNetwork.Vport.find().ReleasePort()
+        ix_network.Vport.find().ReleasePort()
 
     if "session" in locals():
         session.remove()

@@ -45,6 +45,7 @@ test1_ids = dut_parameters["test_basic_ixia_setup"]["ids"]
 
 logging = test_case_logger.setup_logger(__file__)
 
+
 class IxiaTests:
     """Ixia Sample Test"""
 
@@ -55,12 +56,12 @@ class IxiaTests:
         # Create tops object
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
-        # TODO: This config file may vary per dut basis [fixme]
+        # TODO: This config file may vary per dut basis # pylint: disable=W0511
         # Retrieve configuration file for the dut
         ixia_configuration = tops.test_parameters["configuration_file"]
 
         # Call to start Ixia traffic generation and collect traffic/flow stats
-        # This needs to happen per dut basis since configuration file of ixia 
+        # This needs to happen per dut basis since configuration file of ixia
         # might differ from one dut to another
 
         # API takes in configuration file and modifies tops object to store ixia stats
@@ -70,33 +71,28 @@ class IxiaTests:
 
         # Check if Ixia ran into an error to gracefully exit the test
         if not (tops.traffic_item_stats and tops.flow_stats):
-            message = "Skipping the test case because an error was encountered while setting up ixia"
+            message = (
+                "Skipping the test case because an error was encountered while setting up ixia"
+            )
             logging.info(message)
             pytest.skip(reason=message)
 
         # Implement test case specific logic
 
         for stat in tops.traffic_item_stats:
-                logging.info("Traffic Item Statistics:\n{}".format(stat))
-                if float(stat["Loss %"]) > 0:
-                    logging.info(
-                        "There was a packet loss of {}% in the traffic.\n".format(stat["Loss %"])
-                    )
+            logging.info(f"Traffic Item Statistics:\n{format(stat)}")
+            if float(stat["Loss %"]) > 0:
+                loss = format(stat["Loss %"])
+                logging.info(f"There was a packet loss of {loss}% in the traffic.\n")
 
         for flow_stat in tops.flow_stats:
-                logging.info("Flow Statistics:\n{}\n".format(flow_stat))
-                if float(flow_stat["Loss %"]) > 0:
-                    logging.info(
-                        "Endpoint pair {0} suffered a packet loss of {1}%\n".format(
-                            flow_stat["Source/Dest Value Pair"], flow_stat["Loss %"]
-                        )
-                    )
+            logging.info(f"Flow Statistics:\n{format(flow_stat)}\n")
+            if float(flow_stat["Loss %"]) > 0:
+                pair = format(flow_stat["Source/Dest Value Pair"])
+                loss = format(flow_stat["Loss %"])
+                logging.info(f"Endpoint pair {pair} suffered a packet loss of {loss}%\n")
 
         assert tops.traffic_item_stats[0]["Tx Frames"] == "1000"
         assert tops.traffic_item_stats[0]["Rx Frames"] == "1000"
         assert tops.traffic_item_stats[0]["Loss %"] == "0.000"
         assert tops.flow_stats[0]["Traffic Item"] == "Traffic Item 1"
-
-        
-
-

@@ -1581,7 +1581,7 @@ class TestOps:
             for traffic_item_stat in ixia_traffic_item_stats.Rows:
                 self.traffic_item_stats.append({})
                 for column, data in zip(
-                    traffic_item_stat._column_headers, traffic_item_stat._row_data[0]
+                    traffic_item_stat.Columns(), traffic_item_stat.RowData()[0]
                 ):
                     self.traffic_item_stats[index].update({column: data})
                 index += 1
@@ -1589,7 +1589,7 @@ class TestOps:
             index = 0
             for flow_stat in ixia_flow_stats.Rows:
                 self.flow_stats.append({})
-                for column, data in zip(flow_stat._column_headers, flow_stat._row_data[0]):
+                for column, data in zip(flow_stat.Columns(), flow_stat.RowData()[0]):
                     self.flow_stats[index].update({column: data})
                 index += 1
 

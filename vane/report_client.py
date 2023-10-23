@@ -1190,7 +1190,6 @@ class ReportClient:
                     else:
                         suite_result["total_fail"] += 1
 
-
             logging.debug(f"Compiled test suite data: {suite_result}")
             suite_results.append(suite_result)
 

@@ -1,5 +1,5 @@
 # This is a sample duts.yaml file showing how
-# ixia information should be inputted
+# traffic generator (eg.ixia) information should be inputted
 
 duts:
 - mgmt_ip: aa.bbb.ccc.dd
@@ -25,8 +25,9 @@ duts:
 # To connect to Ixia via test cases, add the following information to your duts file
 # in the following format
 
-ixia:
-- api_server_ip: IXIA_API_SERVER_IP
+traffic_generators:
+- type: ixia
+  api_server_ip: IXIA_API_SERVER_IP
   licensing_servers_ip: LICENSE_IP
   licensing_mode: LICENSING MODE # eg - subscription
   licensing_tier: LICENSING TIER # eg - tier3-10g

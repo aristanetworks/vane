@@ -45,7 +45,7 @@ import yaml
 from jinja2 import Template
 from pyeapi.eapilib import EapiError
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
-from vane import config, device_interface, ixia
+from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
 from vane.utils import render_cmds
 
@@ -1557,15 +1557,15 @@ class TestOps:
         try:
             # Module 1 : Authentication: Connect to the IxNetwork API Server
 
-            session, ix_network = ixia.authenticate()
+            session, ix_network = ixia_interface.authenticate()
 
             # Module 2 : Configuration
 
-            ix_network = ixia.configure(ix_network, ixia_configuration)
+            ix_network = ixia_interface.configure(ix_network, ixia_configuration)
 
             # Module 3 : Generating traffic
 
-            ix_network = ixia.generate_traffic(ix_network)
+            ix_network = ixia_interface.generate_traffic(ix_network)
 
             # Get the traffic item and flow statistics
 
@@ -1605,7 +1605,7 @@ class TestOps:
                 # WHICH THEN INVOLVES US HAVING TO WRITE
                 # EVIDENCE TO SOME FILE AND NOT HAVING TO TRANSLATE DATA
 
-                ixia.clear_session(ix_network, session)
+                ixia_interface.clear_session(ix_network, session)
 
             else:
                 logging.info("No Session to clear")

@@ -51,13 +51,13 @@ def authenticate():
     """Initialise credentials and other details required
     to connect to Ixia Web API"""
 
-    api_server_ip = config.test_duts["ixia"][0]["api_server_ip"]
-    licensing_servers = config.test_duts["ixia"][0]["licensing_servers_ip"]
-    licensing_mode = config.test_duts["ixia"][0]["licensing_mode"]
-    licensing_tier = config.test_duts["ixia"][0]["licensing_tier"]
-    rest_port = config.test_duts["ixia"][0]["rest_port"]
-    username = config.test_duts["ixia"][0]["username"]
-    password = config.test_duts["ixia"][0]["password"]
+    api_server_ip = config.test_duts["traffic_generators"][0]["api_server_ip"]
+    licensing_servers = config.test_duts["traffic_generators"][0]["licensing_servers_ip"]
+    licensing_mode = config.test_duts["traffic_generators"][0]["licensing_mode"]
+    licensing_tier = config.test_duts["traffic_generators"][0]["licensing_tier"]
+    rest_port = config.test_duts["traffic_generators"][0]["rest_port"]
+    username = config.test_duts["traffic_generators"][0]["username"]
+    password = config.test_duts["traffic_generators"][0]["password"]
 
     # Connect to the IxNetwork API Server
 

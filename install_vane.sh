@@ -20,6 +20,10 @@ fi
 DEFAULT+="vane"
 DESTINATION_FOLDER+=$DEFAULT
 
+function remove_vane() {
+    echo -e  "${yellow}Enter yes below to remove the cloned vane repo${default}"
+    rm -r $DESTINATION_FOLDER
+}
 
 # (1) Check if Git is installed
 if command -v git &>/dev/null; then
@@ -46,6 +50,7 @@ if command -v python3.9 &>/dev/null; then
     echo -e  "${green}Python 3.9 is installed.${default}"
 else
     echo -e  "${red}Python 3.9 is not installed. Install Python 3.9 before running the script${default}"
+    remove_vane
     exit 1
 fi
 
@@ -61,6 +66,7 @@ else
         echo -e "${green}Curl is installed on your system.${default}"
     else
         echo -e  "${red}Curl is not installed. Install Curl before running the script in order to be able to install Poetry.${default}"
+        remove_vane
         exit 1  # Exit the script with a non-zero status
         # fi
     fi
@@ -71,6 +77,7 @@ else
         echo -e  "${green}Poetry installed successfully by curling installation script.${default}"
     else
         echo -e  "${red}Failed to install Poetry. Exiting script.${default}"
+        remove_vane
         exit 1  # Exit the script with a non-zero status
     fi
     current_user=$(whoami)
@@ -98,6 +105,7 @@ if [ $? -eq 0 ]; then
         echo -e  "${green}Python version set correctly for vane's virtual environment.${default}"
     else
         echo -e  "${red}Failed to set Python version for virtual environment correctly. Exiting script${default}"
+        remove_vane
         exit 1  # Exit the script with a non-zero status
 fi
 echo -e  "${green}Activating the poetry virtual environment${default}"

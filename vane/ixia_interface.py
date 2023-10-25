@@ -71,10 +71,6 @@ def authenticate():
 
     # Authenticate with the Linux-based API server and start a new session
 
-    # TODO: Handle passing in credentials to Ixia # pylint: disable=W0511
-    # (Single user, multiple users)
-    # Affects the handling of shared resources
-
     test_platform.Authenticate(username, password)
 
     new_session = test_platform.Sessions.add()
@@ -109,7 +105,11 @@ Starts and verifies protocols
 def configure(ix_network, file_name):
     """Load the saved configuration :
     Sets up the physical ports, the stacks to be tested,
-    and the traffic item details"""
+    and the traffic item details
+
+    Args:
+    ix_network: ixnetwork created to run this test session
+    file_name: configuration file to be loaded for current session"""
 
     logging.info("Loading in test config")
 
@@ -147,7 +147,10 @@ Generates and starts traffic
 
 
 def generate_traffic(ix_network):
-    """Generate, apply and start the traffic item"""
+    """Generate, apply and start the traffic item
+
+    Args:
+    ix_network: ixnetwork created to run this test session"""
 
     logging.info("Starting Traffic generation")
 
@@ -160,8 +163,6 @@ def generate_traffic(ix_network):
     time.sleep(5)
 
     ix_network.Traffic.Start()
-
-    # TODO: Decide on how to handle continuous traffic if allowed # pylint: disable=W0511
 
     # We can loop and check the state of the traffic item until the transmission stops
 
@@ -187,7 +188,12 @@ Releases the ports and clears the session
 
 
 def clear_session(ix_network, session):
-    """Clears the Ixia seassion and releases the ports occupied"""
+    """Clears the Ixia session and releases the ports occupied
+
+    Args:
+    ix_network: ixnetwork created to run this test session
+    session: current test session"""
+
     logging.info("Clearing Session")
 
     if "ixNetwork" in locals():

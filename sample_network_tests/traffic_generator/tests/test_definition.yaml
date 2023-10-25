@@ -2,14 +2,14 @@
   testcases:
     - name: test_basic_ixia_setup
       description: Verify basic IXIA set up works
-      configuration_file: "sample_network_tests/traffic_generator/configurations/traffic_profile.ixncfg"
+      configuration_file: "sample_network_tests/traffic_generator/configurations/hardware-fixed.ixncfg"
       show_cmd: show version
-      # memory process ceiling
-      expected_output: 80
+      expected_output: expected output
       report_style: modern
-      test_criteria: Verify memory is not exceeding high utilization
+      test_criteria: Verify ixia is setup correctly
       criteria: names
       filter: 
         - DSR01
+        - DCBBW1
       comment: null
       result: True

@@ -1575,8 +1575,6 @@ class TestOps:
 
             # Generate a deep copy of traffic and flow stats to store in tops object
 
-            # TODO: CHECK TRANSLATION OF DATA # pylint: disable=W0511
-
             index = 0
             for traffic_item_stat in ixia_traffic_item_stats.Rows:
                 self.traffic_item_stats.append({})
@@ -1601,10 +1599,6 @@ class TestOps:
             logging.info("Checking if there is a session to be cleared")
 
             if (ix_network and session) is not None:
-                # TODO: OTHER OPTION IS TO CLEAR LATER,  # pylint: disable=W0511
-                # WHICH THEN INVOLVES US HAVING TO WRITE
-                # EVIDENCE TO SOME FILE AND NOT HAVING TO TRANSLATE DATA
-
                 ixia_interface.clear_session(ix_network, session)
 
             else:

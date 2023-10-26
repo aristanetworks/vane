@@ -3,6 +3,7 @@
     - name: test_basic_ixia_setup
       description: Verify basic IXIA set up works
       configuration_file: "sample_network_tests/traffic_generator/configurations/hardware-fixed.ixncfg"
+      traffic_generator_type: ixia
       show_cmd: show version
       expected_output: expected output
       report_style: modern

@@ -58,7 +58,9 @@ class IxiaTests:
 
         # TODO: This config file may vary per dut basis # pylint: disable=W0511
         # Retrieve configuration file for the dut
-        ixia_configuration = tops.test_parameters["configuration_file"]
+
+        configuration_file = tops.test_parameters["configuration_file"]
+        traffic_generator_type = tops.test_parameters["traffic_generator_type"]
 
         # Call to start Ixia traffic generation and collect traffic/flow stats
         # This needs to happen per dut basis since configuration file of ixia
@@ -67,7 +69,7 @@ class IxiaTests:
         # API takes in configuration file and modifies tops object to store ixia stats
         # which will be used in the test case
 
-        tops.setup_ixia(ixia_configuration)
+        tops.setup_and_run_traffic(traffic_generator_type, configuration_file)
 
         # Check if Ixia ran into an error to gracefully exit the test
         if not (tops.traffic_item_stats and tops.flow_stats):

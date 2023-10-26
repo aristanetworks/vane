@@ -1535,17 +1535,24 @@ class TestOps:
             pass
         return result
 
+    def setup_and_run_traffic(self, traffic_generator_type, configuration_file):
+        """Module to call respective traffic generator based on the type of
+        traffic generator being used in the test case
+
+        Args:
+            type (str): type of the traffic generator being used
+            configuration_file: traffic profile file to pass to the traffic generator"""
+
+        if traffic_generator_type == "ixia":
+            self.setup_ixia(configuration_file)
+
     def setup_ixia(self, ixia_configuration):
         """Module to authenticate into Ixia Web Api, configure a session
         with passed in configuration file, generate traffic and return
         traffic and flow stats to validate test criteria
 
         Args:
-            ixia_configuration (str): path of ixia config file
-
-        Returns:
-            traffic_item_stats (list): traffic stats collected from traffic generation
-            flow_stats (list): flow stats collected from traffic generation"""
+            ixia_configuration (str): path of ixia config file"""
 
         ixia_traffic_item_stats = []
         self.traffic_item_stats = []

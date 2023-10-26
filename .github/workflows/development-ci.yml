@@ -136,17 +136,17 @@ jobs:
         run: |
           vane_name=$(python setup.py --name)
           if [[ ! "vane" =~ "$vane_name" ]]; then
-            echo "::error Invalid name reported for Vane application: $vane_name"
+            echo "Invalid name reported for Vane application: expected 'vane', received '$vane_name'"
             exit 1
           fi
 
-      - name: XXX test wrong name reported
-        run: |
-          vane_name=$(python setup.py --name)
-          if [[ ! "vine" =~ "$vane_name" ]]; then
-            echo "::error Invalid name reported for Vane application: $vane_name"
-            exit 1
-          fi
+      # - name: XXX test wrong name reported
+      #   run: |
+      #     vane_name=$(python setup.py --name)
+      #     if [[ ! "vine" =~ "$vane_name" ]]; then
+      #       echo "Invalid name reported for Vane application: expected 'vine', received '$vane_name'"
+      #       exit 1
+      #     fi
 
       - name: XXX test error in command
         run: |

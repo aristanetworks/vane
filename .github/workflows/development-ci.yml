@@ -140,6 +140,22 @@ jobs:
             exit 1
           fi
 
+      - name: XXX test wrong name reported
+        run: |
+          vane_name=$(python setup.py --name)
+          if [[ ! "vine" =~ "$vane_name" ]]; then
+            echo "::error Invalid name reported for Vane application: $vane_name"
+            exit 1
+          fi
+
+      - name: XXX test error in command
+        run: |
+          vane_name=$(python setup.py --names)
+          if [[ ! "vane" =~ "$vane_name" ]]; then
+            echo "::error Invalid name reported for Vane application: $vane_name"
+            exit 1
+          fi
+
       # - name: Run some basic checks after installation and put the results in the environment for testing
       #   run: |
       #     echo "vane_name=$(python setup.py --name 2>&1)" >> $GITHUB_ENV

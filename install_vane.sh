@@ -59,7 +59,7 @@ if poetry --version &>/dev/null; then
     echo -e  "${green}Poetry is installed.${default}"
     poetry="poetry"
 else
-    echo -e  "${yellow}Poetry is not installed. Installing Poetry via curling of installation script${default}"
+    echo -e  "${yellow}Checking for Poetry installation. Installing Poetry via curling of installation script if needed${default}"
     # Check if curl exists on the system
     echo -e  "${yellow}Checking for Curl on the system...${default}"
     if command -v curl &> /dev/null; then
@@ -74,7 +74,7 @@ else
     curl -sSL https://install.python-poetry.org | python3.9 -
     # Check if installation of poetry was succesfull
     if [ $? -eq 0 ]; then
-        echo -e  "${green}Poetry installed successfully by curling installation script.${default}"
+        echo -e  "${green}Poetry has been installed successfully by curling installation script.${default}"
     else
         echo -e  "${red}Failed to install Poetry. Exiting script.${default}"
         remove_vane

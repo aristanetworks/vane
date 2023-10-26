@@ -140,19 +140,20 @@ jobs:
             exit 1
           fi
 
-      # - name: XXX test wrong name reported
-      #   run: |
-      #     vane_name=$(python setup.py --name)
-      #     if [[ ! "vine" =~ "$vane_name" ]]; then
-      #       echo "Invalid name reported for Vane application: expected 'vine', received '$vane_name'"
-      #       exit 1
-      #     fi
-
-      - name: XXX test error in command
+      - name: XXX test wrong name reported
         run: |
-          vane_name=$(python setup.py --names)
-          if [[ ! "vane" =~ "$vane_name" ]]; then
-            echo "::error Invalid name reported for Vane application: $vane_name"
+          vane_name=$(python setup.py --name)
+          if [[ ! "vine" =~ "$vane_name" ]]; then
+            echo "Invalid name reported for Vane application: expected 'vine', received '$vane_name'"
+            exit 1
+          fi
+
+      - name: Check the vane version reported with python setup.py
+        run: |
+          version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
+          vane_version=$(python setup.py --name)
+          if [[ ! "$version_str" =~ "$vane_version" ]]; then
+            echo "Invalid version reported for Vane application: expected '$version_str', received '$vane_version'"
             exit 1
           fi
 

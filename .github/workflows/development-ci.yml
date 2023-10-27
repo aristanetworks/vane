@@ -151,12 +151,12 @@ jobs:
             echo "Command returned version '$vane_version'"
           fi
 
-      - name: Test by running Vane help command
+      - name: Check the output of the Vane help command
         # Check the output of `vane --help`
         #   Look for substrings of the help text in the output of `vane --help` and report the
         #   first substring that is not found
         run: |
-          substrings=("--definitions-file" "--duts-file" "--environment" "--generate-duts-file" "--generate-test-steps" "--markers" "--nrfu")
+          substrings=("usage: vane" "--definitions-file" "--duts-file" "--environment" "--generate-duts-file" "--generate-test-steps" "--markers" "--nrfu")
           vane_help=$(vane --help)
           for substr in "${substrings[@]}"; do
             if [[ ! "$vane_help" =~ "$substr" ]]; then
@@ -164,6 +164,10 @@ jobs:
               exit 1
             fi
           done
+
+      - name: Run the pytest module to verify the vane unitttests load correctly
+        run: |
+          python -m pytest --junit-xml=junit.xml
 
   unittest:
     # Run the Vane unittests

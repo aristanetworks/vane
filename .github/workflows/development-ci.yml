@@ -135,7 +135,7 @@ jobs:
       - name: Check the vane name reported with python setup.py
         run: |
           vane_name=$(python setup.py --name)
-          if [[ ! "vane" =~ "$vane_name" ]]; then
+          if [[ ! "$vane_name" =~ "vane" ]]; then
             echo "Invalid name reported for Vane application: expected 'vane', received '$vane_name'"
             exit 1
           fi
@@ -144,16 +144,26 @@ jobs:
         run: |
           version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
           vane_version=$(python setup.py --version)
-          if [[ ! "$version_str" =~ "$vane_version" ]]; then
+          if [[ ! "$vane_version" =~ "$version_str" ]]; then
             echo "Invalid version reported for Vane application: expected '$version_str', received '$vane_version'"
             exit 1
+          else
+            echo "Command returned version '$vane_version'"
           fi
 
-      # - name: Run some basic checks after installation and put the results in the environment for testing
-      #   run: |
-      #     echo "vane_name=$(python setup.py --name 2>&1)" >> $GITHUB_ENV
-      #     echo "vane_version=$(python setup.py --version 2>&1)" >> $GITHUB_ENV
-      #     echo "vane_help=$(vane --help 2>&1)" >> $GITHUB_ENV
+      - name: Test by running Vane help command
+        # Check the output of `vane --help`
+        #   Look for substrings of the help text in the output of `vane --help` and report the
+        #   first substring that is not found
+        run: |
+          substrings=("--definitions-file" "--duts-file" "--environment" "--generate-duts-file" "--generate-test-steps" "--markers" "--nrfu")
+          vane_help=$(vane --help)
+          for substr in "${substrings[@]}"; do
+            if [[ ! "$vane_help" =~ "$substr" ]]; then
+              echo "Substring '$substr' missing from `vane --help`"
+              exit 1
+            fi
+          done
 
   unittest:
     # Run the Vane unittests

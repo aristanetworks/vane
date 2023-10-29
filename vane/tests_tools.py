@@ -40,16 +40,19 @@ import time
 import inspect
 import re
 import pprint
+import subprocess
 import yaml
 
 from jinja2 import Template
 from pyeapi.eapilib import EapiError
 from vane import config, device_interface
 from vane.vane_logging import logging
-from vane.utils import render_cmds
+from vane.utils import render_cmds, valid_xml_char_ordinal
 
 
 DEFAULT_EOS_CONN = "eapi"
+TCPDUMP_WAIT = 5
+CMD_WAIT = 5
 
 
 def filter_duts(duts, criteria="", dut_filter=""):
@@ -409,8 +412,7 @@ def dut_worker(dut, show_cmds, test_parameters):
 
             logging.debug(f"Found cmd: {show_cmd} at index {cmd_index} of {show_cmds_txt}")
             logging.debug(
-                f"length of cmds: {len(show_cmds_txt)} vs length of "
-                f"output {len(show_cmd_txt_list)}"
+                f"length of cmds: {len(show_cmds_txt)} vs length of output {len(show_cmd_txt_list)}"
             )
 
             show_output_txt = show_cmd_txt_list[cmd_index]["output"]
@@ -1456,6 +1458,129 @@ class TestOps:
             return json_results
 
         return txt_results
+
+    def run_subprocess_cmd(self, commands, tcpdump_dut, traffic_dut, test_param):
+        """
+        Generalized function for collecting tcpdump output while running commands(like config, show,
+        traffic commands etc) parallelly. Returns a dict of outputs for the requested commands.
+        Args:
+            commands(dict): Commands to run on tcpdump and traffic devices.
+            tcpdump_dut(str): Name of the dut where tcpdump command is to be run using "ssh".
+            traffic_dut(obj): Dut connection object of traffic device where commands(like config,
+                                show, traffic commands etc) to be run.
+            test_param(dict): Test parameters defined in the test_definitions file. Commands
+                            (like tcpdump, config, show, traffic commands etc) also need to
+                            be added in the test param against the following keys:
+                tcpdump_cmd(str): A tcpdump command that is to be run on the DUT on "ssh".
+                config_cmds(list): A list of commands(like config, show, traffic commands etc) to
+                                be run on traffic DUT with .config() method
+                traffic_cmd(list): A list of commands(like show, traffic commands etc) to be
+                                run on traffic dut- Mostly ping or tcpreplay commands.
+                            It'll have timeouts, and wait times defined for different commands, if
+                            these keys are not defined, the default values will be used from the
+                            global variables defined in the utils file as mentioned below:
+                tcpdump_cmd_wait(int): Tcpdump command wait time. Default: CMD_WAIT
+                traffic_cmd_wait(int): Traffic commands wait time. Default: CMD_WAIT
+                process_delay(int): Sleep (wait) added before traffic command is run. It is to sync
+                                    tcpdump subprocess packet listening and traffic command run.
+                                    Default: TCPDUMP_WAIT
+                command_execution_wait(int): Will add a delay between the config command and
+                                             traffic command.
+        Return:
+            (dict): Returns a dict of outputs for the tcpdump command & traffic commands with keys:
+                traffic_outputs(list): Output of commands(like config, show, traffic commands etc)
+                                    in a list. For SSH, the list would contain only one element.
+                                    This element would have the outputs of all the commands appended
+                                    into a single string.
+                                    For eAPI, each command's output would be a separate str
+                                    element in the list.
+                tcpdump_output(str): String tcpdump output
+                split_tcpdump_output(list): A list of frames from tcpdump output that are split by
+                                            timestamp.
+        """
+
+        # Collecting tcpdump, traffic and config commands from test_param
+        tcpdump_cmd = test_param["tcpdump_cmd"]
+        traffic_cmd = test_param.get("traffic_cmd", [])
+        config_cmds = test_param.get("config_cmds", [])
+        tcpdump_dut_creds = {}
+
+        # Collecting different commands wait and process delay from test_param
+        tcpdump_cmd_wait = test_param.get("tcpdump_cmd_wait", CMD_WAIT)
+        # traffic_cmd_wait = test_param.get("traffic_cmd_wait", CMD_WAIT)
+        process_delay = test_param.get("process_delay", TCPDUMP_WAIT)
+        command_execution_wait = test_param.get("command_execution_delay")
+        output = {"traffic_outputs": [], "tcpdump_output": "", "split_tcpdump_output": []}
+
+        tcpdump_dut_creds["ip"], tcpdump_dut_creds["user"], tcpdump_dut_creds["password"] = (
+            tcpdump_dut["mgmt_ip"],
+            tcpdump_dut["username"],
+            tcpdump_dut["password"],
+        )
+
+        self.set_evidence_default(tcpdump_dut["name"])
+        self.set_evidence_default(traffic_dut["name"])
+        with subprocess.Popen(
+            [
+                "python3",
+                "/".join(__file__.split("/")[:-2]) + "/vane/run_cmds_in_subprocess.py",
+                tcpdump_dut_creds["ip"],
+                tcpdump_dut_creds["user"],
+                tcpdump_dut_creds["password"],
+                str(tcpdump_cmd_wait),
+                tcpdump_cmd,
+            ],
+            stdout=subprocess.PIPE,
+            universal_newlines=True,
+        ) as tcpdump_process:
+            # Wait added to sync tcpdump packet capture and traffic command run.
+            time.sleep(process_delay)
+
+            # For .enable() func, enclose the traffic command in a list if it was passed as a string
+            if not isinstance(traffic_cmd, list):
+                traffic_cmd = [traffic_cmd]
+
+            # Runs config commands using .config() method on traffic DUT
+            if config_cmds:
+                for traffic_cmd_output in traffic_dut["connection"].config(
+                    [config_cmds], encoding="text"
+                ):
+                    output["traffic_outputs"].append(traffic_cmd_output)
+                if command_execution_wait:
+                    time.sleep(command_execution_wait)
+
+            # Runs traffic commands using eapi(.enable() method) or ssh connection on traffic DUT
+            if traffic_cmd:
+                for traffic_cmd_output in traffic_dut["connection"].enable(
+                    traffic_cmd, encoding="text"
+                ):
+                    output["traffic_outputs"].append(traffic_cmd_output)
+
+            # collecting tcpdump output from subprocess, filtering it and splitting it frame wise
+            output["tcpdump_output"] = tcpdump_process.communicate()[0]
+            output["tcpdump_output"] = "".join(
+                char for char in output["tcpdump_output"] if valid_xml_char_ordinal(char)
+            )
+            if "tcpdump: listening" in output["tcpdump_output"]:
+                output["tcpdump_output"] = output["tcpdump_output"][
+                    output["tcpdump_output"].find("tcpdump: listening") :
+                ]
+
+        for cmd in commands["tcpdump_cmd"]:
+            self._show_cmds[tcpdump_dut["name"]].append(cmd)
+        for cmd in commands["traffic_cmd"]:
+            self._show_cmds[traffic_dut["name"]].append(cmd)
+        tcpdump_results = [
+            {
+                "command": f"{tcpdump_cmd}",
+                "result": {"output": output["tcpdump_output"]},
+                "encoding": "text",
+            }
+        ]
+        self._show_cmd_txts[tcpdump_dut["name"]].append(output["tcpdump_output"])
+        traffic_result = output["traffic_outputs"]
+        self._show_cmd_txts[traffic_dut["name"]].append(traffic_result[0]["result"]["output"])
+        return tcpdump_results + traffic_result
 
     def transfer_file(self, src_file, dest_file, file_system, operation, dut=None, sftp=False):
         """

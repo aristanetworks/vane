@@ -305,7 +305,7 @@ def test_get_duts_data(mocker, loginfo):
             "lastSyncUp": 0,
             "type": "netelement",
             "dcaKey": None,
-            "containerName": "Undefined",
+            "containerName": "Leaf",
         },
         {
             "modelName": "CCS-720XP-48ZC2",
@@ -315,6 +315,40 @@ def test_get_duts_data(mocker, loginfo):
             "streamingStatus": "inactive",
             "unAuthorized": False,
             "ipAddress": "10.88.160.69",
+            "memTotal": 0,
+            "memFree": 0,
+            "sslConfigAvailable": False,
+            "sslEnabledByCVP": False,
+            "lastSyncUp": 0,
+            "type": "netelement",
+            "dcaKey": None,
+            "containerName": "Host",
+        },
+        {
+            "modelName": "CCS-720XP-48ZC3",
+            "domainName": "rtp-pslab.com",
+            "hostname": "ps-rtp1-host4",
+            "mlagEnabled": False,
+            "streamingStatus": "active",
+            "unAuthorized": False,
+            "ipAddress": "10.88.160.68",
+            "memTotal": 0,
+            "memFree": 0,
+            "sslConfigAvailable": False,
+            "sslEnabledByCVP": False,
+            "lastSyncUp": 0,
+            "type": "netelement",
+            "dcaKey": None,
+            "containerName": "Undefined",
+        },
+        {
+            "modelName": "CCS-720XP-48ZC5",
+            "domainName": "rtp-pslab.com",
+            "hostname": "ps-rtp1-host5",
+            "mlagEnabled": False,
+            "streamingStatus": "inactive",
+            "unAuthorized": False,
+            "ipAddress": "10.88.160.70",
             "memTotal": 0,
             "memFree": 0,
             "sslConfigAvailable": False,
@@ -359,6 +393,12 @@ def test_read_device_list_file(mocker, loginfo):
     assert device_data == expected_data
 
     loginfo.assert_called_with("Reading in dut ip data from device list file")
+
+    device_list_file = "tests/unittests/fixtures/device_ip_file_empty_lines"
+    device_data = client.read_device_list_file(device_list_file)
+
+    expected_data = ["10.255.31.184", "10.255.31.185", "10.255.31.186", "10.255.31.187"]
+    assert device_data == expected_data
 
 
 def test_generate_duts_file_cvp(mocker, loginfo):

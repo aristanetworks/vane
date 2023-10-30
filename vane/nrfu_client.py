@@ -185,10 +185,9 @@ class NrfuClient:
 
         # Process inventory data as specified to generate duts.yaml
         for device in inventory:
-            if device["streamingStatus"] == "active":
+            if device["streamingStatus"] == "active" and device["containerName"] != "Undefined":
                 current_device_data = [device["hostname"], device["ipAddress"]]
                 device_data.append(current_device_data)
-
         return device_data
 
     def read_device_list_file(self, device_list_file):
@@ -206,8 +205,8 @@ class NrfuClient:
                 logging.info("Reading in dut ip data from device list file")
                 line = text_in.readline()
                 while line:
-                    # Process each line here, use strip() to remove newline characters
-                    device_data.append(line.strip())
+                    if line.strip():  # ensure no empty lines are read
+                        device_data.append(line.strip())
                     line = text_in.readline()
         except OSError as err:
             logging.error(f"ERROR OPENING DEVICE LIST FILE: {err}")
@@ -291,6 +290,7 @@ class NrfuClient:
                 "template_definitions": "test_definition.yaml.j2",
                 "test_definitions": "test_definition.yaml",
                 "report_summary_style": "modern",
+                "self_contained": True,
             }
         }
 

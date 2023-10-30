@@ -132,7 +132,6 @@ def rc_methods():
         "_reports_dir",
         "_required_template_fields",
         "_results_datamodel",
-        "_return_date",
         "_return_summary_headers",
         "_return_tbl_value",
         "_set_default_value",

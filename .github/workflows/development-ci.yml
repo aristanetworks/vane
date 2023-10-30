@@ -133,6 +133,7 @@ jobs:
           pip install .
 
       - name: Check the vane name reported with python setup.py
+        # `python setup.py --name` should return "vane"
         run: |
           vane_name=$(python setup.py --name)
           if [[ ! "$vane_name" =~ "vane" ]]; then
@@ -141,6 +142,7 @@ jobs:
           fi
 
       - name: Check the vane version reported with python setup.py
+        # `python setup.py --version` should return the same version that is in pyproject.toml
         run: |
           version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
           vane_version=$(python setup.py --version)
@@ -166,6 +168,7 @@ jobs:
           done
 
       - name: Run the pytest module to verify the vane unitttests load correctly
+        # Running the pytest command below should succeed
         run: |
           python -m pytest --junit-xml=junit.xml
 

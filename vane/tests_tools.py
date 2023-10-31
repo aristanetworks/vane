@@ -44,7 +44,8 @@ import yaml
 
 from jinja2 import Template
 from pyeapi.eapilib import EapiError
-from vane import config, device_interface
+from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
+from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
 from vane.utils import render_cmds
 
@@ -1533,6 +1534,82 @@ class TestOps:
         except OSError:
             pass
         return result
+
+    def setup_and_run_traffic(self, traffic_generator_type, configuration_file):
+        """Module to call respective traffic generator based on the type of
+        traffic generator being used in the test case
+
+        Args:
+            type (str): type of the traffic generator being used
+            configuration_file: traffic profile file to pass to the traffic generator"""
+
+        if traffic_generator_type == "ixia":
+            self.setup_ixia(configuration_file)
+
+    def setup_ixia(self, ixia_configuration):
+        """Module to authenticate into Ixia Web Api, configure a session
+        with passed in configuration file, generate traffic and return
+        traffic and flow stats to validate test criteria
+
+        Args:
+            ixia_configuration (str): path of ixia config file"""
+
+        ixia_traffic_item_stats = []
+        self.traffic_item_stats = []
+        ixia_flow_stats = []
+        self.flow_stats = []
+        ix_network = None
+        session = None
+
+        try:
+            # Module 1 : Authentication: Connect to the IxNetwork API Server
+
+            session, ix_network = ixia_interface.authenticate()
+
+            # Module 2 : Configuration
+
+            ix_network = ixia_interface.configure(ix_network, ixia_configuration)
+
+            # Module 3 : Generating traffic
+
+            ix_network = ixia_interface.generate_traffic(ix_network)
+
+            # Get the traffic item and flow statistics
+
+            ixia_traffic_item_stats = StatViewAssistant(ix_network, "Traffic Item Statistics")
+
+            ixia_flow_stats = StatViewAssistant(ix_network, "Flow Statistics")
+
+            # Generate a deep copy of traffic and flow stats to store in tops object
+
+            index = 0
+            for traffic_item_stat in ixia_traffic_item_stats.Rows:
+                self.traffic_item_stats.append({})
+                for column, data in zip(traffic_item_stat.Columns, traffic_item_stat.RawData[0]):
+                    self.traffic_item_stats[index].update({column: data})
+                index += 1
+
+            index = 0
+            for flow_stat in ixia_flow_stats.Rows:
+                self.flow_stats.append({})
+                for column, data in zip(flow_stat.Columns, flow_stat.RawData[0]):
+                    self.flow_stats[index].update({column: data})
+                index += 1
+
+        except Exception as exception:  # pylint: disable=W0718
+            logging.error(
+                f"Exception: Setting up of Ixia errored out due"
+                f" to the following reason: {format(exception)}"
+            )
+
+        finally:
+            logging.info("Checking if there is a session to be cleared")
+
+            if (ix_network and session) is not None:
+                ixia_interface.clear_session(ix_network, session)
+
+            else:
+                logging.info("No Session to clear")
 
 
 def post_process_skip(tops, steps, output=""):

@@ -33,9 +33,8 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
-from vane.vane_logging import logging
 
 TEST_SUITE = __file__
 LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
@@ -50,6 +49,8 @@ test2_ids = dut_parameters["test_if_dns_servers_are_reachable_on_"]["ids"]
 
 test3_duts = dut_parameters["test_dns_configuration_on_"]["duts"]
 test3_ids = dut_parameters["test_dns_configuration_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu

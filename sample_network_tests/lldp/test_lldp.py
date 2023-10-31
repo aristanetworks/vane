@@ -33,8 +33,7 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
-from vane.vane_logging import logging
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 
@@ -56,6 +55,8 @@ test4_ids = dut_parameters["test_if_lldp_max_frame_size_is_correct_on_"]["ids"]
 
 test5_duts = dut_parameters["test_if_lldp_interface_id_is_correct_on_"]["duts"]
 test5_ids = dut_parameters["test_if_lldp_interface_id_is_correct_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu
@@ -91,9 +92,7 @@ class LldpTests:
                     f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
                 )
 
-                actual_output = self.output["lldpInterfaces"][interface_name][
-                    "rxEnabled"
-                ]
+                actual_output = self.output["lldpInterfaces"][interface_name]["rxEnabled"]
 
             except (AttributeError, LookupError, EapiError) as exp:
                 actual_output = str(exp)
@@ -109,13 +108,9 @@ class LldpTests:
             TS: Verify LLDP interface RX state on DUT
             """
             if actual_output == tops.expected_output:
-                tops.output_msg += (
-                    f"{tops.dut_name}'s {interface_name} LLDP RX is enabled\n"
-                )
+                tops.output_msg += f"{tops.dut_name}'s {interface_name} LLDP RX is enabled\n"
             else:
-                tops.output_msg += (
-                    f"{tops.dut_name}'s {interface_name} LLDP RX is NOT enabled\n"
-                )
+                tops.output_msg += f"{tops.dut_name}'s {interface_name} LLDP RX is NOT enabled\n"
 
             tops.actual_results.append({interface_name: actual_output})
             tops.expected_results.append({interface_name: tops.expected_output})
@@ -158,9 +153,7 @@ class LldpTests:
                     f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
                 )
 
-                actual_output = self.output["lldpInterfaces"][interface_name][
-                    "txEnabled"
-                ]
+                actual_output = self.output["lldpInterfaces"][interface_name]["txEnabled"]
 
             except (AttributeError, LookupError, EapiError) as exp:
                 actual_output = str(exp)
@@ -176,13 +169,9 @@ class LldpTests:
             TS: Verify LLDP interface TX state on DUT
             """
             if actual_output == tops.expected_output:
-                tops.output_msg += (
-                    f"{tops.dut_name}'s {interface_name} LLDP TX is enabled\n"
-                )
+                tops.output_msg += f"{tops.dut_name}'s {interface_name} LLDP TX is enabled\n"
             else:
-                tops.output_msg += (
-                    f"{tops.dut_name}'s {interface_name} LLDP TX is NOT enabled\n"
-                )
+                tops.output_msg += f"{tops.dut_name}'s {interface_name} LLDP TX is NOT enabled\n"
 
             tops.actual_results.append({interface_name: actual_output})
             tops.expected_results.append({interface_name: tops.expected_output})
@@ -249,8 +238,7 @@ class LldpLocalInfoTests:
         if tops.actual_output == tops.expected_output:
             tops.test_result = True
             tops.output_msg = (
-                f"{tops.dut_name}'s LLDP System Name is correct: "
-                f"{tops.expected_output}"
+                f"{tops.dut_name}'s LLDP System Name is correct: {tops.expected_output}"
             )
         else:
             tops.test_result = False
@@ -291,9 +279,7 @@ class LldpLocalInfoTests:
                     f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
                 )
 
-                actual_output = self.output["localInterfaceInfo"][interface_name][
-                    "maxFrameSize"
-                ]
+                actual_output = self.output["localInterfaceInfo"][interface_name]["maxFrameSize"]
 
             except (AttributeError, LookupError, EapiError) as exp:
                 actual_output = str(exp)
@@ -363,9 +349,7 @@ class LldpLocalInfoTests:
                     f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
                 )
 
-                actual_output = self.output["localInterfaceInfo"][interface_name][
-                    "interfaceIdType"
-                ]
+                actual_output = self.output["localInterfaceInfo"][interface_name]["interfaceIdType"]
 
             except (AttributeError, LookupError, EapiError) as exp:
                 actual_output = str(exp)

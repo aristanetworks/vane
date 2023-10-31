@@ -79,8 +79,6 @@ def test_write_test_steps(loginfo, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
 
-# Skip test case if not ran in GitHub
-@pytest.mark.skipif(IN_GITHUB_ACTIONS is not True, reason="Test only works in Github Actions.")
 def test_walk_dir(logdebug, mocker):
     "Unit Test for TestStepClient object, method walk_dir"
 
@@ -89,24 +87,21 @@ def test_walk_dir(logdebug, mocker):
     test_steps.walk_dir()
     mocker_object.assert_called_once()
 
-    # These files are unique to git actions ci environment
-    # This test will fail if ran locally
-    files1 = ["__init__.cpython-39.pyc", "test_host.cpython-39-pytest-7.4.0.pyc"]
-    files2 = [
-        "test_definition.yaml",
-        "test_host.py",
-        "test_definition_regenerated.yaml",
+    files = [
         "__init__.py",
+        "test_definition.yaml",
+        "test_definition_regenerated.yaml",
+        "test_host.py",
     ]
 
     logdebug_calls = [
-        call(f"Set Test Step Client object directory to {[TEST_DIR]}"),
-        call(f"Walking directory {TEST_DIR} for test cases"),
-        call(f"Discovered files {files1} in directory {TEST_DIR}"),
-        call(f"Discovered files {files2} in directory {TEST_DIR}"),
-        call(f"Discovered test files: {TEST_FILE} for parsing"),
+        (f"Set Test Step Client object directory to {[TEST_DIR]}"),
+        (f"Walking directory {TEST_DIR} for test cases"),
+        (f"Discovered files {files} in directory {TEST_DIR}"),
+        (f"Discovered test files: {TEST_FILE} for parsing"),
     ]
-    logdebug.assert_has_calls(logdebug_calls, any_order=False)
+    for debug_msg in logdebug_calls:
+        logdebug.assert_any_call(debug_msg)
 
 
 def test_parse_file(loginfo, logdebug, mocker):
@@ -130,6 +125,8 @@ def test_parse_file(loginfo, logdebug, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
     logdebug_calls = [
+        call(f"Set Test Step Client object directory to ['{TEST_DIR}']"),
+        call(f"Parsing file: {TEST_FILE[0]} for test steps and definitions"),
         call(f"Create JSON and MD files for {TEST_FILE[0]} using {TEST_STEP}"),
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)

@@ -1,274 +1,354 @@
 - name: nrfu_tests
   testcases:
-    - name: test_
-      description:
+    - name: test_dns_base_services
+      description: Test case for the verification of DNS resolution functionality.
       test_id: NRFU1.1
-      show_cmd: null
+      {% set test_data = testcase_data["NRFU1.1"].dns_name_server_check %}
+      show_cmd: show ip name-server
       expected_output: null
+      test_criteria: Reverse name server lookup should be successful for name servers configured on the device.
       report_style: modern
+      dns_name_server_check:
+        ipv4_fail_if_not_configured: {{ test_data.ipv4_fail_if_not_configured }}
+        ipv6_fail_if_not_configured: {{ test_data.ipv6_fail_if_not_configured }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_ntp_clocks
+      description: Test case to verify that 2 NTP clocks(a peer and a candidate) are locked on the device.
       test_id: NRFU1.2
-      show_cmd: null
-      expected_output: null
+      show_cmd: show ntp status
+      expected_output:
+        primary_ntp_association: sys.peer
+        secondary_ntp_association: candidate
+      test_criteria: NTP server should be configured on the device. Primary and secondary NTP association should be correct on the device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_redundant_sso_card
+      description: Test case for the verification of redundant supervisor card.
       test_id: NRFU1.3
       show_cmd: null
-      expected_output: null
+      expected_output:
+        sso_protocol_details:
+          configured_protocol: sso
+          operational_protocol: sso
+          switch_over_ready: True
+      test_criteria: Redundancy SSO protocol should be configured, operational and ready for switchover.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_base_services_tacacs
+      description: Testcase for verification of TACACS servers details.
       test_id: NRFU1.4
-      show_cmd: null
+      show_cmd: show tacacs
+      # Forming expected output in the test case file.
       expected_output: null
+      # Setting test case’s pass/fail criteria for reporting.
+      test_criteria: TACACS servers should not have errors, timeouts, failures or disconnects.
+      # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_interfaces_description_status
+      description: Test case for verification of interface description status.
       test_id: NRFU2.1
-      show_cmd: null
+      {% set test_data = testcase_data["NRFU2.1"] %}
+      show_cmds:
+        - show interfaces description
+        - show vlan
       expected_output: null
+      test_criteria: Except for the interfaces with description to ignore, all other interfaces' status should be up and should have a description.
       report_style: modern
+      input:
+        descriptions_to_ignore: {{ test_data["descriptions_to_ignore"] }}
+        fail_on_no_description: {{ test_data["fail_on_no_description"] }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_interfaces_errdisabled_status
+      description: Test case for verification of interface errdisabled status.
       test_id: NRFU2.2
-      show_cmd: null
+      show_cmd: show interfaces status errdisabled
       expected_output: null
+      test_criteria: None of the interface should be in error disabled state.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_interface_errors_and_discards
+      description: Testcase for verification of errors/discards on all the interfaces.
       test_id: NRFU2.3
-      show_cmd: null
+      show_cmd: show interfaces
       expected_output: null
+      test_criteria: Errors/discards should not be found on any of the interface.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_interfaces_mlag_status
+      description: Testcase for verification of MLAG functionality.
       test_id: NRFU2.4
-      show_cmd: null
+      show_cmd: show mlag
       expected_output: null
+      test_criteria: MLAG should be configured as active, connected and consistent on the device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_interfaces_non_arista_optics
+      description: Test case to verify that no non-Arista optics are installed on the device.
       test_id: NRFU2.5
-      show_cmd: null
+      show_cmd: show inventory
       expected_output: null
+      test_criteria: Non-Arista optics should not be installed on the device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_port_channel_member_interface_details
+      description: Testcases to verify that port channel member interfaces should be collecting and distributing.
       test_id: NRFU2.6
-      show_cmd: null
+      show_cmd: show lacp interface all-ports
       expected_output: null
+      test_criteria: All the port channel members interfaces should be collecting and distributing.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_misc_show_commands
+      description: Testcase for verification of miscellaneous show commands support.
       test_id: NRFU3.1
+      # Forming show command in the test case file.
       show_cmd: null
+      # Forming expected output in the test case file.
       expected_output: null
+      # Setting test case’s pass/fail criteria for reporting.
+      test_criteria: Show commands should be executed on the device without any error.
+      # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_routing_bgp_evpn_peers_state
+      description: Test case for verification of BGP EVPN functionality.
       test_id: NRFU4.1
+      {% set test_data = testcase_data["NRFU4.1"] %}
       show_cmd: null
       expected_output: null
+      test_criteria: All BGP EVPN peers state should be established.
       report_style: modern
+      input:
+        skip_on_command_unavailable: {{ test_data["skip_on_command_unavailable"] }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_bgp_ipv4_peers_state
+      description: Testcases for verification of BGP ipv4 peers are established.
       test_id: NRFU4.2
-      show_cmd: null
+      show_cmd: show ip bgp summary vrf all
       expected_output: null
+      test_criteria: All BGP peers should be in established state.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_routing_evpn_l2vni_imet
+      description: Test case for verification of L2 VNI VXLAN interface functionality.
       test_id: NRFU4.3
       show_cmd: null
       expected_output: null
+      test_criteria: Inclusive multicast Ethernet tag (IMET) routes should advertised for all VNI identifiers on device.
       report_style: modern
+      input:
+        skip_on_command_unavailable_check: {{ testcase_data["NRFU4.3"]["skip_on_command_unavailable_check"] }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_multi_agent_routing_protocol
+      description: Test case for verification of multi-agent routing model functionality.
       test_id: NRFU4.4
-      show_cmd: null
-      expected_output: null
+      show_cmd: show ip route summary
+      expected_output:
+        multi_agent_routing_protocol:
+          configured: True
+          operational: True
+      test_criteria: Multi agent routing model protocol should be configured and operational on the device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_acls_api_vrfs_enabled
+      description: Test case to verify that ACL is configured for each VRF on which API is enabled.
       test_id: NRFU5.1
-      show_cmd: null
+      show_cmds:
+        - show management api http-commands
+        - show management api http-commands ip access-list summary
       expected_output: null
+      test_criteria: ACL should be configured on all VRFs on which API is enabled.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_security_rp_enable_password
+      description: Testcase to verify that the enable password is configured.
       test_id: NRFU5.2
-      show_cmd: null
-      expected_output: null
+      show_cmd: show running-config section enable
+      expected_output:
+        enable_password_configured: True
+      test_criteria: Enable password should be configured on device. # Setting test case’s pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_eos_no_config_functionality
+      description: Testcases for verification of security root port "EOS no configurations" functionality.
       test_id: NRFU5.3
-      show_cmd: null
+      show_cmd: show lldp neighbors detail
       expected_output: null
+      test_criteria: Localhost should not be found in the LLDP neighbor information on device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_security_rp_l2_vlan_name
+      description: Test cases for verification of configured VLAN naming.
       test_id: NRFU5.4
-      show_cmd: null
+      show_cmd: show vlan
       expected_output: null
+      test_criteria: All configured VLANs should have a name configured.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_security_rp_login_banner
+      description: Testcase for verification of login banner.
       test_id: NRFU5.5
-      show_cmd: null
-      expected_output: null
+      show_cmd: show banner login
+      expected_output:
+       login_banner_found: True
+      test_criteria: Login banner should be found on the device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_security_rp_ssh_access_list
+      description: Test case to verify that ACL is configured for each VRF on which SSH is enabled
       test_id: NRFU5.6
-      show_cmd: null
+      show_cmds:
+        - show vrf
+        - show management ssh ip access-list summary
       expected_output: null
+      test_criteria: All VRFs that the API is active on should have an ACL to be configured.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_telnet_is_disabled_for_all_vrfs
+      description: Test case to verify that Telnet is disabled for all the VRFs on the device.
       test_id: NRFU5.7
-      show_cmd: null
+      show_cmd: show vrf
       expected_output: null
       report_style: modern
+      test_criteria: Telnet should be disabled for all the VRFs on the device.
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_security_rp_username_password
+      description: Test case for verification of password configuration for user accounts.
       test_id: NRFU5.8
-      show_cmd: null
+      show_cmd: show running-config all section ^username
       expected_output: null
+      test_criteria: All user accounts should be configured with a password.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_bad_syslog_events
+      description: Testcase for verification bad syslog event messages.
       test_id: NRFU6.1
       show_cmd: null
       expected_output: null
+      test_criteria: Bad syslog events(specific keywords) should not be found in the collected logs.
       report_style: modern
+      days_of_logs: {{ testcase_data["NRFU6.1"].days_of_logs }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_hardware_cooling_status
       test_id: NRFU6.2
-      show_cmd: null
-      expected_output: null
+      description: Testcase for the verification of system cooling status.
+      show_cmd: show system environment cooling
+      expected_output:
+        system_cooling_status: coolingOk
+      test_criteria: System cooling status should be 'coolingOk'.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_hardware_core_dump_files
+      description: Test case for verification of core dump files
       test_id: NRFU6.3
-      show_cmd: null
-      expected_output: null
+      show_cmd: show system coredump
+      expected_output:
+        core_dump_files_not_found: True
+      test_criteria: Core dump files should not be found on the device.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_cpu_idle_time
+      description: Testcase for verification of system hardware CPU idle time.
       test_id: NRFU6.4
-      show_cmd: null
-      expected_output: null
+      show_cmd: show processes top once
+      expected_output:
+        cpu_idle_time_within_range: true
+      test_criteria: CPU idle time should be within the expected range. # Setting test case’s pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_hardware_fan_status
+      description: Testcase for verification of fan status in the system.
       test_id: NRFU6.5
-      show_cmd: null
+      show_cmd: show system environment cooling
       expected_output: null
+      test_criteria: For all fans, status should be ok and speed should be stable.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_flash_free_space
+      description: Test case for verification of free space on flash file system
       test_id: NRFU6.6
-      show_cmd: null
-      expected_output: null
+      show_cmd: show file systems
+      expected_output:
+        primary_supervisor_flash_utilization_within_range: True
+        peer_supervisor_flash_utilization_within_range: True
+      test_criteria: Primary and peer supervisor flash file system utilization should be below 70%.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_free_memory
+      description: Test case for verification of system hardware-free memory utilization.
       test_id: NRFU6.7
       show_cmd: null
-      expected_output: null
+      expected_output:
+        memory_utilization_under_range: True
+      test_criteria: Memory utilization percentage of the device should be less than 70%.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_hardware_inventory_status
+      description: Test case for the verification of system hardware inventory on the device.
       test_id: NRFU6.8
-      show_cmd: null
+      {% set test_data = testcase_data["NRFU6.8"] %}
+      show_cmd: show inventory
       expected_output: null
+      test_criteria: Power supply, fan tray and other card slots should be installed on the device.
       report_style: modern
+      hardware_inventory_checks: {{ test_data.hardware_inventory_checks }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_hardware_power_supply_status
+      description: Test case for the verification of system hardware power supply status.
       test_id: NRFU6.9
-      show_cmd: null
+      show_cmd: show system environment power
       expected_output: null
+      test_criteria: Status of all power supplies should be 'Ok'. # Setting test case's pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_hardware_power_supply_voltage_status
+      description: Test case for verification of system power supply voltage sensor status on the device.
       test_id: NRFU6.10
       show_cmd: null
       expected_output: null
+      test_criteria: Status of all power supply voltage sensors should be 'Ok'
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_temperature_sensors
+      description: Testcase for verification of system temperature sensors.
       test_id: NRFU6.11
-      show_cmd: null
+      show_cmd: show system environment temperature
       expected_output: null
+      test_criteria: System temperature should be 'ok'. Hardware status of all sensors should be 'ok' and overheat threshold should not be met. # Setting test case's pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

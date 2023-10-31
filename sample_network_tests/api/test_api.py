@@ -34,8 +34,7 @@
 import pytest
 from pyeapi.eapilib import EapiError
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
-from vane.vane_logging import logging
+from vane import tests_tools, test_case_logger
 
 TEST_SUITE = __file__
 LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
@@ -55,6 +54,8 @@ test4_ids = dut_parameters["test_if_management_http_api_server_is_running_on_"][
 
 test5_duts = dut_parameters["test_if_management_local_http_api_server_is_running_on_"]["duts"]
 test5_ids = dut_parameters["test_if_management_local_http_api_server_is_running_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.demo

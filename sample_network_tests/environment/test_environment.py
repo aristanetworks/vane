@@ -33,8 +33,7 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
-from vane.vane_logging import logging
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 TEST_SUITE = __file__
@@ -56,6 +55,8 @@ test4_ids = dut_parameters["test_if_system_environment_cooling_is_in_spec_on_"][
 
 test5_duts = dut_parameters["test_if_fan_status_is_in_spec_on_"]["duts"]
 test5_ids = dut_parameters["test_if_fan_status_is_in_spec_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu

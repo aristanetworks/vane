@@ -33,8 +33,7 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
-from vane.vane_logging import logging
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 TEST_SUITE = __file__
@@ -43,6 +42,8 @@ LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
 dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
 test1_duts = dut_parameters["test_if_usernames_are_configured_on_"]["duts"]
 test1_ids = dut_parameters["test_if_usernames_are_configured_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.demo

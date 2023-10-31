@@ -33,8 +33,7 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
-from vane.vane_logging import logging
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 TEST_SUITE = __file__
@@ -85,6 +84,8 @@ test14_ids = dut_parameters["test_if_intf_in_counters_are_discarding_on_"]["ids"
 
 test15_duts = dut_parameters["test_if_intf_mtu_is_correct_on_"]["duts"]
 test15_ids = dut_parameters["test_if_intf_mtu_is_correct_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.demo

@@ -33,8 +33,7 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
-from vane.vane_logging import logging
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 
@@ -77,6 +76,8 @@ test11_ids = dut_parameters["test_if_privilege_accounting_methods_set_on_"]["ids
 
 test12_duts = dut_parameters["test_if_dot1x_accounting_methods_set_on_"]["duts"]
 test12_ids = dut_parameters["test_if_dot1x_accounting_methods_set_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu

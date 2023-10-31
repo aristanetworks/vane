@@ -33,8 +33,7 @@
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import tests_tools
-from vane.vane_logging import logging
+from vane import tests_tools, test_case_logger
 from vane.config import dut_objs, test_defs
 
 
@@ -44,6 +43,8 @@ LOG_FILE = {"parameters": {"show_log": "show_output.log"}}
 dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
 test_duts = dut_parameters["test_if_log_messages_appear_on_"]["duts"]
 test_ids = dut_parameters["test_if_log_messages_appear_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.demo
@@ -84,14 +85,11 @@ class LoggingTests:
                 """
                 if sys_msg in tops.show_cmd_txt:
                     actual_output = True
-                    tops.output_msg += (
-                        f"{tops.dut_name} system logs contains message: {sys_msg}. "
-                    )
+                    tops.output_msg += f"{tops.dut_name} system logs contains message: {sys_msg}. "
                 else:
                     actual_output = False
                     tops.output_msg += (
-                        f"{tops.dut_name} system logs does NOT contains message: "
-                        f"{sys_msg}. "
+                        f"{tops.dut_name} system logs does NOT contains message: {sys_msg}. "
                     )
 
             except (AttributeError, LookupError, EapiError) as exp:

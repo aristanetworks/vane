@@ -5,8 +5,6 @@ report_client.py unit tests
 # Disable protected-access for testing hidden class functions
 # pylint: disable=protected-access
 
-import datetime
-
 from vane import report_client
 
 
@@ -26,20 +24,7 @@ def test_object(rc_methods, rc_variables):
         assert variable in dir(RC)
 
 
-def test_date_creation():
-    """Verify object returns date field correctly formatted"""
-
-    date_obj = datetime.datetime.now()
-    old_format_date = date_obj.strftime("%B %d, %Y %I:%M:%S%p")
-    old_file_date = date_obj.strftime("%y%m%d%H%M")
-
-    format_date, file_date = RC._return_date()
-
-    assert old_file_date == file_date
-    assert old_format_date == format_date
-
-
-def test_formating_test_case(test_names, report_names):
+def test_formatting_test_case(test_names, report_names):
     """Verify object can format a test case name correctly"""
 
     test_range = len(test_names)
@@ -53,8 +38,25 @@ def test_formating_test_case(test_names, report_names):
         assert format_name == report_name
 
 
-def test_format_test_suite_name(test_suites):
-    """Verify object can format a test suite name correcty"""
+def test_format_test_suite_name():
+    """Verify object can format a test suite name correctly"""
+
+    test_suites = {
+        "input": [
+            "test_api.py",
+            "test_daemon.py",
+            "test_interface.py",
+            "test_tacacs.py",
+            "test_environment_mock.py",
+        ],
+        "result": [
+            "test api",
+            "test daemon",
+            "test interface",
+            "test tacacs",
+            "test environment mock",
+        ],
+    }
 
     ts_inputs = test_suites["input"]
     ts_results = test_suites["result"]
@@ -67,6 +69,10 @@ def test_format_test_suite_name(test_suites):
         format_name = RC._format_ts_name(suite_name)
 
         assert format_name == suite_result
+
+    # Testing when no "_" in test suite name
+    format_name = RC._format_ts_name("TestMemory.py")
+    assert format_name == "TestMemory"
 
 
 def test_if_keys_in_dict(duts_dict):

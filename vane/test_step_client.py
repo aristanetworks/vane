@@ -67,6 +67,8 @@ class TestStepClient:
             logging.debug(f"Walking directory {test_dir} for test cases")
             test_files = []
             for root, _dirs, files in os.walk(test_dir, topdown=False):
+                # sort the files
+                files.sort()
                 logging.debug(f"Discovered files {files} in directory {test_dir}")
                 test_files.extend(
                     os.path.join(root, name)

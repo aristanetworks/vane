@@ -34,8 +34,7 @@
 import pytest
 from pyeapi.eapilib import EapiError
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
-from vane.vane_logging import logging
+from vane import tests_tools, test_case_logger
 
 
 TEST_SUITE = __file__
@@ -51,6 +50,8 @@ test2_ids = dut_parameters["test_1_min_cpu_utlization_on_"]["ids"]
 
 test3_duts = dut_parameters["test_5_min_cpu_utlization_on_"]["duts"]
 test3_ids = dut_parameters["test_5_min_cpu_utlization_on_"]["ids"]
+
+logging = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.demo

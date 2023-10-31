@@ -6,7 +6,6 @@ report_client.py unit tests
 # pylint: disable=protected-access
 
 from vane import report_client
-from vane import utils
 
 
 DEFINITIONS = "tests/unittests/fixtures/report_definitions.yaml"
@@ -26,7 +25,6 @@ def test_object(rc_methods, rc_variables):
 
 
 def test_formatting_test_case(test_names, report_names):
-
     """Verify object can format a test case name correctly"""
 
     test_range = len(test_names)

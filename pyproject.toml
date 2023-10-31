@@ -36,6 +36,7 @@ pytest-xdist = "^3.2.1"
 pytest-mock = "^3.10.0"
 prompt-toolkit = "^3.0.39"
 ixnetwork-restpy = "^1.1.10"
+python-dateutil = "^2.8.2"
 
 [tool.poetry.dev-dependencies]
 pylint = "2.17.0"

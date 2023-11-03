@@ -289,7 +289,7 @@ class TestsClient:
         list_out = [x for x in self.test_parameters if ext in x]
 
         if parameter and report not in self.test_parameters:
-            logging.info(f"Set {ext} report name to: {report}")
+            logging.info(f"Setting {ext} report name to: {report}")
             self.test_parameters.append(report)
         elif not parameter and len(list_out) > 0:
             for list_item in list_out:
@@ -382,7 +382,7 @@ class TestsClient:
         for name in results_files:
             if "result-" in name:
                 result_file = f"{results_dir}/{name}"
-                logging.info(f"Remove result file: {result_file}")
+                logging.debug(f"Remove result file: {result_file}")
                 os.remove(result_file)
             else:
                 logging.warning(f"Not removing file: {name}")

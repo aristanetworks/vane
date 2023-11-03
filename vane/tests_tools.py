@@ -1405,7 +1405,7 @@ class TestOps:
         self.set_evidence_default(dut_name)
 
         # first run show clock if flag is set
-        if self.show_clock_flag and "show clock" not in cmds:
+        if self.show_clock_flag:
             show_clock_cmds = ["show clock"]
             # run the show_clock_cmds
             try:

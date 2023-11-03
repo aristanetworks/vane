@@ -930,6 +930,20 @@ def create_duts_file(topology_file, inventory_file):
     return None
 
 
+def post_process_skip(tops, steps, output=""):
+    """Post processing for test case that encounters a PyTest Skip
+
+    Args:
+        tops(obj): Test case object
+        steps(func): Test case
+        output(str): Test case show output
+    """
+
+    tops.skip = True
+    tops.parse_test_steps(steps)
+    tops.generate_report(tops.dut_name, output)
+
+
 # pylint: disable-next=too-many-instance-attributes
 class TestOps:
     """Common testcase operations and variables"""
@@ -1391,7 +1405,7 @@ class TestOps:
         self.set_evidence_default(dut_name)
 
         # first run show clock if flag is set
-        if self.show_clock_flag:
+        if self.show_clock_flag and "show clock" not in cmds:
             show_clock_cmds = ["show clock"]
             # run the show_clock_cmds
             try:
@@ -1610,17 +1624,3 @@ class TestOps:
 
             else:
                 logging.info("No Session to clear")
-
-
-def post_process_skip(tops, steps, output=""):
-    """Post processing for test case that encounters a PyTest Skip
-
-    Args:
-        tops(obj): Test case object
-        steps(func): Test case
-        output(str): Test case show output
-    """
-
-    tops.skip = True
-    tops.parse_test_steps(steps)
-    tops.generate_report(tops.dut_name, output)

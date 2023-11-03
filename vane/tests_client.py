@@ -257,7 +257,7 @@ class TestsClient:
         if self_contained:
             self.test_parameters.append("--self-contained-html")
         if html_report and html_name not in self.test_parameters:
-            logging.info(f"Set HTML report name to: {html_name}")
+            logging.info(f"Setting HTML report name to: {html_name}")
             self.test_parameters.append(html_name)
         elif not html_report and len(list_out) > 0:
             for list_item in list_out:

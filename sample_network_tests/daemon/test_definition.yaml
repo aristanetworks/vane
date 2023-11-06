@@ -1,6 +1,7 @@
 - name: test_daemon.py
   testcases:
     - name: test_if_daemons_are_running_on_
+      test_id: TN4.1
       description: Verify a list of daemons are running on DUT
       show_cmd: show daemon
       # List daemons to check on DUT
@@ -17,6 +18,7 @@
         - DLFW4
 
     - name: test_if_daemons_are_enabled_on_
+      test_id: TN4.2
       description: Verify a list of daemons are enabled on DUT
       # List daemons to check on DUT
       daemons:

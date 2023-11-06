@@ -1,6 +1,7 @@
 - name: test_extension.py
   testcases:
     - name: test_if_extensions_are_installed_on_
+      test_id: TN7.1
       description: Verify a list of extension are installed on a DUT
       # List extensions to check on DUT
       extensions:
@@ -17,6 +18,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_extensions_are_erroring_on_
+      test_id: TN7.2
       description: Verify a list of extension are not erroring on a DUT
       # List extensions to check on DUT
       extensions:

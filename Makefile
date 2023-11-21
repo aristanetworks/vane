@@ -32,6 +32,7 @@ COVERAGE=coverage
 
 VERSION := $(shell awk '/^version =/{print $$NF}' pyproject.toml | sed "s/\"//g")
 
+CONTAINER_ENGINE = docker
 DOCKER = docker
 IMAGE_TAG = latest
 CONTAINER_NAME = $(NAME)
@@ -52,7 +53,7 @@ SDIST = $(TMPDIR)/build/$(BASENAME_CVP)
 PYTHON3_SITELIB = $(shell python3 -c 'from distutils.sysconfig import get_python_lib; print(get_python_lib())')
 
 PROJECT_DIR = $(shell pwd)
-DOCKER_DIR = "/project"
+CONTAINER_DIR = "/project"
 
 PEP8_IGNORE = E302,E203,E261,W503,C0209,E501
 
@@ -100,36 +101,30 @@ unittest:
 coverage_report:
 	$(COVERAGE) report -m
 
-.PHONY: exec
-exec:
-	docker exec -it $(CONTAINER_NAME) /bin/bash
+# ---- Container related targets --------------------------------------------------
 
 .PHONY: format
 format:
-	docker exec -it $(CONTAINER_NAME) bash -c "poetry run black -l 100 /project/vane/bin/*py"
+	${CONTAINER_ENGINE} run --rm --name $(CONTAINER_NAME) -v $(PROJECT_DIR):$(CONTAINER_DIR) $(CONTAINER_FULL_NAME) bash -c "poetry run black -l 100 /project/vane/*py"
 
-.PHONY: hints
-hints:
-	docker exec -it $(CONTAINER_NAME) bash -c "poetry run mypy /project/vane/bin/*py"
+.PHONY: container
+# Builds the container
+container:
+	${CONTAINER_ENGINE} build -t $(CONTAINER_FULL_NAME) . --build-arg UID=$(UID) --build-arg GID=$(GID)
 
-docker_build:
-	docker build -t $(CONTAINER_FULL_NAME) . --build-arg UID=$(UID) --build-arg GID=$(GID)
+.PHONY: run
+# Runs the container
+run:
+	${CONTAINER_ENGINE} run --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun -it --rm --name $(CONTAINER_NAME) -v $(PROJECT_DIR):$(CONTAINER_DIR) $(CONTAINER_FULL_NAME)
 
-docker_stop:
-	- docker stop $(CONTAINER_NAME)
-
-docker_run:
-	docker run --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun -t -d --rm --name $(CONTAINER_NAME) -v $(PROJECT_DIR):$(DOCKER_DIR) $(CONTAINER_FULL_NAME)
-
-.PHONY: dev
-dev: docker_stop docker_build docker_run exec
+# ---- CVP RPM related targets --------------------------------------------------
 
 docker_build_cvp:
-	docker build -f Dockerfile.CVP -t vane-cvp . --network=host
-	docker save $(CONTAINER_NAME_CVP) | gzip > $(NAME_CVP).tar.gz
+	${DOCKER} build -f Dockerfile.CVP -t vane-cvp . --network=host
+	${DOCKER} save $(CONTAINER_NAME_CVP) | gzip > $(NAME_CVP).tar.gz
 
 docker_stop_cvp:
-	- docker stop $(CONTAINER_NAME_CVP)
+	- ${DOCKER} stop $(CONTAINER_NAME_CVP)
 
 cvp: docker_stop_cvp docker_build_cvp
 

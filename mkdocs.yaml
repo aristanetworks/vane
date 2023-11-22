@@ -88,7 +88,7 @@ markdown_extensions:
   - pymdownx.critic
   - pymdownx.details
   - pymdownx.emoji:
-      emoji_index: !!python/name:materialx.emoji.twemoji
+      # emoji_index: !!python/name:materialx.emoji.twemoji
       emoji_generator: !!python/name:materialx.emoji.to_svg
       options:
         custom_icons:
@@ -126,7 +126,7 @@ nav:
     - Test Case Setup: test_case_style_guide/test_case_setup.md
     - Sample Network Test Cases: test_case_style_guide/sample_network_tests.md
   - NRFU Testing: nrfu_setup/nrfu_setup.md
-  # - Vane GUI: gui/user_interface.md
+  - Vane GUI: gui/user_interface.md
   - API and CLI reference: 
     - Vane CLI: api/cli.md
     - Vane API: api/api.md

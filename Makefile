@@ -115,7 +115,7 @@ container:
 .PHONY: run
 # Runs the container
 run:
-	${CONTAINER_ENGINE} run --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun -it --rm --name $(CONTAINER_NAME) -v $(PROJECT_DIR):$(CONTAINER_DIR) $(CONTAINER_FULL_NAME)
+	${CONTAINER_ENGINE} run --cap-add=NET_ADMIN --device /dev/net/tun:/dev/net/tun -it --rm -h vane-container --name $(CONTAINER_NAME) -v $(PROJECT_DIR):$(CONTAINER_DIR) $(CONTAINER_FULL_NAME)
 
 # ---- CVP RPM related targets --------------------------------------------------
 

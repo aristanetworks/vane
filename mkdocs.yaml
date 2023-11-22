@@ -62,23 +62,8 @@ extra_css:
 
 plugins:
   - glightbox
-  # - exclude:
-  #     glob:
-  #       - molecule/*
-  #       - tests/*
-  #       - docs/release-notes/1.0.x.md
-  #       - docs/release-notes/1.1.x.md
-  #       - docs/release-notes/2.x.x.md
-  #       - docs/release-notes/3.x.x.md
-  # - git-revision-date-localized:
-  #     type: date
   - search:
       lang: en
-  # - mkdocstrings:
-  #     handlers:
-  #       python:
-  #         paths:
-  #           - python-avd
 
 markdown_extensions:
   - admonition
@@ -130,10 +115,3 @@ nav:
   - API and CLI reference: 
     - Vane CLI: api/cli.md
     - Vane API: api/api.md
-  
-  
-
-
-
-# Optional configuration for custom domain (if you have one)
-# domain: vane.com

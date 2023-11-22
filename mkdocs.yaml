@@ -113,5 +113,5 @@ nav:
   - NRFU Testing: nrfu_setup/nrfu_setup.md
   - Vane GUI: gui/user_interface.md
   - API and CLI reference: 
-    - Vane CLI: api/cli.md
-    - Vane API: api/api.md
+    - Vane CLI: api_cli/cli.md
+    - Vane API: api_cli/api.md

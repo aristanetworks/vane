@@ -40,7 +40,7 @@ NRFU Command Options:
 ```
 !!! info
 
-    Let us get started by discussing some of the necessary flags/arguments, namely definitionas and duts file, what they stand for and how they can be included in order to help you get started with Vane. The remaining arguments and api will be discussed in the [API and CLI Referenec](../api/cli.md) Section.
+    Let us get started by discussing some of the necessary flags/arguments, namely definitionas and duts file, what they stand for and how they can be included in order to help you get started with Vane. The remaining arguments and api will be discussed in the [API and CLI Referenec](../api_cli/cli.md) Section.
 
 ### Using the definitions file flag
 
@@ -111,7 +111,7 @@ parameters:
 The **Vane duts file** includes a list of all devices that Vane should run its test cases against, it includes relevant information for each DUT (device under test) such as their hostname and their access credentials. Operators should edit this file to include the devices that they would like to run Vane against.
 
 !!! info
-    In the [API](../api/api.md) section later on we talk about how we can use certain API to generate this duts.yaml file instead of having to manually fill in all the details
+    In the [API](../api_cli/api.md) section later on we talk about how we can use certain API to generate this duts.yaml file instead of having to manually fill in all the details
 
 You can provide the duts file while running Vane as follows:
 
@@ -161,7 +161,7 @@ duts:
   role: unknown
 ```
 
-There are a few other flags and descriptions on how to use them which you can explore further in the [API section](../api/api.md), but the ones described above are the necessary ones to get started.
+There are a few other flags and descriptions on how to use them which you can explore further in the [API section](../api_cli/api.md), but the ones described above are the necessary ones to get started.
 
 ### Executing Vane
 

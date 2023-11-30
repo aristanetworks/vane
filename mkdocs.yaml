@@ -111,7 +111,7 @@ nav:
     - Test Case Setup: test_case_style_guide/test_case_setup.md
     - Sample Network Test Cases: test_case_style_guide/sample_network_tests.md
   - NRFU Testing: nrfu_setup/nrfu_setup.md
-  - Vane GUI: gui/user_interface.md
+  # - Vane GUI: gui/user_interface.md
   - API and CLI reference: 
     - Vane CLI: api_cli/cli.md
     - Vane API: api_cli/api.md

@@ -7,10 +7,6 @@ Vane has the following Command Line arguments which we will be discussing in thi
 
     We discussed the --definitions-file and --duts-file flag in the [Executing Vane](../executing_vane/executing_vane.md) Section and --nrfu flag in the [NRFU Tetsing](../nrfu_setup/nrfu_setup.md) Section, we will cover the rest here.
 
-## Using the -- environment flag
-
-### Coming Soon
-
 ## Using the -- generate-duts-file flag
 
 This flag can be used to generate the duts file for a given inventory and topology file of a virtual lab.

@@ -52,14 +52,9 @@ Main Command Options:
                         Specify the name of the definitions file
   --duts-file DUTS_FILE
                         Specify the name of the duts file
-  --environment ENVIRONMENT
-                        Specify the test execution environment
   --generate-duts-file topology_file inventory_file
                         Create a duts file from topology and inventory
                         file
-  --generate-duts-from-topo topology_file
-                        Generate a duts file from an ACT topology
-                        file.
   --generate-test-steps test_dir
                         Generate test steps for all the tests in the
                         test directory mentioned in the definitions

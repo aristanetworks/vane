@@ -64,6 +64,7 @@ plugins:
   - glightbox
   - search:
       lang: en
+  - mkdocstrings
 
 markdown_extensions:
   - admonition

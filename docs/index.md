@@ -1,22 +1,42 @@
 # VANE: Network Certification Tool
 
-
-
 ## Description
 
+Vane ( **VA** lidation **NE** twork) <div style='text-align: justify;'> is an
+open source, network validation tool designed to conduct tests on Arista's
+networking devices. It operates by establishing connections with the devices
+on a specified network, executing commands, and conducting tests against
+the generated output. By automating these tasks, Vane significantly streamlines
+the network validation process, sparing users from the time-consuming burden of
+repetitive testing that could otherwise span months.
 
-Vane ( **VA** lidation **NE** twork) <div style='text-align: justify;'> is an open source, network validation tool designed to conduct tests on Arista's networking devices. It operates by establishing connections with the devices on a specified network, executing commands, and conducting tests against the generated output. By automating these tasks, Vane significantly streamlines the network validation process, sparing users from the time-consuming burden of repetitive testing that could otherwise span months.
+Vane prioritizes user-friendliness, aiming to reduce the necessity for system
+operators to manually edit source code. It achieves this goal by dynamically
+conveying information to its test cases through YAML files, which serve as
+containers for parameters passed to specific test cases.
 
-Vane prioritizes user-friendliness, aiming to reduce the necessity for system operators to manually edit source code. It achieves this goal by dynamically conveying information to its test cases through YAML files, which serve as containers for parameters passed to specific test cases.
-
-A significant aspect of the tool is its versatility in reporting test case output across multiple formats such as JSON, HTML, Word documents, or Excel spreadsheets. This diverse range of output formats enhances the clarity of test case results and provides structured data, facilitating easier analysis of the test output.
+A significant aspect of the tool is its versatility in reporting test case output
+across multiple formats such as JSON, HTML, Word documents, or Excel spreadsheets.
+This diverse range of output formats enhances the clarity of test case results and
+provides structured data, facilitating easier analysis of the test output.
 
 </div>
 
-## Technologies in Vane 
-Vane,<div style='text-align: justify;'> is fundamentally a Python project, employing Python classes for tasks such as parsing command line arguments, configuring and executing tests, and reporting test output. Leveraging the versatility of Python, developers proficient in the language can effortlessly create or extend test cases within the Vane framework.
+## Technologies in Vane
 
-For reporting purposes, Vane integrates PyTest, capitalizing on its seamless execution of test cases and compatibility with existing functionality. All Vane test cases adhere to PyTest syntax. In essence, Vane serves as an enriched wrapper around PyTest, augmenting its capabilities. The ongoing focus of Arista's development efforts is geared towards enhancing user experience and simplifying the process of crafting test cases, and Vane aims to serve this.
+Vane,<div style='text-align: justify;'> is fundamentally a Python project,
+employing Python classes for tasks such as parsing command line arguments,
+configuring and executing tests, and reporting test output. Leveraging the
+versatility of Python, developers proficient in the language can effortlessly
+create or extend test cases within the Vane framework.
+
+For reporting purposes, Vane integrates PyTest, capitalizing on its seamless
+execution of test cases and compatibility with existing functionality.
+All Vane test cases adhere to PyTest syntax. In essence, Vane serves as
+an enriched wrapper around PyTest, augmenting its capabilities.
+The ongoing focus of Arista's development efforts is geared towards
+enhancing user experience and simplifying the process of crafting test cases,
+and Vane aims to serve this.
 </div>
 
 ## Contributing
@@ -27,6 +47,7 @@ Please note that all contributions that modify the library behavior
 require corresponding test cases otherwise the pull request will be
 rejected.
 </div>
+
 ## License
 
 <div style='text-align: justify;'>
@@ -45,7 +66,6 @@ modification, are permitted provided that the following conditions are met:
 * Neither the name of the Arista nor the names of its
   contributors may be used to endorse or promote products derived from
   this software without specific prior written permission.
-
 
 !!! quote "Important"
 

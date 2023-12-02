@@ -2,7 +2,6 @@
 
 ::: vane.tests_tools
     options:
-      filters: []
       group_by_category: true
       show_category_heading: true
       show_root_heading: true

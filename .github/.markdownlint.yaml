@@ -30,11 +30,6 @@ MD004:
 MD007:
   indent: 2
 
-# line length
-MD013:
-  false
-  # a lot of debate whether to wrap or not wrap
-
 # multiple headings with the same content
 # siblings_only is set here to allow for common header values in structured
 # documents
@@ -79,10 +74,6 @@ MD041:
 # probably not entirely helpful in a technical writing environment.
 MD044:
   false
-
-# block style - disabled to allow for admonitions
-# MD046:
-#   false
 
 # MD048/code-fence-style - Code fence style
 MD048:

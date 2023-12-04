@@ -10,8 +10,8 @@ default:
   true
 
 # Code block formatting (indented vs fenced)
-# MD046: 
-#   false
+MD046: 
+  false
 
 # Inline HTML
 MD033: 
@@ -57,10 +57,6 @@ MD031:
 # lists should be surrounded by blank lines default: true
 MD032:
   true
-
-# MD033/no-inline-html - Inline HTML
-MD033:
-  false
 
 # bare URL - bare URLs should be wrapped in angle brackets
 # <https://eos.arista.com>

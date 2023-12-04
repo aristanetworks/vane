@@ -275,4 +275,4 @@ in vane, if yes it will further prompt you
 !!! success
 
     After which Vane will start executing the test cases on
-    the devices managed through CVP
+    your devices managed through CVP

@@ -141,7 +141,7 @@ vane –duts-file  duts.yaml
 !!! eos-config "Note"
     duts.yaml is the relative path to your duts file,
     you can use the sample one in vane repo located at
-    [vane/sample_network_tests/duts.yaml](<https://github.com/aristanetworks/vane/blob/develop/sample_network_tests/duts.yaml>)
+    [vane/sample_network_tests/duts.yaml](<https://githb.com/aristanetworks/vane/blob/develop/sample_network_tests/duts.yaml>)
     to get started.
 
 If while running vane you do not include this argument as

@@ -93,6 +93,7 @@ all:
           ansible_host: 10.255.50.212
           ansible_user: cvpadmin
           ansible_ssh_pass: cvp123!
+
 ```
 
 !!! success
@@ -143,7 +144,7 @@ the test cases in the test directory.
 
 ## Using the -- markers flag
 
-This flag can be used to view all the markers supported in Vane
+This flag can be used to view all the markers supported by Vane
 
 ``` text
 vane --markers

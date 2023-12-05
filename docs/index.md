@@ -2,7 +2,7 @@
 
 ## Description
 
-Vane ( **VA** lidation **NE** twork) <div style='text-align: justify;'> is an
+Vane ( **VA** lidate **NE** twork) <div style='text-align: justify;'> is an
 open source, network validation tool designed to conduct tests on Arista's
 networking devices. It operates by establishing connections with the devices
 on a specified network, executing commands, and conducting tests against

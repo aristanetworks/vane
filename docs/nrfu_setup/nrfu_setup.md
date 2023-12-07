@@ -83,133 +83,171 @@ it will prompt you for the test directory as earlier.
 !!! info
 
     If you have the initialized vane-cvp setup, then skip to
-    the second part of Step 8, if not then follow from Step 1
+    the second part of [Step 7](../nrfu_setup/
+    nrfu_setup.md#step-7-get-a-command-shell-in-the-vane-cvp-extension-container),
+    if not then follow from Step 1
 
 ### Step 1: Download the vane-cvp-rpm from the vane repo
 
-Location: <https://github.com/aristanetworks/vane/actions/workflows/cvp-extension-builder.yml>
+Download the vane-cvp-rpm from the vane repo over [here](<https://github.com/aristanetworks/vane/actions/workflows/cvp-extension-builder.yml>)
 
 Select the most recent successful build,
 which would be the one at the top with a green checkmark.
 
 Then download the rpm from the artifacts section
-(You need to be signed into your github account to be able to download this)
+
+!!! note
+    You need to be signed into your github account to be able to download this
 
 The package is downloaded as a zip archive.
-Unzip the archive to extract the rpm file.
 
-### Step 2: scp the rpm file from your local device to your cvp instance
+### Step 2: scp the zipped rpm file from your local device to your cvp instance
 
-The file should be copied into the cvp user’s home directory on the cvp instance.
+The file should be copied into the root directory on the cvp instance.
 
 ``` text
-scp <path_to_rpm_on_local_device> <cvp_user>@<cvp_ip>:/home/cvp
+scp /file/path/vane-cvp-1.1.0rc2-rpm.zip root@<cvp_ip>:/root
 ```
 
 !!! example
 
-    scp /Users/rewati/Downloads/vane-cvp-0.91-1.noarch.rpm root@10.255.67.157:/home/cvp
+    scp /Users/rewati/Downloads/vane-cvp-1.1.0rc2-rpm.zip root@10.255.67.157:/root
 
-### Step 3: Ssh into cvp instance and change to the cvp user
+### Step 3: Ssh into cvp instance
 
-Log into the cvp instance as the root user initially.
-Then use the shown command to change to the cvp user’s account.
+Log into the cvp instance as the root user.
 
 ``` text
 ssh root@<cvp_ip>
-su - cvp
 ```
 
-### Step 4: Install the rpm to add the vane-cvp extension to CVP
+### Step 4: Unzip and untar the copied package in the root user's home directory
+
+!!! tip
+
+    Use tab completion after typing the unzip command,
+    then use a wildcard on the filename for the tar command
+    to avoid having to type out or copy the filename correctly,
+    since the .tgz file is slightly different than the zip file name.
+
+The command and its output will look as follow:
+
+```text
+[root@10-255-119-36 ~]# unzip vane-cvp-1.1.0rc2-rpm.zip && tar xzvf vane-cvp*.tgz
+Archive:  vane-cvp-1.1.0rc2-rpm.zip
+inflating: vane-cvp-1.1.0rc2.tgz
+vane-cvp-1.1.0rc2/
+vane-cvp-1.1.0rc2/vane-cvp-install.sh
+vane-cvp-1.1.0rc2/vane-cvp-uninstall.sh
+vane-cvp-1.1.0rc2/vane-cvp-start.sh
+vane-cvp-1.1.0rc2/vane-cvp-1.1.0rc2-1.noarch.rpm
+```
+
+### Step 5: Change to the newly created directory
+
+Inside the directory, there will be the vane-cvp rpm
+package and 3 executable shell scripts.
+
+``` text
+[root@10-255-119-36 ~]# cd vane-cvp-1.1.0rc2
+[root@10-255-119-36 vane-cvp-1.1.0rc2]# ls -1
+vane-cvp-1.1.0rc2-1.noarch.rpm
+vane-cvp-install.sh
+vane-cvp-start.sh
+vane-cvp-uninstall.sh
+```
+
+#### Step 6a: Run the vane-cvp-install.sh script to install vane and start the container
+
+This installs the RPM, enables the extension in CVP,
+starts the extension and checks the status of the extension,
+then disables the extension.
+
+!!! note
+    Disabling the extension does not stop the extension from running.
+    It is still active and can be used. Disabling the extension prevents
+    the extension from starting automatically the next time CVP is stopped
+    and restarted, e.g. after a reboot or a manual stop and restart of CVP.
+    This is to help prevent the Vane extension from loading after a reboot,
+    which should help prevent issues during a CVP upgrade.
+
+!!! note
+    Although the extension is disabled and this should help during
+    a CVP upgrade process, the suggested process is to always
+    uninstall the Vane CVP extension [see step 6c](../nrfu_setup/
+    nrfu_setup.md#step-6c-uninstalling-the-vane-extension-optional)
+    before proceeding with the CVP upgrade.
+
+``` text
+[root@10-255-119-36 vane-cvp-1.1.0rc2]# ./vane-cvp-install.sh
+
+--------------------------------------------------------------
+
+Install the rpm
+  ....
+
+<lots of output removed>
+
+  ....
+
+
+Action Output
+-------------
+COMPONENT     ACTION        NODE      STATUS      ERROR
+vane-cvp      disable      primary   (E) DONE       -
+
+--------------------------------------------------------------
+
+
+-- Vane CVP extension installed --
+```
+
+#### Step 6b: Restarting the Vane extension after a CVP shutdown (*optional*)
+
+If the CVP instance is stopped for any reason (reboot, manually
+stopped by cvpi commands, etc), the Vane extension will not be
+restarted when CVP is restarted. To restart the Vane extension
+after CVP is running again, cd into the same directory where the
+rpm package and the 3 shell scripts are located and run the
+vane-cvp-start.sh script. This script is nearly identical to the
+vane-cvp-install.sh script with the exception of not perfoming the
+rpm installation. It enables and starts the extension, then verifies
+the status of the extension, and finally disables (without stopping)
+the extension, as before.
+
+``` text
+cd path_to_directory_containing_rpm_package
+
+./vane-cvp-start.sh
+```
 
 !!! warning
-    If upgrading a previously installed vane-cvp extension,
-    skip to section 4b below regarding upgrades.
+
+    This step assumes that the extension has been previously
+    installed by [Step 6a](../nrfu_setup/nrfu_setup.md#step-6a-run-the-vane-cvp-installsh-script-to-install-vane-and-start-the-container)
+    successfully, and this is only to restart the extension.
+
+#### Step 6c: Uninstalling the Vane extension (*optional*)
+
+Uninstalling the Vane CVP extension is highly recommended before
+performing an upgrade to either the extension itself or to CVP.
+
+To uninstall the extension, cd into the same directory where the
+rpm package and the 3 shell scripts are located and run the
+vane-cvp-uninstall.sh script. This script will stop and disable
+the extension if it is running, remove any containers associated
+with the extension, and uninstall the extension from the CVP subsystem.
 
 ``` text
-cvpi install -f <rpm_package>
+cd path_to_directory_containing_rpm_package
+
+./vane-cvp-uninstall.sh
 ```
 
-!!! example
-    cvpi install -f vane-cvp-0.91-1.noarch.rpm
-
-#### Step 4b: Upgrade installation
-
-!!! warning
-    If not doing an upgrade to an existing vane-cvp extension, skip to Step 5.
-
-To upgrade an existing vane-cvp installation, before installing the new
-rpm package, the old rpm package must first be uninstalled and the vane-cvp
-container must be removed from the container library. If the old container
-is not removed, the newer container will not be installed correctly and when
-the vane-cvp extension is run, the old container will be used instead.
-
-**First uninstall the vane-cvp extension from the CVP host.**
-
-``` text
-cvpi uninstall -f vane-cvp
-```
-
-The next operation is optional. If desired, remove the vane-data
-directory from the CVP host system. This will essentially create a
-“fresh install” state for the updated vane-cvp extension.
-
-!!! warning
-
-    If there is data in the shared directory that is going to be
-    needed in the updated environment, do not do this next command,
-    leave the existing data, which will be shared with the new container
-    when it is started.
-
-``` text
-rm -rf /cvpi/apps/vane-cvp/vane-data
-```
-
-**Remove the previous container image from the image registry on the CVP host.**
-
- This is done using the nerdctl utility run as the root user.
- Running nerdctl with sudo does not seem to produce the desired
- results, so we need to switch from the cvp user to the root user,
- then run the nerdctl command, then switch back to the cvp user
- to continue our regular operations.
-
-!!! info
-    The commands shown below should produce a block of output
-    that indicates images have been removed, which
-    usually begins with a line that states
-
-     * Untagged: docker.io/library/vane-cvp:latest@sha256:<some-hash>
-       followed by a block of lines that begin with Deleted: sha256:<hash>. 
-
-``` text
-sudo -i     (to change to the root user for the next command)
-nerdctl rmi -f `nerdctl images | grep vane-cvp | awk '{print $3}'
-exit        (to switch back to the cvp user again)
-```
-
-**Finally, install the updated vane-cvp extension as before.**
-
-``` text
-cvpi install -f <rpm_package>
-```
-
-From this point on, the upgrade of the vane-cvp extension is complete.
-The extension will need to be enabled and started as before, and can
-be exec’ed into after that. Continue with Step 5.
-
-### Step 5: Enable the vane-cvp extension
-
-``` text
-cvpi enable -f vane-cvp
-```
-
-### Step 6: Start the vane-cvp extension
-
-``` text
-cvpi start -f vane-cvp
-```
-
-Check the status of the package by running : ```cvpi status -f vane-cvp```
+!!! note
+    The /cvpi/apps/vane-cvp/vane-data directory that is associated
+    with the container is not removed, so any data that you may have
+    stored in the shared location is still preserved.
 
 ### Step 7: Get a command shell in the vane-cvp extension container
 
@@ -221,25 +259,37 @@ container using kubectl.
 kubectl exec -it <vane-cvp-container-id> -- /bin/bash
 ```
 
-To get the *vane-cvp-container-id* start typing ‘vane’
-and hit tab to trigger the tab-completion which should
-fill in the name of the vane-cvp container. The container
-id should be something like vane-cvp-667699998-m42gh.
+!!! tip
+    To get the *vane-cvp-container-id* start typing ‘vane’
+    and hit tab to trigger the tab-completion which should
+    fill in the name of the vane-cvp container. The container
+    id should be something like vane-cvp-667699998-m42gh.
+
 If returning to a previously initialized vane-cvp setup,
-you will need to first log into the CVP host, then change
-to the cvp user before exec’ing into the vane-cvp container.
+you will need to first log into the CVP host, before exec’ing into the vane-cvp container.
 
 ``` text
 ssh root@<cvp_ip>
-su - cvp
 kubectl exec -it <vane-cvp-container-id> -- /bin/bash
 ```
+
+!!! note
+
+    If the tab completion doesn't work, an alternative form of the
+    kubectl exec command can be run as
+
+    ``` text
+    kubectl exec -it `kubectl get pods | grep vane-cvp | awk '{print $1}'` -- /bin/bash
+    ```
+    where the commands in the backticks will dynamically get the container id.
 
 ### Step 8: Activate Vane shell
 
 After the above command, if everything is successful
-you will be greeted with the prompt, after which if you
+you will be greeted with a prompt as follows, after which if you
 type **activate**, you will enter the vane virtual environment
+
+![Screenshot](../images/vane-cvp-prompt.png)
 
 ### Step 9: Executing Vane
 
@@ -269,7 +319,7 @@ If you answer n/no, it will default to the nrfu_tests folder
 in vane, if yes it will further prompt you
 
 ``` text
-    Please specify test case directory <path/to/test case dir> (Use tab for autocompletion):
+Please specify test case directory <path/to/test case dir> (Use tab for autocompletion):
 ```
 
 !!! success

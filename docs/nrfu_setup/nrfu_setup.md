@@ -157,7 +157,7 @@ vane-cvp-start.sh
 vane-cvp-uninstall.sh
 ```
 
-#### Step 6a: Run the vane-cvp-install.sh script to install vane and start the container
+### Step 6a: Run the vane-cvp-install.sh script to install vane and start the container
 
 This installs the RPM, enables the extension in CVP,
 starts the extension and checks the status of the extension,

@@ -210,7 +210,7 @@ restarted when CVP is restarted. To restart the Vane extension
 after CVP is running again, cd into the same directory where the
 rpm package and the 3 shell scripts are located and run the
 vane-cvp-start.sh script. This script is nearly identical to the
-vane-cvp-install.sh script with the exception of not perfoming the
+vane-cvp-install.sh script with the exception of not performing the
 rpm installation. It enables and starts the extension, then verifies
 the status of the extension, and finally disables (without stopping)
 the extension, as before.

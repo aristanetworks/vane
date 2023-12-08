@@ -5,7 +5,7 @@
 # Expects the extension RPM package and this script to be located in the /root directory of the
 # CVP host, and this script should be run as the root user.
 #
-# The script will cop the RPM package to the /home/cvp directory (required by cvpi installation) and
+# The script will copy the RPM package to the /home/cvp directory (required by cvpi installation) and
 # install the RPM, enable the extension, start the extension, and display the status of the running
 # extension. After the extension is running, it disables the extension so that when CVP is stopped
 # and restarted, the extension is not loaded. This prevents any issues during CVP upgrades or other

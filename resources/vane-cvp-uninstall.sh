@@ -26,7 +26,7 @@ function exit_trap {
   elif [[ $result == *${not_installed}* ]]; then
     # If the result contains the not installed string, notify the user that Vane CVP is
     # already uninstalled
-    echo -e "Vane CVP extension has already been uninstalled, no further steps necessary"
+    echo -e "Vane CVP extension is not installed, no further steps necessary"
 
   else
     echo -e "\n\"${mycommand}\" command failed with exit code $?.\n"

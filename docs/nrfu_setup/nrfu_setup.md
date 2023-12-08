@@ -106,7 +106,7 @@ The package is downloaded as a zip archive.
 The file should be copied into the root directory on the cvp instance.
 
 ``` text
-scp /file/path/vane-cvp-1.1.0rc2-rpm.zip root@<cvp_ip>:/root
+scp /file/path/vane-cvp-<version-info>.zip root@<cvp_ip>:/root
 ```
 
 !!! example
@@ -133,7 +133,7 @@ ssh root@<cvp_ip>
 The command and its output will look as follow:
 
 ```text
-[root@10-255-119-36 ~]# unzip vane-cvp-1.1.0rc2-rpm.zip && tar xzvf vane-cvp*.tgz
+[root@<cvp_ip> ~]# unzip vane-cvp-1.1.0rc2-rpm.zip && tar xzvf vane-cvp*.tgz
 Archive:  vane-cvp-1.1.0rc2-rpm.zip
 inflating: vane-cvp-1.1.0rc2.tgz
 vane-cvp-1.1.0rc2/
@@ -149,8 +149,8 @@ Inside the directory, there will be the vane-cvp rpm
 package and 3 executable shell scripts.
 
 ``` text
-[root@10-255-119-36 ~]# cd vane-cvp-1.1.0rc2
-[root@10-255-119-36 vane-cvp-1.1.0rc2]# ls -1
+[root@<cvp_ip> ~]# cd vane-cvp-1.1.0rc2
+[root@<cvp_ip> vane-cvp-1.1.0rc2]# ls -1
 vane-cvp-1.1.0rc2-1.noarch.rpm
 vane-cvp-install.sh
 vane-cvp-start.sh
@@ -179,7 +179,7 @@ then disables the extension.
     before proceeding with the CVP upgrade.
 
 ``` text
-[root@10-255-119-36 vane-cvp-1.1.0rc2]# ./vane-cvp-install.sh
+[root@<cvp_ip> vane-cvp-1.1.0rc2]# ./vane-cvp-install.sh
 
 --------------------------------------------------------------
 

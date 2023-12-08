@@ -20,6 +20,6 @@ jobs:
           python-version: 3.x
 
       ##### Install required Python Modules and build the website #####
-      - run: pip install .
+      - run: pip install -r docs/requirements.txt
       - run: mkdocs gh-deploy --force
       

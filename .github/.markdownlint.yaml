@@ -89,3 +89,6 @@ MD049:
 MD050:
   # Strong style should be consistent
   style: "asterisk"
+
+MD013:
+  false

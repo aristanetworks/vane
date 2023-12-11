@@ -36,38 +36,16 @@ definition and what they should be used for.
 | Field       | Required  | Description                |
 | ----------- | --------- | -------------------------- |
 | name        |  Yes      |  Name of the test suite |
-| testcases   |   Yes     |  List of test case definitions.
-One per test case. Note this is one per test case not per
-test suite. For example, if test_memory.py has 5 testcases,
-a test case definition for each of the test cases is required. |
-| name        |  Yes      |  Name of test case. This will appear
-in the test report. Use underscores to separate words and Vane will
-remove them when publishing a report. || test_id     | Yes      |
-Unique identifier for test case. This will be published in a test report. |
-|  description   |  Yes       | Describes the purpose of the test case
-and what it's testing. This will be published in a test report. |
-| show_cmd |    No       |  Some test cases have simple logic.
-These test cases send a show command to EOS and then validate a field in
-the operational data. For efficiency these commands can be run in batch
-before test case execution. This field inputs commands needing batch execution.
-If show output is available, Vane will report the show command and its
-output in human readable text. || expected_output  |    No       |
-User defined output to be used for test validation.
-This will vary from test to test and may have many key value pairs.
-It is not a required field for test cases that do not need a configurable
-test criteria. It can be published to the test report depending on report
-template || report_style       |     No      |  Reporting template
-to use when creating output. Vane will default to original reporting without it.|
-| test criteria   |   Yes        |  Details which the test case
-will use to determine pass or fail. This will be published in a test report. |
-| criteria | No | Criteria on the basis of which duts can be filtered.
-Eg: Name, Role || filter | No | Values which should pass the criteria
-mentioned above. || comment     |     No      |  Additional information
-about the test case. It can be published to the test report depending on the
-report template. Example comment is a test case that cannot run because a
-requirement is not met.  This could be a hardware test for vEOS
-instance, or not having expected software configurations like TACACS
-not being configured for TACACS test. |
+| testcases   |   Yes     |  List of test case definitions. One per test case. Note this is one per test case not per test suite. For example, if test_memory.py has 5 testcases, a test case definition for each of the test cases is required.|
+| name        |  Yes      |  Name of test case. This will appear in the test report. Use underscores to separate words and Vane will remove them when publishing a report. |
+| test_id     | Yes      | Unique identifier for test case. This will be published in a test report. |
+|  description   |  Yes       | Describes the purpose of the test case and what it's testing. This will be published in a test report. |
+| show_cmd |    No       |  Some test cases have simple logic. These test cases send a show command to EOS and then validate a field in the operational data. For efficiency these commands can be run in batch before test case execution. This field inputs commands needing batch execution. If show output is available, Vane will report the show command and its output in human readable text. |
+| expected_output  |    No       | User defined output to be used for test validation. This will vary from test to test and may have many key value pairs. It is not a required field for test cases that do not need a configurable test criteria. It can be published to the test report depending on report template |
+| report_style       |     No      |  Reporting template to use when creating output. Vane will default to original reporting without it.|
+| test criteria   |   Yes        |  Details which the test case will use to determine pass or fail. This will be published in a test report. |
+| criteria | No | Criteria on the basis of which duts can be filtered. Eg: Name, Role || filter | No | Values which should pass the criteria mentioned above. |
+| comment     |     No      |  Additional information about the test case. It can be published to the test report depending on the report template. Example comment is a test case that cannot run because a requirement is not met.  This could be a hardware test for vEOS instance, or not having expected software configurations like TACACS not being configured for TACACS test. |
 
 !!! eos-config "Note"
 
@@ -207,25 +185,12 @@ test definition for this. These values are optional.
 
 | key | type (of the value)  | value |
 | ----------- | -------------------------- | -------------------------- |
-criteria | string |Specifies the filtering criteria.  Valid criteria are:
-name (scenario 1), role (scenario 2), names (scenario 3),
-regex (scenario 4). If the criteria field is empty or does not match a
-valid criteria, all duts will be tested (scenario 5). *Scenarios are shown below.*
-|filter |string |Filter based on a DUT name.
-There must be an exact match between
-the DUT’s name in the duts.yaml file.|
-|filter|string |Filter based on a role name.
-There must be an exact match between
-the role’s name in the duts.yaml file. |
-|filter |list |Filter based on a list of roles.
-There must be an exact match between
-each role and the duts.yaml file.|
-|filter | list | Filter based on a list of DUT names.
-There must be an exact match
-between each DUT’s name and the duts.yaml file. |
-|filter | string | Filter based on a regular expression.
-Regular expression  will
-match all DUT’s names in the duts.yaml file that are valid. |
+criteria | string |Specifies the filtering criteria.  Valid criteria are: name (scenario 1), role (scenario 2), names (scenario 3), regex (scenario 4). If the criteria field is empty or does not match a valid criteria, all duts will be tested (scenario 5). *Scenarios are shown below.*
+|filter |string |Filter based on a DUT name. There must be an exact match between the DUT’s name in the duts.yaml file.|
+|filter|string |Filter based on a role name. There must be an exact match between the role’s name in the duts.yaml file. |
+|filter |list |Filter based on a list of roles. There must be an exact match between each role and the duts.yaml file.|
+|filter | list | Filter based on a list of DUT names. There must be an exact match between each DUT’s name and the duts.yaml file. |
+|filter | string | Filter based on a regular expression. Regular expression  will match all DUT’s names in the duts.yaml file that are valid. |
 
 Six current scenarios exists for filtering DUTs:
 
@@ -382,8 +347,7 @@ logging.error("This is an error log")
 !!! eos-config "Note"
     By default the debug logs do not get logged, but this can be
     changed by changing the log levels within the
-    [test case logger file]
-    (https://github.com/aristanetworks/vane/blob/4f2775ca0af0496ec23095a9f8dc72bddf269e5b/vane/test_case_logger.py#L14)
+    [test case logger file](https://github.com/aristanetworks/vane/blob/4f2775ca0af0496ec23095a9f8dc72bddf269e5b/vane/test_case_logger.py#L14)
 
 #### Using markers
 
@@ -403,9 +367,8 @@ to categorize tests based on their purpose.
 ```
 
 You can now run specific groups of tests using markers. For example,
-if you only want to run nrfu tests, you can add the **nrfu** marker
-in the [definitions.yaml markers field]
-(https://github.com/aristanetworks/vane/blob/4c29cb4dba48ad312699b88e91a3f398b7dae81a/sample_network_tests/definitions.yaml#L11).
+if you only want to run nrfu tests, you can add the **nrfu** marker in the
+[definitions.yaml markers field](https://github.com/aristanetworks/vane/blob/4c29cb4dba48ad312699b88e91a3f398b7dae81a/sample_network_tests/definitions.yaml#L11).
 
 !!! tip
 

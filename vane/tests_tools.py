@@ -1420,9 +1420,9 @@ class TestOps:
                     run_cmds = render_cmds(dut, cmds)
                 # if encoding is json run the commands, store the results
                 if encoding == "json":
-                    json_results = conn.enable(run_cmds)
+                    json_results = conn.enable(run_cmds, strict=True)
                 # also run the commands in text mode
-                txt_results = conn.enable(run_cmds, encoding="text")
+                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
             else:
                 # run the config cmd
                 txt_results = conn.config(cmds)

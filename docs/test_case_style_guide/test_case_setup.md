@@ -345,7 +345,7 @@ logging.error("This is an error log")
 ```
 
 !!! eos-config "Note"
-    By default the debug logs do not get logged, but this can be
+    By default the "debug" logs do not get logged, but this can be
     changed by changing the log levels within the
     [test case logger file](https://github.com/aristanetworks/vane/blob/4f2775ca0af0496ec23095a9f8dc72bddf269e5b/vane/test_case_logger.py#L14)
 

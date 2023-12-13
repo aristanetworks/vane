@@ -2,9 +2,6 @@
     "ignorePatterns": [
     {
         "pattern": "^https://marketplace.visualstudio.com/"
-    },
-    {
-        "pattern": "^https://j2live.ttl255.com/"
     }
     ]
 }

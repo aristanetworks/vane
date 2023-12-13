@@ -75,6 +75,12 @@ NRFU Command Options:
                         required input.
 ```
 
+To exit out of the virtual environment execute the following command:
+
+``` text
+exit
+```
+
 !!! success "Success"
     Now that you are all set up, navigate to the
     [Executing Vane](../executing_vane/executing_vane.md)

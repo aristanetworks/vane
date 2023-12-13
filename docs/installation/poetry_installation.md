@@ -1,9 +1,11 @@
 # Via Poetry
 
-**Note:** If you do not want to follow the steps below we have an installation
-script which automates the manual installation procedure via poetry. Follow the
-instructions in [Installation Script for Vane](../InstallationScriptforVane.pdf)
-to install Vane using the Installation script.
+!!! eos-config "Note"
+
+    If you do not want to follow the steps below we have an installation
+    script which automates the manual installation procedure via poetry. Follow the
+    instructions in [Installation Script for Vane](../InstallationScriptforVane.pdf)
+    to install Vane using the Installation script.
 
 Vane can be installed using poetry which sets up a python virtual
 environment by following the steps below:
@@ -25,7 +27,7 @@ poetry --version
 !!! failure "Error"
     If you get a command not found error, install poetry using the
     following command and ensure it has been installed correctly and
-    its Path has been set correctly by trying the version command again.
+    its path has been set correctly by trying the version command again.
 
     ``` text
     curl -sSL https://install.python-poetry.org | python3 -
@@ -42,7 +44,7 @@ We will now configure poetry to spin up the virtual environment
 in the project root directory instead of its default location
 
 Check currently configured location by running the following
-command and checking the virtualenvs.path field
+command and checking the *virtualenvs.path* field
 
 ``` text
 poetry config --list
@@ -81,7 +83,7 @@ In either case, the prompt will change to indicate the virtual
 environment is active by prefixing the project name and python version,
 and Vane can now be executed in the environment.
 
-!!! info "Info"
+!!! eos-config "Note"
     Vane is currently supported in python versions 3.9 and lower
 
 Vane is now ready to be executed and the prompt will look as follows:
@@ -122,6 +124,12 @@ Main Command Options:
 NRFU Command Options:
   --nrfu                Starts NRFU tests and will prompt users for
                         required input.
+```
+
+To exit out of the virtual environment execute the following command:
+
+``` text
+deactivate
 ```
 
 !!! success "Success"

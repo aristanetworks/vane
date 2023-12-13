@@ -21,3 +21,12 @@ industries where physical infrastructure plays a significant role.
 communicating with and testing the entire network, not just individual devices.
 This ensures that the network as a whole is thoroughly validated, identifying
 potential bottlenecks, inter-device dependencies, and overall system efficiency.
+
+## **Ease of Integration with Existing Workflows**
+
+*Customization and Adaptability:* By supporting configurations ingested
+from AVD or YAML files, Vane aligns with existing development and operational
+workflows. This ensures a smooth integration process for organizations that have
+established practices using specific tools or file formats. The tool becomes an
+integral part of the existing ecosystem, minimizing disruptions and accelerating the
+adoption of network validation practices.

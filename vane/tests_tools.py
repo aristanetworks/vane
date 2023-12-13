@@ -159,7 +159,7 @@ def import_yaml(yaml_file):
 
 
 def yaml_read(yaml_file):
-    """Return a yaml data read from the yaml file
+    """Return yaml data read from the yaml file
 
     Args:
         yaml_file (file): Input yaml file to be read
@@ -1290,11 +1290,11 @@ class TestOps:
 
     def run_cfg_cmds(self, cfg_cmds, dut=None, conn_type="eapi", timeout=0, new_conn=False):
         """run_cfg_cmds is a wrapper which runs the configuration cmds
-        if no dut is passed then cmds are run on TestOps dut object
-        if conn_type is eapi then pyeapi is used to connect to dut
-        if conn_type is ssh then netmiko is used to connect to dut
-        if timeout is non-zero then a new connection is created with new timeout
-        if new_conn is True a new connction to dut is created
+        if no dut is passed then cmds are run on TestOps dut object,
+        if conn_type is eapi then pyeapi is used to connect to dut,
+        if conn_type is ssh then netmiko is used to connect to dut,
+        if timeout is non-zero then a new connection is created with new timeout,
+        if new_conn is True a new connction to dut is created.
 
         Args:
           cfg_cmds (list): list of configuration cmds to run
@@ -1329,16 +1329,16 @@ class TestOps:
     ):
         """run_show_cmds is a wrapper which runs the 'show_cmds'
         conn_type determines how the cmds are being run
-        if conn_type is eapi then pyeapi is used on specified dut
+        if conn_type is eapi then pyeapi is used on specified dut,
         if conn_type is ssh then netmiko connection in dut object is used
-        if no dut is passed then cmds are run on TestOps dut object
+        if no dut is passed then cmds are run on TestOps dut object.
         It returns the output of these 'show_cmds' in the encoding requested.
         Also it checks show_clock_flag
         to see if 'show_clock' cmd needs to be run. It stores the text output for
         'show_cmds' list in 'show_cmds_txt' list for the specific dut.
         Also 'show_cmds' list is appended to object's 'show_cmds' list.
-        If timeout is non-zero then a new connection is created with new timeout
-        If new_conn is set to True then new connection is created
+        If timeout is non-zero then a new connection is created with new timeout.
+        If new_conn is set to True then new connection is created.
 
         Args:
           show_cmds (list): list of show commands to be run

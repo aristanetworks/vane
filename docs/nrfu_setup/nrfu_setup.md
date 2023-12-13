@@ -80,7 +80,7 @@ it will prompt you for the test directory as earlier.
 
 ## II.  Running Vane as a CVP Application
 
-!!! info
+!!! eos-config "Note"
 
     If you have the initialized vane-cvp setup, then skip to
     the second part of [Step 7](../nrfu_setup/
@@ -94,9 +94,13 @@ Download the vane-cvp-rpm from the vane repo over [here](<https://github.com/ari
 Select the most recent successful build,
 which would be the one at the top with a green checkmark.
 
+!!! info "Reference"
+
+    ![Screenshot](../images/cvp_rpm.png)
+
 Then download the rpm from the artifacts section
 
-!!! note
+!!! eos-config "Note"
     You need to be signed into your github account to be able to download this
 
 The package is downloaded as a zip archive.
@@ -109,7 +113,7 @@ The file should be copied into the root directory on the cvp instance.
 scp /file/path/vane-cvp-<version-info>.zip root@<cvp_ip>:/root
 ```
 
-!!! example
+!!! note "Example"
 
     scp /Users/rewati/Downloads/vane-cvp-1.1.0rc2-rpm.zip root@10.255.67.157:/root
 
@@ -163,7 +167,7 @@ This installs the RPM, enables the extension in CVP,
 starts the extension and checks the status of the extension,
 then disables the extension.
 
-!!! note
+!!! eos-config "Note"
     Disabling the extension does not stop the extension from running.
     It is still active and can be used. Disabling the extension prevents
     the extension from starting automatically the next time CVP is stopped
@@ -171,7 +175,7 @@ then disables the extension.
     This is to help prevent the Vane extension from loading after a reboot,
     which should help prevent issues during a CVP upgrade.
 
-!!! note
+!!! eos-config "Note"
     Although the extension is disabled and this should help during
     a CVP upgrade process, the suggested process is to always
     uninstall the Vane CVP extension [see step 6c](../nrfu_setup/
@@ -244,7 +248,7 @@ cd path_to_directory_containing_rpm_package
 ./vane-cvp-uninstall.sh
 ```
 
-!!! note
+!!! eos-config "Note"
     The /cvpi/apps/vane-cvp/vane-data directory that is associated
     with the container is not removed, so any data that you may have
     stored in the shared location is still preserved.
@@ -273,7 +277,7 @@ ssh root@<cvp_ip>
 kubectl exec -it <vane-cvp-container-id> -- /bin/bash
 ```
 
-!!! note
+!!! warning
 
     If the tab completion doesn't work, an alternative form of the
     kubectl exec command can be run as
@@ -315,7 +319,8 @@ Given CVP authentication is successful, it will prompt you the following:
 Do you want to specify a test case directory [y|n]: 
 ```
 
-If you answer n/no, it will default to the nrfu_tests folder
+If you answer n/no, it will default to the
+[nrfu_tests folder](https://github.com/aristanetworks/vane/tree/develop/nrfu_tests)
 in vane, if yes it will further prompt you
 
 ``` text

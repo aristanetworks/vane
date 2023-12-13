@@ -18,7 +18,7 @@ This step will ensure it downloads all the dependencies needed to
 run Vane in the isolated docker environment, for example it will install
 poetry and create a virtual environment with the required dependencies.
 
-!!! eos-config "Note"
+!!! warning
     Ensure your docker daemon is running before building the container
     otherwise the *make container* command will error out.
 
@@ -48,7 +48,7 @@ After this command you will see the following screen
     activate
     ```
 
-??? info "Info"
+??? eos-config "Note"
     The Vane project repo is mounted in the docker container as /project directory.
     In order to modify source code or refer to any files which exist within the
     vane repo use the mounted "project" folder instead.

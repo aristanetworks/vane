@@ -45,6 +45,7 @@ definition and what they should be used for.
 | report_style       |     No      |  Reporting template to use when creating output. Vane will default to original reporting without it.|
 | test criteria   |   Yes        |  Details which the test case will use to determine pass or fail. This will be published in a test report. |
 | criteria | No | Criteria on the basis of which duts can be filtered. Eg: Name, Role || filter | No | Values which should pass the criteria mentioned above. |
+| filter | No | Values which would get filtered via the criteria mentioned above. |
 | comment     |     No      |  Additional information about the test case. It can be published to the test report depending on the report template. Example comment is a test case that cannot run because a requirement is not met.  This could be a hardware test for vEOS instance, or not having expected software configurations like TACACS not being configured for TACACS test. |
 
 !!! eos-config "Note"
@@ -54,7 +55,7 @@ definition and what they should be used for.
 
 ### II. Creating a test case file
 
-!!! important
+!!! warning
     The aim of this section is to help you get started with writing a test case
     that would make use of a variety of features that Vane provides. There are no
     hard and fast rules, and user should practice their discretion while making the
@@ -65,11 +66,9 @@ definition and what they should be used for.
 
     ??? example "test_memory.py"
 
-        #### Example Test Case File
 
 
-
-        ``` python title=" Sample test file: test_memory.py"
+        ``` python
         """ Tests to validate memory utilization."""
 
         import pytest
@@ -173,11 +172,11 @@ from vane.config import dut_objs, test_defs
 #### Parameterization of Test Cases
 
 All test cases should either be parametrized or should use
-parameterized vane fixture. ‘dut’ is one such parameterized
+parameterized vane fixture. **dut** is one such parameterized
 vane fixture.
 
 Parameterized test cases solve the problem of grouping duts based on
-name(s), name regex, or role. It can be easily extended to any other
+name(s), regex, or role. It can be easily extended to any other
 dut property defined in duts.yaml. The test definition file will be used
 to express a filtering criteria and a filter.
 2 new key, value pairs (criteria, filter) will be introduced into a
@@ -185,7 +184,7 @@ test definition for this. These values are optional.
 
 | key | type (of the value)  | value |
 | ----------- | -------------------------- | -------------------------- |
-criteria | string |Specifies the filtering criteria.  Valid criteria are: name (scenario 1), role (scenario 2), names (scenario 3), regex (scenario 4). If the criteria field is empty or does not match a valid criteria, all duts will be tested (scenario 5). *Scenarios are shown below.*
+criteria | string |Specifies the filtering criteria.  Valid criteria are: name (scenario 1), role (scenario 2), names (scenario 3), regex (scenario 4), roles (scenario 5). If the criteria field is empty or does not match a valid criteria, all duts will be tested (scenario 6). *Scenarios are shown below.*
 |filter |string |Filter based on a DUT name. There must be an exact match between the DUT’s name in the duts.yaml file.|
 |filter|string |Filter based on a role name. There must be an exact match between the role’s name in the duts.yaml file. |
 |filter |list |Filter based on a list of roles. There must be an exact match between each role and the duts.yaml file.|
@@ -256,7 +255,7 @@ Six current scenarios exists for filtering DUTs:
 - Scenario 6: All DUTs, this is the default setting and no additional
   information needs to be added to the test definition file.
 
-!!! important
+!!! eos-config "Note"
 
     The following additions will have to be made to the test case file in order
     to parameterize the test case.
@@ -274,7 +273,7 @@ Six current scenarios exists for filtering DUTs:
     contains the filter and criteria key, value pairs for each test case.
     The filter is executed against the duts_objs to create a subset of DUTs.
 
-    The dut_parameters data structure returns parameters for all test keys.
+    The dut_parameters data structure has parameters for all test keys.
     The data structure is a dictionary and organized by test case name.
     Each test case name contains the subset of duts and a list dut names.
     Below shows the data structure:
@@ -347,7 +346,7 @@ logging.error("This is an error log")
 !!! eos-config "Note"
     By default the "debug" logs do not get logged, but this can be
     changed by changing the log levels within the
-    [test case logger file](https://github.com/aristanetworks/vane/blob/4f2775ca0af0496ec23095a9f8dc72bddf269e5b/vane/test_case_logger.py#L14)
+    [test case logger file](https://github.com/aristanetworks/vane/blob/4f2775ca0af0496ec23095a9f8dc72bddf269e5b/vane/test_case_logger.py)
 
 #### Using markers
 
@@ -368,7 +367,7 @@ to categorize tests based on their purpose.
 
 You can now run specific groups of tests using markers. For example,
 if you only want to run nrfu tests, you can add the **nrfu** marker in the
-[definitions.yaml markers field](https://github.com/aristanetworks/vane/blob/4c29cb4dba48ad312699b88e91a3f398b7dae81a/sample_network_tests/definitions.yaml#L11).
+[definitions.yaml markers field](https://github.com/aristanetworks/vane/blob/4c29cb4dba48ad312699b88e91a3f398b7dae81a/sample_network_tests/definitions.yaml).
 
 !!! tip
 
@@ -466,8 +465,8 @@ Vane produces diverse reports in formats such as .json, .html, and .docx.
 By invoking the [generate_report api](../api_cli/api.md), all
 pertinent test data is appended to the test object. This data is subsequently
 utilized when generating documentation reports through a call to the
-[write_results](https://github.com/aristanetworks/vane/blob/4c29cb4dba48ad312699b88e91a3f398b7dae81a/vane/vane_cli.py#L157)
-method after the test case has finished executing.
+[write_results](https://github.com/aristanetworks/vane/blob/4c29cb4dba48ad312699b88e91a3f398b7dae81a/vane/vane_cli.py)
+method in vane_cli.py after the test case has finished executing.
 
 Additionally, the generate_report method is responsible for generating
 evidence files that exhibit various **show commands** and their
@@ -533,7 +532,7 @@ generate HTML reports containing the results of the test cases.
 
 !!! Tip
     You can view the different kinds of reports that Vane generates in the
-    [Executing Vane](../executing_vane/executing_vane.md#viewing-reports-generated-by-vane)section
+    [Executing Vane](../executing_vane/executing_vane.md#viewing-reports-generated-by-vane) section
 
 #### Generating test case steps
 
@@ -543,7 +542,7 @@ the following syntax.
 
 === "test steps in a test case"
 
-    ```python hl_lines="3 13-15 35-37 52-54 56"
+    ```python hl_lines="3 13-15 38-40 56-58 60"
         @pytest.mark.parametrize("dut", test1_duts, ids=test1_ids)
         def test_if_hostname_is_correcet_on_(self, dut, tests_definitions):
             """TD: Verify hostname is set on device is correct

@@ -3,7 +3,7 @@
 Vane has the following Command Line arguments which we will be discussing in
 this section
 
-!!! info
+!!! info "Vane Help"
     ![Screenshot](../images/cli.png)
 
     We discussed the --definitions-file and --duts-file flag in the
@@ -115,7 +115,8 @@ vane --generate-test-steps path/to/test/case/directory
 ```
 
 This will generate a markdown file and json file for each test case
-with detailed test steps that were executed by Vane while running
+with detailed test steps (sourced from the test case file)
+that were executed by Vane while running
 the test cases in the test directory.
 
 !!! info "Test Steps"
@@ -150,10 +151,10 @@ This flag can be used to view all the markers supported by Vane
 vane --markers
 ```
 
-!!! info
+!!! eos-config "Note"
     Currently supported Vane markers:
 
-    ??? info "Expand"
+    ??? info "View Markers"
         ``` python
         [{'marker': 'filesystem', 'description': 'EOS File System Test Suite'},
         {'marker': 'daemons', 'description': 'EOS daemons Test Suite'},

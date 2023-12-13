@@ -38,7 +38,7 @@ NRFU Command Options:
                         required input.
 ```
 
-!!! info
+!!! eos-config "Note"
     Let us get started by discussing some of the necessary flags/arguments,
     namely definitionas and duts file, what they stand for and how they can
     be included in order to help you get started with Vane.
@@ -80,7 +80,7 @@ vane defaults to using the path mentioned in the
 [vane/config.py](https://github.com/aristanetworks/vane/blob/develop/vane/config.py)
 file
 
-``` yaml title=" Sample definitions.yaml" hl_lines="13 19 20 21"
+``` yaml title=" Sample definitions.yaml" hl_lines="14 20 21 22"
 # This is a sample definitions.yaml file which can be used to run vane.
 # The fields below can be changed to reflect specific test cases,
 # test directories which need to be run.
@@ -115,7 +115,7 @@ parameters:
 
 ```
 
-### Using the duts file flag
+## Using the duts file flag
 
 ``` text
 –duts_file duts.yml
@@ -127,9 +127,10 @@ run its test cases against, it includes relevant information for each DUT
 Operators should edit this file to include the devices that they would
 like to run Vane against.
 
-!!! info
-    In the [API](../api_cli/api.md) section later on we talk about how
-    we can use certain API to generate this duts.yaml file instead of having
+!!! eos-config "Note"
+    In the [CLI](../api_cli/cli.md#using-the----generate-duts-file-flag)
+    section later on we talk about how
+    we can use certain flag to generate this duts.yaml file instead of having
     to manually fill in all the details
 
 You can provide the duts file while running Vane as follows:
@@ -149,7 +150,7 @@ above then vane defaults to using the duts file mentioned in the
 [vane/config.py](https://github.com/aristanetworks/vane/blob/develop/vane/config.py)
 file
 
-``` yaml title=" Sample duts.yaml" hl_lines="7-25"
+``` yaml title=" Sample duts.yaml" hl_lines="5-23"
 # This is a sample duts.yaml file which can be used to run vane.
 # This file has been generated from the Vane Demo Lab Topology.
 
@@ -185,8 +186,8 @@ duts:
   role: unknown
 ```
 
-There are a few other flags and descriptions on how to use them
-which you can explore further in the [API section](../api_cli/api.md),
+There are a few other flags with descriptions on how to use them
+which you can explore further in the [CLI section](../api_cli/cli.md),
 but the ones described above are the necessary ones to get started.
 
 ## Running Vane
@@ -230,7 +231,7 @@ including json, .docx, html. These reports offer detailed information
 on the test cases such as test case procedure, input, expected output,
 pass/fail result, and other relevant observations.
 
-!!! info "Sample Reports"
+!!! info "Sample Reports (*click to expand*)"
     === "Sample .docx Report"
         ![Screenshot](../images/report_one.png)
         ![Screenshot](../images/report_two.png)

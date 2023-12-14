@@ -198,11 +198,28 @@ def init_duts(show_cmds, test_parameters, test_duts):
         "data, hostname, and connection."
     )
 
+    reachability, reachable_duts, unreachable_duts = check_duts_reachability(test_duts)
+
+    try:
+        continue_when_unreachable = config.test_parameters["parameters"][
+            "continue_when_unreachable"
+        ]
+    except KeyError:
+        continue_when_unreachable = False
+
+    if not (reachability or continue_when_unreachable):
+        logging.error(f"Error connecting to {unreachable_duts}, hence exiting Vane")
+        sys.exit(1)
+
+    test_duts["duts"] = reachable_duts
+
     duts = login_duts(test_parameters, test_duts)
     workers = len(duts)
 
     logging.debug(f"Duts login info: {duts} and create {workers} workers")
     logging.debug(f"Passing the following show commands to workers: {show_cmds}")
+
+    logging.info("Starting the execution of show commands for Vane cache")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         future_object = {
@@ -216,6 +233,38 @@ def init_duts(show_cmds, test_parameters, test_duts):
     logging.debug(f"Return duts data structure: {duts}")
 
     return duts
+
+
+def check_duts_reachability(test_duts):
+    """Check if duts are reachable
+
+    Args:
+        test_duts (dict): Dictionary of duts
+
+    Returns:
+        reachability (boolean): result of if duts are reachable
+        reachable_duts (dict): reachable duts
+        unreachable_duts (dict): unreachable duts
+    """
+
+    logging.info("Checking connectivity of duts")
+    reachable_duts = []
+    unreachable_duts = []
+    for dut in test_duts["duts"]:
+        # check for reachability
+        ip_address = dut["mgmt_ip"]
+        ret = os.system(f"ping -o -c 3 -W 3000 {ip_address} > {os.devnull}")
+        if ret == 0:
+            reachable_duts.append(dut)
+        else:
+            name = dut["name"]
+            logging.info(f"Failed to connect to {name}")
+            unreachable_duts.append(dut)
+
+    if len(test_duts["duts"]) == len(reachable_duts):
+        return True, reachable_duts, unreachable_duts
+
+    return False, reachable_duts, unreachable_duts
 
 
 def login_duts(test_parameters, test_duts):
@@ -250,17 +299,16 @@ def login_duts(test_parameters, test_duts):
         logging.debug(f"Connecting to switch: {name} using parameters: {dut}")
 
         eos_conn = test_parameters["parameters"].get("eos_conn", DEFAULT_EOS_CONN)
-        netmiko_conn = device_interface.NetmikoConn()
-        netmiko_conn.set_up_conn(dut)
-        login_ptr["ssh_conn"] = netmiko_conn
-
-        pyeapi_conn = device_interface.PyeapiConn()
-        pyeapi_conn.set_up_conn(dut)
-        login_ptr["eapi_conn"] = pyeapi_conn
 
         if eos_conn == "eapi":
+            pyeapi_conn = device_interface.PyeapiConn()
+            pyeapi_conn.set_up_conn(dut)
+            login_ptr["eapi_conn"] = pyeapi_conn
             login_ptr["connection"] = pyeapi_conn
         elif eos_conn == "ssh":
+            netmiko_conn = device_interface.NetmikoConn()
+            netmiko_conn.set_up_conn(dut)
+            login_ptr["ssh_conn"] = netmiko_conn
             login_ptr["connection"] = netmiko_conn
         else:
             raise ValueError(f"Invalid EOS conn type {eos_conn} specified")
@@ -1235,6 +1283,42 @@ class TestOps:
         self._show_cmds.setdefault(dut_name, [])
         self.show_cmd_txts.setdefault(dut_name, [])
 
+    def get_ssh_connection(self, dut):
+        """Return the ssh connection if it exists otherwise initialise
+        a new ssh connection
+
+        Args:
+            dut (dict): device whose ssh connection should be returned
+
+        Returns:
+            conn (netmiko connection): ssh connection for the device"""
+
+        if "ssh_conn" not in dut:
+            netmiko_conn = device_interface.NetmikoConn()
+            netmiko_conn.set_up_conn(dut)
+            dut["ssh_conn"] = netmiko_conn
+            dut["connection"] = netmiko_conn
+
+        return dut["ssh_conn"]
+
+    def get_eapi_connection(self, dut):
+        """Return the eapi connection if it exists otherwise initialise
+        a new eapi connection
+
+        Args:
+            dut (dict): device whose eapi connection should be returned
+
+        Returns:
+            conn (paramiko connection): eapi connection for the device"""
+
+        if "eapi_conn" not in dut:
+            pyeapi_conn = device_interface.PyeapiConn()
+            pyeapi_conn.set_up_conn(dut)
+            dut["eapi_conn"] = pyeapi_conn
+            dut["connection"] = pyeapi_conn
+
+        return dut["eapi_conn"]
+
     def get_new_conn(self, dut, conn_type, timeout):
         """get new conn returns a new connection to dut of type 'conn_type'
         with read timeout set to timeout
@@ -1373,9 +1457,9 @@ class TestOps:
         if timeout == 0:
             # if timeout is zero, then use existing connections
             if conn_type == "eapi":
-                conn = dut["eapi_conn"]
+                conn = self.get_eapi_connection(dut)
             elif conn_type == "ssh":
-                conn = dut["ssh_conn"]
+                conn = self.get_ssh_connection(dut)
             else:
                 raise ValueError(f"conn_type [{conn_type}] not supported")
         elif timeout > 0 or new_conn:

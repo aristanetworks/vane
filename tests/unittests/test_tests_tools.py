@@ -1209,6 +1209,7 @@ def test_test_ops_generate_report(logdebug, mocker):
         "test_result": False,
         "output_msg": "",
         "actual_output": "",
+        "skip": False,
         "test_id": 1,
         "show_cmd_txts": {
             "DCBBW1": [

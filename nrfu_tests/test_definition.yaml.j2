@@ -1,11 +1,16 @@
 - name: nrfu_tests
   testcases:
-    - name: test_
-      description:
+    - name: test_dns_base_services
+      description: Test case for the verification of DNS resolution functionality.
       test_id: NRFU1.1
-      show_cmd: null
+      {% set test_data = testcase_data["NRFU1.1"].dns_name_server_check %}
+      show_cmd: show ip name-server
       expected_output: null
+      test_criteria: Reverse name server lookup should be successful for name servers configured on the device.
       report_style: modern
+      dns_name_server_check:
+        ipv4_fail_if_not_configured: {{ test_data.ipv4_fail_if_not_configured }}
+        ipv6_fail_if_not_configured: {{ test_data.ipv6_fail_if_not_configured }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_ntp_clocks
@@ -269,11 +274,13 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_cpu_idle_time
+      description: Testcase for verification of system hardware CPU idle time.
       test_id: NRFU6.4
-      show_cmd: null
-      expected_output: null
+      show_cmd: show processes top once
+      expected_output:
+        cpu_idle_time_within_range: true
+      test_criteria: CPU idle time should be within the expected range. # Setting test case’s pass/fail criteria for reporting
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
@@ -286,11 +293,14 @@
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
-    - name: test_
-      description:
+    - name: test_system_flash_free_space
+      description: Test case for verification of free space on flash file system
       test_id: NRFU6.6
-      show_cmd: null
-      expected_output: null
+      show_cmd: show file systems
+      expected_output:
+        primary_supervisor_flash_utilization_within_range: True
+        peer_supervisor_flash_utilization_within_range: True
+      test_criteria: Primary and peer supervisor flash file system utilization should be below 70%.
       report_style: modern
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}

@@ -82,25 +82,6 @@ def field_names():
 
 
 @pytest.fixture
-def test_suites():
-    """Input values for _format_ts_name test case
-
-    Returns: [list]: Names of tests
-    """
-
-    return {
-        "input": [
-            "test_api.py",
-            "test_daemon.py",
-            "test_interface.py",
-            "test_tacacs.py",
-            "test_environment.py",
-        ],
-        "result": ["Api", "Daemon", "Interface", "Tacacs", "Environment"],
-    }
-
-
-@pytest.fixture
 def rc_methods():
     """Inputs report client's methods
 
@@ -151,7 +132,6 @@ def rc_methods():
         "_reports_dir",
         "_required_template_fields",
         "_results_datamodel",
-        "_return_date",
         "_return_summary_headers",
         "_return_tbl_value",
         "_set_default_value",

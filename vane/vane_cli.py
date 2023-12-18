@@ -74,12 +74,6 @@ def parse_cli():
     )
 
     parser.add_argument(
-        "--environment",
-        default=vane.config.ENVIRONMENT,
-        help="Specify the test execution environment",
-    )
-
-    parser.add_argument(
         "--generate-duts-file",
         help="Create a duts file from topology and inventory file",
         nargs=3,
@@ -303,8 +297,14 @@ def main():
                 logging.warning(f"Changing DUTS file name to {args.duts_file}")
                 vane.config.DUTS_FILE = args.duts_file
 
-            if args.environment:
-                vane.config.ENVIRONMENT = args.environment
+            if args.generate_duts_file:
+                logging.info(
+                    f"Generating DUTS File from topology: {args.generate_duts_file[0]} and "
+                    f"inventory: {args.generate_duts_file[1]} file.\n"
+                )
+                vane.config.DUTS_FILE = tests_tools.create_duts_file(
+                    args.generate_duts_file[0], args.generate_duts_file[1]
+                )
 
             if args.generate_duts_from_topo:
                 logging.info(

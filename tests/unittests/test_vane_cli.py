@@ -222,7 +222,6 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            environment="test",
             generate_duts_file=None,
             generate_duts_from_topo=None,
             generate_test_steps=None,
@@ -232,7 +231,6 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
     )
     vane_cli.main()
 
-    assert vane.config.ENVIRONMENT == "test"
     assert vane.config.DEFINITIONS_FILE == "definitions_sample.yaml"
     assert vane.config.DUTS_FILE == "duts_sample.yaml"
 
@@ -262,7 +260,6 @@ def test_main_create_duts_file(loginfo, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            environment="test",
             generate_duts_file=["topology.yaml", "inventory.yaml", "duts_name.yaml"],
             generate_duts_from_topo=None,
             generate_test_steps=None,
@@ -297,7 +294,6 @@ def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            environment="test",
             generate_duts_file=None,
             generate_duts_from_topo=["topology.yaml"],
             generate_test_steps=None,
@@ -337,7 +333,6 @@ def test_main_write_test_steps(loginfo, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            environment="test",
             generate_duts_file=None,
             generate_duts_from_topo=None,
             generate_test_steps="test_directory",

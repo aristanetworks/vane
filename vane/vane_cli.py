@@ -76,8 +76,8 @@ def parse_cli():
     parser.add_argument(
         "--generate-duts-file",
         help="Create a duts file from topology and inventory file",
-        nargs=2,
-        metavar=("topology_file", "inventory_file"),
+        nargs=3,
+        metavar=("topology_file", "inventory_file", "duts_file"),
     )
 
     parser.add_argument(
@@ -251,6 +251,7 @@ def download_test_results():
 
     source = "reports/TEST RESULTS"
     destination = "reports/TEST RESULTS ARCHIVES/" + dt_string
+
     if os.path.exists(source):
         shutil.make_archive(destination, "zip", source)
 
@@ -263,6 +264,15 @@ def main():
 
     if args.markers:
         print(f"{show_markers()}")
+
+    elif args.generate_duts_file:
+        logging.info(
+            f"Generating DUTS File from topology: {args.generate_duts_file[0]} and "
+            f"inventory: {args.generate_duts_file[1]} file.\n"
+        )
+        tests_tools.create_duts_file(
+            args.generate_duts_file[0], args.generate_duts_file[1], args.generate_duts_file[2]
+        )
 
     elif args.generate_test_steps:
         logging.info(
@@ -286,15 +296,6 @@ def main():
             if args.duts_file:
                 logging.warning(f"Changing DUTS file name to {args.duts_file}")
                 vane.config.DUTS_FILE = args.duts_file
-
-            if args.generate_duts_file:
-                logging.info(
-                    f"Generating DUTS File from topology: {args.generate_duts_file[0]} and "
-                    f"inventory: {args.generate_duts_file[1]} file.\n"
-                )
-                vane.config.DUTS_FILE = tests_tools.create_duts_file(
-                    args.generate_duts_file[0], args.generate_duts_file[1]
-                )
 
             if args.generate_duts_from_topo:
                 logging.info(

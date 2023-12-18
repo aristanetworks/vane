@@ -297,15 +297,6 @@ def main():
                 logging.warning(f"Changing DUTS file name to {args.duts_file}")
                 vane.config.DUTS_FILE = args.duts_file
 
-            if args.generate_duts_file:
-                logging.info(
-                    f"Generating DUTS File from topology: {args.generate_duts_file[0]} and "
-                    f"inventory: {args.generate_duts_file[1]} file.\n"
-                )
-                vane.config.DUTS_FILE = tests_tools.create_duts_file(
-                    args.generate_duts_file[0], args.generate_duts_file[1]
-                )
-
             if args.generate_duts_from_topo:
                 logging.info(
                     f"Generating DUTS File from topology: {args.generate_duts_from_topo[0]} file.\n"

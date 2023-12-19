@@ -179,7 +179,8 @@ def test_download_test_results(loginfo):
     ARCHIVE folder"""
 
     dir_path = "reports/TEST RESULTS ARCHIVES"
-    if os.path.isdir(dir_path):
+    source_path = "reports/TEST RESULTS"
+    if os.path.isdir(dir_path) and os.path.isdir(source_path):
         length = len(list(os.listdir(dir_path)))
         vane_cli.download_test_results()
         new_length = len(os.listdir(dir_path))
@@ -208,7 +209,6 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            environment="test",
             generate_duts_file=None,
             generate_test_steps=None,
             markers=False,
@@ -217,7 +217,6 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
     )
     vane_cli.main()
 
-    assert vane.config.ENVIRONMENT == "test"
     assert vane.config.DEFINITIONS_FILE == "definitions_sample.yaml"
     assert vane.config.DUTS_FILE == "duts_sample.yaml"
 
@@ -236,13 +235,10 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
     logwarning.assert_has_calls(logwarning_calls, any_order=False)
 
 
-def test_main_create_duts_file(loginfo, logwarning, mocker):
+def test_main_create_duts_file(loginfo, mocker):
     """Tests the --generate-duts-file flag"""
 
-    mocker.patch("vane.vane_cli.run_tests")
-    mocker.patch("vane.vane_cli.write_results")
-    mocker.patch("vane.vane_cli.download_test_results")
-    mocker.patch("vane.tests_tools.create_duts_file", return_value="duts.yml")
+    mocker.patch("vane.tests_tools.create_duts_file")
 
     # mocking parse cli to test --generate-duts-file
     mocker.patch(
@@ -250,16 +246,14 @@ def test_main_create_duts_file(loginfo, logwarning, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            environment="test",
-            generate_duts_file=["topology.yaml", "inventory.yaml"],
+            generate_duts_file=["topology.yaml", "inventory.yaml", "duts_name.yaml"],
+            generate_duts_from_topo=None,
             generate_test_steps=None,
             markers=False,
             nrfu=False,
         ),
     )
     vane_cli.main()
-
-    assert vane.config.DUTS_FILE == "duts.yml"
 
     # assert info logs to ensure all the above methods executed without errors
     loginfo_calls = [
@@ -268,16 +262,8 @@ def test_main_create_duts_file(loginfo, logwarning, mocker):
             "Generating DUTS File from topology: topology.yaml and "
             "inventory: inventory.yaml file.\n"
         ),
-        call("\n\n!VANE has completed without errors!\n\n"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-    # assert warning logs to ensure all the above methods executed without errors
-    logwarning_calls = [
-        call("Changing Definitions file name to definitions_sample.yaml"),
-        call("Changing DUTS file name to duts_sample.yaml"),
-    ]
-    logwarning.assert_has_calls(logwarning_calls, any_order=False)
 
 
 def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):
@@ -293,7 +279,6 @@ def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            environment="test",
             generate_duts_file=None,
             generate_test_steps=None,
             markers=False,
@@ -331,7 +316,6 @@ def test_main_write_test_steps(loginfo, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            environment="test",
             generate_duts_file=None,
             generate_test_steps="test_directory",
             markers=False,

@@ -866,6 +866,7 @@ def test_create_duts_file():
     FIXTURES NEEDED: fixture_topology.yaml, fixture_inventory.yaml"""
     topology_data = "tests/unittests/fixtures/fixture_topology.yaml"
     inventory_data = "tests/unittests/fixtures/fixture_inventory.yaml"
+    duts_file_name = "duts_file_name.yaml"
 
     expected_data = {
         "duts": [
@@ -884,11 +885,11 @@ def test_create_duts_file():
         "servers": [],
     }
 
-    file = tests_tools.create_duts_file(topology_data, inventory_data)
-    assert os.path.isfile(file)
-    with open(file, "r", encoding="utf-8") as input_yaml:
+    tests_tools.create_duts_file(topology_data, inventory_data, duts_file_name)
+    assert os.path.isfile(duts_file_name)
+    with open(duts_file_name, "r", encoding="utf-8") as input_yaml:
         assert expected_data == yaml.safe_load(input_yaml)
-    os.remove(file)
+    os.remove(duts_file_name)
 
 
 # TEST-OPS METHODS
@@ -1179,6 +1180,7 @@ def test_test_ops_generate_report(logdebug, mocker):
         "test_result": False,
         "output_msg": "",
         "actual_output": "",
+        "skip": False,
         "test_id": 1,
         "show_cmd_txts": {
             "DCBBW1": [

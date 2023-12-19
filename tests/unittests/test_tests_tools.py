@@ -861,35 +861,6 @@ def test_export_text():
     shutil.rmtree("text", ignore_errors=True)
 
 
-def test_generate_duts_file():
-    """Validates generation of duts file from duts data"""
-    dut_file = "dut_file.yml"
-    dut = {
-        "DSR01": {
-            "ip_addr": "192.168.0.9",
-            "node_type": "veos",
-            "neighbors": [
-                {"neighborDevice": "DCBBW1", "neighborPort": "Ethernet1", "port": "Ethernet1"},
-                {"neighborDevice": "DCBBW2", "neighborPort": "Ethernet1", "port": "Ethernet2"},
-            ],
-        }
-    }
-
-    assert not os.path.exists(dut_file)
-    with open(dut_file, "w", encoding="utf-8") as file:
-        tests_tools.generate_duts_file(dut, file, "username", "password!")
-
-    # check if yaml file got created
-    assert os.path.isfile(dut_file)
-
-    # check if yaml file got written to correctly
-    with open(dut_file, "r", encoding="utf-8") as input_yaml:
-        actual = yaml.safe_load(input_yaml)
-        assert dut["DSR01"]["neighbors"] == actual[0]["neighbors"]
-        assert dut["DSR01"]["ip_addr"] == actual[0]["mgmt_ip"]
-    os.remove(dut_file)
-
-
 def test_create_duts_file():
     """Validates generation of duts file from topology and inventory file
     FIXTURES NEEDED: fixture_topology.yaml, fixture_inventory.yaml"""

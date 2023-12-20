@@ -41,39 +41,13 @@ Vane is now ready to be executed and the prompt will look as follows:
 
 ``` text
 (venv) vane #
-
-(venv) vane # vane --help
-
-usage: vane [-h] [--definitions-file DEFINITIONS_FILE]
-            [--duts-file DUTS_FILE] [--environment ENVIRONMENT]
-            [--generate-duts-file topology_file inventory_file]
-            [--generate-duts-from-topo topology_file]
-            [--generate-test-steps test_dir] [--markers] [--nrfu]
-
-Network Certification Tool
-
-optional arguments:
-  -h, --help            show this help message and exit
-
-Main Command Options:
-  --definitions-file DEFINITIONS_FILE
-                        Specify the name of the definitions file
-  --duts-file DUTS_FILE
-                        Specify the name of the duts file
-  --generate-duts-file topology_file inventory_file
-                        Create a duts file from topology and inventory
-                        file
-  --generate-test-steps test_dir
-                        Generate test steps for all the tests in the
-                        test directory mentioned in the definitions
-                        file
-  --markers             List of supported technology tests. Equivalent
-                        to pytest --markers
-
-NRFU Command Options:
-  --nrfu                Starts NRFU tests and will prompt users for
-                        required input.
 ```
+
+```text
+(venv) vane # vane --help
+```
+
+![Screenshot](../images/cli.png)
 
 To exit out of the virtual environment execute the following command:
 

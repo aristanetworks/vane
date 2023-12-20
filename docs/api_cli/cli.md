@@ -13,11 +13,12 @@ this section
 
 ## Using the -- generate-duts-file flag
 
-This flag can be used to generate the duts file for a given inventory
-and topology file of a virtual lab.
+This flag can be used to generate the duts file with a given name
+(via the third argument) for a given inventory and topology file
+of a virtual lab.
 
 ``` text
-vane –-generate-duts-file topology.yaml inventory.yaml 
+vane –-generate-duts-file topology.yaml inventory.yaml duts_file
 ```
 
 **topology.yaml** : this file represents the topology of the virtual lab
@@ -102,7 +103,7 @@ all:
     to generate a duts file which Vane will run against.
 
     ``` text
-    vane –-generate-duts-file topology.yaml inventory.yaml 
+    vane –-generate-duts-file topology.yaml inventory.yaml duts_file
     ```
 
 ## Using the -- generate-test-steps flag

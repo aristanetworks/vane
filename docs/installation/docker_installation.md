@@ -74,7 +74,7 @@ Vane is now ready to be executed and the prompt will look as follows:
 (vane-dev-shell) vane-container project # vane --help
 ```
 
-![Screenshot](../images/cli.png)
+![Screenshot](../images/vane_cli.png)
 
 To exit out of the container execute the following command:
 

@@ -4,7 +4,7 @@ Vane has the following Command Line arguments which we will be discussing in
 this section
 
 !!! info "Vane Help"
-    ![Screenshot](../images/cli.png)
+    ![Screenshot](../images/vane_cli.png)
 
     We discussed the --definitions-file and --duts-file flag in the
     [Executing Vane](../executing_vane/executing_vane.md) Section

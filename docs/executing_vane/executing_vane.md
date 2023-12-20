@@ -8,7 +8,7 @@ shows the different available arguments that can be used.
 (vane-py3.9) vane # vane --help
 ```
 
-![Screenshot](../images/cli.png)
+![Screenshot](../images/vane_cli.png)
 
 !!! eos-config "Note"
     Let us get started by discussing some of the necessary flags/arguments,

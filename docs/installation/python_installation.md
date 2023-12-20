@@ -47,7 +47,7 @@ Vane is now ready to be executed and the prompt will look as follows:
 (venv) vane # vane --help
 ```
 
-![Screenshot](../images/cli.png)
+![Screenshot](../images/vane_cli.png)
 
 To exit out of the virtual environment execute the following command:
 

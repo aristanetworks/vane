@@ -7,6 +7,12 @@
       expected_output: temp-hostname
       report_style: modern
       test_criteria: Verify setup comments are filtered properly
+    - name: test_if_ssh_text_cmds_mixed_batch_run
+      description: Verify running mixed batch cmds using ssh 
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify cmds can be run using ssh with json encoding
     - name: test_if_ssh_json_cmds_run
       description: Verify running cmds using ssh with json encoding
       show_cmd: null

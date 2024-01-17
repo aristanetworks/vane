@@ -127,6 +127,58 @@ class VaneTests:
         tops.generate_report(tops.dut_name, tops.output_msg)
         assert tops.actual_output == tops.expected_output
 
+    def test_if_ssh_text_cmds_mixed_batch_run(self, dut, tests_definitions):
+        """TD: Verifies cmds run using ssh and output is same as eapi
+
+        Args:
+          dut (dict): Encapsulates dut details including name, connection
+        """
+
+        tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+
+        try:
+            tops.show_cmds[tops.dut_name] = ["vrf instance MGMTMGMT", "bash timeout 20 sudo tcpdump -vvni ma1 port 514"]
+
+            cmds=[]
+            cmd = {}
+            cmd["cmds"] = ["vrf instance MGMTMGMT"]
+            cmd["cmd_type"] = "cfg"
+            cmd["encoding"] = "text"
+            cmd_args = {}
+            cmd_args["read_timeout"] = 40
+            cmd_args["exit_config_mode"] = False
+            cmd["cmd_args"] = cmd_args
+            cmds.append(cmd)
+            cmd = {}
+            cmd["cmds"] = ["bash timeout 20 sudo tcpdump -vvni ma1 port 514"]
+            cmd["cmd_type"] = "show"
+            cmd["encoding"] = "text"
+            cmd_args = {}
+            cmd_args["read_timeout"] = 40
+            cmd_args["exit_config_mode"] = True
+            cmd["cmd_args"] = cmd_args
+            cmds.append(cmd)
+            """
+            TS: Run cmds using batch api with one cfg and one show cmd
+            """
+            tops.actual_output = tops.run_ssh_mixed_batch(cmds)
+
+        except (AttributeError, LookupError, EapiError) as exception:
+            logging.error(
+                f"On device {tops.dut_name}: Error while running testcase on DUT is: "
+                f"{str(exception)}"
+            )
+            tops.actual_output = str(exception)
+            tops.output_msg += (
+                f"EXCEPTION encountered on device {tops.dut_name}, while "
+                f"investigating if ssh can be used to run cmds. Vane recorded error: {exception}"
+            )
+
+        tops.parse_test_steps(self.test_if_ssh_text_cmds_mixed_batch_run)
+        tops.test_result = "error" not in tops.actual_output
+        tops.generate_report(tops.dut_name, tops.output_msg)
+        assert "error" not in tops.actual_output
+
     def test_if_ssh_text_cmds_run(self, dut, tests_definitions):
         """TD: Verifies cmds run using ssh and output is same as eapi
 

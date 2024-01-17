@@ -1306,6 +1306,55 @@ class TestOps:
             hidden_cmd=hidden_cmd,
         )
 
+    def run_ssh_mixed_batch(
+        self,
+        cmds,
+        dut=None,
+        **kwargs,
+    ):
+        """run_mixed_batch is a wrapper which runs the 'cmds.cmds'
+        these cmds can be either show or cfg cmds
+        conn_type used here is ssh conn
+        if no dut is passed then cmds are run on TestOps dut object
+        It returns the output of these 'cmds.cmds' in the encoding requested.
+        Also it checks show_clock_flag
+        to see if 'show_clock' cmd needs to be run. It stores the text output for
+        the cmds list in 'show_cmds_txt' list for the specific dut.
+        Also cmds list is appended to object's 'show_cmds' list.
+
+        Args: cmds: list of dicts with cmds list to be run
+        cmd dict{
+        "encoding",#"json" or "text"
+        "cmd_type",#"cfg" or "text"
+        "cmds",#list of cmds
+        "cmd_args",#described below
+        }
+        cmd_args dict {
+        "read_timeout", #read_timeout for netmiko to wait for prompt
+        "exit_config_mode" #whether or not to exit config mode after 'cmds' are run
+        }
+        dut: the device to run the show command on
+        conn_type: eapi or ssh, with eapi being default
+
+        Returns: A list object that includes the response for each command 
+        """
+
+        results = []
+        for cmd in cmds:
+            retval = self._run_and_record_cmds(
+                encoding=cmd["encoding"],
+                cmd_type=cmd["cmd_type"],
+                cmds=cmd["cmds"],
+                dut=dut,
+                conn_type="ssh",
+                timeout=0,
+                new_conn=False,
+                hidden_cmd=False,
+                **(cmd["cmd_args"])
+            )
+            results.append(retval)
+        return results
+
     def _run_and_record_cmds(
         self,
         cmds,
@@ -1316,6 +1365,7 @@ class TestOps:
         cmd_type="show",
         dut=None,
         hidden_cmd=False,
+        **kwargs
     ):
         """_run_and_record_cmds runs both config and show cmds and records the output
         of these commands
@@ -1361,7 +1411,7 @@ class TestOps:
             show_clock_cmds = ["show clock"]
             # run the show_clock_cmds
             try:
-                show_clock_op = conn.enable(show_clock_cmds, "text")
+                show_clock_op = conn.enable(show_clock_cmds, "text", **kwargs)
             except BaseException as e:
                 # add the show clock cmd to _show_cmds evidence list
                 for cmd in show_clock_cmds:
@@ -1386,12 +1436,12 @@ class TestOps:
                     run_cmds = render_cmds(dut, cmds)
                 # if encoding is json run the commands, store the results
                 if encoding == "json":
-                    json_results = conn.enable(run_cmds, strict=True)
+                    json_results = conn.enable(run_cmds, strict=True, **kwargs)
                 # also run the commands in text mode
-                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
+                txt_results = conn.enable(run_cmds, strict=True, encoding="text", **kwargs)
             else:
                 # run the config cmd
-                txt_results = conn.config(cmds)
+                txt_results = conn.config(cmds, **kwargs)
         except BaseException as e:  # pylint: disable=broad-except
             logging.error(f"Following cmds {cmds} generated exception {str(e)}")
             # add the cmds to _show_cmds cmds list

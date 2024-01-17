@@ -89,10 +89,7 @@ it will prompt you for the test directory as earlier.
 
 ### Step 1: Download the vane-cvp-rpm from the vane repo
 
-Download the vane-cvp-rpm from the vane repo over [here](<https://github.com/aristanetworks/vane/actions/workflows/cvp-extension-builder.yml>)
-
-Select the most recent successful build,
-which would be the one at the top with a green checkmark.
+To download the vane-cvp-rpm, select the most recent successful build, **which would be the one at the top with a green checkmark**, over [here](<https://github.com/aristanetworks/vane/actions/workflows/cvp-extension-builder.yml>).
 
 !!! info "Reference"
 

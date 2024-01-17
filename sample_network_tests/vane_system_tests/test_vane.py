@@ -138,13 +138,13 @@ class VaneTests:
 
         try:
             tops.show_cmds[tops.dut_name] = [
-                "vrf instance MGMTMGMT",
+                "cli vrf MGMTMGMT",
                 "bash timeout 20 sudo tcpdump -vvni ma1 port 514",
             ]
 
             cmds = []
             cmd = {}
-            cmd["cmds"] = ["vrf instance MGMTMGMT"]
+            cmd["cmds"] = ["cli vrf MGMTMGMT"]
             cmd["cmd_type"] = "cfg"
             cmd["encoding"] = "text"
             cmd_args = {}

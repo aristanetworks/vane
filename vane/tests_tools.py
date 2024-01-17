@@ -835,39 +835,8 @@ def export_text(text_file, text_data, dut_name):
         sys.exit(1)
 
 
-def generate_duts_file(dut, file, username, password):
-    """Util function to take in an individual dut and print
-    its relevant data to a given file.
-
-    Args:
-        dut (dict): device structure
-        file (io): file to write duts data to
-        username (str): username
-        password (str): user's password
-    """
-    dut_dict = {}
-    try:
-        for data in dut:
-            if dut[data]["node_type"] == "veos":
-                dut_dict = [
-                    {
-                        "mgmt_ip": dut[data]["ip_addr"],
-                        "name": data,
-                        "neighbors": dut[data]["neighbors"],
-                        "password": password,
-                        "transport": "https",
-                        "username": username,
-                        "role": "",
-                    }
-                ]
-        if dut_dict:
-            yaml.dump(dut_dict, file)
-    except yaml.YAMLError as err:
-        print(f"DUTs creation for {file} failed due to exception {err}")
-
-
-def create_duts_file(topology_file, inventory_file):
-    """Automatically generate a DUTs file given a topology and inventory file
+def create_duts_file(topology_file, inventory_file, duts_file_name):
+    """Automatically generate a DUTs file
 
     Args:
         topology_file (str): Name and path of topology file
@@ -919,10 +888,8 @@ def create_duts_file(topology_file, inventory_file):
                 continue
         if dut_properties or server_properties:
             dut_file.update({"duts": dut_properties, "servers": server_properties})
-            with open(config.DUTS_FILE, "w", encoding="utf-8") as yamlfile:
+            with open(duts_file_name, "w", encoding="utf-8") as yamlfile:
                 yaml.dump(dut_file, yamlfile, sort_keys=False)
-
-                return config.DUTS_FILE
 
     # pylint: disable-next=broad-exception-caught
     except Exception as excep:
@@ -930,8 +897,6 @@ def create_duts_file(topology_file, inventory_file):
         logging.error("EXITING TEST RUNNER")
         print(">>> ERROR While creating duts file")
         sys.exit(1)
-
-    return None
 
 
 # pylint: disable-next=too-many-instance-attributes
@@ -1446,9 +1411,9 @@ class TestOps:
                     run_cmds = render_cmds(dut, cmds)
                 # if encoding is json run the commands, store the results
                 if encoding == "json":
-                    json_results = conn.enable(run_cmds)
+                    json_results = conn.enable(run_cmds, strict=True)
                 # also run the commands in text mode
-                txt_results = conn.enable(run_cmds, encoding="text")
+                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
             else:
                 # run the config cmd
                 txt_results = conn.config(cmds)

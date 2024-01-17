@@ -1,6 +1,8 @@
 # Create a container used for building CVP rpm packages for the Vane utility
 
 # Sourced in part from https://github.com/jc21/docker-rpmbuild-centos7/blob/master/docker/Dockerfile
+# and from https://github.com/teddysun/across/blob/master/docker/rpmbuild/Dockerfile.rpmbuild7
+# and from the endpointdev site mentioned below
 
 # Start with a Centos 7 distro (what CVP is deployed on)
 FROM centos:7
@@ -11,15 +13,13 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Set the prompt
 ENV PS1='cvp-rpm-build # '
 
-# Disable the mirrorlist because they are useless
-RUN sed -i 's/^mirrorlist=/#mirrorlist=/' /etc/yum.repos.d/CentOS-Base.repo \
-  && sed -i 's/^#baseurl=/baseurl=/' /etc/yum.repos.d/CentOS-Base.repo
+# Initialize yum utils, epel-release and centos-release packages
+RUN yum install -y yum-utils epel-release centos-release-scl-rh \
+	&& yum-config-manager --enable epel
 
-# Yum
-RUN rpm -Uvh https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm \
-  && yum localinstall -y https://yum.jc21.com/jc21-yum.rpm \
-  && yum -y install deltarpm centos-release-scl \
-  && yum-config-manager --enable rhel-server-rhscl-7-rpms
+# Add the endpointdev repo for getting an upgraded git version
+#   https://www.endpointdev.com/blog/2021/12/installing-git-2-on-centos-7/
+RUN yum -y install https://packages.endpointdev.com/rhel/7/os/x86_64/endpoint-repo.x86_64.rpm
 
 # Update yum and install the needed packages
 #   Use skip-broken to bypass errors

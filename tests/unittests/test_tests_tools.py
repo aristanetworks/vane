@@ -1001,8 +1001,6 @@ def test_test_ops_verify_show_cmd_pass(loginfo, logdebug, mocker):
         "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    tops = create_test_ops_instance(mocker)
-
     # handling the true case
 
     show_cmds = ["show version"]
@@ -1022,8 +1020,6 @@ def test_test_ops_verify_show_cmd_fail(logcritical, mocker):
         "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    tops = create_test_ops_instance(mocker)
-
     # handling the false case
 
     show_cmd = ["show lldp neighbors"]
@@ -1104,7 +1100,6 @@ def test_test_ops_get_parameters(loginfo, logdebug, mocker):
     # mocking the call to verify_show_cmd in init()
 
     mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
-    tops = create_test_ops_instance(mocker)
 
     expected_output = {
         "name": "test_memory_utilization_on_",

@@ -609,7 +609,7 @@ def test_get_parameters(loginfo, logdebug):
     loginfo_calls = [
         call("Identify test case and return parameters"),
         call("Return testcases for Test Suite: test_aaa.py"),
-        call("Return parameters for Test Case: test_if_exec_authorization_methods_set_on_"),
+        call("Returning parameters for Test Case: test_if_exec_authorization_methods_set_on_"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
@@ -651,7 +651,7 @@ def test_verify_show_cmd_pass(loginfo, logdebug):
     show_cmd = "show clock"
     tests_tools.verify_show_cmd(show_cmd, dut)
     loginfo.assert_called_with(
-        "Verifying if show command show clock was successfully executed on Test Dut dut"
+        "Verifying if show command show clock was/were successfully executed on Test Dut dut",
     )
     logdebug.assert_called_with("Verified output for show command show clock on Test Dut")
 
@@ -927,13 +927,13 @@ def create_test_ops_instance(mocker):
 def test_test_ops_constructor(mocker):
     "Validates that TestOPs object gets initialized correctly"
 
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
+    # mocking the call to verify_show_cmd and get_parameters in init()
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
     tops = create_test_ops_instance(mocker)
 
     # assert all the object values are set correctly
@@ -995,10 +995,10 @@ def test_test_ops_constructor(mocker):
 def test_test_ops_verify_show_cmd_pass(loginfo, logdebug, mocker):
     """Validates verification of show commands being executed on given dut"""
 
-    # mocking the call to _get_parameters in init()
+    # mocking the call to get_parameters in init()
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
     tops = create_test_ops_instance(mocker)
@@ -1006,9 +1006,9 @@ def test_test_ops_verify_show_cmd_pass(loginfo, logdebug, mocker):
     # handling the true case
 
     show_cmds = ["show version"]
-    tops._verify_show_cmd(show_cmds, DUT)
+    tests_tools.verify_show_cmd(show_cmds, DUT)
     loginfo.assert_called_with(
-        "Verifying if show command ['show version'] were successfully executed on DCBBW1 dut"
+        "Verifying if show command ['show version'] was/were successfully executed on DCBBW1 dut"
     )
     logdebug.assert_called_with("Verified output for show command show version on DCBBW1")
 
@@ -1016,10 +1016,10 @@ def test_test_ops_verify_show_cmd_pass(loginfo, logdebug, mocker):
 def test_test_ops_verify_show_cmd_fail(logcritical, mocker):
     """Validates verification of show commands being executed on given dut"""
 
-    # mocking the call to _get_parameters in init()
+    # mocking the call to get_parameters in init()
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
     tops = create_test_ops_instance(mocker)
@@ -1032,20 +1032,20 @@ def test_test_ops_verify_show_cmd_fail(logcritical, mocker):
     # when show_cmd is not executed on the dut
 
     with pytest.raises(AssertionError):
-        tops._verify_show_cmd(show_cmd, DUT)
+        tests_tools.verify_show_cmd(show_cmd, DUT)
     logcritical.assert_called_with("Show command show lldp neighbors not executed on DCBBW1")
 
 
 def test_test_ops_write_results(loginfo, logdebug, mocker):
     "Validates functionality of write_results method"
 
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
+    # mocking the call to verify_show_cmd and get_parameters in init()
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     # mocking call to export_yaml
 
@@ -1072,13 +1072,13 @@ def test_test_ops_write_results(loginfo, logdebug, mocker):
 def test_test_ops_write_text_results(mocker):
     "Validates functionality of write_text_results method"
 
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
+    # mocking the call to verify_show_cmd and get_parameters in init()
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     # mocking call to export_yaml
 
@@ -1101,9 +1101,9 @@ def test_test_ops_write_text_results(mocker):
 def test_test_ops_get_parameters(loginfo, logdebug, mocker):
     """Validates getting test case details from test parameters, suites and name"""
 
-    # mocking the call to _verify_show_cmd in init()
+    # mocking the call to verify_show_cmd in init()
 
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
     tops = create_test_ops_instance(mocker)
 
     expected_output = {
@@ -1120,17 +1120,19 @@ def test_test_ops_get_parameters(loginfo, logdebug, mocker):
         "test_suite": "test_memory.py",
     }
 
-    actual_output = tops._get_parameters(TEST_DEFINITION, TEST_SUITE, "test_memory_utilization_on_")
+    actual_output = tests_tools.get_parameters(
+        TEST_DEFINITION, TEST_SUITE, "test_memory_utilization_on_"
+    )
     assert expected_output == actual_output
 
     loginfo_calls = [
         call("Identify test case and return parameters"),
+        call("Return testcases for Test Suite: test_memory.py"),
         call("Returning parameters for Test Case: test_memory_utilization_on_"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
     logdebug_calls = [
-        call("Return testcases for Test Suite: test_memory.py"),
         call(
             "Suite_parameters: [{'name': 'test_memory.py', 'testcases': "
             "[{'name': 'test_memory_utilization_on_', "
@@ -1155,10 +1157,10 @@ def test_test_ops_get_parameters(loginfo, logdebug, mocker):
 def test_test_ops_generate_report(logdebug, mocker):
     """Validates functionality of generate_report method"""
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
     mocker_object_one = mocker.patch("vane.tests_tools.TestOps._html_report")
     mocker_object_two = mocker.patch("vane.tests_tools.TestOps._write_results")
     mocker_object_three = mocker.patch("vane.tests_tools.TestOps._write_text_results")
@@ -1210,10 +1212,10 @@ def test_test_ops_html_report(mocker, capsys):
     """Validates html_report functionality"""
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
     tops = create_test_ops_instance(mocker)
 
     tops._html_report()
@@ -1237,13 +1239,13 @@ def test_test_ops_html_report(mocker, capsys):
 def test_test_ops_verify_veos_pass(loginfo, logdebug, mocker):
     """Validates verification of the model of the dut"""
 
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
+    # mocking the call to verify_show_cmd and get_parameters in init()
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
     tops = create_test_ops_instance(mocker)
 
     # handling the true case
@@ -1256,13 +1258,13 @@ def test_test_ops_verify_veos_pass(loginfo, logdebug, mocker):
 def test_test_ops_verify_veos_fail(logdebug, mocker):
     """Validates verification of the model of the dut"""
 
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
+    # mocking the call to verify_show_cmd and get_parameters in init()
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
     tops = create_test_ops_instance(mocker)
 
     # handling the false case
@@ -1276,13 +1278,13 @@ def test_test_ops_parse_test_steps(loginfo, mocker):
     """Validates verification of the parse_test_steps method
     FIXTURE NEEDED: tests/unittests/fixtures/test_steps/test_steps.py"""
 
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
+    # mocking the call to verify_show_cmd and get_parameters in init()
 
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
     tops = create_test_ops_instance(mocker)
     tops.parse_test_steps(test_steps.TestSyslogFunctionality.test_syslog_functionality_on_server)
 
@@ -1299,10 +1301,10 @@ def test_test_ops_parse_test_steps(loginfo, mocker):
 def test_test_ops_run_show_cmds_json(mocker):
     """Validates the functionality of run_show_cmds method"""
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn.enable")
     mocker_object.side_effect = [
@@ -1366,10 +1368,10 @@ def test_test_ops_run_show_cmds_json(mocker):
 def test_test_ops_run_show_cmds_text(mocker):
     """Validates the functionality of run_show_cmds method"""
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn.enable")
     mocker_object.side_effect = [
@@ -1423,10 +1425,10 @@ def test_test_ops_run_show_cmds_text(mocker):
 def test_test_ops_run_show_cmds_json_exception_fail(mocker):
     """Validates the functionality of run_show_cmds method"""
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn.enable")
     mocker_object.side_effect = [pyeapi.eapilib.CommandError(1000, "Invalid command")]
@@ -1449,10 +1451,10 @@ def test_test_ops_run_show_cmds_json_exception_fail(mocker):
 def test_test_ops_run_show_cmds_text_exception_fail(mocker):
     """Validates the functionality of run_show_cmds method"""
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn.enable")
     mocker_object.side_effect = [pyeapi.eapilib.CommandError(1000, "Invalid command")]
@@ -1476,10 +1478,10 @@ def test_test_ops_run_show_cmds_text_exception_fail(mocker):
 def test_test_ops_run_cfg_cmds_pyeapi(mocker):
     """Validates the functionality of run_show_cmds method"""
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn.enable")
     mocker_object.side_effect = [
@@ -1527,10 +1529,10 @@ def test_test_ops_run_cfg_cmds_pyeapi(mocker):
 def test_test_ops_run_cfg_cmds_ssh(mocker):
     """Validates the functionality of run_show_cmds method"""
     mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
+        "vane.tests_tools.get_parameters",
         return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
     )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     mocker_object = mocker.patch("vane.device_interface.NetmikoConn.enable")
     mocker_object.side_effect = [
@@ -1582,7 +1584,7 @@ def test_test_ops_run_cfg_cmds_ssh(mocker):
 
 def test_test_ops_transfer_file(mocker):
     """Validates the functionality of transfer_file method"""
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
 
     mocker.patch(
         "vane.device_interface.NetmikoConn.set_up_conn",

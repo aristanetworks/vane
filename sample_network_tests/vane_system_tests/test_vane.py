@@ -137,9 +137,12 @@ class VaneTests:
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
 
         try:
-            tops.show_cmds[tops.dut_name] = ["vrf instance MGMTMGMT", "bash timeout 20 sudo tcpdump -vvni ma1 port 514"]
+            tops.show_cmds[tops.dut_name] = [
+                "vrf instance MGMTMGMT",
+                "bash timeout 20 sudo tcpdump -vvni ma1 port 514",
+            ]
 
-            cmds=[]
+            cmds = []
             cmd = {}
             cmd["cmds"] = ["vrf instance MGMTMGMT"]
             cmd["cmd_type"] = "cfg"
@@ -341,11 +344,6 @@ class VaneTests:
         tops.test_result = tops.actual_output == tops.expected_output
         tops.generate_report(tops.dut_name, tops.output_msg)
         assert tops.actual_output == tops.expected_output
-
-    def test_if_setup_fail_is_handled(self):
-        """TD: Verifies if invalid cmd in setup is handled properly"""
-
-        """ This function is never called since the setup fails"""
 
     def test_run_show_cmds_timeout_func(self, dut, tests_definitions):
         """TD: Verifies run_show_cmds() timeout func

@@ -59,7 +59,9 @@ def parse_cli():
     Returns:
         args (obj): An object containing the CLI arguments.
     """
-    parser = argparse.ArgumentParser(description="Network Certification Tool")
+    main_parser = argparse.ArgumentParser(description="Network Certification Tool")
+    parser = main_parser.add_argument_group("Main Command Options")
+    nrfu_parser = main_parser.add_argument_group("NRFU Command Options")
 
     parser.add_argument(
         "--version",
@@ -103,13 +105,13 @@ def parse_cli():
         action="store_true",
     )
 
-    parser.add_argument(
+    nrfu_parser.add_argument(
         "--nrfu",
         help=("Starts NRFU tests and will prompt users for required input."),
         action="store_true",
     )
 
-    args = parser.parse_args()
+    args = main_parser.parse_args()
 
     return args
 

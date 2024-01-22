@@ -45,6 +45,7 @@ import yaml
 from jinja2 import Template
 from pyeapi.eapilib import EapiError
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
+from pysnmp.hlapi import *
 from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
 from vane.utils import render_cmds
@@ -1499,6 +1500,97 @@ class TestOps:
             os.remove(session_log)
         except OSError:
             pass
+        return result
+
+    def run_snmpget(
+        self,
+        user,
+        auth_key,
+        priv_key,
+        oid,
+        dut=None,
+        auth_protocol=usmHMACSHAAuthProtocol,
+        priv_protocol=usmAesCfb256Protocol,
+    ):
+        """run_snmpget() runs a query against 'dut'
+        using 'user', 'auth_key', 'priv_key' as cerdentials
+        Args:
+            user: snmp user
+            auth_key: snmp auth key
+            priv_key: snmp priv key
+            oid: snmp oid
+            dut: the dut against which snmp get needs to run
+            auth_protocol: snmp auth protocol
+            priv_protocol: snmp priv protocol"""
+
+        if dut is None:
+            dut = self.dut
+
+        dut_name = dut["name"]
+        target_ip = dut["mgmt_ip"]
+
+        # initializing evidence values for other duts since
+        # init only initializes for primary dut
+
+        self.set_evidence_default(dut_name)
+
+        # first run show clock if flag is set
+        if self.show_clock_flag:
+            conn = get_new_conn(dut, "eapi", 0)
+            show_clock_cmds = ["show clock"]
+            # run the show_clock_cmds
+            try:
+                show_clock_op = conn.enable(show_clock_cmds, "text")
+            except BaseException as exp:
+                # add the show clock cmd to _show_cmds evidence list
+                for cmd in show_clock_cmds:
+                    self._show_cmds[dut_name].append(cmd)
+                # add the exception result to _show_cmd_txts evidence output list
+                self._show_cmd_txts[dut_name].append(str(exp))
+                raise exp
+
+            # add the show_clock_cmds to _show_cmds list
+            # also add the o/p of show_clock_cmds to _show_cmd_txts list
+            for result_dict in show_clock_op:
+                self._show_cmds[dut_name].append(result_dict["command"])
+                self._show_cmd_txts[dut_name].append(result_dict["result"]["output"])
+
+        snmpget_cmd = (
+            "snmpget -v 3 -a SHA -A $SNMP_SHA_KEY "
+            "-u $SNMP_USER_NAME -x AES -X $SNMP_AES_KEY -l "
+            f"authPriv {target_ip} {oid}"
+        )
+        self._show_cmds[dut_name].append(snmpget_cmd)
+        result = ""
+        auth = UsmUserData(
+            userName=user,
+            authKey=auth_key,
+            authProtocol=auth_protocol,
+            privKey=priv_key,
+            privProtocol=priv_protocol,
+        )
+        cmd = getCmd(
+            SnmpEngine(),
+            auth,
+            UdpTransportTarget((target_ip, 161)),
+            ContextData(),
+            ObjectType(ObjectIdentity(oid)),
+        )
+        error_indication, error_status, error_index, var_binds = next(cmd)
+        if error_indication or error_status:
+            # record error indication
+            result = error_indication
+        elif error_status:
+            result = "{} at {}".format(
+                error_status.prettyPrint(),
+                error_index and var_binds[int(error_index) - 1][0] or "?",
+            )
+
+        else:
+            for var_bind in var_binds:
+                result += " ".join((" = ".join([x.prettyPrint() for x in var_bind])))
+
+        self._show_cmd_txts[dut_name].append(result)
         return result
 
     def setup_and_run_traffic(self, traffic_generator_type, configuration_file):

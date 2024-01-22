@@ -596,6 +596,65 @@ class VaneTests:
         assert self.tops.expected_output == self.tops.actual_output
 
 
+    def test_snmpget_to_dut(self, dut, tests_definitions):
+        """
+        Test case to check cmd template
+        """
+
+        # Initializing the TestOps class and initializing the variables
+        self.tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
+        test_params = self.tops.test_parameters
+        self.tops.actual_output = {}
+        self.output = ""
+        self.tops.output_msg = (
+            "SNMP traps are generated and returned no errors when snmpwalk command is executed"
+            " locally on switch."
+        )
+
+        try:
+            """
+            TS: Running 'snmpget -v <snmp_version> -a SHA -A
+            <snmp_authentication_protocol_passphrase> -x AES -X <snmp_privacy_protocol_passphrase>
+            -u <snmp_username> -l authPriv <snmp_local_interface_ip>
+            HOST-RESOURCES-MIB::hrProcessorLoad' command and verifying SNMP traps are generated
+            on device.
+            """
+            snmp_walk_cmd = (
+                "bash timeout 5 snmpwalk -v"
+                " 3 -a SHA -A {{ snmp_authentication_protocol_passphrase }}"
+                " -x AES -X {{ snmp_privacy_protocol_passphrase }} -u"
+                " {{ snmp_username }} -l authPriv"
+                " {{ snmp_local_interface_ip }} HOST-RESOURCES-MIB::hrProcessorLoad"
+            )
+            dut["snmp_authentication_protocol_passphrase"] = "arista123"
+            dut["snmp_privacy_protocol_passphrase"] = "arista123"
+            dut["snmp_username"] = "Arista"
+            dut["snmp_local_interface_ip"] = "192.168.0.9"
+            oid = ".1.3.6.1.2.1.1.5.0"
+            self.tops.actual_output = self.tops.run_snmpget("Arista", "arista123", "arista123", oid, dut=dut)
+
+
+            # forming output message if test result is fail
+            if dut["name"] in self.tops.actual_output:
+                self.tops.output_msg = (
+                    "SNMP traps are not generated and returned invalid output when snmpwalk command"
+                    " is executed locally on switch."
+                )
+
+        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+            logging.error(
+                "On device %s: Error while running the testcase is:\n%s",
+                self.tops.dut_name,
+                str(excep),
+            )
+            self.tops.output_msg = self.tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
+
+        self.tops.test_result = dut['name'] in self.tops.actual_output
+        self.tops.parse_test_steps(self.test_snmpget_to_dut)
+        self.tops.generate_report(dut["name"], self.output)
+        assert dut['name'] in self.tops.actual_output
+
+
 @pytest.mark.vane_system_tests
 class TestcaseSkipTests:
     """Suite of testcases to validate PyTest skip"""

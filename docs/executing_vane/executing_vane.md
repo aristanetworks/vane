@@ -203,7 +203,7 @@ including json, .docx, html. These reports offer detailed information
 on the test cases such as test case procedure, input, expected output,
 pass/fail result, and other relevant observations.
 
-!!! info "Sample Reports (*click to expand*)"
+!!! info "Sample Reports"
     === "Sample .docx Report"
         ![Screenshot](../images/report_one.png)
         ![Screenshot](../images/report_two.png)

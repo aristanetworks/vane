@@ -213,6 +213,7 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
             generate_test_steps=None,
             markers=False,
             nrfu=False,
+            version=False,
         ),
     )
     vane_cli.main()
@@ -283,6 +284,7 @@ def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):
             generate_test_steps=None,
             markers=False,
             nrfu=False,
+            version=False,
         ),
     )
     vane_cli.main()

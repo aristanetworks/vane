@@ -23,4 +23,4 @@ repos:
         stages: [commit, push, manual]
         args:
           - --quiet
-          - --config=config.json
+          # Add --config=config.json with config.json file mentioning url patterns to ignore if needed

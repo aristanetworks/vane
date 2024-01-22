@@ -205,7 +205,8 @@ class NrfuClient:
                 logging.info("Reading in dut ip data from device list file")
                 line = text_in.readline()
                 while line:
-                    if line.strip():  # ensure no empty lines are read
+                    # ensure no empty lines or lines starting with # are read
+                    if line.strip() and not line.strip().startswith("#"):
                         device_data.append(line.strip())
                     line = text_in.readline()
         except OSError as err:

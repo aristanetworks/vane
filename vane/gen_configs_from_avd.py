@@ -69,7 +69,7 @@ def create_configs_file(avd_sd_dir):
             config[device_name]["ethernet_interfaces"] = full_config.get("ethernet_interfaces", {})
             config[device_name]["mlag_configuration"] = full_config.get("mlag_configuration", {})
             config[device_name]["loopback_interfaces"] = full_config.get("loopback_interfaces", {})
-            config[device_name]["vxlan_interfaces"] = full_config.get("vxlan_interfaces", {})
+            config[device_name]["vxlan_interface"] = full_config.get("vxlan_interface", {})
             add_lldp_neighbors_dict(config)
     with open("configs.yml", "w", encoding="utf-8") as file:
         yaml.safe_dump(config, file, sort_keys=False)

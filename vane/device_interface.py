@@ -51,6 +51,22 @@ error_responses = [
 ]
 
 
+def get_cmds(cmds):
+    """get_cmds: converts cmds to json cmds
+    cmds can be a list of commands or just one command (str)
+    """
+    pipe_json = " | json"
+
+    if isinstance(cmds, list):
+        local_cmds = cmds.copy()
+        for i, cmd in enumerate(cmds):
+            local_cmds[i] = cmd + pipe_json
+    elif isinstance(cmds, str):
+        local_cmds = cmds + pipe_json
+
+    return cmds, local_cmds
+
+
 class CommandError(Exception):
     """Base exception raised for command errors
     The CommandError instance provides a custom exception that can be used
@@ -206,22 +222,7 @@ class NetmikoConn(DeviceConn):
         # pylint: disable=attribute-defined-outside-init
         self._connection = Netmiko(**remote_device)
 
-    def get_cmds(self, cmds):
-        """get_cmds: converts cmds to json cmds
-        cmds can be a list of commands or just one command (str)
-        """
-        pipe_json = " | json"
-
-        if isinstance(cmds, list):
-            local_cmds = cmds.copy()
-            for i, cmd in enumerate(cmds):
-                local_cmds[i] = cmd + pipe_json
-        elif isinstance(cmds, str):
-            local_cmds = cmds + pipe_json
-
-        return cmds, local_cmds
-
-    def send_list_cmds(self, cmds, encoding="json"):
+    def send_list_cmds(self, cmds, read_timeout, encoding="json"):
         """send_list_cmds: sends the list of commands to device conn
         and collects the output as list"""
 
@@ -229,11 +230,11 @@ class NetmikoConn(DeviceConn):
 
         for i, cmd in enumerate(cmds):
             try:
-                output = self._connection.send_command(cmd)
+                output = self._connection.send_command(cmd, read_timeout=read_timeout)
             except netmiko.exceptions.NetmikoTimeoutException:
                 # try resetting connection and see if it works
                 self.set_up_conn(self.name)
-                output = self._connection.send_command(cmd)
+                output = self._connection.send_command(cmd, read_timeout=read_timeout)
 
             if output not in error_responses:
                 if encoding == "json":
@@ -250,16 +251,16 @@ class NetmikoConn(DeviceConn):
 
         return cmds_op
 
-    def send_str_cmds(self, cmds, encoding="json"):
+    def send_str_cmds(self, cmds, read_timeout, encoding="json"):
         """send_str_cmds: sends one command to device conn"""
 
         cmds_op = []
         try:
-            output = self._connection.send_command(cmds)
+            output = self._connection.send_command(cmds, read_timeout=read_timeout)
         except netmiko.exceptions.NetmikoTimeoutException:
             # try resetting connection and see if it works
             self.set_up_conn(self.name)
-            output = self._connection.send_command(cmds)
+            output = self._connection.send_command(cmds, read_timeout=read_timeout)
 
         if output not in error_responses:
             if encoding == "json":
@@ -287,17 +288,26 @@ class NetmikoConn(DeviceConn):
 
         if encoding == "json":
             # for json encoding, lets try to run cmds using | json
-            cmds, local_cmds = self.get_cmds(cmds=cmds)
+            cmds, local_cmds = get_cmds(cmds=cmds)
         elif encoding == "text" and isinstance(cmds, list):
             local_cmds = cmds.copy()
         else:
             # when cmds is a string and encoding is text
             local_cmds = cmds
 
+        read_timeout = None
+        for key, value in kwargs.items():
+            if key == "read_timeout":
+                read_timeout = value
+
         if isinstance(cmds, list):
-            cmds_op = self.send_list_cmds(cmds=local_cmds, encoding=encoding)
+            cmds_op = self.send_list_cmds(
+                cmds=local_cmds, encoding=encoding, read_timeout=read_timeout
+            )
         elif isinstance(cmds, str):
-            cmds_op = self.send_str_cmds(cmds=local_cmds, encoding=encoding)
+            cmds_op = self.send_str_cmds(
+                cmds=local_cmds, encoding=encoding, read_timeout=read_timeout
+            )
 
         return cmds_op
 
@@ -368,7 +378,16 @@ class NetmikoConn(DeviceConn):
         commands = list(commands)
 
         self._connection.enable()
-        response = self._connection.send_config_set(commands)
+        read_timeout = None
+        exit_config_mode = True
+        for key, value in kwargs.items():
+            if key == "read_timeout":
+                read_timeout = value
+            elif key == "exit_config_mode":
+                exit_config_mode = value
+        response = self._connection.send_config_set(
+            commands, read_timeout=read_timeout, exit_config_mode=exit_config_mode
+        )
 
         return response
 

@@ -3,7 +3,7 @@ name: Build and Deploy Vane site
 on:
   push:
     branches:
-      - documentation
+      - main
 
 
 jobs:

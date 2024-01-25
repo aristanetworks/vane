@@ -896,6 +896,20 @@ def create_duts_file(topology_file, inventory_file, duts_file_name):
         sys.exit(1)
 
 
+def post_process_skip(tops, steps, output=""):
+    """Post processing for test case that encounters a PyTest Skip
+
+    Args:
+        tops(obj): Test case object
+        steps(func): Test case
+        output(str): Test case show output
+    """
+
+    tops.skip = True
+    tops.parse_test_steps(steps)
+    tops.generate_report(tops.dut_name, output)
+
+
 # pylint: disable-next=too-many-instance-attributes
 class TestOps:
     """Common testcase operations and variables"""
@@ -1576,17 +1590,3 @@ class TestOps:
 
             else:
                 logging.info("No Session to clear")
-
-
-def post_process_skip(tops, steps, output=""):
-    """Post processing for test case that encounters a PyTest Skip
-
-    Args:
-        tops(obj): Test case object
-        steps(func): Test case
-        output(str): Test case show output
-    """
-
-    tops.skip = True
-    tops.parse_test_steps(steps)
-    tops.generate_report(tops.dut_name, output)

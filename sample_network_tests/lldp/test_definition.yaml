@@ -1,6 +1,7 @@
 - name: test_lldp.py
   testcases:
     - name: test_if_lldp_rx_is_enabled_on_
+      test_id: TN11.1
       description: Verify LLDP receive is enabled on interesting interfaces
       # LLDP RX state
       show_cmd: show lldp
@@ -14,6 +15,7 @@
         - DLFW4
 
     - name: test_if_lldp_tx_is_enabled_on_
+      test_id: TN11.2
       description: Verify LLDP transmit is enabled on interesting interfaces
       # LLDP TX state
       expected_output: true
@@ -27,6 +29,7 @@
         - DLFW4
 
     - name: test_if_lldp_system_name_is_correct_on_
+      test_id: TN11.3
       description: Verify show lldp local-info hostname is the system's name
       # Use dut name
       expected_output: null
@@ -40,6 +43,7 @@
         - DLFW4
 
     - name: test_if_lldp_max_frame_size_is_correct_on_
+      test_id: TN11.4
       description: Verify show lldp local-info maxFrameSize is correct
       # LLDP Max frame size
       expected_output: 9236
@@ -53,6 +57,7 @@
         - DLFW4
 
     - name: test_if_lldp_interface_id_is_correct_on_
+      test_id: TN11.5
       description: Verify show lldp local-info interfaceIdType is correct
       # LLDP ID type
       expected_output: interfaceName

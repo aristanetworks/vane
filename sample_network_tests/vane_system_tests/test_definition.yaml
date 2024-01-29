@@ -82,3 +82,9 @@
       expected_output: null
       report_style: modern
       test_criteria: Verify cmd template works
+    - name: test_testcase_skip
+      description: Verify correct behavior when PyTest skip occurs
+      show_cmd: null
+      expected_output: null
+      report_style: modern
+      test_criteria: Verify correct behavior when PyTest skip occurs

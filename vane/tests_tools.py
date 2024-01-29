@@ -44,7 +44,8 @@ import yaml
 
 from jinja2 import Template
 from pyeapi.eapilib import EapiError
-from vane import config, device_interface
+from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
+from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
 from vane.utils import render_cmds
 
@@ -831,37 +832,7 @@ def export_text(text_file, text_data, dut_name):
         sys.exit(1)
 
 
-def generate_duts_file(dut, file, username, password):
-    """Util function to take in an individual dut and print
-    its relevant data to a given file.
-
-    Args:
-        dut (dict): device structure
-        file (io): file to write duts data to
-        username, password (str): user credentials
-    """
-    dut_dict = {}
-    try:
-        for data in dut:
-            if dut[data]["node_type"] == "veos":
-                dut_dict = [
-                    {
-                        "mgmt_ip": dut[data]["ip_addr"],
-                        "name": data,
-                        "neighbors": dut[data]["neighbors"],
-                        "password": password,
-                        "transport": "https",
-                        "username": username,
-                        "role": "",
-                    }
-                ]
-        if dut_dict:
-            yaml.dump(dut_dict, file)
-    except yaml.YAMLError as err:
-        print(f"DUTs creation for {file} failed due to exception {err}")
-
-
-def create_duts_file(topology_file, inventory_file):
+def create_duts_file(topology_file, inventory_file, duts_file_name):
     """Automatically generate a DUTs file
 
     Args:
@@ -898,12 +869,11 @@ def create_duts_file(topology_file, inventory_file):
                 )
             else:
                 continue
+
         if dut_properties:
             dut_file.update({"duts": dut_properties})
-            with open(config.DUTS_FILE, "w", encoding="utf-8") as yamlfile:
+            with open(duts_file_name, "w", encoding="utf-8") as yamlfile:
                 yaml.dump(dut_file, yamlfile, sort_keys=False)
-
-                return config.DUTS_FILE
 
     # pylint: disable-next=broad-exception-caught
     except Exception as excep:
@@ -912,7 +882,19 @@ def create_duts_file(topology_file, inventory_file):
         print(">>> ERROR While creating duts file")
         sys.exit(1)
 
-    return None
+
+def post_process_skip(tops, steps, output=""):
+    """Post processing for test case that encounters a PyTest Skip
+
+    Args:
+        tops(obj): Test case object
+        steps(func): Test case
+        output(str): Test case show output
+    """
+
+    tops.skip = True
+    tops.parse_test_steps(steps)
+    tops.generate_report(tops.dut_name, output)
 
 
 # pylint: disable-next=too-many-instance-attributes
@@ -928,6 +910,8 @@ class TestOps:
             dut (dict): device under test
         """
         test_case = inspect.stack()[1][3]
+        # Test cases that skip will change skip to True
+        self.skip = False
         self.test_case = test_case
         self.test_parameters = self._get_parameters(tests_definitions, test_suite, self.test_case)
         self.expected_output = self.test_parameters["expected_output"]
@@ -1118,6 +1102,7 @@ class TestOps:
         self.test_parameters["show_cmd_txts"] = self._show_cmd_txts
         self.test_parameters["test_steps"] = self.test_steps
         self.test_parameters["show_cmds"] = self._show_cmds
+        self.test_parameters["skip"] = self.skip
 
         if str(self.show_cmd_txt):
             self.test_parameters["show_cmd"] += ":\n\n" + self.show_cmd_txt
@@ -1402,9 +1387,9 @@ class TestOps:
                     run_cmds = render_cmds(dut, cmds)
                 # if encoding is json run the commands, store the results
                 if encoding == "json":
-                    json_results = conn.enable(run_cmds)
+                    json_results = conn.enable(run_cmds, strict=True)
                 # also run the commands in text mode
-                txt_results = conn.enable(run_cmds, encoding="text")
+                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
             else:
                 # run the config cmd
                 txt_results = conn.config(cmds)
@@ -1516,3 +1501,79 @@ class TestOps:
         except OSError:
             pass
         return result
+
+    def setup_and_run_traffic(self, traffic_generator_type, configuration_file):
+        """Module to call respective traffic generator based on the type of
+        traffic generator being used in the test case
+
+        Args:
+            type (str): type of the traffic generator being used
+            configuration_file: traffic profile file to pass to the traffic generator"""
+
+        if traffic_generator_type == "ixia":
+            self.setup_ixia(configuration_file)
+
+    def setup_ixia(self, ixia_configuration):
+        """Module to authenticate into Ixia Web Api, configure a session
+        with passed in configuration file, generate traffic and return
+        traffic and flow stats to validate test criteria
+
+        Args:
+            ixia_configuration (str): path of ixia config file"""
+
+        ixia_traffic_item_stats = []
+        self.traffic_item_stats = []
+        ixia_flow_stats = []
+        self.flow_stats = []
+        ix_network = None
+        session = None
+
+        try:
+            # Module 1 : Authentication: Connect to the IxNetwork API Server
+
+            session, ix_network = ixia_interface.authenticate()
+
+            # Module 2 : Configuration
+
+            ix_network = ixia_interface.configure(ix_network, ixia_configuration)
+
+            # Module 3 : Generating traffic
+
+            ix_network = ixia_interface.generate_traffic(ix_network)
+
+            # Get the traffic item and flow statistics
+
+            ixia_traffic_item_stats = StatViewAssistant(ix_network, "Traffic Item Statistics")
+
+            ixia_flow_stats = StatViewAssistant(ix_network, "Flow Statistics")
+
+            # Generate a deep copy of traffic and flow stats to store in tops object
+
+            index = 0
+            for traffic_item_stat in ixia_traffic_item_stats.Rows:
+                self.traffic_item_stats.append({})
+                for column, data in zip(traffic_item_stat.Columns, traffic_item_stat.RawData[0]):
+                    self.traffic_item_stats[index].update({column: data})
+                index += 1
+
+            index = 0
+            for flow_stat in ixia_flow_stats.Rows:
+                self.flow_stats.append({})
+                for column, data in zip(flow_stat.Columns, flow_stat.RawData[0]):
+                    self.flow_stats[index].update({column: data})
+                index += 1
+
+        except Exception as exception:  # pylint: disable=W0718
+            logging.error(
+                f"Exception: Setting up of Ixia errored out due"
+                f" to the following reason: {format(exception)}"
+            )
+
+        finally:
+            logging.info("Checking if there is a session to be cleared")
+
+            if (ix_network and session) is not None:
+                ixia_interface.clear_session(ix_network, session)
+
+            else:
+                logging.info("No Session to clear")

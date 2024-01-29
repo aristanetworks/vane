@@ -283,6 +283,7 @@ class NrfuClient:
                 "results_dir": "reports/results",
                 "setup_show": False,
                 "show_log": "show_output.log",
+                "continue_when_unreachable": True,
                 "stdout": False,
                 "test_cases": "All",
                 "test_dirs": [test_dir],

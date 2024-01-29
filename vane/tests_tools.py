@@ -43,6 +43,7 @@ import pprint
 import yaml
 
 from jinja2 import Template
+from icmplib import ping
 from pyeapi.eapilib import EapiError
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
@@ -209,6 +210,11 @@ def init_duts(show_cmds, test_parameters, test_duts):
 
     if not (reachability or continue_when_unreachable):
         logging.error(f"Error connecting to {unreachable_duts}, hence exiting Vane")
+        print(
+            "\x1b[31mVane encountered an error while attempting to connect to DUTS.\n"
+            "For detailed information, please refer to the logs.\nDue to this issue, "
+            "Vane is exiting. \x1b[31m"
+        )
         sys.exit(1)
 
     test_duts["duts"] = reachable_duts
@@ -253,8 +259,9 @@ def check_duts_reachability(test_duts):
     for dut in test_duts["duts"]:
         # check for reachability
         ip_address = dut["mgmt_ip"]
-        ret = os.system(f"ping -o -c 3 -W 3000 {ip_address} > {os.devnull}")
-        if ret == 0:
+        host = ping(ip_address, count=3, interval=1, timeout=3, privileged=False)
+        ret = host.is_alive
+        if ret:
             reachable_duts.append(dut)
         else:
             name = dut["name"]

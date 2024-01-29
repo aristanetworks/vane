@@ -12,7 +12,7 @@
       show_cmd: null
       expected_output: null
       report_style: modern
-      test_criteria: Verify cmds can be run using ssh with json encoding
+      test_criteria: Verify cmds cfgs and show cmds can be run together using ssh
     - name: test_if_ssh_json_cmds_run
       description: Verify running cmds using ssh with json encoding
       show_cmd: null

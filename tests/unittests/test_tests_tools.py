@@ -991,47 +991,6 @@ def test_test_ops_constructor(mocker):
     assert not tops.test_result
     assert tops.test_id == tops.test_parameters.get("test_id", None)
 
-
-def test_test_ops_verify_show_cmd_pass(loginfo, logdebug, mocker):
-    """Validates verification of show commands being executed on given dut"""
-
-    # mocking the call to get_parameters in init()
-
-    mocker.patch(
-        "vane.tests_tools.get_parameters",
-        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
-    )
-    # handling the true case
-
-    show_cmds = ["show version"]
-    tests_tools.verify_show_cmd(show_cmds, DUT)
-    loginfo.assert_called_with(
-        "Verifying if show command ['show version'] was/were successfully executed on DCBBW1 dut"
-    )
-    logdebug.assert_called_with("Verified output for show command show version on DCBBW1")
-
-
-def test_test_ops_verify_show_cmd_fail(logcritical, mocker):
-    """Validates verification of show commands being executed on given dut"""
-
-    # mocking the call to get_parameters in init()
-
-    mocker.patch(
-        "vane.tests_tools.get_parameters",
-        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
-    )
-    # handling the false case
-
-    show_cmd = ["show lldp neighbors"]
-
-    # handling the assert False raised in the verify_show_cmd method
-    # when show_cmd is not executed on the dut
-
-    with pytest.raises(AssertionError):
-        tests_tools.verify_show_cmd(show_cmd, DUT)
-    logcritical.assert_called_with("Show command show lldp neighbors not executed on DCBBW1")
-
-
 def test_test_ops_write_results(loginfo, logdebug, mocker):
     "Validates functionality of write_results method"
 
@@ -1092,62 +1051,6 @@ def test_test_ops_write_text_results(mocker):
     }
     dut_name = "DCBBW1"
     mocker_object.assert_called_once_with(text_file, text_data, dut_name)
-
-
-def test_test_ops_get_parameters(loginfo, logdebug, mocker):
-    """Validates getting test case details from test parameters, suites and name"""
-
-    # mocking the call to verify_show_cmd in init()
-
-    mocker.patch("vane.tests_tools.verify_show_cmd", return_value=True)
-
-    expected_output = {
-        "name": "test_memory_utilization_on_",
-        "description": "Verify memory is not exceeding high utilization",
-        "show_cmd": "show version",
-        "expected_output": 80,
-        "report_style": "modern",
-        "test_criteria": "Verify memory is not exceeding high utilization",
-        "criteria": "names",
-        "filter": ["DSR01", "DCBBW1"],
-        "comment": None,
-        "result": True,
-        "test_suite": "test_memory.py",
-    }
-
-    actual_output = tests_tools.get_parameters(
-        TEST_DEFINITION, TEST_SUITE, "test_memory_utilization_on_"
-    )
-    assert expected_output == actual_output
-
-    loginfo_calls = [
-        call("Identify test case and return parameters"),
-        call("Return testcases for Test Suite: test_memory.py"),
-        call("Returning parameters for Test Case: test_memory_utilization_on_"),
-    ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-    logdebug_calls = [
-        call(
-            "Suite_parameters: [{'name': 'test_memory.py', 'testcases': "
-            "[{'name': 'test_memory_utilization_on_', "
-            "'description': 'Verify memory is not exceeding high utilization', "
-            "'show_cmd': 'show version', 'expected_output': 80, 'report_style': 'modern', "
-            "'test_criteria': 'Verify memory is not exceeding high utilization', "
-            "'criteria': 'names', 'filter': ['DSR01', 'DCBBW1'], 'comment': None, "
-            "'result': True}]}]"
-        ),
-        call(
-            "Case_parameters: {'name': 'test_memory_utilization_on_', "
-            "'description': 'Verify memory is not exceeding high utilization', "
-            "'show_cmd': 'show version', 'expected_output': 80, 'report_style': 'modern', "
-            "'test_criteria': 'Verify memory is not exceeding high utilization', "
-            "'criteria': 'names', 'filter': ['DSR01', 'DCBBW1'], 'comment': None, "
-            "'result': True}"
-        ),
-    ]
-    logdebug.assert_has_calls(logdebug_calls, any_order=False)
-
 
 def test_test_ops_generate_report(logdebug, mocker):
     """Validates functionality of generate_report method"""

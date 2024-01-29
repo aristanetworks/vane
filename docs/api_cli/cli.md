@@ -15,16 +15,15 @@ this section
 
 This flag can be used to generate the duts file with a given name
 (via the third argument) for a given inventory and topology file
-of a virtual lab.
+of a deployed network.
 
 ``` text
 vane –-generate-duts-file topology.yaml inventory.yaml duts_file
 ```
 
-**topology.yaml** : this file represents the topology of the virtual lab
-you will run Vane against. For demoing purposes we have a virtual lab
-deployed in ACT within the EOS+ tenant called: Vane Demo Lab.
-You can get the topology file from under there.
+**topology.yaml** : this file represents the topology of the lab
+you will run Vane against. The topology.yaml file abides by the following
+format.
 
 ``` yaml title=" Sample topology.yaml" hl_lines="9-24"
 veos:
@@ -67,8 +66,10 @@ nodes:
 
 ```
 
-**inventory.yaml** : this file can be downloaded from ACT
-from the view which reflects your deployed lab.
+**inventory.yaml** : this file can be downloaded from ACT (if running
+Vane against a virtual ACT lab) from the view which reflects
+your deployed lab. The inventory.yaml file abides by the following
+format.
 
 ``` yaml title=" Sample inventory.yaml"
 all:
@@ -77,23 +78,23 @@ all:
       hosts:
         cv_ztp:
           ansible_host: 10.255.62.114
-          ansible_user: root
-          ansible_password: cvproot
+          ansible_user: username
+          ansible_password: password
         cv_server:
           ansible_httpapi_host: 10.255.62.114
           ansible_host: 10.255.62.114
-          ansible_user: cvpadmin
-          ansible_password: cvp123!
+          ansible_user: username
+          ansible_password: password!
     VEOS:
       hosts:
         DCBBW1:
           ansible_host: 10.255.31.234
-          ansible_user: cvpadmin
-          ansible_ssh_pass: cvp123!
+          ansible_user: username
+          ansible_ssh_pass: password!
         DSR01:
           ansible_host: 10.255.50.212
-          ansible_user: cvpadmin
-          ansible_ssh_pass: cvp123!
+          ansible_user: username
+          ansible_ssh_pass: password!
 
 ```
 

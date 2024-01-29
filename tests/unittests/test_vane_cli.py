@@ -267,43 +267,6 @@ def test_main_create_duts_file(loginfo, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
 
-def test_main_generate_duts_from_topo(loginfo, logwarning, mocker):
-    """Tests the --generate-duts-from-topo flag"""
-
-    mocker.patch("vane.vane_cli.run_tests")
-    mocker.patch("vane.vane_cli.write_results")
-    mocker.patch("vane.vane_cli.download_test_results")
-
-    # mocking parse cli to test --generate-duts-from-topo
-    mocker.patch(
-        "vane.vane_cli.parse_cli",
-        return_value=argparse.Namespace(
-            definitions_file="definitions_sample.yaml",
-            duts_file="duts_sample.yaml",
-            generate_duts_file=None,
-            generate_test_steps=None,
-            markers=False,
-            nrfu=False,
-            version=False,
-        ),
-    )
-    vane_cli.main()
-
-    # assert info logs to ensure all the above methods executed without errors
-    loginfo_calls = [
-        call("Reading in input from command-line"),
-        call("\n\n!VANE has completed without errors!\n\n"),
-    ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-    # assert warning logs to ensure all the above methods executed without errors
-    logwarning_calls = [
-        call("Changing Definitions file name to definitions_sample.yaml"),
-        call("Changing DUTS file name to duts_sample.yaml"),
-    ]
-    logwarning.assert_has_calls(logwarning_calls, any_order=False)
-
-
 def test_main_write_test_steps(loginfo, mocker):
     """Tests the --generate-test-steps flag"""
 

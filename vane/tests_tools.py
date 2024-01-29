@@ -844,7 +844,6 @@ def create_duts_file(topology_file, inventory_file, duts_file_name):
     """
     dut_file = {}
     dut_properties = []
-    server_properties = []
     topology_file = import_yaml(topology_file)
     inventory_file = import_yaml(inventory_file)
 
@@ -868,23 +867,11 @@ def create_duts_file(topology_file, inventory_file, duts_file_name):
                         "role": topology_details.get("role", "unknown"),
                     }
                 )
-            elif name in inventory_file["all"]["children"]["GENERIC"]["hosts"]:
-                inventory_details = inventory_file["all"]["children"]["GENERIC"]["hosts"][name]
-                server_properties.append(
-                    {
-                        "mgmt_ip": inventory_details["ansible_host"],
-                        "name": name,
-                        "neighbors": topology_details["neighbors"],
-                        "password": inventory_details["ansible_ssh_pass"],
-                        "transport": "https",
-                        "username": inventory_details["ansible_user"],
-                        "role": topology_details.get("role", "unknown"),
-                    }
-                )
             else:
                 continue
-        if dut_properties or server_properties:
-            dut_file.update({"duts": dut_properties, "servers": server_properties})
+
+        if dut_properties:
+            dut_file.update({"duts": dut_properties})
             with open(duts_file_name, "w", encoding="utf-8") as yamlfile:
                 yaml.dump(dut_file, yamlfile, sort_keys=False)
 

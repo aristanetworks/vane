@@ -1276,7 +1276,7 @@ class TestOps:
         Args: cmds: list of dicts with cmds list to be run
         cmd dict{
         "encoding",#"json" or "text"
-        "cmd_type",#"cfg" or "text"
+        "cmd_type",#"cfg" or "show"
         "cmds",#list of cmds
         "cmd_args",#described below
         }

@@ -1,6 +1,7 @@
 - name: test_dns.py
   testcases:
     - name: test_if_dns_resolves_on_
+      test_id: TN5.1
       description: Verify DNS is running by performing pings and verifying name resolution
       show_cmd: null
       # List of URLs to test DNS against
@@ -17,6 +18,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_dns_servers_are_reachable_on_
+      test_id: TN5.2
       description: Verifies DNS servers are reachable via ping
       show_cmd: null
       dns_servers:
@@ -32,6 +34,7 @@
         - DSR01
         - DCBBW1
     - name: test_dns_configuration_on_
+      test_id: TN5.3
       description: Verifies DNS configuration matches the recommended practices 
       show_cmd: show running-config section name-server
       # List of NTP servers

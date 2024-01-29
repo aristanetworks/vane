@@ -1,6 +1,7 @@
 - name: test_aaa.py
   testcases:
     - name: test_if_authentication_counters_are_incrementing_on_
+      test_id: TN1.1
       description: Verify AAA counters are working correctly
       show_cmd: show aaa counters
       expected_output: null
@@ -13,6 +14,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_aaa_session_logging_is_working_on_
+      test_id: TN1.2
       description: Verify AAA session logging is working by identifying eapi connection
       show_cmd: show users detail
       expected_output: command-api
@@ -25,6 +27,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_commands_authorization_methods_set_on_
+      test_id: TN1.3
       description: Verify AAA command authorization are method-lists set correct
       show_cmd: show aaa methods all
       # List command authorizations to check on DUT
@@ -39,6 +42,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_exec_authorization_methods_set_on_
+      test_id: TN1.4
       description: Verify AAA exec authorization are method-lists set correct
       show_cmd: show aaa methods all
       # List exec authorizations to check on DUT
@@ -53,6 +57,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_default_login_authentication_methods_set_on_
+      test_id: TN1.5
       description: Verify AAA default login authentication are method-lists set correct
       show_cmd: show aaa methods all
       # List default login authentication to check on DUT
@@ -67,6 +72,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_login_authentication_methods_set_on_
+      test_id: TN1.6
       description: AAA login authentication are method-lists set correct
       show_cmd: show aaa methods all
       # List login authentication to check on DUT
@@ -80,6 +86,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_dot1x_authentication_methods_set_on_
+      test_id: TN1.7
       description: Verify AAA dot1x authentication are method-lists set correct
       show_cmd: show aaa methods all
       # List dot1x authentication to check on DUT
@@ -93,6 +100,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_enable_authentication_methods_set_on_
+      test_id: TN1.8
       description: Verify AAA enable authentication are method-lists set correct
       show_cmd: show aaa methods all
       # List enable login authentication to check on DUT
@@ -108,6 +116,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_system_accounting_methods_set_on_
+      test_id: TN1.9
       description: Verify AAA system accounting method-lists are set correct
       # List default system accounting to check on DUT
       default_acct: []
@@ -123,6 +132,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_exec_accounting_methods_set_on_
+      test_id: TN1.10
       description: Verify AAA exec accounting method-lists are set correct
       # List exec system accounting to check on DUT
       default_acct: []
@@ -138,6 +148,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_privilege_accounting_methods_set_on_
+      test_id: TN1.11
       description: Verify AAA privilege accounting method-lists are set correct
       # List privilege system accounting to check on DUT
       default_acct: []
@@ -153,6 +164,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_dot1x_accounting_methods_set_on_
+      test_id: TN1.12
       description: Verify AAA dot1x accounting method-lists are set correct
       # List dot1x system accounting to check on DUT
       default_acct: []

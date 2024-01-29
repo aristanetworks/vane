@@ -1,6 +1,7 @@
 - name: test_environment.py
   testcases:
     - name: test_if_system_environment_temp_is_in_spec_on_
+      test_id: TN6.1
       description: Verify system temperature environmentals are functional within spec
       # Expected system temperature
       expected_output: temperatureOk
@@ -13,6 +14,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_sensors_temp_is_in_spec_on_
+      test_id: TN6.2
       description: Verify system temperature sensors environmentals are functional within spec
       # Expected system temperature
       expected_output: False
@@ -25,6 +27,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_system_environment_power_are_in_spec_on_
+      test_id: TN6.3
       description: Verify system power environmentals are functional within spec
       # Expected state of power
       expected_output: ok
@@ -38,6 +41,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_system_environment_cooling_is_in_spec_on_
+      test_id: TN6.4
       description: Verify system cooling environmentals are functional within spec
       # Expected state of cooling
       expected_output: coolingOk
@@ -50,6 +54,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_fan_status_is_in_spec_on_
+      test_id: TN6.5
       description: Verify fan modules are functioning correctly
       # Expected state of cooling
       expected_output: ok

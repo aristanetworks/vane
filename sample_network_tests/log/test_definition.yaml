@@ -1,6 +1,7 @@
 - name: test_logging.py
   testcases:
     - name: test_if_log_messages_appear_on_
+      test_id: TN12.1
       description: Verify local log messages
       show_cmd: show logging
       test_criteria: Verify local log messages

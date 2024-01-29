@@ -124,7 +124,7 @@ file
 
 ``` yaml title=" Sample duts.yaml" hl_lines="5-23"
 # This is a sample duts.yaml file which can be used to run vane.
-# This file has been generated from the Vane Demo Lab Topology.
+# Ensure you edit the ip addresses to reflect your DUTS
 
 duts:
 - mgmt_ip: 10.255.106.71
@@ -180,10 +180,6 @@ vane
   ``` text
   vane –definitions-file sample_network_tests/definitions.yaml –duts-file sample_network_tests/duts.yaml
   ```
-
-!!! warning
-    **Ensure the Vane-Demo ACT lab is running, when you run Vane**
-    **using the sample definitions and duts file**
 
 Below is a sample run of vane:
 

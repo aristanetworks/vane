@@ -296,7 +296,7 @@ def test_main_write_test_steps(loginfo, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
 
-def test_main_nrfu_client(loginfo, logwarning, mocker):
+def test_main_nrfu_client(loginfo, mocker):
     """Tests the nrfu flag"""
 
     mocker.patch("vane.vane_cli.run_tests")

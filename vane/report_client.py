@@ -1226,7 +1226,6 @@ class ReportClient:
 
                     if dut["skip"]:
                         test_result = "SKIP"
-                        fail_reason = dut.get("actual_output", "")
                     elif dut["test_result"]:
                         test_result = "PASS"
                     else:

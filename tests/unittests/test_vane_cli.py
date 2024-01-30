@@ -212,7 +212,7 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
             generate_duts_file=None,
             generate_test_steps=None,
             markers=False,
-            nrfu=False,
+            subcommand=None,
             version=False,
         ),
     )
@@ -251,7 +251,7 @@ def test_main_create_duts_file(loginfo, mocker):
             generate_duts_from_topo=None,
             generate_test_steps=None,
             markers=False,
-            nrfu=False,
+            subcommand=None,
         ),
     )
     vane_cli.main()
@@ -292,5 +292,44 @@ def test_main_write_test_steps(loginfo, mocker):
     loginfo_calls = [
         call("Reading in input from command-line"),
         call("Generating test steps for test cases within test_directory test directory\n"),
+    ]
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+
+def test_main_nrfu_client(loginfo, logwarning, mocker):
+    """Tests the nrfu flag"""
+
+    mocker.patch("vane.vane_cli.run_tests")
+    mocker.patch("vane.vane_cli.write_results")
+    mocker.patch("vane.vane_cli.download_test_results")
+
+    mocker_object = mocker.patch("vane.nrfu_client.NrfuClient")
+    nrfu_client_instance = mocker_object.return_value
+
+    nrfu_client_instance.definitions_file = "definitions_sample.yaml"
+    nrfu_client_instance.duts_file = "duts_sample.yaml"
+
+    # mocking parse cli to test nrfu flag
+    mocker.patch(
+        "vane.vane_cli.parse_cli",
+        return_value=argparse.Namespace(
+            definitions_file="",
+            duts_file="",
+            generate_duts_file=None,
+            generate_test_steps=None,
+            markers=False,
+            subcommand="nrfu",
+            version=False,
+        ),
+    )
+    vane_cli.main()
+
+    assert vane.config.DEFINITIONS_FILE == "definitions_sample.yaml"
+    assert vane.config.DUTS_FILE == "duts_sample.yaml"
+
+    # assert info logs to ensure all the above methods executed without errors
+    loginfo_calls = [
+        call("Invoking the Nrfu client to run Nrfu tests"),
+        call("\n\n!VANE has completed without errors!\n\n"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=False)

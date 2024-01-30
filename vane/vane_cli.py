@@ -59,37 +59,36 @@ def parse_cli():
     Returns:
         args (obj): An object containing the CLI arguments.
     """
-    main_parser = argparse.ArgumentParser(description="Network Certification Tool")
-    parser = main_parser.add_argument_group("Main Command Options")
-    nrfu_parser = main_parser.add_argument_group("NRFU Command Options")
+    parser = argparse.ArgumentParser(description="Network Certification Tool")
+    main_command_group = parser.add_argument_group("Main Command Options")
 
-    parser.add_argument(
+    main_command_group.add_argument(
         "--version",
         "--v",  # Alias for version
         help=("Current Version of Vane"),
         action="store_true",
     )
 
-    parser.add_argument(
+    main_command_group.add_argument(
         "--definitions-file",
         default=vane.config.DEFINITIONS_FILE,
         help="Specify the name of the definitions file",
     )
 
-    parser.add_argument(
+    main_command_group.add_argument(
         "--duts-file",
         default=vane.config.DUTS_FILE,
         help="Specify the name of the duts file",
     )
 
-    parser.add_argument(
+    main_command_group.add_argument(
         "--generate-duts-file",
         help="Create a duts file from topology and inventory file",
         nargs=3,
         metavar=("topology_file", "inventory_file", "duts_file"),
     )
 
-    parser.add_argument(
+    main_command_group.add_argument(
         "--generate-test-steps",
         help=(
             "Generate test steps for all the tests in"
@@ -99,19 +98,40 @@ def parse_cli():
         metavar=("test_dir"),
     )
 
-    parser.add_argument(
+    main_command_group.add_argument(
         "--markers",
         help=("List of supported technology tests. Equivalent to pytest --markers"),
         action="store_true",
     )
 
-    nrfu_parser.add_argument(
-        "--nrfu",
-        help=("Starts NRFU tests and will prompt users for required input."),
+    # Define a subcommand "nrfu" with its argument group
+    nrfu_sub_parser = parser.add_subparsers(
+        dest="subcommand", help="`vane nrfu --help` for more options"
+    )
+    nrfu_parser = nrfu_sub_parser.add_parser(
+        "nrfu", help="Executes NRFU testing with default options"
+    )
+    nrfu_command_group = nrfu_parser.add_argument_group("NRFU Command Options")
+
+    # Define optional arguments for "nrfu"
+    nrfu_command_group.add_argument(
+        "--software_reporting",
+        help="Enable software reporting for NRFU testing",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--hardware_reporting",
+        help="Enable hardware reporting for NRFU testing",
         action="store_true",
     )
 
-    args = main_parser.parse_args()
+    # Parse the command-line arguments
+    args = parser.parse_args()
+
+    # The parsed arguments can be accessed like this:
+    # if args.subcommand == "nrfu":
+    #     print(f"nrfu software_reporting: {args.software_reporting}")
+    #     print(f"nrfu hardware_reporting: {args.hardware_reporting}")
 
     return args
 
@@ -257,7 +277,7 @@ def main():
         print(f"Vane Framework Version: {metadata.version(__package__)}")
 
     else:
-        if args.nrfu:
+        if args.subcommand == "nrfu":
             logging.info("Invoking the Nrfu client to run Nrfu tests")
             nrfu = nrfu_client.NrfuClient()
             vane.config.DEFINITIONS_FILE = nrfu.definitions_file

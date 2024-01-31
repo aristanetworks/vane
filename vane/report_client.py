@@ -1184,7 +1184,6 @@ class ReportClient:
 
                     if dut["skip"]:
                         suite_result["total_skip"] += 1
-                        dut["fail_or_skip_reason"] = dut.get("actual_output", "")
                     elif dut["test_result"]:
                         suite_result["total_pass"] += 1
                     else:

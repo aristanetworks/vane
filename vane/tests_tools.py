@@ -1593,8 +1593,10 @@ class TestOps:
             # record error indication
             result = f"{error_indication}"
         elif error_status:
-            result = f"{error_status.prettyPrint()} at"\
-                     f"{error_index and var_binds[int(error_index) - 1][0] or '?'}"
+            result = (
+                f"{error_status.prettyPrint()} at"
+                f"{error_index and var_binds[int(error_index) - 1][0] or '?'}"
+            )
 
         else:
             for var_bind in var_binds:

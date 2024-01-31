@@ -595,7 +595,6 @@ class VaneTests:
         self.tops.generate_report(dut["name"], self.output)
         assert self.tops.expected_output == self.tops.actual_output
 
-
     def test_snmpget_to_dut(self, dut, tests_definitions):
         """
         Test case to check cmd template
@@ -631,8 +630,9 @@ class VaneTests:
             dut["snmp_username"] = "Arista"
             dut["snmp_local_interface_ip"] = "192.168.0.9"
             oid = ".1.3.6.1.2.1.1.5.0"
-            self.tops.actual_output = self.tops.run_snmpget("Arista", "arista123", "arista123", oid, dut=dut)
-
+            self.tops.actual_output = self.tops.run_snmpget(
+                "Arista", "arista123", "arista123", oid, dut=dut
+            )
 
             # forming output message if test result is fail
             if dut["name"] in self.tops.actual_output:
@@ -649,10 +649,10 @@ class VaneTests:
             )
             self.tops.output_msg = self.tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
 
-        self.tops.test_result = dut['name'] in self.tops.actual_output
+        self.tops.test_result = dut["name"] in self.tops.actual_output
         self.tops.parse_test_steps(self.test_snmpget_to_dut)
         self.tops.generate_report(dut["name"], self.output)
-        assert dut['name'] in self.tops.actual_output
+        assert dut["name"] in self.tops.actual_output
 
 
 @pytest.mark.vane_system_tests

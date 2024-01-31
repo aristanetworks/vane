@@ -40,12 +40,23 @@ import time
 import inspect
 import re
 import pprint
+import pysnmp
 import yaml
 
 from jinja2 import Template
 from pyeapi.eapilib import EapiError
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
-from pysnmp.hlapi import *
+from pysnmp.hlapi import (
+    usmHMACSHAAuthProtocol,
+    usmAesCfb256Protocol,
+    UsmUserData,
+    getCmd,
+    SnmpEngine,
+    UdpTransportTarget,
+    ContextData,
+    ObjectType,
+    ObjectIdentity,
+)
 from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
 from vane.utils import render_cmds
@@ -1536,7 +1547,7 @@ class TestOps:
 
         # first run show clock if flag is set
         if self.show_clock_flag:
-            conn = get_new_conn(dut, "eapi", 0)
+            conn = self.get_new_conn(dut, "eapi", 0)
             show_clock_cmds = ["show clock"]
             # run the show_clock_cmds
             try:
@@ -1576,15 +1587,14 @@ class TestOps:
             ContextData(),
             ObjectType(ObjectIdentity(oid)),
         )
-        error_indication, error_status, error_index, var_binds = next(cmd)
+        error_indication, error_status, error_index, var_binds = pysnmp.hlapi.next(cmd)
+
         if error_indication or error_status:
             # record error indication
-            result = error_indication
+            result = f"{error_indication}"
         elif error_status:
-            result = "{} at {}".format(
-                error_status.prettyPrint(),
-                error_index and var_binds[int(error_index) - 1][0] or "?",
-            )
+            result = f"{error_status.prettyPrint()} at"\
+                     f"{error_index and var_binds[int(error_index) - 1][0] or '?'}"
 
         else:
             for var_bind in var_binds:

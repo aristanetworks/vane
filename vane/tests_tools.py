@@ -1589,7 +1589,7 @@ class TestOps:
         )
         error_indication, error_status, error_index, var_binds = pysnmp.hlapi.next(cmd)
 
-        if error_indication or error_status:
+        if error_indication: 
             # record error indication
             result = f"{error_indication}"
         elif error_status:

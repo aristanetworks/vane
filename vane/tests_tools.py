@@ -42,8 +42,10 @@ import re
 import pprint
 import yaml
 
+
 from jinja2 import Template
 from icmplib import ping
+from icmplib.exceptions import SocketPermissionError
 from pyeapi.eapilib import EapiError
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
@@ -256,11 +258,21 @@ def check_duts_reachability(test_duts):
     logging.info("Checking connectivity of duts")
     reachable_duts = []
     unreachable_duts = []
+    ret = False
     for dut in test_duts["duts"]:
         # check for reachability
         ip_address = dut["mgmt_ip"]
-        host = ping(ip_address, count=3, interval=1, timeout=3, privileged=False)
-        ret = host.is_alive
+        try:
+            host = ping(ip_address, count=3, interval=1, timeout=3, privileged=False)
+            ret = host.is_alive
+        except SocketPermissionError as e:
+            logging.error(
+                f"Entered the exception due to permission issues: {e}\n"
+                "Trying the ping utility via os.system instead"
+            )
+            host = os.system(f"ping -c 1 -W 3 {ip_address} > {os.devnull}")
+            ret = host == 0
+
         if ret:
             reachable_duts.append(dut)
         else:

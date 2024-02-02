@@ -115,13 +115,59 @@ def parse_cli():
 
     # Define optional arguments for "nrfu"
     nrfu_command_group.add_argument(
-        "--software_reporting",
-        help="Enable software reporting for NRFU testing",
+        "--hardware-appendix",
+        help="Enables the hardware appendix and prints it to report. Default value is False.",
         action="store_true",
     )
     nrfu_command_group.add_argument(
-        "--hardware_reporting",
-        help="Enable hardware reporting for NRFU testing",
+        "--software-appendix",
+        help="Enables the software appendix and prints it to report. Default value is False.",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--topology-appendix",
+        help="Enables the topology appendix and prints it to report. Default value is False.",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--configuration-appendix",
+        help="Enables the configuration appendix and prints it to report. Default value is False.",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--detailed-test-section",
+        help="Enables the detailed test case result sections. Defaults value is True",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--only-detailed-test-fails",
+        help="Only publish detailed test case failures in the results section."
+        "Defaults value is False",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "–-no-html-report",
+        help="Disables HTML report and prints to reports directory.",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--no-excel-report",
+        help="Disables Excel report and prints to reports directory. ",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--no-doc-report",
+        help="Disables Word Doc report and prints to reports directory.",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--no-stdout-report",
+        help="Disables standard output reporting.",
+        action="store_true",
+    )
+    nrfu_command_group.add_argument(
+        "--no-md-report",
+        help="Disables MarkDown report and prints to reports directory.",
         action="store_true",
     )
 

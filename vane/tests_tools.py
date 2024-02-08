@@ -46,7 +46,8 @@ import yaml
 from jinja2 import Template
 from icmplib import ping
 from icmplib.exceptions import SocketPermissionError
-from pyeapi.eapilib import EapiError
+from pyeapi.eapilib import EapiError, ConnectionError  # pylint: disable=W0622
+from netmiko.exceptions import NetmikoAuthenticationException
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
@@ -217,13 +218,13 @@ def init_duts(show_cmds, test_parameters, test_duts):
             "\x1b[31mVane encountered an error while attempting to connect to DUT/s with ip's:\n"
             f"{unreachable_ips}\n"
             "For detailed information, please refer to the logs.\nDue to this issue, "
-            "Vane is exiting. \x1b[31m"
+            "Vane is exiting. \x1b[0m"
         )
         sys.exit(1)
 
     test_duts["duts"] = reachable_duts
 
-    duts = login_duts(test_parameters, test_duts)
+    duts = login_duts(test_parameters, test_duts, continue_when_unreachable)
     workers = len(duts)
 
     logging.debug(f"Duts login info: {duts} and create {workers} workers")
@@ -236,12 +237,30 @@ def init_duts(show_cmds, test_parameters, test_duts):
             executor.submit(dut_worker, dut, show_cmds, test_duts): dut for dut in duts
         }
 
-    if future_object:
-        logging.debug("Future object generated successfully")
-
+    # Check for exceptions
+    for future, dut in future_object.items():
+        try:
+            # This will raise an exception if the task had an exception
+            future.result()
+        except ConnectionError as e:
+            if not continue_when_unreachable:
+                dut_name = dut["name"]
+                print(
+                    "\x1b[31mExiting Vane.\n"
+                    f"Error running all cmds on dut {dut_name} due to failed authentication.\n{e}\n"
+                    "\x1b[0m"
+                )
+                logging.error(
+                    "Exiting Vane: "
+                    f"Error running all cmds on dut {dut_name} due to failed authentication. {e}\n"
+                )
+                sys.exit(1)
+            else:
+                for current_dut in duts.copy():
+                    if current_dut["name"] is dut["name"]:
+                        duts.remove(current_dut)
     logging.info("Returning duts data structure")
     logging.debug(f"Return duts data structure: {duts}")
-
     return duts
 
 
@@ -288,12 +307,14 @@ def check_duts_reachability(test_duts):
     return False, reachable_duts, unreachable_duts
 
 
-def login_duts(test_parameters, test_duts):
+def login_duts(test_parameters, test_duts, continue_when_unreachable):
     """Use eapi to connect to Arista switches for testing
 
     Args:
       test_parameters (dict): Abstraction of testing parameters
       test_duts (dict): Dictionary of duts
+      continue_when_unreachable (bool): boolean indicating whether to
+      continue Vane execution in case of single dut un-reachability
 
     Returns:
       logins (list): List of dictionaries with connection and name
@@ -328,7 +349,29 @@ def login_duts(test_parameters, test_duts):
             login_ptr["connection"] = pyeapi_conn
         elif eos_conn == "ssh":
             netmiko_conn = device_interface.NetmikoConn()
-            netmiko_conn.set_up_conn(dut)
+            try:
+                netmiko_conn.set_up_conn(dut)
+            except NetmikoAuthenticationException as err:
+                if not continue_when_unreachable:
+                    print(
+                        "\x1b[31mExiting Vane.\n"
+                        f"Error running all cmds on dut {name} due"
+                        f" to failed authentication.\n{err}\n"
+                        "\x1b[0m"
+                    )
+                    logging.critical(
+                        "Exiting Vane: "
+                        f"Error running all cmds on dut {name} due"
+                        f" to failed authentication. {err}\n"
+                    )
+                    sys.exit(1)
+                else:
+                    logging.error(
+                        f"Error running all cmds on dut {name} due"
+                        f" to failed authentication. {err}\n"
+                    )
+                    logins.pop(login_index)
+                    continue
             login_ptr["ssh_conn"] = netmiko_conn
             login_ptr["connection"] = netmiko_conn
         else:
@@ -352,18 +395,20 @@ def login_duts(test_parameters, test_duts):
     return logins
 
 
-def send_cmds(show_cmds, conn, encoding):
+def send_cmds(show_cmds, conn, encoding, dut):
     """Send show commands to duts and recurse on failure
 
     Args:
         show_cmds (list): List of pre-processed commands
         conn (obj): connection
         encoding (string): encoding type of show commands: either json or text
+        dut (dict): structured data of a dut output data, hostname, and other details
+
 
     Returns:
         show_cmd_list (list): list of show commands
     """
-
+    dut_name = dut["name"]
     try:
         logging.debug(f"List of show commands in show_cmds with encoding {encoding}: {show_cmds}")
 
@@ -371,19 +416,23 @@ def send_cmds(show_cmds, conn, encoding):
             show_cmd_list = conn.run_commands(show_cmds)
         elif encoding == "text":
             show_cmd_list = conn.run_commands(show_cmds, encoding="text")
-
-        logging.info("Ran all show commands on dut")
+        logging.info(f"Ran all show commands on dut {dut_name}")
         logging.debug(f"Ran all show cmds with encoding {encoding}: {show_cmds}")
 
+    except ConnectionError as err:
+        logging.critical(
+            f"Error running all cmds on dut {dut_name} due to failed authentication: {err}"
+        )
+        raise ConnectionError("", f"{err}") from err
     # pylint: disable-next=broad-exception-caught
     except Exception as err:
-        logging.error(f"Error running all cmds: {err}")
+        logging.error(f"Error running all cmds on dut {dut_name}: {type(err)}")
 
         show_cmds = remove_cmd(err, show_cmds)
 
         logging.debug(f"New show_cmds: {show_cmds}")
 
-        show_cmd_list = send_cmds(show_cmds, conn, encoding)
+        show_cmd_list = send_cmds(show_cmds, conn, encoding, dut)
         show_cmd_list = show_cmd_list[0]
 
     logging.debug(f"Return all show cmds: {show_cmd_list}")
@@ -426,7 +475,7 @@ def dut_worker(dut, show_cmds, test_parameters):
     with show output.
 
     Args:
-      dut (dict): structured data of a dut output data, hostname, and
+      dut (dict): structured data of a dut output data, hostname, and other details
       show_cmds (list): List of show commands
       test_parameters (dict): Abstraction of testing parameters
     """
@@ -439,12 +488,12 @@ def dut_worker(dut, show_cmds, test_parameters):
     logging.debug(f"List of show commands {show_cmds}")
 
     all_cmds_json = show_cmds.copy()
-    show_cmd_json_list, show_cmds_json = send_cmds(all_cmds_json, conn, "json")
+    show_cmd_json_list, show_cmds_json = send_cmds(all_cmds_json, conn, "json", dut)
 
     logging.debug(f"Returned from send_cmds_json {show_cmds_json}")
 
     all_cmds_txt = show_cmds.copy()
-    show_cmd_txt_list, show_cmds_txt = send_cmds(all_cmds_txt, conn, "text")
+    show_cmd_txt_list, show_cmds_txt = send_cmds(all_cmds_txt, conn, "text", dut)
 
     logging.debug(f"Returned from send_cmds_txt {show_cmds_txt}")
 

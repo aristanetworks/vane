@@ -3,7 +3,8 @@ import logging
 import os
 import shutil
 import sys
-from unittest.mock import call
+from unittest.mock import call, MagicMock
+from icmplib.exceptions import SocketPermissionError
 import pytest
 import yaml
 import pyeapi.eapilib
@@ -314,9 +315,6 @@ def test_init_duts_unreachable_and_not_continue(loginfo, logdebug, logerr, mocke
     logerr.assert_called_with("Error connecting to [], hence exiting Vane")
 
 
-# should we add 2 more?
-
-
 def test_login_duts_eapi(loginfo, mocker):
     """Validates the functionality of login_duts
     FIXTURE NEEDED: fixture_definitions.yaml, fixture_duts.yaml"""
@@ -425,9 +423,118 @@ def test_login_duts_ssh(loginfo, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
 
-def test_check_duts_reachability():
-    """_summary_"""
-    pass
+def test_check_duts_reachability_when_unreachable(mocker, loginfo):
+    """Validates the functionality of check_duts_reachability method
+    when a dut is unreachable"""
+
+    mocker_object1 = MagicMock()
+    mocker_object2 = MagicMock()
+
+    mocker_object = mocker.patch("vane.tests_tools.ping")
+    mocker_object.side_effect = [mocker_object1, mocker_object2]
+
+    mocker_object1.is_alive = True
+    mocker_object2.is_alive = False
+
+    test_duts = {
+        "duts": [
+            {
+                "mgmt_ip": "10.255.70.132",
+                "name": "DCBBW1",
+                "password": "cvp123!",
+                "transport": "https",
+                "username": "cvpadmin",
+                "role": "unknown",
+            },
+            {
+                "mgmt_ip": "10.255.70.133",
+                "name": "DCBBW2",
+                "password": "cvp123!",
+                "transport": "https",
+                "username": "cvpadmin",
+                "role": "unknown",
+            },
+        ]
+    }
+
+    reachability, reachable_duts, unreachable_duts = tests_tools.check_duts_reachability(test_duts)
+    assert not reachability
+    assert reachable_duts[0] == test_duts["duts"][0]
+    assert unreachable_duts[0] == test_duts["duts"][1]
+    loginfo_calls = [call("Checking connectivity of duts"), call("Failed to connect to DCBBW2")]
+
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+
+def test_check_duts_reachability_when_reachable(mocker, loginfo):
+    """Validates the functionality of check_duts_reachability method
+    when dut is reachable"""
+
+    mocker_object = mocker.patch("vane.tests_tools.ping")
+    host = mocker_object.return_value
+    host.is_alive = True
+    test_duts = {
+        "duts": [
+            {
+                "mgmt_ip": "10.255.70.133",
+                "name": "DCBBW1",
+                "password": "cvp123!",
+                "transport": "https",
+                "username": "cvpadmin",
+                "role": "unknown",
+            }
+        ]
+    }
+
+    reachability, reachable_duts, unreachable_duts = tests_tools.check_duts_reachability(test_duts)
+    assert reachability
+    assert reachable_duts[0] == test_duts["duts"][0]
+    assert not unreachable_duts
+
+    loginfo_calls = [
+        call("Checking connectivity of duts"),
+    ]
+
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+
+def test_check_duts_reachability_when_exception(mocker, loginfo, logerr):
+    """Validates the functionality of check_duts_reachability method
+    when an exception is raised but dut is reachable"""
+
+    mocker_object = mocker.patch("vane.tests_tools.ping")
+    mocker.patch("os.system", return_value=0)
+    mocker_object.side_effect = [
+        SocketPermissionError("Windows subsystem cannot execute this package")
+    ]
+    test_duts = {
+        "duts": [
+            {
+                "mgmt_ip": "10.255.70.133",
+                "name": "DCBBW1",
+                "password": "cvp123!",
+                "transport": "https",
+                "username": "cvpadmin",
+                "role": "unknown",
+            }
+        ]
+    }
+
+    reachability, reachable_duts, unreachable_duts = tests_tools.check_duts_reachability(test_duts)
+    assert reachability
+    assert reachable_duts[0] == test_duts["duts"][0]
+    assert not unreachable_duts
+
+    loginfo_calls = [
+        call("Checking connectivity of duts"),
+    ]
+
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+    logerr.assert_called_with(
+        "Entered the exception due to permission issues: "
+        "Root privileges are required to create the socket\n"
+        "Trying the ping utility via os.system instead"
+    )
 
 
 def test_send_cmds_json(loginfo, logdebug, mocker):
@@ -1784,11 +1891,52 @@ def test_test_ops_transfer_file(mocker):
     }
 
 
-def test_test_ops_get_ssh_connection():
-    """_summary_"""
-    pass
+def test_test_ops_get_ssh_connection(mocker):
+    """Validates the functionality of get_ssh_connection method"""
+
+    mocker_object = mocker.patch("vane.device_interface.NetmikoConn")
+    netmiko_instance = mocker_object.return_value
+
+    dut = {"name": "DSR01"}
+    tops = create_test_ops_instance(mocker)
+
+    conn = tops.get_ssh_connection(dut)
+
+    # assert call to NetmikoConn was made correctly
+
+    assert netmiko_instance.set_up_conn.call_count == 1
+
+    assert conn == netmiko_instance
+    assert dut["ssh_conn"] == dut["connection"] == netmiko_instance
+
+    # assert when a value already exists, it is returned as is and
+    # new connection is not created
+
+    dut["ssh_conn"] = "I have a predefined value"
+    conn = tops.get_ssh_connection(dut)
+    assert conn == dut["ssh_conn"] == "I have a predefined value"
 
 
-def test_test_ops_get_eapi_connection():
-    """_summary_"""
-    pass
+def test_test_ops_get_eapi_connection(mocker):
+    """Validates the functionality of get_eapi_connection method"""
+    mocker_object = mocker.patch("vane.device_interface.PyeapiConn")
+    pyeapi_instance = mocker_object.return_value
+
+    dut = {"name": "DSR01"}
+    tops = create_test_ops_instance(mocker)
+
+    conn = tops.get_eapi_connection(dut)
+
+    # assert call to PyeapiConn was made correctly
+
+    assert pyeapi_instance.set_up_conn.call_count == 1
+
+    assert conn == pyeapi_instance
+    assert dut["eapi_conn"] == dut["connection"] == pyeapi_instance
+
+    # assert when a value already exists, it is returned as is and
+    # new connection is not created
+
+    dut["eapi_conn"] = "I have a predefined value"
+    conn = tops.get_eapi_connection(dut)
+    assert conn == dut["eapi_conn"] == "I have a predefined value"

@@ -204,9 +204,7 @@ def init_duts(show_cmds, test_parameters, test_duts):
     reachability, reachable_duts, unreachable_duts = check_duts_reachability(test_duts)
 
     try:
-        continue_when_unreachable = config.test_parameters["parameters"][
-            "continue_when_unreachable"
-        ]
+        continue_when_unreachable = test_parameters["parameters"]["continue_when_unreachable"]
     except KeyError:
         continue_when_unreachable = False
 
@@ -222,7 +220,6 @@ def init_duts(show_cmds, test_parameters, test_duts):
         sys.exit(1)
 
     test_duts["duts"] = reachable_duts
-
     duts = login_duts(test_parameters, test_duts)
     workers = len(duts)
 
@@ -299,7 +296,7 @@ def login_duts(test_parameters, test_duts):
       logins (list): List of dictionaries with connection and name
                      of DUTs
     """
-    logging.info("Using eapi to connect to Arista switches for testing")
+    logging.info("Using eapi/ssh to connect to Arista switches for testing")
 
     duts = test_duts["duts"]
     logins = []

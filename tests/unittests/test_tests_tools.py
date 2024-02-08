@@ -242,7 +242,7 @@ def test_import_yaml_non_existing_file(mocker, logerr):
     logerr.assert_called_with("EXITING TEST RUNNER")
 
 
-def test_init_duts(loginfo, logdebug, mocker):
+def test_init_duts_reachable(loginfo, logdebug, mocker):
     """Validates the functionality of init_duts
     FIXTURE NEEDED: fixture_definitions.yaml, fixture_duts.yaml"""
     show_cmds = ["show version", "show clock"]
@@ -251,6 +251,7 @@ def test_init_duts(loginfo, logdebug, mocker):
 
     mocker.patch("vane.tests_tools.login_duts", return_value="DUTS")
     mocker.patch("vane.tests_tools.dut_worker")
+    mocker.patch("vane.tests_tools.check_duts_reachability", return_value=(True, [], []))
     actual_output = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
 
     assert actual_output == "DUTS"
@@ -261,6 +262,7 @@ def test_init_duts(loginfo, logdebug, mocker):
             "on each dut. Return structured data of DUTs output "
             "data, hostname, and connection."
         ),
+        call("Starting the execution of show commands for Vane cache"),
         call("Returning duts data structure"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
@@ -274,7 +276,48 @@ def test_init_duts(loginfo, logdebug, mocker):
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
 
-def test_login_duts(loginfo, mocker):
+def test_init_duts_unreachable_and_not_continue(loginfo, logdebug, logerr, mocker):
+    """Validates the functionality of init_duts
+    FIXTURE NEEDED: fixture_definitions.yaml, fixture_duts.yaml"""
+    show_cmds = ["show version", "show clock"]
+    test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+
+    mocker.patch("vane.tests_tools.login_duts", return_value="DUTS")
+    mocker.patch("vane.tests_tools.dut_worker")
+    mocker.patch("vane.tests_tools.check_duts_reachability", return_value=(False, [], []))
+    sys_exit_mocked = mocker.patch("sys.exit")
+    actual_output = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
+
+    assert actual_output == "DUTS"
+
+    loginfo_calls = [
+        call(
+            "Find DUTs and then execute inputted show commands "
+            "on each dut. Return structured data of DUTs output "
+            "data, hostname, and connection."
+        ),
+        call("Starting the execution of show commands for Vane cache"),
+        call("Returning duts data structure"),
+    ]
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+    logdebug_calls = [
+        call("Duts login info: DUTS and create 4 workers"),
+        call("Passing the following show commands to workers: ['show version', 'show clock']"),
+        call("Future object generated successfully"),
+        call("Return duts data structure: DUTS"),
+    ]
+    logdebug.assert_has_calls(logdebug_calls, any_order=False)
+
+    sys_exit_mocked.assert_called_with(1)
+    logerr.assert_called_with("Error connecting to [], hence exiting Vane")
+
+
+# should we add 2 more?
+
+
+def test_login_duts_eapi(loginfo, mocker):
     """Validates the functionality of login_duts
     FIXTURE NEEDED: fixture_definitions.yaml, fixture_duts.yaml"""
 
@@ -288,17 +331,12 @@ def test_login_duts(loginfo, mocker):
         return_value={"DSR01": "network_configs", "DCBBW1": "network_configs"},
     )
 
-    mocker_object = mocker.patch("vane.device_interface.NetmikoConn")
-    netmiko_instance = mocker_object.return_value
-
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn")
     pyeapi_instance = mocker_object.return_value
 
     actual_output = tests_tools.login_duts(test_parameters, test_duts)
 
-    # assert called to NetmikoCOnn and PyeapiConn were made correctly
-
-    assert netmiko_instance.set_up_conn.call_count == 2
+    # assert calls PyeapiConn were made correctly
 
     assert pyeapi_instance.set_up_conn.call_count == 2
 
@@ -306,7 +344,7 @@ def test_login_duts(loginfo, mocker):
 
     for index in range(0, 2):
         dut_info = actual_output[index]
-        assert dut_info["ssh_conn"] == netmiko_instance
+        assert dut_info["eapi_conn"] == pyeapi_instance
         assert dut_info["connection"] == pyeapi_instance
         assert dut_info["name"] == test_duts["duts"][index]["name"]
         assert dut_info["mgmt_ip"] == test_duts["duts"][index]["mgmt_ip"]
@@ -320,22 +358,12 @@ def test_login_duts(loginfo, mocker):
     # assert logs
 
     loginfo_calls = [
-        call("Using eapi to connect to Arista switches for testing"),
+        call("Using eapi/ssh to connect to Arista switches for testing"),
         call("Connecting to switch: DSR01"),
         call("Connecting to switch: DCBBW1"),
     ]
 
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-    # assert values when ssh connection
-
-    test_parameters["parameters"]["eos_conn"] = "ssh"
-
-    actual_output = tests_tools.login_duts(test_parameters, test_duts)
-
-    for index in range(0, 2):
-        dut_info = actual_output[index]
-        assert dut_info["connection"] == netmiko_instance
 
     # assert values when neither pyeapi nor ssh connection
 
@@ -345,6 +373,61 @@ def test_login_duts(loginfo, mocker):
         actual_output = tests_tools.login_duts(test_parameters, test_duts)
     except ValueError as exception:
         assert str(exception) == "Invalid EOS conn type invalid_connection_type specified"
+
+
+def test_login_duts_ssh(loginfo, mocker):
+    """Validates the functionality of login_duts
+    FIXTURE NEEDED: fixture_definitions.yaml, fixture_duts.yaml"""
+
+    test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+    test_parameters["parameters"]["eos_conn"] = "ssh"
+
+    # mocking method calls in login_duts
+
+    mocker.patch(
+        "vane.tests_tools.import_yaml",
+        return_value={"DSR01": "network_configs", "DCBBW1": "network_configs"},
+    )
+
+    mocker_object = mocker.patch("vane.device_interface.NetmikoConn")
+    netmiko_instance = mocker_object.return_value
+
+    actual_output = tests_tools.login_duts(test_parameters, test_duts)
+
+    # assert called to NetmikoConn were made correctly
+
+    assert netmiko_instance.set_up_conn.call_count == 2
+
+    # assert values when netmiko connection
+
+    for index in range(0, 2):
+        dut_info = actual_output[index]
+        assert dut_info["ssh_conn"] == netmiko_instance
+        assert dut_info["connection"] == netmiko_instance
+        assert dut_info["name"] == test_duts["duts"][index]["name"]
+        assert dut_info["mgmt_ip"] == test_duts["duts"][index]["mgmt_ip"]
+        assert dut_info["username"] == test_duts["duts"][index]["username"]
+        assert dut_info["role"] == test_duts["duts"][index]["role"]
+        assert dut_info["neighbors"] == test_duts["duts"][index]["neighbors"]
+        assert dut_info["results_dir"] == test_parameters["parameters"]["results_dir"]
+        assert dut_info["report_dir"] == test_parameters["parameters"]["report_dir"]
+        assert dut_info["network_configs"] == "network_configs"
+
+    # assert logs
+
+    loginfo_calls = [
+        call("Using eapi/ssh to connect to Arista switches for testing"),
+        call("Connecting to switch: DSR01"),
+        call("Connecting to switch: DCBBW1"),
+    ]
+
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+
+def test_check_duts_reachability():
+    """_summary_"""
+    pass
 
 
 def test_send_cmds_json(loginfo, logdebug, mocker):
@@ -1699,3 +1782,13 @@ def test_test_ops_transfer_file(mocker):
             file_tranfer_log,
         ],
     }
+
+
+def test_test_ops_get_ssh_connection():
+    """_summary_"""
+    pass
+
+
+def test_test_ops_get_eapi_connection():
+    """_summary_"""
+    pass

@@ -104,9 +104,10 @@ nav:
   - Home: index.md
   - Win with Vane: differentiation/differentiation.md
   - Installation: 
-    - Via Poetry: installation/poetry_installation.md
-    - Via Docker: installation/docker_installation.md
+    - Home: installation/installation_home.md
     - Via Python Virtual Environment: installation/python_installation.md
+    - Via Docker: installation/docker_installation.md
+    - Via Poetry: installation/poetry_installation.md
   - Executing Vane: executing_vane/executing_vane.md
   - Vane Test Cases: 
     - Test Case Setup: test_case_style_guide/test_case_setup.md

@@ -46,7 +46,8 @@ import yaml
 from jinja2 import Template
 from icmplib import ping
 from icmplib.exceptions import SocketPermissionError
-from pyeapi.eapilib import EapiError
+from pyeapi.eapilib import EapiError, ConnectionError  # pylint: disable=W0622
+from netmiko.exceptions import NetmikoAuthenticationException
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
@@ -219,27 +220,29 @@ def init_duts(show_cmds, test_parameters, test_duts):
         )
         sys.exit(1)
 
-    test_duts["duts"] = reachable_duts
-    duts = login_duts(test_parameters, test_duts)
-    workers = len(duts)
+    reachable_duts, additional_unreachable_duts = login_duts(test_parameters, reachable_duts)
+    unreachable_duts.extend(additional_unreachable_duts)
+    workers = len(reachable_duts)
 
-    logging.debug(f"Duts login info: {duts} and create {workers} workers")
+    logging.debug(f"Duts login info: {reachable_duts} and create {workers} workers")
     logging.debug(f"Passing the following show commands to workers: {show_cmds}")
 
     logging.info("Starting the execution of show commands for Vane cache")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         future_object = {
-            executor.submit(dut_worker, dut, show_cmds, test_duts): dut for dut in duts
+            executor.submit(dut_worker, dut, show_cmds, reachable_duts): dut
+            for dut in reachable_duts
         }
 
     if future_object:
         logging.debug("Future object generated successfully")
 
     logging.info("Returning duts data structure")
-    logging.debug(f"Return duts data structure: {duts}")
+    logging.debug(f"Return duts data structure: {reachable_duts}")
+    logging.debug(f"Return unreachable duts data structure: {unreachable_duts}")
 
-    return duts
+    return reachable_duts, unreachable_duts
 
 
 def check_duts_reachability(test_duts):
@@ -285,7 +288,7 @@ def check_duts_reachability(test_duts):
     return False, reachable_duts, unreachable_duts
 
 
-def login_duts(test_parameters, test_duts):
+def login_duts(test_parameters, duts):
     """Use eapi to connect to Arista switches for testing
 
     Args:
@@ -293,13 +296,15 @@ def login_duts(test_parameters, test_duts):
       test_duts (dict): Dictionary of duts
 
     Returns:
-      logins (list): List of dictionaries with connection and name
-                     of DUTs
+      reachable_duts (list): List of dictionaries with connection and name
+                     of DUTs which can be reached
+      unreachable_duts (list): List of dictionaries with connection and name
+                     of DUTs which cannot be reached (due to bad authentication)
     """
     logging.info("Using eapi/ssh to connect to Arista switches for testing")
 
-    duts = test_duts["duts"]
-    logins = []
+    reachable_duts = []
+    unreachable_duts = []
 
     network_configs = {}
     if "network_configs" in test_parameters["parameters"]:
@@ -308,9 +313,9 @@ def login_duts(test_parameters, test_duts):
 
     for dut in duts:
         name = dut["name"]
-        login_index = len(logins)
-        logins.append({})
-        login_ptr = logins[login_index]
+        login_index = len(reachable_duts)
+        reachable_duts.append({})
+        login_ptr = reachable_duts[login_index]
 
         logging.info(f"Connecting to switch: {name}")
 
@@ -320,16 +325,20 @@ def login_duts(test_parameters, test_duts):
 
         if eos_conn == "eapi":
             pyeapi_conn = device_interface.PyeapiConn()
-            pyeapi_conn.set_up_conn(dut)
             login_ptr["eapi_conn"] = pyeapi_conn
             login_ptr["connection"] = pyeapi_conn
         elif eos_conn == "ssh":
             netmiko_conn = device_interface.NetmikoConn()
-            netmiko_conn.set_up_conn(dut)
             login_ptr["ssh_conn"] = netmiko_conn
             login_ptr["connection"] = netmiko_conn
         else:
             raise ValueError(f"Invalid EOS conn type {eos_conn} specified")
+
+        success = authenticate_and_setup_conn(dut, login_ptr["connection"])
+        if not success:
+            reachable_duts.pop(login_index)
+            unreachable_duts.append(dut)
+            continue
 
         login_ptr["name"] = name
         login_ptr["mgmt_ip"] = dut["mgmt_ip"]
@@ -344,9 +353,9 @@ def login_duts(test_parameters, test_duts):
         if name in network_configs:
             login_ptr["network_configs"] = network_configs[name]
 
-    logging.debug(f"Returning duts logins: {logins}")
+    logging.debug(f"Returning reachable_duts: {reachable_duts}")
 
-    return logins
+    return reachable_duts, unreachable_duts
 
 
 def send_cmds(show_cmds, conn, encoding):
@@ -418,7 +427,7 @@ def remove_cmd(err, show_cmds):
     return show_cmds
 
 
-def dut_worker(dut, show_cmds, test_parameters):
+def dut_worker(dut, show_cmds, reachable_duts):
     """Execute inputted show commands on dut.  Update dut structured data
     with show output.
 
@@ -430,7 +439,7 @@ def dut_worker(dut, show_cmds, test_parameters):
     name = dut["name"]
     conn = dut["connection"]
     dut["output"] = {}
-    dut["output"]["interface_list"] = return_interfaces(name, test_parameters)
+    dut["output"]["interface_list"] = return_interfaces(name, reachable_duts)
 
     logging.info(f"Executing show commands on {name}")
     logging.debug(f"List of show commands {show_cmds}")
@@ -493,21 +502,21 @@ def dut_worker(dut, show_cmds, test_parameters):
     logging.info(f"{name} updated with show output {dut}")
 
 
-def return_interfaces(hostname, test_parameters):
-    """Parse test_parameters for interface connections and return them to test
+def return_interfaces(hostname, reachable_duts):
+    """Parse reachable_duts for interface connections and return them to test
 
     Args:
         hostname (str):  hostname of dut
-        test_parameters (dict): Abstraction of testing parameters
+        reachable_duts (dict): Abstraction of testing parameters
 
     Returns:
       interface_list (list): list of interesting interfaces based on
                              PS LLD spreadsheet
     """
-    logging.info("Parse test_parameters for interface connections and return them to test")
+    logging.info("Parse reachable_duts for interface connections and return them to test")
 
     interface_list = []
-    duts = test_parameters["duts"]
+    duts = reachable_duts
 
     for dut in duts:
         dut_name = dut["name"]
@@ -994,6 +1003,39 @@ def create_duts_file(topology_file, inventory_file):
         sys.exit(1)
 
     return None
+
+
+def authenticate_and_setup_conn(dut, conn_object):
+    """Method to setup and authenticate setting up
+    PyEapi or Netmiko connection based on conn object passed
+
+    Args:
+        dut (dict): device data
+        conn_object (pyeapi/netmiko): type of connection
+    """
+
+    try:
+        conn_object.set_up_conn(dut)
+    except (ConnectionError, NetmikoAuthenticationException) as err:
+        continue_when_unreachable = config.test_parameters["parameters"][
+            "continue_when_unreachable"
+        ]
+        if not continue_when_unreachable:
+            dut_name = dut["name"]
+            print(
+                "\x1b[31mExiting Vane.\n"
+                f"Error running all cmds on dut {dut_name} due to failed authentication.\n{err}\n"
+                "\x1b[0m"
+            )
+            logging.error(
+                "Exiting Vane: "
+                f"Error running all cmds on dut {dut_name} due to failed authentication. {err}\n"
+            )
+            sys.exit(1)
+        else:
+            return False
+
+    return True
 
 
 # pylint: disable-next=too-many-instance-attributes

@@ -321,6 +321,7 @@ def test_login_duts_eapi(loginfo, mocker):
 
     test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
     test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+    duts = test_duts["duts"]
 
     # mocking method calls in login_duts
 
@@ -332,7 +333,7 @@ def test_login_duts_eapi(loginfo, mocker):
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn")
     pyeapi_instance = mocker_object.return_value
 
-    actual_output = tests_tools.login_duts(test_parameters, test_duts)
+    actual_output = tests_tools.login_duts(test_parameters, duts)
 
     # assert calls PyeapiConn were made correctly
 
@@ -368,7 +369,7 @@ def test_login_duts_eapi(loginfo, mocker):
     test_parameters["parameters"]["eos_conn"] = "invalid_connection_type"
 
     try:
-        actual_output = tests_tools.login_duts(test_parameters, test_duts)
+        actual_output = tests_tools.login_duts(test_parameters, duts)
     except ValueError as exception:
         assert str(exception) == "Invalid EOS conn type invalid_connection_type specified"
 
@@ -379,6 +380,7 @@ def test_login_duts_ssh(loginfo, mocker):
 
     test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
     test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+    duts = test_duts["duts"]
     test_parameters["parameters"]["eos_conn"] = "ssh"
 
     # mocking method calls in login_duts
@@ -391,7 +393,7 @@ def test_login_duts_ssh(loginfo, mocker):
     mocker_object = mocker.patch("vane.device_interface.NetmikoConn")
     netmiko_instance = mocker_object.return_value
 
-    actual_output = tests_tools.login_duts(test_parameters, test_duts)
+    actual_output = tests_tools.login_duts(test_parameters, duts)
 
     # assert called to NetmikoConn were made correctly
 
@@ -700,8 +702,9 @@ def test_dut_worker(logdebug, mocker):
 def test_return_interfaces(loginfo, logdebug):
     """Validates if interfaces are being read properly from test parameters
     FIXTURE NEEDED: fixture_duts.yaml"""
-    test_parameters = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
-    actual_output = tests_tools.return_interfaces("DSR01", test_parameters)
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+    duts = test_duts["duts"]
+    actual_output = tests_tools.return_interfaces("DSR01", duts)
     excepted_output = [
         {
             "hostname": "DSR01",
@@ -734,7 +737,7 @@ def test_return_interfaces(loginfo, logdebug):
     ]
     assert actual_output == excepted_output
     loginfo_calls = [
-        call("Parse test_parameters for interface connections and return them to test"),
+        call("Parse reachable_duts for interface connections and return them to test"),
         call("Discovering interface parameters for: DSR01"),
         call("Returning interface list."),
     ]

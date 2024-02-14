@@ -219,27 +219,27 @@ def init_duts(show_cmds, test_parameters, test_duts):
         )
         sys.exit(1)
 
-    test_duts["duts"] = reachable_duts
-    duts = login_duts(test_parameters, test_duts)
-    workers = len(duts)
+    reachable_duts = login_duts(test_parameters, reachable_duts)
+    workers = len(reachable_duts)
 
-    logging.debug(f"Duts login info: {duts} and create {workers} workers")
+    logging.debug(f"Duts login info: {reachable_duts} and create {workers} workers")
     logging.debug(f"Passing the following show commands to workers: {show_cmds}")
 
     logging.info("Starting the execution of show commands for Vane cache")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         future_object = {
-            executor.submit(dut_worker, dut, show_cmds, test_duts): dut for dut in duts
+            executor.submit(dut_worker, dut, show_cmds, reachable_duts): dut
+            for dut in reachable_duts
         }
 
     if future_object:
         logging.debug("Future object generated successfully")
 
     logging.info("Returning duts data structure")
-    logging.debug(f"Return duts data structure: {duts}")
+    logging.debug(f"Return duts data structure: {reachable_duts}")
 
-    return duts
+    return reachable_duts
 
 
 def check_duts_reachability(test_duts):
@@ -285,7 +285,7 @@ def check_duts_reachability(test_duts):
     return False, reachable_duts, unreachable_duts
 
 
-def login_duts(test_parameters, test_duts):
+def login_duts(test_parameters, duts):
     """Use eapi to connect to Arista switches for testing
 
     Args:
@@ -298,7 +298,6 @@ def login_duts(test_parameters, test_duts):
     """
     logging.info("Using eapi/ssh to connect to Arista switches for testing")
 
-    duts = test_duts["duts"]
     logins = []
 
     network_configs = {}
@@ -418,19 +417,19 @@ def remove_cmd(err, show_cmds):
     return show_cmds
 
 
-def dut_worker(dut, show_cmds, test_parameters):
+def dut_worker(dut, show_cmds, reachable_duts):
     """Execute inputted show commands on dut.  Update dut structured data
     with show output.
 
     Args:
       dut (dict): structured data of a dut output data, hostname, and
       show_cmds (list): List of show commands
-      test_parameters (dict): Abstraction of testing parameters
+      reachable_duts (dict): Abstraction of duts
     """
     name = dut["name"]
     conn = dut["connection"]
     dut["output"] = {}
-    dut["output"]["interface_list"] = return_interfaces(name, test_parameters)
+    dut["output"]["interface_list"] = return_interfaces(name, reachable_duts)
 
     logging.info(f"Executing show commands on {name}")
     logging.debug(f"List of show commands {show_cmds}")
@@ -493,21 +492,21 @@ def dut_worker(dut, show_cmds, test_parameters):
     logging.info(f"{name} updated with show output {dut}")
 
 
-def return_interfaces(hostname, test_parameters):
-    """Parse test_parameters for interface connections and return them to test
+def return_interfaces(hostname, reachable_duts):
+    """Parse reachable_duts for interface connections and return them to test
 
     Args:
         hostname (str):  hostname of dut
-        test_parameters (dict): Abstraction of testing parameters
+        reachable_duts (dict): Abstraction of reachable_duts
 
     Returns:
       interface_list (list): list of interesting interfaces based on
                              PS LLD spreadsheet
     """
-    logging.info("Parse test_parameters for interface connections and return them to test")
+    logging.info("Parse reachable_duts for interface connections and return them to test")
 
     interface_list = []
-    duts = test_parameters["duts"]
+    duts = reachable_duts
 
     for dut in duts:
         dut_name = dut["name"]

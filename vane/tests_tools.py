@@ -210,7 +210,9 @@ def init_duts(show_cmds, test_parameters, test_duts):
         continue_when_unreachable = False
 
     if not (reachability or continue_when_unreachable):
-        logging.error(f"Error connecting to {unreachable_duts}, not reachable via ping, hence exiting Vane")
+        logging.error(
+            f"Error connecting to {unreachable_duts}, not reachable via ping, hence exiting Vane"
+        )
         unreachable_ips = [unreachable_dut["mgmt_ip"] for unreachable_dut in unreachable_duts]
         print(
             "\x1b[31mVane encountered an error while attempting to connect to DUT/s with ip's:\n"

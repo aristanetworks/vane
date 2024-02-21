@@ -250,12 +250,16 @@ def test_init_duts_reachable(loginfo, logdebug, mocker):
     test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
     test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
 
-    mocker.patch("vane.tests_tools.login_duts", return_value="DUTS")
+    mocker.patch("vane.tests_tools.login_duts", return_value=([test_duts["duts"][0]], []))
     mocker.patch("vane.tests_tools.dut_worker")
-    mocker.patch("vane.tests_tools.check_duts_reachability", return_value=(True, [], []))
-    actual_output = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
+    mocker.patch(
+        "vane.tests_tools.check_duts_reachability", return_value=(True, [test_duts["duts"][0]], [])
+    )
 
-    assert actual_output == "DUTS"
+    reachable_duts, unreachable_duts = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
+
+    assert reachable_duts == [test_duts["duts"][0]]
+    assert not unreachable_duts
 
     loginfo_calls = [
         call(
@@ -269,10 +273,11 @@ def test_init_duts_reachable(loginfo, logdebug, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
     logdebug_calls = [
-        call("Duts login info: DUTS and create 4 workers"),
+        call(f"Duts login info: {reachable_duts} and create 1 workers"),
         call("Passing the following show commands to workers: ['show version', 'show clock']"),
         call("Future object generated successfully"),
-        call("Return duts data structure: DUTS"),
+        call(f"Return duts data structure: {reachable_duts}"),
+        call(f"Return unreachable duts data structure: {unreachable_duts}"),
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
@@ -284,13 +289,17 @@ def test_init_duts_unreachable_and_not_continue(loginfo, logdebug, logerr, mocke
     test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
     test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
 
-    mocker.patch("vane.tests_tools.login_duts", return_value="DUTS")
+    mocker.patch("vane.tests_tools.login_duts", return_value=([test_duts["duts"][0]], []))
     mocker.patch("vane.tests_tools.dut_worker")
-    mocker.patch("vane.tests_tools.check_duts_reachability", return_value=(False, [], []))
+    mocker.patch(
+        "vane.tests_tools.check_duts_reachability",
+        return_value=(False, [test_duts["duts"][0]], [test_duts["duts"][1]]),
+    )
     sys_exit_mocked = mocker.patch("sys.exit")
-    actual_output = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
+    reachable_duts, unreachable_duts = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
 
-    assert actual_output == "DUTS"
+    assert reachable_duts == [test_duts["duts"][0]]
+    assert unreachable_duts == [test_duts["duts"][1]]
 
     loginfo_calls = [
         call(
@@ -304,15 +313,18 @@ def test_init_duts_unreachable_and_not_continue(loginfo, logdebug, logerr, mocke
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
     logdebug_calls = [
-        call("Duts login info: DUTS and create 4 workers"),
+        call(f"Duts login info: {reachable_duts} and create 1 workers"),
         call("Passing the following show commands to workers: ['show version', 'show clock']"),
         call("Future object generated successfully"),
-        call("Return duts data structure: DUTS"),
+        call(f"Return duts data structure: {reachable_duts}"),
+        call(f"Return unreachable duts data structure: {unreachable_duts}"),
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
     sys_exit_mocked.assert_called_with(1)
-    logerr.assert_called_with("Error connecting to [], hence exiting Vane")
+    logerr.assert_called_with(
+        f"Error connecting to {unreachable_duts}, not reachable via ping, hence exiting Vane"
+    )
 
 
 def test_login_duts_eapi(loginfo, mocker):
@@ -333,7 +345,7 @@ def test_login_duts_eapi(loginfo, mocker):
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn")
     pyeapi_instance = mocker_object.return_value
 
-    actual_output = tests_tools.login_duts(test_parameters, duts)
+    reachable_duts, _ = tests_tools.login_duts(test_parameters, duts)
 
     # assert calls PyeapiConn were made correctly
 
@@ -342,7 +354,7 @@ def test_login_duts_eapi(loginfo, mocker):
     # assert values when pyeapi connection
 
     for index in range(0, 2):
-        dut_info = actual_output[index]
+        dut_info = reachable_duts[index]
         assert dut_info["eapi_conn"] == pyeapi_instance
         assert dut_info["connection"] == pyeapi_instance
         assert dut_info["name"] == test_duts["duts"][index]["name"]
@@ -369,7 +381,7 @@ def test_login_duts_eapi(loginfo, mocker):
     test_parameters["parameters"]["eos_conn"] = "invalid_connection_type"
 
     try:
-        actual_output = tests_tools.login_duts(test_parameters, duts)
+        reachable_duts, _ = tests_tools.login_duts(test_parameters, duts)
     except ValueError as exception:
         assert str(exception) == "Invalid EOS conn type invalid_connection_type specified"
 
@@ -393,7 +405,7 @@ def test_login_duts_ssh(loginfo, mocker):
     mocker_object = mocker.patch("vane.device_interface.NetmikoConn")
     netmiko_instance = mocker_object.return_value
 
-    actual_output = tests_tools.login_duts(test_parameters, duts)
+    reachable_duts, _ = tests_tools.login_duts(test_parameters, duts)
 
     # assert called to NetmikoConn were made correctly
 
@@ -402,7 +414,7 @@ def test_login_duts_ssh(loginfo, mocker):
     # assert values when netmiko connection
 
     for index in range(0, 2):
-        dut_info = actual_output[index]
+        dut_info = reachable_duts[index]
         assert dut_info["ssh_conn"] == netmiko_instance
         assert dut_info["connection"] == netmiko_instance
         assert dut_info["name"] == test_duts["duts"][index]["name"]

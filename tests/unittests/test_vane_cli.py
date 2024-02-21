@@ -39,7 +39,7 @@ def test_setup_vane(loginfo, mocker):
     mocker_object.side_effect = ["Duts_file", "Test_parameters"]
     mocker.patch("vane.tests_tools.return_test_defs", return_value="Test definitions")
     mocker.patch("vane.tests_tools.return_show_cmds", return_value="show_commands")
-    mocker.patch("vane.tests_tools.init_duts", return_value="Dut object")
+    mocker.patch("vane.tests_tools.init_duts", return_value=([], []))
 
     vane_cli.setup_vane()
 
@@ -47,7 +47,7 @@ def test_setup_vane(loginfo, mocker):
     assert vane.config.test_duts == "Duts_file"
     assert vane.config.test_parameters == "Test_parameters"
     assert vane.config.test_defs == "Test definitions"
-    assert vane.config.dut_objs == "Dut object"
+    assert not vane.config.dut_objs
 
     # assert logs to ensure the method executed without errors
     loginfo_calls = [

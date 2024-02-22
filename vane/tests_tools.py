@@ -1015,15 +1015,17 @@ def authenticate_and_setup_conn(dut, conn_object):
         dut (dict): device data
         conn_object (pyeapi/netmiko): type of connection
     """
-
+    dut_name = dut["name"]
     try:
         conn_object.set_up_conn(dut)
     except (ConnectionError, NetmikoAuthenticationException) as err:
-        continue_when_unreachable = config.test_parameters["parameters"][
-            "continue_when_unreachable"
-        ]
+        try:
+            continue_when_unreachable = config.test_parameters["parameters"][
+                "continue_when_unreachable"
+            ]
+        except KeyError:
+            continue_when_unreachable = False
         if not continue_when_unreachable:
-            dut_name = dut["name"]
             print(
                 "\x1b[31mExiting Vane.\n"
                 f"Error running all cmds on dut {dut_name} due to failed authentication.\n{err}\n"
@@ -1035,8 +1037,10 @@ def authenticate_and_setup_conn(dut, conn_object):
             )
             sys.exit(1)
         else:
+            logging.info(f"Authentication to dut {dut_name} failed")
             return False
 
+    logging.info(f"Authentication to dut {dut_name} is successful")
     return True
 
 

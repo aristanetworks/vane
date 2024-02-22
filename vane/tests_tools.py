@@ -226,6 +226,13 @@ def init_duts(show_cmds, test_parameters, test_duts):
     unreachable_duts.extend(additional_unreachable_duts)
     workers = len(reachable_duts)
 
+    if not workers:
+        print(
+            "\x1b[31mNo valid duts to run tests on, hence exiting Vane.\n"
+            "Look at the logs for further details \x1b[31m"
+        )
+        sys.exit(1)
+
     logging.debug(f"Duts login info: {reachable_duts} and create {workers} workers")
     logging.debug(f"Passing the following show commands to workers: {show_cmds}")
 
@@ -355,7 +362,7 @@ def login_duts(test_parameters, duts):
         if name in network_configs:
             login_ptr["network_configs"] = network_configs[name]
 
-    logging.debug(f"Returning reachable_duts: {reachable_duts}")
+    logging.info(f"Returning reachable_duts: {reachable_duts}")
 
     return reachable_duts, unreachable_duts
 

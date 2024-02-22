@@ -367,6 +367,7 @@ def test_login_duts_eapi(loginfo, logdebug, mocker):
         call("Using eapi/ssh to connect to Arista switches for testing"),
         call("Connecting to switch: DSR01"),
         call("Connecting to switch: DCBBW1"),
+        call(f"Returning reachable_duts: {reachable_duts}"),
     ]
 
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
@@ -374,7 +375,6 @@ def test_login_duts_eapi(loginfo, logdebug, mocker):
     logdebug_calls = [
         call(f"Connecting to switch: DSR01 using parameters: {duts[0]}"),
         call(f"Connecting to switch: DCBBW1 using parameters: {duts[1]}"),
-        call(f"Returning reachable_duts: {reachable_duts}"),
     ]
 
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
@@ -435,6 +435,7 @@ def test_login_duts_ssh(loginfo, logdebug, mocker):
         call("Using eapi/ssh to connect to Arista switches for testing"),
         call("Connecting to switch: DSR01"),
         call("Connecting to switch: DCBBW1"),
+        call(f"Returning reachable_duts: {reachable_duts}"),
     ]
 
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
@@ -442,7 +443,6 @@ def test_login_duts_ssh(loginfo, logdebug, mocker):
     logdebug_calls = [
         call(f"Connecting to switch: DSR01 using parameters: {duts[0]}"),
         call(f"Connecting to switch: DCBBW1 using parameters: {duts[1]}"),
-        call(f"Returning reachable_duts: {reachable_duts}"),
     ]
 
     logdebug.assert_has_calls(logdebug_calls, any_order=False)

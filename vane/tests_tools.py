@@ -218,7 +218,7 @@ def init_duts(show_cmds, test_parameters, test_duts):
             "\x1b[31mVane encountered an error while attempting to connect to DUT/s with ip's:\n"
             f"{unreachable_ips}\n"
             "For detailed information, please refer to the logs.\nDue to this issue, "
-            "Vane is exiting. \x1b[31m"
+            "Vane is exiting. \x1b[0m"
         )
         sys.exit(1)
 
@@ -229,7 +229,7 @@ def init_duts(show_cmds, test_parameters, test_duts):
     if not workers:
         print(
             "\x1b[31mNo valid duts to run tests on, hence exiting Vane.\n"
-            "Look at the logs for further details \x1b[31m"
+            "Look at the logs for further details \x1b[0m"
         )
         sys.exit(1)
 

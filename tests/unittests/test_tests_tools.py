@@ -513,7 +513,6 @@ def test_authenticate_and_setup_conn_netmiko_valid(mocker, loginfo):
 
 
 def test_authenticate_and_setup_conn_netmiko_invalid(mocker, logerr, capsys):
-    """TODO"""
     """Validate the functionality of authenticate_and_setup_conn
     method when netmiko connection with invalid credentials is tried
     and Vane should exit out immediately"""
@@ -583,7 +582,6 @@ def test_authenticate_and_setup_conn_pyeapi_valid(mocker, loginfo):
 
 
 def test_authenticate_and_setup_conn_pyeapi_invalid(mocker, loginfo):
-    """TODO"""
     """Validate the functionality of authenticate_and_setup_conn
     method when pyeapi connection with invalid credentials is tried
     and Vane should still continue"""

@@ -147,7 +147,7 @@ class PyeapiConn(DeviceConn):
             self._connection.enable_authentication(device_data["enable_pwd"])
 
         # Add logic to authenticate connection
-        self.run_commands(["show version"])
+        self.run_commands(["echo authenticating connection"])
 
     def run_commands(self, cmds, encoding="json", send_enable=True, **kwargs):
         """wrapper around pyeapi run_commands func"""

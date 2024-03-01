@@ -54,7 +54,16 @@ from requests.exceptions import HTTPError, ReadTimeout, Timeout, TooManyRedirect
 from vane.vane_logging import logging
 
 
-def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name):
+def create_duts_file_from_cvp(
+    cvp_ip,
+    cvp_username,
+    cvp_password,
+    duts_file_name,
+    api_token=None,
+    is_cvaas=None,
+    dev_username=None,
+    dev_password=None,
+):
     """
     create_duts_file_from_cvp function:
         (1) Function to retrieve the inventory from cvp.
@@ -62,16 +71,23 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
         devices.
         (3) All this info is dumped in file 'duts_file_name'.
     Args:
-        cvp_ip: ip address for CVP
+        cvp_ip: ip address or hostname for CVP
         cvp_username: username for CVP
         cvp_password: password for CVP
         duts_file_name: name of the duts file to be written
+        api_token: REST API token for CVP/CVaaS authentication
+        is_cvaas: flag to specify target is CVaaS
+        dev_username: username to connect to devices (required when using api_token)
+        dev_password: password to connect to devices
     """
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     try:
         clnt = CvpClient()
-        clnt.connect([cvp_ip], cvp_username, cvp_password)
+        if api_token:
+            clnt.connect([cvp_ip], username="", password="", is_cvaas=is_cvaas, api_token=api_token)
+        else:
+            clnt.connect([cvp_ip], cvp_username, cvp_password)
         logging.info("Pulling the inventory from CVP")
         print(f"Pull the inventory from CVP: {cvp_ip}")
         inventory = clnt.api.get_inventory()
@@ -96,13 +112,19 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
     for dev in inventory:
         if dev["ztpMode"]:
             continue
+        
+        # if no device credentials provided, use CVP credentials
+        # if neither password provided, fall back to empty string (null causes tests to fail)
+        dev_username = dev_username or cvp_username
+        dev_password = dev_password or cvp_password or ""
+        
         dut_properties.append(
             {
                 "mgmt_ip": dev["ipAddress"],
                 "name": dev["hostname"],
-                "password": cvp_password,
+                "password": dev_password,
                 "transport": "https",
-                "username": cvp_username,
+                "username": dev_username,
                 "role": "unknown",
                 "neighbors": [],
             }
@@ -120,15 +142,21 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
 
     neighbors_matrix = {}
     for dut in dut_properties:
-        neighbors = dut["output"][lldp_cmd]["result"][0]["lldpNeighbors"]
-        for neighbor in neighbors:
-            del neighbor["ttl"]
-            fqdn = neighbor["neighborDevice"]
-            neighbor["neighborDeivce"] = fqdn.split(".")[0]
-        neighbors_matrix[dut["name"]] = neighbors
+        try:
+            neighbors = dut["output"][lldp_cmd]["result"][0]["lldpNeighbors"]
+            for neighbor in neighbors:
+                del neighbor["ttl"]
+                fqdn = neighbor["neighborDevice"]
+                neighbor["neighborDevice"] = fqdn.split(".")[0]
+            neighbors_matrix[dut["name"]] = neighbors
+        except KeyError:
+            print(f'command "{lldp_cmd}" has not been collected from {dut["name"]}')
 
     for dut_property in dut_properties:
-        dut_property["neighbors"] = neighbors_matrix[dut_property["name"]]
+        try:
+            dut_property["neighbors"] = neighbors_matrix[dut_property["name"]]
+        except KeyError:
+            print(f'neighbors not known for {dut_property["name"]}')
         del dut_property["output"]
         del dut_property["connection"]
 
@@ -166,8 +194,11 @@ def dut_worker(dut, show_cmds):
     )
 
     for show_cmd in show_cmds:
-        output = dut["connection"].execute(show_cmd)
-        dut["output"][show_cmd] = output
+        try:
+            output = dut["connection"].execute(show_cmd)
+            dut["output"][show_cmd] = output
+        except Exception as err:
+            print(f'EAPI connection to {dut["mgmt_ip"]} failed - {type(err).__name__}: {err}')
 
 
 def main():
@@ -175,6 +206,7 @@ def main():
 
     args = parse_cli()
 
+    # original syntax (all arguments of --generate_cvp_duts_file)
     if args.generate_cvp_duts_file:
         logging.info("Generating duts file from CVP")
         create_duts_file_from_cvp(
@@ -183,6 +215,40 @@ def main():
             args.generate_cvp_duts_file[2],
             args.generate_cvp_duts_file[3],
         )
+    # individual options syntax (better for token authentication)
+    else:
+        if args.cvp_node and args.duts_file:
+            if args.username and args.password:
+                create_duts_file_from_cvp(
+                    args.cvp_node,
+                    args.username,
+                    args.password,
+                    args.duts_file,
+                    dev_username=args.dev_username,
+                    dev_password=args.dev_password,
+                )
+            elif args.api_token:
+                if args.dev_username:
+                    create_duts_file_from_cvp(
+                        args.cvp_node,
+                        None,
+                        None,
+                        args.duts_file,
+                        api_token=args.api_token,
+                        is_cvaas=args.is_cvaas,
+                        dev_username=args.dev_username,
+                        dev_password=args.dev_password,
+                    )
+                else:
+                    sys.exit(
+                        "--dev-username is required for EAPI authentication when token authentication to CVP/CVaaS is used"
+                    )
+            else:
+                sys.exit("Either --username and --password or --api-token must be specified.")
+        else:
+            sys.exit(
+                "IP address or hostname for CVP/CVaaS (--cvp-node) and output file (--duts-file) must be specified"
+            )
 
 
 def parse_cli():
@@ -194,8 +260,41 @@ def parse_cli():
 
     parser = argparse.ArgumentParser(
         description=(
-            "Script to generate duts.yaml for vane from CVP and devices. Does not work for ACT env."
+            "Script to generate duts.yaml for vane from CVP/CVaaS and devices. Does not work for ACT env."
         )
+    )
+
+    parser.add_argument("--cvp-node", help="IP address or hostname of CVP/CVaaS")
+
+    password_auth = parser.add_argument_group(
+        "username/password authentication",
+        "Authenticate to CVP with a username and password.  Does not work with CVaaS.",
+    )
+    token_auth = parser.add_argument_group(
+        "API token authentication",
+        "Authenticate to CVP/CVaaS with a REST API token.  Required when OAuth is used (always for CVaaS).",
+    )
+    dev_auth = parser.add_argument_group(
+        "Device username/password authentication",
+        "Authenticate to EAPI devices with a different username and password than CVP.  Required when API token auth is used.",
+    )
+
+    password_auth.add_argument("-u", "--username", help="Username for CVP authentication")
+
+    password_auth.add_argument("-p", "--password", help="Password for CVP authentication")
+
+    token_auth.add_argument(
+        "--api-token", help="REST API token for CVP/CVaaS authentication", metavar="TOKEN"
+    )
+
+    dev_auth.add_argument("--dev-username", help="Username for EAPI device authentication")
+
+    dev_auth.add_argument("--dev-password", help="Password for EAPI device authentication")
+
+    parser.add_argument("--is-cvaas", help="enable connection to CVaaS", action="store_true")
+
+    parser.add_argument(
+        "--duts-file", help="output file for duts inventory in YAML format", metavar="FILENAME"
     )
 
     parser.add_argument(

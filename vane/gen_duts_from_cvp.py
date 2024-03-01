@@ -43,7 +43,7 @@ import sys
 import yaml
 import urllib3
 import pyeapi
-from cvprac.cvp_client import CvpClient
+import cvprac.cvp_client
 from cvprac.cvp_client_errors import (
     CvpApiError,
     CvpLoginError,
@@ -70,7 +70,7 @@ def create_duts_file_from_cvp(cvp_ip, cvp_username, cvp_password, duts_file_name
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
     try:
-        clnt = CvpClient()
+        clnt = cvprac.cvp_client.CvpClient()
         clnt.connect([cvp_ip], cvp_username, cvp_password)
         logging.info("Pulling the inventory from CVP")
         print(f"Pull the inventory from CVP: {cvp_ip}")

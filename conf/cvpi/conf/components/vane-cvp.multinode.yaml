@@ -3,8 +3,6 @@ vane-cvp-image:
     load:
       command: [ "${CVP_HOME}/bin/image-load.sh", "vane-cvp" ]
       nodes: { "*" }
-      deps:
-        docker: start
       timeout: 300s
 
 vane-cvp:

@@ -85,8 +85,16 @@ def parse_cli():
     parser.add_argument(
         "--generate-duts-file",
         help="Create a duts file from topology and inventory file",
-        nargs=3,
-        metavar=("topology_file", "inventory_file", "duts_file"),
+        nargs=2,
+        metavar=("TOPOLOGY_FILE", "INVENTORY_FILE"),
+    )
+
+    parser.add_argument(
+        "--duts-file-name",
+        help="Provide a name for the generated duts file."
+        " Used in conjunction with --generate-duts-file flag",
+        nargs=1,
+        metavar=("DUTS_FILE_NAME"),
     )
 
     parser.add_argument(
@@ -96,7 +104,7 @@ def parse_cli():
             " the test directory mentioned in the definitions file"
         ),
         nargs=1,
-        metavar=("test_dir"),
+        metavar=("TEST_DIR"),
     )
 
     parser.add_argument(
@@ -238,12 +246,16 @@ def main():
         print(f"{show_markers()}")
 
     elif args.generate_duts_file:
+        duts_file_name = "duts.yaml"
         logging.info(
             f"Generating DUTS File from topology: {args.generate_duts_file[0]} and "
             f"inventory: {args.generate_duts_file[1]} file.\n"
         )
+        # If name of duts file to be created is given
+        if args.duts_file_name:
+            duts_file_name = args.duts_file_name[0]
         tests_tools.create_duts_file(
-            args.generate_duts_file[0], args.generate_duts_file[1], args.generate_duts_file[2]
+            args.generate_duts_file[0], args.generate_duts_file[1], duts_file_name
         )
 
     elif args.generate_test_steps:

@@ -119,11 +119,11 @@ jobs:
           # If not on a published branch, append a provisional tag to the distribution name
           #
           if [[ "${{github.ref}}" =~ "main" || "${{github.ref}}" =~ "develop" ]]; then
-            tag="${timestamp}"
+            tag="-${timestamp}"
           elif [[ "${{github.ref}}" =~ "gar-cvp-update" ]]; then
-            tag="${timestamp}-test-build"
+            tag="-${timestamp}-test-build"
           else
-            tag="${timestamp}-provisional"
+            tag="-${timestamp}-provisional"
           fi
           #
           # Create the distribution directory

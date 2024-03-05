@@ -114,8 +114,10 @@ jobs:
           #
           # If not on a published branch, append a provisional tag to the distribution name
           #
-          if ${PUB_BRANCH} == true; then
+          if [[ "${{github.ref}}" == "main" -o "${{github.ref}}" == "develop" ]]; then
             tag=""
+          elif [[ "${{github.ref}}" == "gar-cvp-update" ]]; then
+            tag="-test-build"
           else
             tag="-provisional"
           fi

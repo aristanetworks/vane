@@ -114,7 +114,7 @@ jobs:
           #
           # Get a timestamp for the build
           #
-          timestamp=$(date -Iminutes)
+          timestamp=$(date +%Y-%m-%d_%H%M)
           #
           # If not on a published branch, append a provisional tag to the distribution name
           #

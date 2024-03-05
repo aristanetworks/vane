@@ -112,14 +112,18 @@ jobs:
           #
           version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
           #
+          # Get a timestamp for the build
+          #
+          timestamp=$(date -Iminutes)
+          #
           # If not on a published branch, append a provisional tag to the distribution name
           #
-          if [[ "main" =~ "${{github.ref}}" || "develop" =~ "${{github.ref}}" ]]; then
-            tag=""
-          elif [[ "gar-cvp-update" =~ "${{github.ref}}" ]]; then
-            tag="-test-build"
+          if [[ "${{github.ref}}" =~ "main" || "${{github.ref}}" =~ "develop" ]]; then
+            tag="${timestamp}"
+          elif [[ "${{github.ref}}" =~ "gar-cvp-update" ]]; then
+            tag="${timestamp}-test-build"
           else
-            tag="-provisional"
+            tag="${timestamp}-provisional"
           fi
           #
           # Create the distribution directory

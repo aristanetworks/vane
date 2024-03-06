@@ -103,21 +103,23 @@ jobs:
           make rpm-cvp
 
       - name: Create a vane-cvp distribution directory based on the version being built
-        env:
-          # Check if we are on a published branch (main or develop)
-          PUB_BRANCH: ${{ contains(fromJSON('["main", "develop"]'), github.ref) }}
         run: |
           #
           # Get the version string from the pyproject.toml file
           #
           version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
           #
-          # If not on a published branch, append a provisional tag to the distribution name
+          # Get a timestamp for the build (no colon in the time - looks like a port number and
+          # causes problems later)
           #
-          if ${PUB_BRANCH} == true; then
-            tag=""
+          timestamp=$(date +%Y-%m-%d_%H%M)
+          #
+          # If not on the main or develop branch, append a provisional tag to the distribution name
+          #
+          if [[ "${{github.ref}}" =~ "main" || "${{github.ref}}" =~ "develop" ]]; then
+            tag="-${timestamp}"
           else
-            tag="-provisional"
+            tag="-${timestamp}-provisional"
           fi
           #
           # Create the distribution directory

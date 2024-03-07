@@ -1184,7 +1184,8 @@ class TestOps:
         comments = pattern.findall(content)
 
         # Format each item in list
-        comments = [x.strip() for x in comments]
+        comments = [re.sub(r"\n\s+", " ", x) for x in comments]
+
         if not comments:
             comments.append("N/a no Test Steps found")
 

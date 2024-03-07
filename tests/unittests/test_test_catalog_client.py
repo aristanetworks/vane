@@ -315,4 +315,4 @@ def test_main_test_catalog_functionality(request, mocker, test_directories, expe
         # Removing created CSV file, if not deleted already.
         file_clean_up(test_catalog_file_path)
 
-    assert actual_rows == expected_rows
+    assert sorted(actual_rows) == sorted(expected_rows)

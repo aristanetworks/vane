@@ -8,6 +8,7 @@ import pytest
 import yaml
 import pyeapi.eapilib
 import vane
+from tests.unittests.fixtures.test_steps import test_steps
 from vane import tests_tools
 
 
@@ -1268,6 +1269,30 @@ def test_test_ops_verify_veos_fail(logdebug, mocker):
     DUT["output"]["show version"]["json"]["modelName"] = "cEOS"
     tops.verify_veos()
     logdebug.assert_called_with("DCBBW1 is not a VEOS instance so returning False")
+
+
+def test_test_ops_parse_test_steps(loginfo, mocker):
+    """Validates verification of the parse_test_steps method
+    FIXTURE NEEDED: tests/unittests/fixtures/test_steps/test_steps.py"""
+
+    # mocking the call to _verify_show_cmd and _get_parameters in init()
+
+    mocker.patch(
+        "vane.tests_tools.TestOps._get_parameters",
+        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
+    )
+    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
+    tops = create_test_ops_instance(mocker)
+    tops.parse_test_steps(test_steps.TestSyslogFunctionality.test_syslog_functionality_on_server)
+
+    # assert the test steps log call
+    loginfo.assert_called_with(
+        "These are test steps "
+        "[' Creating Testops class object and initializing the variable', "
+        "' Running Tcpdump on syslog server and entering in config mode\\n"
+        "             and existing to verify logging event are captured.',"
+        " ' Comparing the actual output and expected output. Generating docx report']"
+    )
 
 
 def test_test_ops_run_show_cmds_json(mocker):

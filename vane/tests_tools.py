@@ -1141,27 +1141,6 @@ class TestOps:
                 print(f"{index}. {dut_name}# {command}\n\n{text}")
                 index += 1
 
-    def verify_veos(self):
-        """Verify DUT is a VEOS instance
-
-        Returns:
-            veos_bool: boolean indicating whether DUT is VEOS instance or not
-        """
-        show_cmd = "show version"
-        veos_bool = False
-        veos = self.dut["output"][show_cmd]["json"]["modelName"]
-
-        logging.info(f"Verifying if {self.dut_name} DUT is a VEOS instance. Model is {veos}")
-
-        if "vEOS" in veos:
-            veos_bool = True
-
-            logging.debug(f"{self.dut_name} is a VEOS instance so returning {veos_bool}")
-        else:
-            logging.debug(f"{self.dut_name} is not a VEOS instance so returning {veos_bool}")
-
-        return veos_bool
-
     def parse_test_steps(self, func):
         """Returns a list of all the test_steps in the given function.
         Inspects functions and finds statements with TS: and organizes

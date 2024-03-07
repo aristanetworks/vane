@@ -996,7 +996,7 @@ class InterfaceCountersTests:
 
                 in_bps = self.output["interfaceStatistics"]["inBitsRate"]
 
-                if tops.verify_veos():
+                if tests_tools.verify_veos(dut):
                     bandwidth = 10000000000
                 else:
                     bandwidth = self.output["bandwidth"]

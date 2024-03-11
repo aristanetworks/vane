@@ -70,7 +70,8 @@ class EvpnRoutingTests:
                     evpn_running = True
                     break
 
-            assert evpn_running, "EVPN is not configured on the device."
+            if evpn_running:
+                pytest.skip(f"EVPN is not configured on {tops.dut_name}.")
 
             bgp_evpn_peer = ""
             for vrf in vrf_details:

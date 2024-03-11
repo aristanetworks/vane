@@ -161,7 +161,8 @@ def test_walk_dir_no_test_files_collected(mocker, capsys):
         test_catalog.walk_dir()
     exit_logs = capsys.readouterr()
 
-    # Verifying that if no tests are found in the directory then system exit is initiated with code 0.
+    # Verifying that if no tests are found in the directory then system exit is
+    # initiated with code 0.
     assert f"No test files found in directory {[no_test_dir]}." in exit_logs.out
 
     assert (

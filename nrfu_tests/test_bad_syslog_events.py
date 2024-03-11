@@ -55,7 +55,7 @@ class BadSyslogEventsTests:
             TS: Running 'show logging' command on DUT and verifying that the SysLog is configured
             on the device.
             """
-            syslog_output = tops.run_show_cmds(syslog_events_cmd[0])
+            syslog_output = tops.run_show_cmds(syslog_events_cmd[0], encoding="txt")
             logging.info(
                 (
                     f"On device {tops.dut_name}, output of {syslog_events_cmd[0]} command"
@@ -76,7 +76,7 @@ class BadSyslogEventsTests:
             TS: Running `show logging last <daysOfLogs> days` command on DUT and verifying
             the keywords in syslog events that are generally considered to be bad.
             """
-            output = tops.run_show_cmds(syslog_events_cmd[1])
+            output = tops.run_show_cmds(syslog_events_cmd[1], encoding="txt")
             logging.info(
                 (
                     f"On device {tops.dut_name}, output of {syslog_events_cmd[1]} command"

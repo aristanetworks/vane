@@ -35,8 +35,9 @@ import os
 import re
 import copy
 import csv
+import sys
+from datetime import datetime
 import yaml
-from vane.utils import return_date
 from vane.vane_logging import logging
 
 
@@ -55,7 +56,7 @@ class TestCatalogClient:
         """
         logging.info("Creating the test catalog client object")
         logging.debug(f"Setting the test catalog client object directories to {test_dir}")
-        self._test_dirs = test_dir
+        self.test_dirs = test_dir
         self.test_file_data = {}
         self.test_def_data = {}
 
@@ -69,10 +70,10 @@ class TestCatalogClient:
 
     def walk_dir(self):
         """
-        Walks through each of the directory
+        Walks through each of the directories
         """
         test_files = []
-        for test_dir in self._test_dirs:
+        for test_dir in self.test_dirs:
             logging.info(f"Walking directory {test_dir} for the test cases")
             for root, _dirs, files in os.walk(test_dir, topdown=False):
                 # sort the files
@@ -89,10 +90,8 @@ class TestCatalogClient:
         logging.debug(f"Discovered test files: {test_files} for parsing")
 
         if not test_files:
-            raise FileNotFoundError(
-                "\033[91mNo Python test files found in directory"
-                f" {self._test_dirs}. Please check and correct the directory path.\033[0m"
-            )
+            print(f"\033[91mNo test files found in directory {self.test_dirs}.\033[0m")
+            sys.exit(0)
 
         self.parse_test_data(test_files)
 
@@ -130,13 +129,7 @@ class TestCatalogClient:
                                 self.test_def_data[test_suite].update(
                                     {
                                         test_case["name"]: {
-                                            "test_id": test_case.get(
-                                                "test_id",
-                                                (
-                                                    "Test ID is not found in the"
-                                                    "test_definitions.yaml file"
-                                                ),
-                                            )
+                                            "test_id": test_case.get("test_id", "No test ID found")
                                         }
                                     }
                                 )
@@ -178,7 +171,8 @@ class TestCatalogClient:
                 # cases hence handled both.
                 if test_suite != "__file__":
                     final_test_suite = test_suite.replace('"', "")
-                self.test_file_data.setdefault(final_test_suite, {})
+
+            self.test_file_data.setdefault(final_test_suite, {})
 
             if test_case_name:
                 final_test_case_name = test_case_name
@@ -228,17 +222,20 @@ class TestCatalogClient:
         and the Python file).
         """
         final_data = copy.deepcopy(self.test_def_data)
+
+        # Iterating over the data collected from test definitions file.
         for test_suite, test_cases in self.test_def_data.items():
             test_file_info = self.test_file_data.get(test_suite, {})
 
-            for inner_key in test_cases:
+            # Correlating the test case data.
+            for test_case in test_cases:
                 default_step_msg = ["Test steps are not collected from the Python file"]
                 default_test_description = "Test description is not collected from the Python file"
-                test_steps = test_file_info.get(inner_key, {}).get("test_steps", default_step_msg)
-                test_description = test_file_info.get(inner_key, {}).get(
+                test_steps = test_file_info.get(test_case, {}).get("test_steps", default_step_msg)
+                test_description = test_file_info.get(test_case, {}).get(
                     "test_description", default_test_description
                 )
-                final_data[test_suite][inner_key].update(
+                final_data[test_suite][test_case].update(
                     {"test_steps": test_steps, "test_description": test_description}
                 )
 
@@ -257,30 +254,36 @@ class TestCatalogClient:
         header = ["Test Suite", "Test Case ID", "Test Case", "Description", "Test Steps"]
         data_rows = self.get_data_rows(final_data)
 
-        # Collecting date to append to file name.
-        _, file_date = return_date()
+        # No data will be written in the CSV file if data rows are empty.
+        if not data_rows:
+            print(f"\033[91mNo tests found in the directory {self.test_dirs}.\033[0m")
+            sys.exit(0)
+
+        # Collecting the current timestamp.
+        file_timestamp = datetime.now()
+        file_timestamp = file_timestamp.strftime("%Y%m%d%H%M%S")
 
         # Creating test catalog directory
         folder_path = os.path.join(os.getcwd(), folder_name)
         os.makedirs(folder_path, exist_ok=True)
 
         # Forming the file path for test catalog file.
-        file_name = f"test_catalog_{file_date}.csv"
+        file_name = f"test_catalog_{file_timestamp}.csv"
         file_path = os.path.join(folder_path, file_name)
 
         logging.info(
-            f"Writing a test catalog file: test_catalog_{file_date}.csv in the {folder_path}"
+            f"Writing a test catalog file: test_catalog_{file_timestamp}.csv in the {folder_path}"
         )
 
         try:
-            # Writing test catalog details
+            # Writing test catalog details in CSV file.
             with open(file_path, "w", encoding="utf_8", newline="") as file:
                 writer = csv.writer(file, lineterminator="\n")
                 writer.writerow(header)
                 writer.writerows(data_rows)
         except FileNotFoundError as error_msg:
             print(
-                f"\033[91mError occurred while writing to test_catalog_{file_date}.csv file:"
+                f"\033[91mError occurred while writing to test_catalog_{file_timestamp}.csv file:"
                 f" {error_msg}\033[0m"
             )
 

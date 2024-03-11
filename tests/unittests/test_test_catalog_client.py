@@ -78,7 +78,7 @@ def file_clean_up(file_name):
 
 def test_test_catalog_client_constructor(loginfo, logdebug):
     """
-    Unit Test for TestCatlogClient object, method __init__
+    Unit Test for TestCatalogClient object, method __init__
     """
     test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
 
@@ -96,7 +96,7 @@ def test_test_catalog_client_constructor(loginfo, logdebug):
 
 def test_write_test_catalog(loginfo, mocker):
     """
-    Unit Test for TestCatlogClient object, method write_test_catalog
+    Unit Test for TestCatalogClient object, method write_test_catalog
     """
     test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
     mocker_object = mocker.patch("vane.test_catalog_client.TestCatalogClient.walk_dir")
@@ -112,7 +112,7 @@ def test_write_test_catalog(loginfo, mocker):
 
 def test_walk_dir(loginfo, logdebug, mocker):
     """
-    Unit Test for TestCatlogClient object, method walk_dir
+    Unit Test for TestCatalogClient object, method walk_dir
     Fixture or files used:
     tests/unittests/fixtures/test_catalog_client/pass_dirs/api/test_api.py,
     tests/unittests/fixtures/test_catalog_client/pass_dirs/api/test_definition.yaml
@@ -145,7 +145,7 @@ def test_walk_dir(loginfo, logdebug, mocker):
 
 def test_walk_dir_no_test_files_collected(mocker, capsys):
     """
-    Unit Test for TestCatlogClient object, method walk_dir in case of no test files in directory
+    Unit Test for TestCatalogClient object, method walk_dir in case of no test files in a directory
     Fixture or files used:
     tests/unittests/fixtures/test_catalog_client/no_test_files_directory
     """
@@ -172,7 +172,7 @@ def test_walk_dir_no_test_files_collected(mocker, capsys):
 
 def test_parse_test_data(loginfo, mocker):
     """
-    Unit Test for TestCatlogClient object, method parse_test_data
+    Unit Test for TestCatalogClient object, method parse_test_data
     Fixture or files used:
     tests/unittests/fixtures/test_catalog_client/parsed_test_def.json
     tests/unittests/fixtures/test_catalog_client/pass_dirs/api/test_api.py,
@@ -215,7 +215,7 @@ def test_parse_test_data(loginfo, mocker):
 
 def test_parse_python_file():
     """
-    Unit Test for TestCatlogClient object, method parse_python_file
+    Unit Test for TestCatalogClient object, method parse_python_file
     Fixture or files used:
     tests/unittests/fixtures/test_catalog_client/pass_dirs/api/test_api.py
     tests/unittests/fixtures/test_catalog_client/parsed_python_file_content.json
@@ -243,7 +243,7 @@ def test_parse_python_file():
 
 def test_correlate_test_data(mocker, loginfo):
     """
-    Unit Test for TestCatlogClient object, method correlate_test_data
+    Unit Test for TestCatalogClient object, method correlate_test_data
     Fixture or files used:
     tests/unittests/fixtures/test_catalog_client/parsed_python_file_content.json
     tests/unittests/fixtures/test_catalog_client/parsed_test_def.json
@@ -280,7 +280,7 @@ def test_correlate_test_data(mocker, loginfo):
 
 def test_get_data_rows():
     """
-    Unit Test for TestCatlogClient object, method get_data_rows
+    Unit Test for TestCatalogClient object, method get_data_rows
     Fixture or files used:
     tests/unittests/fixtures/test_catalog_client/correlated_data.json,
     tests/unittests/fixtures/test_catalog_client/test_catalog.csv
@@ -306,7 +306,7 @@ def test_get_data_rows():
 
 def test_write_to_csv(loginfo, request, mocker):
     """
-    Unit Test for TestCatlogClient object, method write_to_csv
+    Unit Test for TestCatalogClient object, method write_to_csv
     Fixture or files used:
     tests/unittests/fixtures/test_catalog_client/correlated_data.json
     tests/unittests/fixtures/test_catalog_client/test_catalog.csv

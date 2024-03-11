@@ -70,7 +70,7 @@ class EvpnRoutingTests:
                     evpn_running = True
                     break
 
-            if evpn_running:
+            if not evpn_running:
                 pytest.skip(f"EVPN is not configured on {tops.dut_name}.")
 
             bgp_evpn_peer = ""

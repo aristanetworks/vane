@@ -117,7 +117,7 @@ class TestCatalogClient:
                         yaml_data = yaml.safe_load(infile)
                         if not yaml_data:
                             raise ValueError(
-                                "\033[91mTest Case details are not found in the"
+                                "\033[91mTest case details are not found in the"
                                 f" {test_file} file.\033[0m"
                             )
 
@@ -192,8 +192,7 @@ class TestCatalogClient:
                 # Collecting the test description.
                 if "TD: " in test_description:
                     test_description = test_description.replace("TD: ", "")
-                    # If only one TD or TS is found in the file then the file name will be added
-                    # as test case name.
+
                     if not final_test_case_name:
                         final_test_case_name = final_test_suite
                         self.test_file_data[final_test_suite].update(

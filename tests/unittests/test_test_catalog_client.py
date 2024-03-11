@@ -156,13 +156,13 @@ def test_walk_dir_no_test_files_collected(mocker, capsys):
 
     test_catalog = test_catalog_client.TestCatalogClient([no_test_dir])
 
-    # Catching the system exit during the pytest
+    # Catching the system exit during the test execution
     with pytest.raises(SystemExit) as exitinfo:
         test_catalog.walk_dir()
-    captured = capsys.readouterr()
+    exit_logs = capsys.readouterr()
 
-    # Verifying that if no tests found in directory then system exit is initiated with code 0.
-    assert f"No test files found in directory {[no_test_dir]}." in captured.out
+    # Verifying that if no tests are found in the directory then system exit is initiated with code 0.
+    assert f"No test files found in directory {[no_test_dir]}." in exit_logs.out
 
     assert (
         exitinfo.value.code == 0
@@ -173,6 +173,7 @@ def test_parse_test_data(loginfo, mocker):
     """
     Unit Test for TestCatlogClient object, method parse_test_data
     Fixture or files used:
+    tests/unittests/fixtures/test_catalog_client/parsed_test_def.json
     tests/unittests/fixtures/test_catalog_client/pass_dirs/api/test_api.py,
     tests/unittests/fixtures/test_catalog_client/pass_dirs/api/test_definition.yaml
     """
@@ -232,7 +233,7 @@ def test_parse_python_file():
     with open(json_file, encoding="utf_8") as json_file_data:
         expected_output = json.load(json_file_data)
 
-    # Collecting the the parsed data.
+    # Collecting the parsed data.
     test_catalog.parse_python_file(py_content, py_file)
     actual_output = test_catalog.test_file_data
 
@@ -255,7 +256,7 @@ def test_correlate_test_data(mocker, loginfo):
     test_catalog.test_file_data = {}
     test_catalog.test_def_data = {}
 
-    # Collecting the parsed python file.
+    # Collecting the parsed Python file.
     with open(parsed_py_file, encoding="utf_8") as parsed_python_file:
         test_catalog.test_file_data = json.load(parsed_python_file)
 
@@ -263,7 +264,7 @@ def test_correlate_test_data(mocker, loginfo):
     with open(parsed_test_def_file, encoding="utf_8") as parsed_test_def_file:
         test_catalog.test_def_data = json.load(parsed_test_def_file)
 
-    # Collecting corrleated data.
+    # Collecting correlated data.
     with open(final_data_file, encoding="utf_8") as final_data_file:
         final_data = json.load(final_data_file)
 
@@ -396,18 +397,18 @@ def test_main_test_catalog_functionality(
     actual_rows = "Header and data rows are not collected."
     expected_rows = "Header and data rows should be collected."
 
-    # Forming the path of test catalog file.
+    # Forming path of the test catalog file.
     test_catalog_path = os.path.join(request.config.rootpath, "test_catalog")
     test_catalog_file_path = os.path.join(test_catalog_path, f"test_catalog_{date_str}.csv")
 
     # Added condition for parameterized test no_tests_in_provided_directory
     if request.node.name.split("[")[1].split("]")[0] == "no_tests_in_provided_directory":
-        # Checking if systemExit exception is raised.
+        # Catching the system exit during the test execution
         with pytest.raises(SystemExit) as exitinfo:
             test_catalog_obj.write_test_catalog()
 
-        captured = capsys.readouterr()
-        assert f"No tests found in the directory {test_directories}." in captured.out
+        exit_logs = capsys.readouterr()
+        assert f"No tests found in the directory {test_directories}." in exit_logs.out
         assert (
             exitinfo.value.code == 0
         ), f"Expected system exit code is '0' however it is found as {exitinfo.value.code}"

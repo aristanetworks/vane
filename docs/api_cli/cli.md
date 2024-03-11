@@ -107,43 +107,23 @@ all:
     vane –-generate-duts-file topology.yaml inventory.yaml duts_file
     ```
 
-## Using the -- generate-test-steps flag
+## Using the -- generate-test-catalog flag
 
-This flag can be used to generate the test steps of test cases
-within the provided test case directory.
+This flag can be used to generate a test catalog csv file for test directory/s passed
+as the argument
 
 ``` text
-vane --generate-test-steps path/to/test/case/directory
+vane --generate-test-catalog path/to/test/case/directory
 ```
 
-This will generate a markdown file and json file for each test case
-with detailed test steps (sourced from the test case file)
-that were executed by Vane while running
-the test cases in the test directory.
+This will generate a csv file that has details regarding the test suite, test case id, test case name,
+test case description and test case steps for each of the test case belonging to the passed
+in test directory. This csv file will be stamped with the time of generation and would be created within
+a folder called test catalog.
 
-!!! info "Test Steps"
-    === "Sample .md file"
-        ![Screenshot](../images/test_steps_md.png)
-
-    === "Sample .md file (preview)"
-        ![Screenshot](../images/test_steps_md_preview.png)
-
-    === "Sample .json file"
-        ``` json
-        {"sample_network_tests/dns/test_dns.py":
-        ["November 22, 2023 05:30:42PM",
-        "TD: Verify DNS is running by performing pings and verifying name resolution",
-        "TS: Collecting the urls from DUT", 
-        "TS: Running ping commands on the DUT",
-        "TS: Creating test report based on results",
-        "TD: Verifies DNS servers are reachable via ping",
-        "TS: Collecting the dns servers and dns vrfs for the test",
-        "TS: Running ping commands on the DUT",
-        "TS: Creating test report based on results",
-        "TD: Verifies DNS configuration matches the recommended practices",
-        "TS: Running show command `show running-config section name-server` on dut",
-        "TS: Creating test report based on results"]}
-        ```
+!!! info "Test Catalog"
+    === "Sample .csv file"
+        ![Screenshot](../images/test_catalog_csv.png)
 
 ## Using the -- markers flag
 

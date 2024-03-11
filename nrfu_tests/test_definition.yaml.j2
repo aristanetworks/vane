@@ -16,12 +16,14 @@
     - name: test_ntp_clocks
       description: Test case to verify that 2 NTP clocks(a peer and a candidate) are locked on the device.
       test_id: NRFU1.2
+      {% set test_data = testcase_data["NRFU1.2"].check_for_1_ntp_server %}
       show_cmd: show ntp status
       expected_output:
         primary_ntp_association: sys.peer
         secondary_ntp_association: candidate
       test_criteria: NTP server should be configured on the device. Primary and secondary NTP association should be correct on the device.
       report_style: modern
+      check_for_1_ntp_server: {{ test_data }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_redundant_sso_card

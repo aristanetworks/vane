@@ -31,6 +31,7 @@ class NtpAssocitionsTests:
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         self.output = ""
+        test_params = tops.test_parameters["check_for_1_ntp_server"]
         tops.actual_output = {
             "primary_ntp_association": "Not found",
             "secondary_ntp_association": "Not found",

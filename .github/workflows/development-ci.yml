@@ -158,7 +158,7 @@ jobs:
         #   Look for substrings of the help text in the output of `vane --help` and report the
         #   first substring that is not found
         run: |
-          substrings=("usage: vane" "--definitions-file" "--duts-file" "--environment" "--generate-duts-file" "--generate-test-steps" "--markers" "--nrfu")
+          substrings=("usage: vane" "--version" "--definitions-file" "--duts-file" "--generate-duts-file" "--generate-test-steps" "--markers" "--nrfu")
           vane_help=$(vane --help)
           for substr in "${substrings[@]}"; do
             if [[ ! "$vane_help" =~ "$substr" ]]; then

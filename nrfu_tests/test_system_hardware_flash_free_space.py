@@ -70,13 +70,13 @@ class FlashFreeSpaceTests:
             command on dut and verifying that peer supervisor flash file system utilization is
             within the range.
             """
-            output = tops.run_show_cmds([peer_supervisor_cmd])
+            output = tops.run_show_cmds([peer_supervisor_cmd], encoding="txt")
             logging.info(
                 f"On device {tops.dut_name}, output of {peer_supervisor_cmd} command"
                 f" is:\n{output}\n"
             )
             self.output += f"\nOutput of {peer_supervisor_cmd} command is:\n{output}"
-            output = output[0]["result"]["messages"][0].split("\n")
+            output = output[0]["result"]["output"].split("\n")
 
             for line in output:
                 if "bytes total" in line:

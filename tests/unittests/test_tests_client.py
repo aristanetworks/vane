@@ -102,7 +102,7 @@ def test_write_test_def_file(loginfo):
     if os.path.exists(test_dir + "/" + test_definitions):
         os.remove(test_dir + "/" + test_definitions)
 
-    # Write test def file
+    # Write test definition file
     client.write_test_def_file(template_definitions, master_definitions, test_dir, test_definitions)
 
     # Verify the definitions file was regenerated

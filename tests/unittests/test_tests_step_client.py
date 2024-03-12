@@ -90,7 +90,6 @@ def test_walk_dir(logdebug, mocker):
     files = [
         "__init__.py",
         "test_definition.yaml",
-        "test_definition_regenerated.yaml",
         "test_host.py",
     ]
 

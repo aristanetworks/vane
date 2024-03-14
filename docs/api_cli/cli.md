@@ -8,7 +8,7 @@ this section
 
     We discussed the --definitions-file and --duts-file flag in the
     [Executing Vane](../executing_vane/executing_vane.md) Section
-    and --nrfu flag in the [NRFU Tetsing](../nrfu_setup/nrfu_setup.md)
+    and --nrfu flag in the [NRFU Testing](../nrfu_setup/nrfu_setup.md)
     Section, we will cover the rest here.
 
 ## Using the -- generate-duts-file flag
@@ -25,7 +25,7 @@ vane –-generate-duts-file topology.yaml inventory.yaml duts_file
 you will run Vane against. The topology.yaml file abides by the following
 format.
 
-``` yaml title=" Sample topology.yaml" hl_lines="9-24"
+``` yaml title="Sample topology.yaml"
 veos:
 # Define the global vEOS parameters
 username: username
@@ -68,10 +68,10 @@ nodes:
 
 **inventory.yaml** : this file can be downloaded from ACT (if running
 Vane against a virtual ACT lab) from the view which reflects
-your deployed lab. The inventory.yaml file abides by the following
-format.
+your deployed lab. If not using ACT, the inventory.yaml file can be created
+by abiding by the following format.
 
-``` yaml title=" Sample inventory.yaml"
+``` yaml title="Sample inventory.yaml"
 all:
   children:
     CVP:
@@ -201,7 +201,8 @@ def test_smoke_feature():
 
 You can now run specific groups of tests using markers. For example,
 if you only want to run smoke tests, you can add the **smoke** marker
-in the definitions.yaml markers field as follows.
+in the definitions.yaml file's **marker** field as follows. The details
+on how a marker can be specified are linked below.
 
 ``` yaml title="definitions.yaml" hl_lines="5"
 parameters:

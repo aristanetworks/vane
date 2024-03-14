@@ -32,7 +32,7 @@
 
 """This module has the TestOps class which provides an array of different
 operations that a test case can perform. It also consists of standalone
-functions which provide utility while executing test cases. """
+functions which provide utility operations while executing test cases. """
 
 import copy
 import concurrent.futures
@@ -901,12 +901,12 @@ def create_duts_file(topology_file, inventory_file, duts_file_name):
 
 # pylint: disable-next=too-many-instance-attributes
 class TestOps:
-    """The TestOps class introduces API which lets you execute common testcase operations
+    """The TestOps class introduces the API which lets you execute common testcase operations
     like running show commands on devices, generating test reports, writing evidence files
     and generating test steps. These operations get called from within the test case."""
 
     def __init__(self, tests_definitions, test_suite, dut):
-        """Initializes TestOps Object with test specific and dut specific data
+        """Initializes the TestOps Object with test specific and dut specific data
 
         Args:
             tests_definitions (str): YAML representation of tests
@@ -1173,7 +1173,7 @@ class TestOps:
         return veos_bool
 
     def parse_test_steps(self, func):
-        """Returns a list of all the test_steps in the given function.
+        """Returns a list of all the test steps in the given function.
         Inspects functions and finds statements with TS: and organizes
         them into a list.
 
@@ -1206,7 +1206,7 @@ class TestOps:
         logging.info(f"These are test steps {self.test_steps}")
 
     def set_evidence_default(self, dut_name):
-        """For initializing evidence values for neighbor duts since
+        """Initializes evidence values for neighbor duts since
         init only initializes for primary dut
 
         Args:
@@ -1218,7 +1218,7 @@ class TestOps:
         self.show_cmd_txts.setdefault(dut_name, [])
 
     def get_new_conn(self, dut, conn_type, timeout):
-        """Get new conn returns a new connection to dut of type 'conn_type'
+        """Returns a new connection to the dut of type 'conn_type'
         with read timeout set to timeout
 
         Args:
@@ -1254,12 +1254,12 @@ class TestOps:
         raise ValueError(f"conn_type [{conn_type}] not supported")
 
     def run_cfg_cmds(self, cfg_cmds, dut=None, conn_type="eapi", timeout=0, new_conn=False):
-        """run_cfg_cmds is a wrapper which runs the configuration cmds
+        """A wrapper which runs the configuration cmds
         if no dut is passed then cmds are run on TestOps dut object,
         if conn_type is eapi then pyeapi is used to connect to dut,
         if conn_type is ssh then netmiko is used to connect to dut,
         if timeout is non-zero then a new connection is created with new timeout,
-        if new_conn is True a new connction to dut is created.
+        if new_conn is True a new connection to dut is created.
 
         Args:
           cfg_cmds (list): list of configuration cmds to run
@@ -1292,7 +1292,7 @@ class TestOps:
         new_conn=False,
         hidden_cmd=False,
     ):
-        """run_show_cmds is a wrapper which runs the 'show_cmds'
+        """A wrapper which runs the 'show_cmds'
         conn_type determines how the cmds are being run
         if conn_type is eapi then pyeapi is used on specified dut,
         if conn_type is ssh then netmiko connection in dut object is used
@@ -1450,7 +1450,7 @@ class TestOps:
         return txt_results
 
     def transfer_file(self, src_file, dest_file, file_system, operation, dut=None, sftp=False):
-        """transfer_file will transfer filename to/from the the dut depending
+        """Transfers filename to/from the the dut depending
         on the operation mentioned.
 
         Args:

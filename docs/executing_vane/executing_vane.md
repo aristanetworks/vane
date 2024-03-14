@@ -52,7 +52,7 @@ vane defaults to using the path mentioned in the
 [vane/config.py](https://github.com/aristanetworks/vane/blob/develop/vane/config.py)
 file
 
-``` yaml title=" Sample definitions.yaml" hl_lines="14 20 21 22"
+``` yaml title="Sample definitions.yaml" hl_lines="14 20 21 22"
 # This is a sample definitions.yaml file which can be used to run vane.
 # The fields below can be changed to reflect specific test cases,
 # test directories which need to be run.
@@ -122,7 +122,7 @@ above then vane defaults to using the duts file mentioned in the
 [vane/config.py](https://github.com/aristanetworks/vane/blob/develop/vane/config.py)
 file
 
-``` yaml title=" Sample duts.yaml" hl_lines="5-23"
+``` yaml title="Sample duts.yaml" hl_lines="5-23"
 # This is a sample duts.yaml file which can be used to run vane.
 # Ensure you edit the ip addresses to reflect your DUTS
 

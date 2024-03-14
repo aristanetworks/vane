@@ -14,7 +14,7 @@ definition and what they should be used for.
 
 !!! example
 
-    ``` yaml title=" Sample test_definitions.yaml"
+    ``` yaml title="Sample test_definitions.yaml"
     - name: test_memory.py
     testcases:
         - name: test_memory_utilization_on_

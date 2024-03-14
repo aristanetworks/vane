@@ -134,7 +134,8 @@ vane --markers
 ```
 
 !!! eos-config "Note"
-    Currently supported Vane markers:
+    Markers currently defined in the Vane distribution
+    (newer customized ones can be added in the [pytest.ini](https://github.com/aristanetworks/vane/blob/develop/pytest.ini) file):
 
     ??? info "View Markers"
         ``` python

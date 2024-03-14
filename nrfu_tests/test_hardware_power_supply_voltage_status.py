@@ -56,6 +56,7 @@ class PowerSupplyVoltageTests:
             self.output += f"\nOutput of {tops.show_cmd} command is:\n{version_output}\n"
 
             # Skipping test case if the device is vEOS.
+            model = version_output.get("modelName")
             if "vEOS" in version_output.get("modelName"):
                 pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
 

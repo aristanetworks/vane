@@ -37,6 +37,7 @@ import argparse
 from io import StringIO
 from contextlib import redirect_stdout
 from datetime import datetime
+from importlib import metadata
 import shutil
 import os
 import pytest
@@ -58,7 +59,16 @@ def parse_cli():
     Returns:
         args (obj): An object containing the CLI arguments.
     """
-    parser = argparse.ArgumentParser(description="Network Certification Tool")
+    main_parser = argparse.ArgumentParser(description="Network Certification Tool")
+    parser = main_parser.add_argument_group("Main Command Options")
+    nrfu_parser = main_parser.add_argument_group("NRFU Command Options")
+
+    parser.add_argument(
+        "--version",
+        "--v",  # Alias for version
+        help=("Current Version of Vane"),
+        action="store_true",
+    )
 
     parser.add_argument(
         "--definitions-file",
@@ -95,13 +105,13 @@ def parse_cli():
         action="store_true",
     )
 
-    parser.add_argument(
+    nrfu_parser.add_argument(
         "--nrfu",
         help=("Starts NRFU tests and will prompt users for required input."),
         action="store_true",
     )
 
-    args = parser.parse_args()
+    args = main_parser.parse_args()
 
     return args
 
@@ -242,6 +252,9 @@ def main():
             f"test directory\n"
         )
         write_test_steps(args.generate_test_steps)
+
+    elif args.version:
+        print(f"Vane Framework Version: {metadata.version(__package__)}")
 
     else:
         if args.nrfu:

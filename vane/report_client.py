@@ -1182,10 +1182,9 @@ class ReportClient:
                 for dut in test_case["duts"]:
                     suite_result["total_tests"] += 1
 
-                    if dut["test_result"] and dut["test_result"] == "Skipped":
+                    if dut["skip"]:
                         suite_result["total_skip"] += 1
-                        dut["fail_or_skip_reason"] = dut.get("actual_output", "")
-                    elif dut["test_result"] and dut["test_result"] != "Skipped":
+                    elif dut["test_result"]:
                         suite_result["total_pass"] += 1
                     else:
                         suite_result["total_fail"] += 1
@@ -1224,10 +1223,9 @@ class ReportClient:
                     logging.debug(f"Compiling results for DUT/s {dut_name}")
                     testcase_id = dut["test_id"]
 
-                    if dut["test_result"] and dut["test_result"] == "Skipped":
+                    if dut["skip"]:
                         test_result = "SKIP"
-                        fail_reason = dut.get("actual_output", "")
-                    elif dut["test_result"] and dut["test_result"] != "Skipped":
+                    elif dut["test_result"]:
                         test_result = "PASS"
                     else:
                         test_result = "FAIL"

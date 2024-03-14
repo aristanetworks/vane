@@ -882,7 +882,6 @@ def test_create_duts_file():
                 "role": "unknown",
             }
         ],
-        "servers": [],
     }
 
     tests_tools.create_duts_file(topology_data, inventory_data, duts_file_name)
@@ -1288,11 +1287,10 @@ def test_test_ops_parse_test_steps(loginfo, mocker):
 
     # assert the test steps log call
     loginfo.assert_called_with(
-        "These are test steps "
-        "[' Creating Testops class object and initializing the variable', "
-        "' Running Tcpdump on syslog server and entering in config mode\\n"
-        "             and existing to verify logging event are captured.',"
-        " ' Comparing the actual output and expected output. Generating docx report']"
+        "These are test steps [' Creating Testops class object and initializing the variable ', '"
+        " Running Tcpdump on syslog server and entering in config mode and existing to verify"
+        " logging event are captured. ', ' Comparing the actual output and expected output."
+        " Generating docx report ']"
     )
 
 

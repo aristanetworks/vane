@@ -1,6 +1,7 @@
 - name: test_interface.py
   testcases:
     - name: test_if_intf_protocol_status_is_connected_on_
+      test_id: TN10.1
       description: Verify the interfaces of interest protocol statuses are connected
       # interface protocol status
       expected_output: up
@@ -12,6 +13,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_link_status_is_connected_on_
+      test_id: TN10.2
       description: Verify the interfaces of interest link statuses are connected
       # interface link status
       expected_output: connected
@@ -23,6 +25,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_phy_status_connected_on_
+      test_id: TN10.3
       description: Verify the interfaces of interest physical state is link up
       # interface physical status
       expected_output: linkUp
@@ -34,6 +37,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_counters_has_input_errors_on_
+      test_id: TN10.4
       description: Verify the interfaces of interest does not have input errors
       # Number of tolerable input errors
       expected_output: 0
@@ -45,6 +49,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_counters_has_output_errors_on_
+      test_id: TN10.5
       description: Verify the interfaces of interest does not have output errors
       # Number of tolerable output errors
       expected_output: 0
@@ -56,6 +61,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_counters_has_frame_too_short_errors_on_
+      test_id: TN10.6
       description: Verify the interfaces of interest have no frameTooShorts errors
       # Number of tolerable frameTooShorts errors
       expected_output: 0
@@ -67,6 +73,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_counters_has_frame_too_long_errors_on_
+      test_id: TN10.7
       description: Verify the interfaces of interest have no frameTooLong errors
       # Number of tolerable frameLongShorts errors
       expected_output: 0
@@ -78,6 +85,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_counters_has_fcs_errors_on_
+      test_id: TN10.8
       description: Verify the interfaces of interest have no fcsErrors errors
       # Number of tolerable fcsErrors errors
       expected_output: 0
@@ -89,6 +97,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_counters_has_alignment_errors_on_
+      test_id: TN10.9
       description: Verify the interfaces of interest have no alignmentErrors errors
       # Number of tolerable alignmentErrors errors
       expected_output: 0
@@ -100,6 +109,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_counters_has_symbol_errors_on_
+      test_id: TN10.10
       description: Verify the interfaces of interest have no symbolErrors errors
       # Number of tolerable symbolErrors errors
       expected_output: 0
@@ -111,6 +121,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_interface_errors_on_
+      test_id: TN10.11
       description: Verifies interfaces L1 errors (Rx, Giants, Tx, Runts, FCS, Align)
       # Number of tolerable errors
       expected_output: 0
@@ -122,6 +133,7 @@
         - DSR01
         - DCBBW1
     - name: test_interface_utilization_on_
+      test_id: TN10.12
       description: Verify input and output bandwidth utilization of interfaces
       # Number of tolerable errors
       expected_output: 70
@@ -133,6 +145,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_out_counters_are_discarding_on_
+      test_id: TN10.13
       description: Verify the interfaces of interest have no outDiscards
       # Number of tolerable outDiscards errors
       expected_output: 0
@@ -144,6 +157,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_in_counters_are_discarding_on_
+      test_id: TN10.14
       description: Verify the interfaces of interest have no inDiscards
       # Number of tolerable inDiscards errors
       expected_output: 0
@@ -155,6 +169,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_intf_mtu_is_correct_on_
+      test_id: TN10.15
       description: Verify the interfaces of interest MTU
       # Interface MTU size
       expected_output: 1500

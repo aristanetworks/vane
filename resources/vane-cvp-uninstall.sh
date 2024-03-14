@@ -38,7 +38,15 @@ trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # Handle errors then exit
 trap exit_trap EXIT
 
-# Remove the container images first
+# Stop the extension first
+#  - Later iterations seem to require the extension to be stopped before the
+#    containers can be removed (containers must not be in use)
+echo -e $divider
+echo -e "Stop the extension\n"
+mycommand="cvpi stop -f vane-cvp"
+result=$($mycommand 2>&1)
+
+# Remove the container images
 #  - If the uninstallation fails for some reason, at least the containers are removed
 #  - If the containers do not exist, the commands do not fail and the uninstallation will
 #    still proceed afterwards
@@ -49,12 +57,6 @@ nerdctl rmi -f vane-cvp
 if [ ! -z ${img_id:+x} ]; then
   nerdctl rmi -f ${img_id}
 fi
-
-# Stop the extension
-echo -e $divider
-echo -e "Stop the extension\n"
-mycommand="cvpi stop -f vane-cvp"
-result=$($mycommand 2>&1)
 
 # Disable the extension
 echo -e $divider

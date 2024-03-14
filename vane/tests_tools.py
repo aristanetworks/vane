@@ -847,7 +847,6 @@ def create_duts_file(topology_file, inventory_file, duts_file_name):
     """
     dut_file = {}
     dut_properties = []
-    server_properties = []
     topology_file = import_yaml(topology_file)
     inventory_file = import_yaml(inventory_file)
 
@@ -871,23 +870,11 @@ def create_duts_file(topology_file, inventory_file, duts_file_name):
                         "role": topology_details.get("role", "unknown"),
                     }
                 )
-            elif name in inventory_file["all"]["children"]["GENERIC"]["hosts"]:
-                inventory_details = inventory_file["all"]["children"]["GENERIC"]["hosts"][name]
-                server_properties.append(
-                    {
-                        "mgmt_ip": inventory_details["ansible_host"],
-                        "name": name,
-                        "neighbors": topology_details["neighbors"],
-                        "password": inventory_details["ansible_ssh_pass"],
-                        "transport": "https",
-                        "username": inventory_details["ansible_user"],
-                        "role": topology_details.get("role", "unknown"),
-                    }
-                )
             else:
                 continue
-        if dut_properties or server_properties:
-            dut_file.update({"duts": dut_properties, "servers": server_properties})
+
+        if dut_properties:
+            dut_file.update({"duts": dut_properties})
             with open(duts_file_name, "w", encoding="utf-8") as yamlfile:
                 yaml.dump(dut_file, yamlfile, sort_keys=False)
 
@@ -897,6 +884,20 @@ def create_duts_file(topology_file, inventory_file, duts_file_name):
         logging.error("EXITING TEST RUNNER")
         print(">>> ERROR While creating duts file")
         sys.exit(1)
+
+
+def post_process_skip(tops, steps, output=""):
+    """Post processing for test case that encounters a PyTest Skip
+
+    Args:
+        tops(obj): Test case object
+        steps(func): Test case
+        output(str): Test case show output
+    """
+
+    tops.skip = True
+    tops.parse_test_steps(steps)
+    tops.generate_report(tops.dut_name, output)
 
 
 # pylint: disable-next=too-many-instance-attributes
@@ -1195,7 +1196,8 @@ class TestOps:
         comments = pattern.findall(content)
 
         # Format each item in list
-        comments = [x.strip() for x in comments]
+        comments = [re.sub(r"\n\s+", " ", x) for x in comments]
+
         if not comments:
             comments.append("N/a no Test Steps found")
 
@@ -1605,17 +1607,3 @@ class TestOps:
 
             else:
                 logging.info("No Session to clear")
-
-
-def post_process_skip(tops, steps, output=""):
-    """Post processing for test case that encounters a PyTest Skip
-
-    Args:
-        tops (obj): Test case object
-        steps (func): Test case
-        output (str): Test case show output
-    """
-
-    tops.skip = True
-    tops.parse_test_steps(steps)
-    tops.generate_report(tops.dut_name, output)

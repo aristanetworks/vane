@@ -888,11 +888,10 @@ def create_duts_file(topology_file, inventory_file, duts_file_name):
 
 def post_process_skip(tops, steps, output=""):
     """Post processing for test case that encounters a PyTest Skip
-
     Args:
-        tops(obj): Test case object
-        steps(func): Test case
-        output(str): Test case show output
+        tops (obj): Test case object
+        steps (func): Test case
+        output (str): Test case show output
     """
 
     tops.skip = True

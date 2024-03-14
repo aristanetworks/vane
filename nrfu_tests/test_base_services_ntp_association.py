@@ -14,7 +14,7 @@ logging = test_case_logger.setup_logger(__file__)
 
 @pytest.mark.nrfu_test
 @pytest.mark.base_services
-class NtpAssocitionsTests:
+class NtpAssociationsTests:
     """Testcases for verification of NTP association functionality"""
 
     dut_parameters = tests_tools.parametrize_duts(TEST_SUITE, test_defs, dut_objs)
@@ -31,15 +31,28 @@ class NtpAssocitionsTests:
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         self.output = ""
+        test_params = tops.test_parameters
         tops.actual_output = {
             "primary_ntp_association": "Not found",
             "secondary_ntp_association": "Not found",
         }
-        # Forming an output message if a test result is pass
+        single_ntp_check = test_params["input"].get("single_ntp_check")
         tops.output_msg = (
-            "NTP server is configured on the device. Primary and secondary NTP association is"
-            " correct on the device."
+            "NTP server should be configured on the device. Primary and secondary NTP association"
+            " is correct on the device."
         )
+        if single_ntp_check:
+            tops.expected_output = {"primary_ntp_association": "sys.peer"}
+            # Forming an output message if a test result is pass
+            tops.output_msg = (
+                "NTP server should be configured on the device. Primary NTP association is correct"
+                " on the device."
+            )
+            tops.test_criteria = (
+                "NTP server should be configured on the device. Primary NTP association should be "
+                "correct on the device. "
+            )
+            tops.actual_output = {"primary_ntp_association": "Not found"}
 
         try:
             """
@@ -53,13 +66,18 @@ class NtpAssocitionsTests:
 
             # Skipping testcase if NTP server is not configured on DUT.
             if output.get("status") == "disabled":
-                pytest.skip(f"NTP server is not configured on device {tops.dut_name}.")
+                tops.output_msg = (
+                    f"Skipping test case on device {tops.dut_name} as"
+                    " NTP server is not configured on device."
+                )
+                tests_tools.post_process_skip(tops, self.test_ntp_clocks, self.output)
+                pytest.skip(tops.output_msg)
 
             ntp_association_cmd = "show ntp associations"
 
             """
             TS: Running `show ntp associations` on device and verifying that the
-            primary and secondary NTP association is correct on the host.
+            expected NTP association is correct on the host.
             """
             output = tops.run_show_cmds([ntp_association_cmd])
             logging.info(
@@ -67,35 +85,37 @@ class NtpAssocitionsTests:
             )
             self.output += f"Output of {ntp_association_cmd} command is: \n{output}"
             ntp_associations = output[0]["result"].get("peers")
-            assert ntp_associations, "NTP association details are not collected."
+            assert (
+                ntp_associations
+            ), "NTP association details are not collected in the command output."
 
-            for peer in ntp_associations:
-                if ntp_associations[peer].get("condition") == "sys.peer":
+            for _, peer_details in ntp_associations.items():
+                if peer_details.get("condition") == "sys.peer":
                     tops.actual_output["primary_ntp_association"] = "sys.peer"
-                elif ntp_associations[peer].get("condition") == "candidate":
-                    tops.actual_output["secondary_ntp_association"] = "candidate"
+                if not single_ntp_check:
+                    if peer_details.get("condition") == "candidate":
+                        tops.actual_output["secondary_ntp_association"] = "candidate"
 
             # Forming an output message if a test result is fail
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = ""
-                not_primary_ntp_association = (
-                    tops.actual_output["primary_ntp_association"]
-                    != tops.expected_output["primary_ntp_association"]
-                )
-                not_secondary_ntp_association = (
-                    tops.actual_output["secondary_ntp_association"]
-                    != tops.expected_output["secondary_ntp_association"]
-                )
-                if not_primary_ntp_association and not_secondary_ntp_association:
-                    tops.output_msg += (
-                        "Primary and Secondary NTP associations are not found on the device.\n"
-                    )
-                elif not_primary_ntp_association:
+                not_primary_ntp_association = tops.actual_output.get(
+                    "primary_ntp_association"
+                ) != tops.expected_output.get("primary_ntp_association")
+                not_secondary_ntp_association = tops.actual_output.get(
+                    "secondary_ntp_association"
+                ) != tops.expected_output.get("secondary_ntp_association")
+                if not_primary_ntp_association:
                     tops.output_msg += "Primary NTP association is not found on the device.\n"
-                elif not_secondary_ntp_association:
-                    tops.output_msg += "Secondary NTP association is not found on the device."
+                elif not single_ntp_check:
+                    if not_secondary_ntp_association:
+                        tops.output_msg += "Secondary NTP association is not found on the device."
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excp:
+        # For BaseException test case is failing instead of skipping it. Hence adding
+        # specific exception here.
+        except pytest.skip.Exception:
+            pytest.skip(tops.output_msg)
+        except (BaseException, EapiError) as excp:
             tops.actual_output = tops.output_msg = str(excp).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}: Error occurred while running testcase"

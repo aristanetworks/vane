@@ -22,6 +22,8 @@
         secondary_ntp_association: candidate
       test_criteria: NTP server should be configured on the device. Primary and secondary NTP association should be correct on the device. # Setting test case’s pass/fail criteria for reporting
       report_style: modern # Setting report_style as modern, If a report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      input:
+        single_ntp_check: False # Single NTP server verification, set the value as True when single ntp server verification needed.
       criteria: names
       filter:
         - BLFE1

@@ -47,8 +47,8 @@ vane –definitions_file definitions.yaml
     the sample one in vane repo is at
     [vane/sample_network_tests/definitions.yaml](<https://github.com/aristanetworks/vane/blob/develop/sample_network_tests/definitions.yaml>)
 
-If while running vane you do not include this argument as above then
-vane defaults to using the path mentioned in the
+If you do not include this argument then vane defaults to
+using the path mentioned in the
 [vane/config.py](https://github.com/aristanetworks/vane/blob/develop/vane/config.py)
 file
 
@@ -117,8 +117,8 @@ vane –duts-file  duts.yaml
     [vane/sample_network_tests/duts.yaml](<https://github.com/aristanetworks/vane/blob/develop/sample_network_tests/duts.yaml>)
     to get started.
 
-If while running vane you do not include this argument as
-above then vane defaults to using the duts file mentioned in the
+If you do not include this argument then vane defaults to
+using the path mentioned in the
 [vane/config.py](https://github.com/aristanetworks/vane/blob/develop/vane/config.py)
 file
 

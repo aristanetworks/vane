@@ -86,7 +86,6 @@ class MiscShowCommandTests:
                         )
 
                         # Do NOT Fail test case if command is not supported on hardware
-                        if command not ""
                         tops.actual_output["show_commands"].update(
                             {command: {"command_executed": True}}
                         )

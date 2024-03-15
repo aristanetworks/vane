@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -32,7 +32,7 @@ class PowerSupplyVoltageTests:
         """
         TD: Test case for verification of system power supply voltage sensor status on the device.
         Args:
-            dut(dict): details related to a particular DUT
+            dut(dict): details related to a particular device
             tests_definitions(dict): test suite and test case parameters.
         """
 
@@ -64,27 +64,29 @@ class PowerSupplyVoltageTests:
             TS: Running `show system environment power voltage` command on the device and
             verifying status for all power supply voltage sensors should be 'OK'.
             """
-            power_supply_cmd = "show system environment power voltage"
-            voltage_cmd_output = tops.run_show_cmds([power_supply_cmd])
+            self.power_supply_cmd = "show system environment power voltage"
+            self.voltage_cmd_output = tops.run_show_cmds([self.power_supply_cmd])
             logging.info(
-                f"On device {tops.dut_name}, output of {power_supply_cmd} command is:"
-                f" \n{voltage_cmd_output}\n"
+                f"On device {tops.dut_name}, output of {self.power_supply_cmd} command is:"
+                f" \n{self.voltage_cmd_output}\n"
             )
-            self.output += f"\nOutput of {power_supply_cmd} command is:\n{voltage_cmd_output}\n"
-            voltage_sensors = voltage_cmd_output[0]["result"].get("voltageSensors")
+            self.output += (
+                f"\nOutput of {self.power_supply_cmd} command is:\n{self.voltage_cmd_output}\n"
+            )
+            voltage_sensors = self.voltage_cmd_output[0]["result"].get("voltageSensors")
 
             # Collecting power supply sensors from the list of sensor
-            power_voltage_sensor = [
+            self.power_voltage_sensor = [
                 {sensor: sensor_data}
                 for sensor, sensor_data in voltage_sensors.items()
                 if "PowerSupply" in sensor
             ]
             assert (
-                power_voltage_sensor
+                self.power_voltage_sensor
             ), "Power supply voltage sensor details are not found on the device."
 
             # Updating the actual and expected state of the power supply sensor
-            for voltage_sensor in power_voltage_sensor:
+            for voltage_sensor in self.power_voltage_sensor:
                 for sensor, sensor_data in voltage_sensor.items():
                     tops.expected_output["power_supply_voltage_sensors"].update(
                         {sensor: {"status": "ok"}}
@@ -115,7 +117,12 @@ class PowerSupplyVoltageTests:
                         f" follows:\n{power_supply_status}"
                     )
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+        # For BaseException test case is failing instead of skipping it. Hence, adding
+        # specific exception here.
+        except pytest.skip.Exception:
+            pytest.skip(tops.output_msg)
+
+        except (BaseException, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}, Error while running the test case"

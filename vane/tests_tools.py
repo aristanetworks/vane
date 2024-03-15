@@ -203,6 +203,15 @@ def init_duts(show_cmds, test_parameters, test_duts):
     duts = login_duts(test_parameters, test_duts)
     workers = len(duts)
 
+    if not workers:
+        print(
+            "\x1b[31mNo valid DUTs to run tests on, hence exiting Vane.\n"
+            "If you are running on/via a CVP instance ensure your DUTs are"
+            " not in the undefined container.\n"
+            "Look at the logs for further details. \x1b[0m"
+        )
+        sys.exit(1)
+
     logging.debug(f"Duts login info: {duts} and create {workers} workers")
     logging.debug(f"Passing the following show commands to workers: {show_cmds}")
 

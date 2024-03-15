@@ -1,0 +1,119 @@
+# Project information
+site_name: Vane
+site_author: Arista Vane Team
+site_description: Arista Network Validation documentation
+copyright: Copyright &copy; 2023 Arista Networks
+
+# Repository information
+repo_name: Vane on Github
+repo_url: https://github.com/aristanetworks/vane
+
+# Configuration
+use_directory_urls: false
+theme:
+  name: material
+  custom_dir: overrides
+  features:
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - navigation.instant
+    - navigation.top
+    - search.highlight
+    - toc.follow
+  highlightjs: true
+  icon:
+    repo: fontawesome/brands/github
+    logo: bootstrap/vane-white-logo
+    edit: fontawesome/solid/file-pen
+  favicon: favicon/favicon.ico
+  font:
+    text: Spectral
+    code: Fira Mono
+  language: en
+  include_search_page: false
+  search_index_only: true
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/aristanetworks/vane
+    - icon: fontawesome/brands/twitter
+      link: https://twitter.com/AristaNetworks
+    - icon: fontawesome/solid/globe
+      link: https://www.arista.com
+  # version:
+  #   provider: mike
+  #   default: stable
+
+extra_css:
+  - stylesheets/extra.material.css
+
+plugins:
+  - glightbox
+  - search:
+      lang: en
+  - mkdocstrings
+
+markdown_extensions:
+  - admonition
+  - attr_list
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      # emoji_index: !!python/name:materialx.emoji.twemoji
+      emoji_generator: !!python/name:materialx.emoji.to_svg
+      options:
+        custom_icons:
+          - overrides/.icons
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.mark
+  - pymdownx.tilde
+  - pymdownx.caret
+  - pymdownx.smartsymbols
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - tables
+  - toc:
+      separator: "-"
+      permalink: true
+
+
+nav:
+  - Home: index.md
+  - Win with Vane: differentiation/differentiation.md
+  - Installation: 
+    - Home: installation/installation_home.md
+    - Via Python Virtual Environment: installation/python_installation.md
+    - Via Docker: installation/docker_installation.md
+    - Via Poetry: installation/poetry_installation.md
+  - Executing Vane: executing_vane/executing_vane.md
+  - Vane Test Cases: 
+    - Test Case Setup: test_case_style_guide/test_case_setup.md
+    - Sample Network Test Cases: test_case_style_guide/sample_network_tests.md
+  - NRFU Testing: nrfu_setup/nrfu_setup.md
+  # - Vane GUI: gui/user_interface.md
+  - API and CLI reference: 
+    - Vane CLI: api_cli/cli.md
+    - Vane API: api_cli/api.md

@@ -15,6 +15,7 @@ parameters:
   results_dir: reports/results
   setup_show: false
   show_log: show_output.log
+  continue_when_unreachable: false 
   stdout: false
   test_cases: All
   test_dirs: 

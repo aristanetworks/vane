@@ -42,7 +42,10 @@ import re
 import pprint
 import yaml
 
+
 from jinja2 import Template
+from icmplib import ping
+from icmplib.exceptions import SocketPermissionError
 from pyeapi.eapilib import EapiError
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
@@ -198,27 +201,91 @@ def init_duts(show_cmds, test_parameters, test_duts):
         "data, hostname, and connection."
     )
 
-    duts = login_duts(test_parameters, test_duts)
-    workers = len(duts)
+    reachability, reachable_duts, unreachable_duts = check_duts_reachability(test_duts)
 
-    logging.debug(f"Duts login info: {duts} and create {workers} workers")
+    try:
+        continue_when_unreachable = test_parameters["parameters"]["continue_when_unreachable"]
+    except KeyError:
+        continue_when_unreachable = False
+
+    if not (reachability or continue_when_unreachable):
+        logging.error(f"Error connecting to {unreachable_duts}, hence exiting Vane")
+        unreachable_ips = [unreachable_dut["mgmt_ip"] for unreachable_dut in unreachable_duts]
+        print(
+            "\x1b[31mVane encountered an error while attempting to connect to DUT/s with ip's:\n"
+            f"{unreachable_ips}\n"
+            "For detailed information, please refer to the logs.\nDue to this issue, "
+            "Vane is exiting. \x1b[31m"
+        )
+        sys.exit(1)
+
+    reachable_duts = login_duts(test_parameters, reachable_duts)
+    workers = len(reachable_duts)
+
+    logging.debug(f"Duts login info: {reachable_duts} and create {workers} workers")
     logging.debug(f"Passing the following show commands to workers: {show_cmds}")
+
+    logging.info("Starting the execution of show commands for Vane cache")
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as executor:
         future_object = {
-            executor.submit(dut_worker, dut, show_cmds, test_duts): dut for dut in duts
+            executor.submit(dut_worker, dut, show_cmds, reachable_duts): dut
+            for dut in reachable_duts
         }
 
     if future_object:
         logging.debug("Future object generated successfully")
 
     logging.info("Returning duts data structure")
-    logging.debug(f"Return duts data structure: {duts}")
+    logging.debug(f"Return duts data structure: {reachable_duts}")
 
-    return duts
+    return reachable_duts
 
 
-def login_duts(test_parameters, test_duts):
+def check_duts_reachability(test_duts):
+    """Check if duts are reachable
+
+    Args:
+        test_duts (dict): Dictionary of duts
+
+    Returns:
+        reachability (boolean): result of if duts are reachable
+        reachable_duts (dict): reachable duts
+        unreachable_duts (dict): unreachable duts
+    """
+
+    logging.info("Checking connectivity of duts")
+    reachable_duts = []
+    unreachable_duts = []
+    ret = False
+    for dut in test_duts["duts"]:
+        # check for reachability
+        ip_address = dut["mgmt_ip"]
+        try:
+            host = ping(ip_address, count=3, interval=1, timeout=3, privileged=False)
+            ret = host.is_alive
+        except SocketPermissionError as e:
+            logging.error(
+                f"Entered the exception due to permission issues: {e}\n"
+                "Trying the ping utility via os.system instead"
+            )
+            host = os.system(f"ping -c 1 -W 3 {ip_address} > {os.devnull}")
+            ret = host == 0
+
+        if ret:
+            reachable_duts.append(dut)
+        else:
+            name = dut["name"]
+            logging.info(f"Failed to connect to {name}")
+            unreachable_duts.append(dut)
+
+    if len(test_duts["duts"]) == len(reachable_duts):
+        return True, reachable_duts, unreachable_duts
+
+    return False, reachable_duts, unreachable_duts
+
+
+def login_duts(test_parameters, duts):
     """Use eapi to connect to Arista switches for testing
 
     Args:
@@ -229,9 +296,8 @@ def login_duts(test_parameters, test_duts):
       logins (list): List of dictionaries with connection and name
                      of DUTs
     """
-    logging.info("Using eapi to connect to Arista switches for testing")
+    logging.info("Using eapi/ssh to connect to Arista switches for testing")
 
-    duts = test_duts["duts"]
     logins = []
 
     network_configs = {}
@@ -250,17 +316,16 @@ def login_duts(test_parameters, test_duts):
         logging.debug(f"Connecting to switch: {name} using parameters: {dut}")
 
         eos_conn = test_parameters["parameters"].get("eos_conn", DEFAULT_EOS_CONN)
-        netmiko_conn = device_interface.NetmikoConn()
-        netmiko_conn.set_up_conn(dut)
-        login_ptr["ssh_conn"] = netmiko_conn
-
-        pyeapi_conn = device_interface.PyeapiConn()
-        pyeapi_conn.set_up_conn(dut)
-        login_ptr["eapi_conn"] = pyeapi_conn
 
         if eos_conn == "eapi":
+            pyeapi_conn = device_interface.PyeapiConn()
+            pyeapi_conn.set_up_conn(dut)
+            login_ptr["eapi_conn"] = pyeapi_conn
             login_ptr["connection"] = pyeapi_conn
         elif eos_conn == "ssh":
+            netmiko_conn = device_interface.NetmikoConn()
+            netmiko_conn.set_up_conn(dut)
+            login_ptr["ssh_conn"] = netmiko_conn
             login_ptr["connection"] = netmiko_conn
         else:
             raise ValueError(f"Invalid EOS conn type {eos_conn} specified")
@@ -352,19 +417,19 @@ def remove_cmd(err, show_cmds):
     return show_cmds
 
 
-def dut_worker(dut, show_cmds, test_parameters):
+def dut_worker(dut, show_cmds, reachable_duts):
     """Execute inputted show commands on dut.  Update dut structured data
     with show output.
 
     Args:
       dut (dict): structured data of a dut output data, hostname, and
       show_cmds (list): List of show commands
-      test_parameters (dict): Abstraction of testing parameters
+      reachable_duts (dict): Abstraction of duts
     """
     name = dut["name"]
     conn = dut["connection"]
     dut["output"] = {}
-    dut["output"]["interface_list"] = return_interfaces(name, test_parameters)
+    dut["output"]["interface_list"] = return_interfaces(name, reachable_duts)
 
     logging.info(f"Executing show commands on {name}")
     logging.debug(f"List of show commands {show_cmds}")
@@ -427,21 +492,21 @@ def dut_worker(dut, show_cmds, test_parameters):
     logging.info(f"{name} updated with show output {dut}")
 
 
-def return_interfaces(hostname, test_parameters):
-    """Parse test_parameters for interface connections and return them to test
+def return_interfaces(hostname, reachable_duts):
+    """Parse reachable_duts for interface connections and return them to test
 
     Args:
         hostname (str):  hostname of dut
-        test_parameters (dict): Abstraction of testing parameters
+        reachable_duts (dict): Abstraction of reachable_duts
 
     Returns:
       interface_list (list): list of interesting interfaces based on
                              PS LLD spreadsheet
     """
-    logging.info("Parse test_parameters for interface connections and return them to test")
+    logging.info("Parse reachable_duts for interface connections and return them to test")
 
     interface_list = []
-    duts = test_parameters["duts"]
+    duts = reachable_duts
 
     for dut in duts:
         dut_name = dut["name"]
@@ -1203,6 +1268,42 @@ class TestOps:
         self._show_cmds.setdefault(dut_name, [])
         self.show_cmd_txts.setdefault(dut_name, [])
 
+    def get_ssh_connection(self, dut):
+        """Return the ssh connection if it exists otherwise initialise
+        a new ssh connection
+
+        Args:
+            dut (dict): device whose ssh connection should be returned
+
+        Returns:
+            conn (netmiko connection): ssh connection for the device"""
+
+        if "ssh_conn" not in dut:
+            netmiko_conn = device_interface.NetmikoConn()
+            netmiko_conn.set_up_conn(dut)
+            dut["ssh_conn"] = netmiko_conn
+            dut["connection"] = netmiko_conn
+
+        return dut["ssh_conn"]
+
+    def get_eapi_connection(self, dut):
+        """Return the eapi connection if it exists otherwise initialise
+        a new eapi connection
+
+        Args:
+            dut (dict): device whose eapi connection should be returned
+
+        Returns:
+            conn (paramiko connection): eapi connection for the device"""
+
+        if "eapi_conn" not in dut:
+            pyeapi_conn = device_interface.PyeapiConn()
+            pyeapi_conn.set_up_conn(dut)
+            dut["eapi_conn"] = pyeapi_conn
+            dut["connection"] = pyeapi_conn
+
+        return dut["eapi_conn"]
+
     def get_new_conn(self, dut, conn_type, timeout):
         """get new conn returns a new connection to dut of type 'conn_type'
         with read timeout set to timeout
@@ -1341,9 +1442,9 @@ class TestOps:
         if timeout == 0:
             # if timeout is zero, then use existing connections
             if conn_type == "eapi":
-                conn = dut["eapi_conn"]
+                conn = self.get_eapi_connection(dut)
             elif conn_type == "ssh":
-                conn = dut["ssh_conn"]
+                conn = self.get_ssh_connection(dut)
             else:
                 raise ValueError(f"conn_type [{conn_type}] not supported")
         elif timeout > 0 or new_conn:

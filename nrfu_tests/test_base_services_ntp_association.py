@@ -56,7 +56,8 @@ class NtpAssociationsTests:
 
         try:
             """
-            TS: Running `show ntp status` on device and verifying the NTP is configured.
+            TS: Running `show ntp status` command on the device and verifying that
+            the NTP is configured.
             """
             output = dut["output"][tops.show_cmd]["json"]
             logging.info(
@@ -76,8 +77,8 @@ class NtpAssociationsTests:
             ntp_association_cmd = "show ntp associations"
 
             """
-            TS: Running `show ntp associations` on device and verifying that the
-            expected NTP association is correct on the host.
+            TS: Running `show ntp associations` command on the device and verifying that the 
+            NTP association is correct on the host.
             """
             output = tops.run_show_cmds([ntp_association_cmd])
             logging.info(
@@ -87,29 +88,31 @@ class NtpAssociationsTests:
             ntp_associations = output[0]["result"].get("peers")
             assert (
                 ntp_associations
-            ), "NTP association details are not collected in the command output."
+            ), f"No NTP servers found in '{ntp_association_cmd}' command output."
 
             for _, peer_details in ntp_associations.items():
-                if peer_details.get("condition") == "sys.peer":
+                peer_condition = peer_details.get("condition")
+                if peer_condition == "sys.peer":
                     tops.actual_output["primary_ntp_association"] = "sys.peer"
-                if not single_ntp_check:
-                    if peer_details.get("condition") == "candidate":
-                        tops.actual_output["secondary_ntp_association"] = "candidate"
+                if not single_ntp_check and peer_condition == "candidate":
+                    tops.actual_output["secondary_ntp_association"] = "candidate"
 
             # Forming an output message if a test result is fail
             if tops.actual_output != tops.expected_output:
                 tops.output_msg = ""
-                not_primary_ntp_association = tops.actual_output.get(
-                    "primary_ntp_association"
-                ) != tops.expected_output.get("primary_ntp_association")
-                not_secondary_ntp_association = tops.actual_output.get(
+                actutal_primary_ntp_status = tops.actual_output.get("primary_ntp_association")
+                expected_primary_ntp_status = tops.expected_output.get("primary_ntp_association")
+                actual_secondary_ntp_status = tops.actual_output.get("secondary_ntp_association")
+                expected_secondary_ntp_status = tops.expected_output.get(
                     "secondary_ntp_association"
-                ) != tops.expected_output.get("secondary_ntp_association")
-                if not_primary_ntp_association:
+                )
+                no_primary_ntp = actutal_primary_ntp_status != expected_primary_ntp_status
+                no_secondary_ntp = actual_secondary_ntp_status != expected_secondary_ntp_status
+
+                if no_primary_ntp:
                     tops.output_msg += "Primary NTP association is not found on the device.\n"
-                elif not single_ntp_check:
-                    if not_secondary_ntp_association:
-                        tops.output_msg += "Secondary NTP association is not found on the device."
+                elif not single_ntp_check and no_secondary_ntp:
+                    tops.output_msg += "Secondary NTP association is not found on the device."
 
         # For BaseException test case is failing instead of skipping it. Hence adding
         # specific exception here.

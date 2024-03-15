@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """ Test case to verify that 2 NTP clocks(a peer and a candidate) are locked on the device."""
@@ -51,9 +51,14 @@ class NtpAssocitionsTests:
             )
             self.output = f"Output of {tops.show_cmd} command is: \n{output}\n"
 
-            # Skipping testcase if NTP server is not configured on DUT.
+            # Skipping test case if NTP server is not configured on device.
             if output.get("status") == "disabled":
-                pytest.skip(f"NTP server is not configured on device {tops.dut_name}.")
+                tops.output_msg = (
+                    f"Skipping test case on {tops.dut_name} as NTP server is not configured on"
+                    " device."
+                )
+                tests_tools.post_process_skip(tops, self.test_ntp_clocks, self.output)
+                pytest.skip(tops.output_msg)
 
             ntp_association_cmd = "show ntp associations"
 
@@ -95,7 +100,12 @@ class NtpAssocitionsTests:
                 elif not_secondary_ntp_association:
                     tops.output_msg += "Secondary NTP association is not found on the device."
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excp:
+        # For BaseException test case is failing instead of skipping it. Hence, adding
+        # specific exception here.
+        except pytest.skip.Exception:
+            pytest.skip(tops.output_msg)
+
+        except (BaseException, EapiError) as excp:
             tops.actual_output = tops.output_msg = str(excp).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}: Error occurred while running testcase"

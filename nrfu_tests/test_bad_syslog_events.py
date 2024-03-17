@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -28,9 +28,9 @@ class BadSyslogEventsTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_bad_syslog_events(self, dut, tests_definitions):
         """
-        TD: Testcase for verification of bad syslog event messages.
+        TD: Test case for verification of bad syslog event messages.
         Args:
-            dut(dict): details related to a particular DUT
+            dut(dict): details related to a particular device
             tests_definitions(dict): test suite and test case parameters.
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
@@ -55,7 +55,7 @@ class BadSyslogEventsTests:
             TS: Running 'show logging' command on DUT and verifying that the SysLog is configured
             on the device.
             """
-            syslog_output = tops.run_show_cmds(syslog_events_cmd[0])
+            syslog_output = tops.run_show_cmds(syslog_events_cmd[0], encoding="text")
             logging.info(
                 (
                     f"On device {tops.dut_name}, output of {syslog_events_cmd[0]} command"
@@ -68,15 +68,17 @@ class BadSyslogEventsTests:
             # Skipping, if SysLog is not configured.
             for detail in syslog_output_details.split("\n"):
                 if "Syslog logging: disabled" in detail:
-                    pytest.skip(
+                    tops.output_msg = (
                         f"For {tops.dut_name} SysLog is not configured, hence test skipped."
                     )
+                    tests_tools.post_process_skip(tops, self.test_bad_syslog_events, self.output)
+                    pytest.skip(tops.output_msg)
 
             """
             TS: Running `show logging last <daysOfLogs> days` command on DUT and verifying
             the keywords in syslog events that are generally considered to be bad.
             """
-            output = tops.run_show_cmds(syslog_events_cmd[1])
+            output = tops.run_show_cmds(syslog_events_cmd[1], encoding="text")
             logging.info(
                 (
                     f"On device {tops.dut_name}, output of {syslog_events_cmd[1]} command"
@@ -107,8 +109,13 @@ class BadSyslogEventsTests:
                     f"\nFollowing bad syslog events are found on the device: \n{bad_syslog}"
                 )
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
-            tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
+        # For BaseException test case is failing instead of skipping it. Hence, adding
+        # specific exception here.
+        except pytest.skip.Exception:
+            pytest.skip(tops.output_msg)
+
+        except (BaseException, EapiError) as excp:
+            tops.output_msg = tops.actual_output = str(excp).split("\n", maxsplit=1)[0]
             logging.error(
                 (
                     f"On device {tops.dut_name}, Error while running the testcase"

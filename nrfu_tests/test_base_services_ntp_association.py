@@ -48,7 +48,7 @@ class NtpAssociationsTests:
                 "NTP server should be configured on the device. Primary NTP association is correct"
                 " on the device."
             )
-            tops.test_criteria = (
+            test_params["test_criteria"] = (
                 "NTP server should be configured on the device. Primary NTP association should be "
                 "correct on the device. "
             )
@@ -64,7 +64,6 @@ class NtpAssociationsTests:
                 f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n"
             )
             self.output = f"Output of {tops.show_cmd} command is: \n{output}\n"
-
             # Skipping testcase if NTP server is not configured on DUT.
             if output.get("status") == "disabled":
                 tops.output_msg = (

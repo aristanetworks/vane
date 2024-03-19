@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -60,12 +60,14 @@ class DnsBaseServicesTests:
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
 
             # Skipping test case if name servers are not configured on the device.
-            version_verification = list(test_params.values())
-            if not any(version_verification):
-                pytest.skip(
+            self.version_verification = list(test_params.values())
+            if not any(self.version_verification):
+                tops.output_msg = (
                     f"Name servers are not configured on {tops.dut_name}, hence skipping the"
                     " test case."
                 )
+                tests_tools.post_process_skip(tops, self.test_dns_base_services, self.output)
+                pytest.skip(tops.output_msg)
 
             try:
                 for ip_version_verification, verification_status in test_params.items():
@@ -90,12 +92,12 @@ class DnsBaseServicesTests:
                             }
                         )
 
-                        bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
-                        bash_cmd_output = tops.run_show_cmds([bash_cmd])
+                        self.bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
+                        self.bash_cmd_output = tops.run_show_cmds([self.bash_cmd])
                         logging.info(
                             (
-                                f"On device {tops.dut_name}, the output of the `{bash_cmd}` command"
-                                f" is: \n{bash_cmd_output}\n"
+                                f"On device {tops.dut_name}, the output of the `{self.bash_cmd}`"
+                                f" command is: \n{self.bash_cmd_output}\n"
                             ),
                         )
                         tops.actual_output["name_servers"].update(
@@ -122,8 +124,13 @@ class DnsBaseServicesTests:
                                 f" {ip_address}.\n"
                             )
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
-            tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
+        # For BaseException test case is failing instead of skipping it. Hence, adding
+        # specific exception here.
+        except pytest.skip.Exception:
+            pytest.skip(tops.output_msg)
+
+        except (BaseException, EapiError) as excp:
+            tops.output_msg = tops.actual_output = str(excp).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}, Error while running the test case"
                 f" is:\n{tops.actual_output}"

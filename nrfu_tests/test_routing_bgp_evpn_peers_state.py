@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -60,10 +60,14 @@ class BgpEvpnTests:
                 # Checking for the condition whether to skip the test case or
                 # check the assert statement
                 if skip_on_command_unavailable:
-                    pytest.skip(
+                    tops.output_msg = (
                         f"On device {tops.dut_name}, command is unavailable, device might be in"
                         " ribd mode."
                     )
+                    tests_tools.post_process_skip(
+                        tops, self.test_routing_bgp_evpn_peers_state, self.output
+                    )
+                    pytest.skip(tops.output_msg)
                 else:
                     assert False, (
                         f"On device {tops.dut_name}, command is unavailable, device might be in"

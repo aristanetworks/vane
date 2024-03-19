@@ -62,11 +62,19 @@ class HardwareInventoryTests:
             # Skipping the test case if all the inventory slots are not inserted.
             inventory_verification_status = list(test_params["hardware_inventory_checks"].values())
             if not any(inventory_verification_status):
-                pytest.skip(f"Inventory slots are not inserted on {tops.dut_name}")
+                tops.output_msg = f"Inventory slots are not inserted on device {tops.dut_name}."
+                tests_tools.post_process_skip(
+                    tops, self.test_hardware_inventory_status, self.output
+                )
+                pytest.skip(tops.output_msg)
 
             # Skipping test case if the device is vEOS.
             if "vEOS" in version_output.get("modelName"):
-                pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
+                tops.output_msg = f"{tops.dut_name} is vEOS device, hence test skipped."
+                tests_tools.post_process_skip(
+                    tops, self.test_hardware_inventory_status, self.output
+                )
+                pytest.skip(tops.output_msg)
 
             """
             TS: Running the `show inventory` command on the device and verifying the power supply

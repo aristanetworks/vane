@@ -117,7 +117,9 @@ class HardwareInventoryTests:
                         card_name = slot.split("_")[0]
                         slot_output = output["cardSlots"]
                         # Commenting assert.  It is not working with single supervisors.
-                        # assert slot_output, f"{converted_slot_name} is not inserted on the device."
+                        #
+                        # assert slot_output,
+                        # f"{converted_slot_name} is not inserted on the device."
 
                         expected_output.update({slot: {}})
                         actual_output.update({slot: {}})

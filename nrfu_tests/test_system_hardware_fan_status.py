@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -149,7 +149,7 @@ class SystemHardwareFanStatusTests:
         except pytest.skip.Exception:
             pytest.skip(tops.output_msg)
 
-        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+        except (BaseException, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
                 (

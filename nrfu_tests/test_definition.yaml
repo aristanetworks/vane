@@ -106,6 +106,9 @@
       expected_output: null # Expected output is formed inside the test case
       test_criteria: Non-Arista optics should not be installed on the device.
       report_style: modern
+      input: # Input parameters for test case
+        accepted_transceiver_manufacturers: # List of supported transceiver manufacturer
+          - Arista Networks
       criteria: names
       filter:
         - BLFE1

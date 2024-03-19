@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -7,13 +7,12 @@ Test case to verify that no non-Arista optics are installed on the device
 
 import pytest
 from pyeapi.eapilib import EapiError
-from vane import test_case_logger
+from vane import test_case_logger, tests_tools
 from vane.config import dut_objs, test_defs
-from vane import tests_tools
 
 
 TEST_SUITE = "nrfu_tests"
-logging = test_case_logger.setup_logger(__file__)
+logger = test_case_logger.setup_logger(__file__)
 
 
 @pytest.mark.nrfu_test
@@ -38,8 +37,11 @@ class InterfaceOpticsTests:
 
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
         self.output = ""
-        tops.actual_output = {"transceiver_slots": {}}
-        tops.expected_output = {"transceiver_slots": {}}
+        tops.actual_output = {"accepted_transceiver_manufacturer_found": {"slots": {}}}
+        tops.expected_output = {"accepted_transceiver_manufacturer_found": {"slots": {}}}
+        test_params = tops.test_parameters
+        accepted_transceiver = test_params["input"]["accepted_transceiver_manufacturers"]
+        non_arista_optics = []
 
         # Output message if the test result is passed
         tops.output_msg = "Non-Arista optics are not installed on the device."
@@ -50,42 +52,49 @@ class InterfaceOpticsTests:
             that non-Arista optics should not be installed on the device.
             """
             inventory_output = dut["output"][tops.show_cmd]["json"]
-            logging.info(
+            logger.info(
                 (
                     f"On device {tops.dut_name}, output of {tops.show_cmd} command is:"
                     f" \n{inventory_output}\n"
                 ),
             )
-            self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{inventory_output}"
-            transceiver_slots = inventory_output.get("xcvrSlots")
-            assert transceiver_slots, "Transceiver slots are not found on the device."
+            self.output += (
+                f"\n\nOutput of {tops.show_cmd}, output of {tops.show_cmd} command is:"
+                f" \n{inventory_output}"
+            )
+
+            # Collecting all transceiver slots from the command output.
+            transceiver_slots = inventory_output.get("xcvrSlots", {})
+
+            # Verifying that at least 1 transceiver is installed on the device
+            not_installed_transceiver = [
+                transceiver_detail.get("mfgName")
+                for transceiver_detail in transceiver_slots.values()
+                if transceiver_detail.get("mfgName") != "Not Present"
+            ]
+            assert not_installed_transceiver, "Transceiver slots are not installed on the device."
 
             # Updating expected and actual optics manufacturer for transceiver
             for transceiver, transceiver_details in transceiver_slots.items():
-                manufacturer_name = transceiver_details.get("mfgName")
-                tops.expected_output["transceiver_slots"].update(
-                    {transceiver: {"manufacture_name": "Arista Networks"}}
-                )
-                if manufacturer_name in ["Arista Networks", "Not Present"]:
-                    tops.expected_output["transceiver_slots"].update(
-                        {transceiver: {"manufacture_name": manufacturer_name}}
+                manufacturer = transceiver_details.get("mfgName")
+
+                # Checking for transceiver slot having manufacturing information present and in
+                # accepted transceiver list.
+                if manufacturer != "Not Present":
+                    tops.expected_output["accepted_transceiver_manufacturer_found"]["slots"].update(
+                        {transceiver: True}
                     )
-                tops.actual_output["transceiver_slots"].update(
-                    {transceiver: {"manufacture_name": manufacturer_name}}
-                )
+                    tops.actual_output["accepted_transceiver_manufacturer_found"]["slots"].update(
+                        {transceiver: True}
+                    )
+                    if manufacturer not in accepted_transceiver:
+                        tops.actual_output["accepted_transceiver_manufacturer_found"][
+                            "slots"
+                        ].update({transceiver: False})
+                        non_arista_optics.append(f"{transceiver} - {manufacturer}")
 
             # Forming output message in case of test case failure
-            if tops.output_msg != tops.expected_output:
-                non_arista_optics = []
-                for transceiver, expected_transceiver_info in tops.expected_output[
-                    "transceiver_slots"
-                ].items():
-                    actual_transceiver_info = tops.actual_output["transceiver_slots"][transceiver][
-                        "manufacture_name"
-                    ]
-                    if actual_transceiver_info == expected_transceiver_info["manufacture_name"]:
-                        continue
-                    non_arista_optics.append(f"{transceiver} - {actual_transceiver_info}")
+            if tops.actual_output != tops.expected_output:
                 if non_arista_optics:
                     non_arista_optic = "\n".join(non_arista_optics)
                     tops.output_msg = (
@@ -95,7 +104,7 @@ class InterfaceOpticsTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
-            logging.error(
+            logger.error(
                 f"On device {tops.dut_name}, Error while running the test case"
                 f" is:\n{tops.actual_output}"
             )

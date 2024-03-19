@@ -15,6 +15,9 @@ testcase_data:
       - test
       - future
     fail_on_no_description: True # If this field is set to True, the Test case will fail when the description is not found. Otherwise test case will pass even when interfaces do not have a description.
+  NRFU2.5:
+    accepted_transceiver_manufacturers: # List of supported transceiver manufacturer
+      - Arista Networks
   NRFU4.1:
     skip_on_command_unavailable: False # Skip the test case if the command is unavailable when set to True, otherwise check with assert messaging
   NRFU6.8:

@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -56,9 +56,11 @@ class BgpIpPeersStatusTests:
 
             # Skipping, if BGP is not configured.
             if not bgp_peers:
-                pytest.skip(
-                    f"For {tops.dut_name}, BGP is not configured, hence skipped the testcase."
+                tops.output_msg = (
+                    f"Skipping test case on {tops.dut_name} as BGP is not configured on device."
                 )
+                tests_tools.post_process_skip(tops, self.test_bgp_ipv4_peers_state, self.output)
+                pytest.skip(tops.output_msg)
 
             # Failing the test case if BGP peers are not found.
             for vrf in bgp_peers:

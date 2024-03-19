@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -28,9 +28,9 @@ class SystemCoolingStatusTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_system_hardware_cooling_status(self, dut, tests_definitions):
         """
-        TD: Testcase for the verification of system cooling status.
+        TD: Test case for the verification of system cooling status.
         Args:
-            dut(dict): details related to a particular DUT
+            dut(dict): details related to a particular device
             tests_definitions(dict): test suite and test case parameters.
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
@@ -56,7 +56,11 @@ class SystemCoolingStatusTests:
 
             # Skipping testcase if device is vEOS.
             if "vEOS" in version_output.get("modelName"):
-                pytest.skip(f"{tops.dut_name} is vEOS device, hence test is skipped.")
+                tops.output_msg = f"Skipping test case on {tops.dut_name} as it is vEOS device."
+                tests_tools.post_process_skip(
+                    tops, self.test_system_hardware_cooling_status, self.output
+                )
+                pytest.skip(tops.output_msg)
 
             """
             TS: Running `show system environment cooling` command and verifying
@@ -78,6 +82,11 @@ class SystemCoolingStatusTests:
                     "System cooling status is not ok. Ambient Temperature: "
                     f"{format(ambient_temperature,'.2f')} C'"
                 )
+
+        # For BaseException test case is failing instead of skipping it. Hence, adding
+        # specific exception here.
+        except pytest.skip.Exception:
+            pytest.skip(tops.output_msg)
 
         except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]

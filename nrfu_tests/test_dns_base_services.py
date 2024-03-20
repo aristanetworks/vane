@@ -92,12 +92,12 @@ class DnsBaseServicesTests:
                             }
                         )
 
-                        self.bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
-                        self.bash_cmd_output = tops.run_show_cmds([self.bash_cmd])
+                        bash_cmd = f"bash timeout 10 nslookup {reverse_resolution_ip}"
+                        bash_cmd_output = tops.run_show_cmds([bash_cmd])
                         logging.info(
                             (
-                                f"On device {tops.dut_name}, the output of the `{self.bash_cmd}`"
-                                f" command is: \n{self.bash_cmd_output}\n"
+                                f"On device {tops.dut_name}, the output of the `{bash_cmd}` command"
+                                f" is: \n{bash_cmd_output}\n"
                             ),
                         )
                         tops.actual_output["name_servers"].update(
@@ -124,13 +124,8 @@ class DnsBaseServicesTests:
                                 f" {ip_address}.\n"
                             )
 
-        # For BaseException test case is failing instead of skipping it. Hence, adding
-        # specific exception here.
-        except pytest.skip.Exception:
-            pytest.skip(tops.output_msg)
-
-        except (BaseException, EapiError) as excp:
-            tops.output_msg = tops.actual_output = str(excp).split("\n", maxsplit=1)[0]
+        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
+            tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}, Error while running the test case"
                 f" is:\n{tops.actual_output}"

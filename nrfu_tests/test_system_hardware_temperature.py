@@ -169,8 +169,8 @@ class SystemHardwareTemperatureTests:
 
             # Skipping test case if the device is vEOS.
             model = self.version_output.get("modelName")
-            if "vEOS" in model or "7010" in model:
-                tops.output_msg = f"Skipping test case on {tops.dut_name} as it is vEOS device."
+            if "vEOS" in model:
+                tops.output_msg = f"{tops.dut_name} is {model} device, hence test skipped."
                 tests_tools.post_process_skip(
                     tops, self.test_system_temperature_sensors, self.output
                 )

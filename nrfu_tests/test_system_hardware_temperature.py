@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -169,7 +169,13 @@ class SystemHardwareTemperatureTests:
 
             # Skipping test case if the device is vEOS.
             if "vEOS" in self.version_output.get("modelName"):
-                pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
+                tops.output_msg = (
+                    f"Skipping the test case as the device {tops.dut_name}, is a vEOS device."
+                )
+                tests_tools.post_process_skip(
+                    tops, self.test_system_temperature_sensors, self.output
+                )
+                pytest.skip(tops.output_msg)
 
             """
             TS: Running the "show system environment temperature" command on DUT and

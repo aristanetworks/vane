@@ -92,12 +92,14 @@
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_interfaces_non_arista_optics
-      description: Test case to verify that no non-Arista optics are installed on the device.
+      description: Test case to verify that Arista supported optics are installed on the device.
       test_id: NRFU2.5
+      {% set test_data = testcase_data["NRFU2.5"] %}
       show_cmd: show inventory
       expected_output: null
       test_criteria: Non-Arista optics should not be installed on the device.
       report_style: modern
+      approved_optics: {{ test_data["approved_optics"] }}
       criteria: {{ global_dut_filter.criteria }}
       filter: {{ global_dut_filter.filter }}
     - name: test_port_channel_member_interface_details

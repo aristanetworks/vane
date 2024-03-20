@@ -100,12 +100,7 @@ class NtpAssocitionsTests:
                 elif not_secondary_ntp_association:
                     tops.output_msg += "Secondary NTP association is not found on the device."
 
-        # For BaseException test case is failing instead of skipping it. Hence, adding
-        # specific exception here.
-        except pytest.skip.Exception:
-            pytest.skip(tops.output_msg)
-
-        except (BaseException, EapiError) as excp:
+        except (AssertionError, AttributeError, LookupError, EapiError) as excp:
             tops.actual_output = tops.output_msg = str(excp).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}: Error occurred while running testcase"

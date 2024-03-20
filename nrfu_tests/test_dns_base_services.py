@@ -60,8 +60,8 @@ class DnsBaseServicesTests:
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
 
             # Skipping test case if name servers are not configured on the device.
-            self.version_verification = list(test_params.values())
-            if not any(self.version_verification):
+            version_verification = list(test_params.values())
+            if not any(version_verification):
                 tops.output_msg = (
                     f"Name servers are not configured on {tops.dut_name}, hence skipping the"
                     " test case."

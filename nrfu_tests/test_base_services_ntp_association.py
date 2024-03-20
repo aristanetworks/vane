@@ -64,6 +64,7 @@ class NtpAssociationsTests:
                 f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n"
             )
             self.output = f"Output of {tops.show_cmd} command is: \n{output}\n"
+
             # Skipping testcase if NTP server is not configured on DUT.
             if output.get("status") == "disabled":
                 tops.output_msg = (
@@ -76,7 +77,7 @@ class NtpAssociationsTests:
             ntp_association_cmd = "show ntp associations"
 
             """
-            TS: Running `show ntp associations` command on the device and verifying that the 
+            TS: Running `show ntp associations` command on the device and verifying that the
             NTP association is correct on the host.
             """
             output = tops.run_show_cmds([ntp_association_cmd])
@@ -113,11 +114,7 @@ class NtpAssociationsTests:
                 elif not single_ntp_check and no_secondary_ntp:
                     tops.output_msg += "Secondary NTP association is not found on the device."
 
-        # For BaseException test case is failing instead of skipping it. Hence adding
-        # specific exception here.
-        except pytest.skip.Exception:
-            pytest.skip(tops.output_msg)
-        except (BaseException, EapiError) as excp:
+        except (AssertionError, AttributeError, LookupError, EapiError) as excp:
             tops.actual_output = tops.output_msg = str(excp).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}: Error occurred while running testcase"

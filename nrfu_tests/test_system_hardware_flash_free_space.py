@@ -67,7 +67,6 @@ class FlashFreeSpaceTests:
             )
             logging.debug(f"Primary flash utilization is: {flash_utilization}")
 
-
             """
             TS: Running `bash timeout 60 FastCli -p15 -c "session peer-supervisor dir flash:"`
             command on dut and verifying that peer supervisor flash file system utilization is
@@ -120,7 +119,8 @@ class FlashFreeSpaceTests:
                             f" actual found as '{utilization}%'.\n"
                         )
 
-        except (AttributeError, LookupError, EapiError, TypeError) as excep:
+        # pylint: disable-next=broad-exception-caught
+        except BaseException as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
                 f"On device {tops.dut_name}, Error while running the test case"

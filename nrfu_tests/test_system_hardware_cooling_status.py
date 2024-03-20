@@ -28,9 +28,9 @@ class SystemCoolingStatusTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_system_hardware_cooling_status(self, dut, tests_definitions):
         """
-        TD: Test case for the verification of system cooling status.
+        TD: Testcase for the verification of system cooling status.
         Args:
-            dut(dict): details related to a particular device
+            dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
@@ -83,12 +83,7 @@ class SystemCoolingStatusTests:
                     f"{format(ambient_temperature,'.2f')} C'"
                 )
 
-        # For BaseException test case is failing instead of skipping it. Hence, adding
-        # specific exception here.
-        except pytest.skip.Exception:
-            pytest.skip(tops.output_msg)
-
-        except (BaseException, EapiError) as excep:
+        except (AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
                 (

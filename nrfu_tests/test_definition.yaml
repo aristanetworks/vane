@@ -307,7 +307,7 @@
       filter:
         - BLFE1
     - name: test_system_hardware_fan_status
-      description: Test case for verification of fan status in the system.
+      description: Testcase for verification of fan status in the system.
       test_id: NRFU6.5
       show_cmd: show system environment cooling
       expected_output: null # Forming expected output in the test case.

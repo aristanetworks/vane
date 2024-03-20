@@ -58,8 +58,9 @@ class SystemHardwarePowerSupplyTests:
             self.output += f"Output of 'show version' command is: \n{version_output}"
 
             # Skipping test case if the device is vEOS.
-            if "vEOS" in version_output.get("modelName"):
-                tops.output_msg = f"{tops.dut_name} is vEOS device, hence test is skipped."
+            model = version_output.get("modelName")
+            if "vEOS" in model:
+                tops.output_msg = f"{tops.dut_name} is {model} device, hence test skipped."
                 tests_tools.post_process_skip(
                     tops, self.test_system_hardware_power_supply_status, self.output
                 )

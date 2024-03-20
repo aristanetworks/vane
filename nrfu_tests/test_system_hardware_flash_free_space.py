@@ -65,7 +65,8 @@ class FlashFreeSpaceTests:
             tops.actual_output["primary_supervisor_flash_utilization_within_range"] = (
                 flash_utilization <= 70
             )
-            logging.debug(f"primary flash utilization is: {flash_utilization}")
+            logging.debug(f"Primary flash utilization is: {flash_utilization}")
+
 
             """
             TS: Running `bash timeout 60 FastCli -p15 -c "session peer-supervisor dir flash:"`

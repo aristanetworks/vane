@@ -57,7 +57,8 @@ class BgpIpPeersStatusTests:
             # Skipping, if BGP is not configured.
             if not bgp_peers:
                 tops.output_msg = (
-                    f"Skipping test case on {tops.dut_name} as BGP is not configured on device."
+                    f"BGP is not configured on device {tops.dut_name}, hence skipping the test"
+                    " case."
                 )
                 tests_tools.post_process_skip(tops, self.test_bgp_ipv4_peers_state, self.output)
                 pytest.skip(tops.output_msg)

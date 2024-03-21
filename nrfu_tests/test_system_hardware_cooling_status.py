@@ -55,8 +55,9 @@ class SystemCoolingStatusTests:
             self.output += f"Output of 'show version' command is: \n{version_output}"
 
             # Skipping testcase if device is vEOS.
-            if "vEOS" in version_output.get("modelName"):
-                tops.output_msg = f"Skipping test case on {tops.dut_name} as it is vEOS device."
+            model = version_output.get("modelName")
+            if "vEOS" in model:
+                tops.output_msg = f"{tops.dut_name} is {model} device, hence test skipped."
                 tests_tools.post_process_skip(
                     tops, self.test_system_hardware_cooling_status, self.output
                 )

@@ -28,9 +28,9 @@ class MlagStatusTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_interfaces_mlag_status(self, dut, tests_definitions):
         """
-        TD: Test case for verification of MLAG functionality
+        TD: Testcase for verification of MLAG functionality
         Args:
-            dut(dict): details related to a particular device
+            dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters
         """
         tops = tests_tools.TestOps(tests_definitions, TEST_SUITE, dut)
@@ -43,12 +43,12 @@ class MlagStatusTests:
 
         try:
             """
-            TS: Running 'show mlag' command on device and verifying that the MLAG is configured
+            TS: Running 'show mlag' command on DUT and verifying that the MLAG is configured
             on the device.
             """
             output = dut["output"][tops.show_cmd]["json"]
             logging.info(
-                f"On device {tops.dut_name}, output of {tops.show_cmd} command is:\n{output}\n",
+                f"On device {tops.dut_name}, output of {tops.show_cmd} command is: \n{output}\n",
             )
             self.output += f"\nOutput of {tops.show_cmd} command is: \n{output}"
 
@@ -87,12 +87,7 @@ class MlagStatusTests:
                             f" '{tops.actual_output['mlag_details'].get(mlag_key)}'.\n"
                         )
 
-        # For BaseException test case is failing instead of skipping it. Hence, adding
-        # specific exception here.
-        except pytest.skip.Exception:
-            pytest.skip(tops.output_msg)
-
-        except (BaseException, EapiError) as excep:
+        except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             tops.output_msg = tops.actual_output = str(excep).split("\n", maxsplit=1)[0]
             logging.error(
                 (

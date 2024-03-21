@@ -69,7 +69,7 @@ class BadSyslogEventsTests:
             for detail in syslog_output_details.split("\n"):
                 if "Syslog logging: disabled" in detail:
                     tops.output_msg = (
-                        f"For {tops.dut_name} SysLog is not configured, hence test skipped."
+                        f"SysLog is not configured on device {tops.dut_name}, hence test skipped."
                     )
                     tests_tools.post_process_skip(tops, self.test_bad_syslog_events, self.output)
                     pytest.skip(tops.output_msg)

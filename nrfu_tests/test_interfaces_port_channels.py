@@ -50,7 +50,7 @@ class PortChannelMemberInterfacesTests:
 
             # Skipping testcase if port channel details are not found on DUT.
             if not output.get("portChannels"):
-                tops.output_msg = "Port-Channels are not found hence skipped the testcase."
+                tops.output_msg = "Port-Channels are not found hence skipped the test case."
                 tests_tools.post_process_skip(
                     tops, self.test_port_channel_member_interface_details, self.output
                 )

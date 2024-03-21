@@ -63,7 +63,7 @@ class DnsBaseServicesTests:
             version_verification = list(test_params.values())
             if not any(version_verification):
                 tops.output_msg = (
-                    f"Name servers are not configured on {tops.dut_name}, hence skipping the"
+                    f"Name servers are not configured on device {tops.dut_name}, hence skipping the"
                     " test case."
                 )
                 tests_tools.post_process_skip(tops, self.test_dns_base_services, self.output)

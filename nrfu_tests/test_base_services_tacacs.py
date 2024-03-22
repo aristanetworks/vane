@@ -57,7 +57,10 @@ class TacacsServersTests:
 
             # Skipping test case if TACACS servers are not configured.
             if not tacacs_servers:
-                tops.output_msg = f"TACACS servers are not configured on {tops.dut_name}."
+                tops.output_msg = (
+                    f"TACACS servers are not configured on the device {tops.dut_name}.hence"
+                    " skipped the test case."
+                )
                 tests_tools.post_process_skip(tops, self.test_base_services_tacacs, self.output)
                 pytest.skip(tops.output_msg)
 

@@ -55,7 +55,7 @@ class MlagStatusTests:
             # Skipping, if MLAG is not configured.
             if output.get("state") == "disabled":
                 tops.output_msg = (
-                    f"Skipping test case on {tops.dut_name} as MLAG is not configured on device."
+                    f"MLAG is not configured on device {tops.dut_name}, hence skipped test case."
                 )
                 tests_tools.post_process_skip(tops, self.test_interfaces_mlag_status, self.output)
                 pytest.skip(tops.output_msg)

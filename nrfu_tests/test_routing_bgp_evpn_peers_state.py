@@ -61,8 +61,8 @@ class BgpEvpnTests:
                 # check the assert statement
                 if skip_on_command_unavailable:
                     tops.output_msg = (
-                        f"On device {tops.dut_name}, command is unavailable, device might be in"
-                        " ribd mode."
+                        f"Skipping test case on {tops.dut_name} as {show_cmd} command is"
+                        " unavailable or device might be in ribd mode."
                     )
                     tests_tools.post_process_skip(
                         tops, self.test_routing_bgp_evpn_peers_state, self.output

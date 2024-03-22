@@ -70,9 +70,7 @@ class PowerSupplyVoltageTests:
                 f"On device {tops.dut_name}, output of {power_supply_cmd} command is:"
                 f" \n{voltage_cmd_output}\n"
             )
-            self.output += (
-                f"\nOutput of {power_supply_cmd} command is:\n{voltage_cmd_output}\n"
-            )
+            self.output += f"\nOutput of {power_supply_cmd} command is:\n{voltage_cmd_output}\n"
             voltage_sensors = voltage_cmd_output[0]["result"].get("voltageSensors")
 
             # Collecting power supply sensors from the list of sensor

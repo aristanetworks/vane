@@ -127,7 +127,9 @@ class EnvironmentTests:
             ) = (
                 self.output
             ) = f"INVALID TEST: CloudEOS router {tops.dut_name} does not require cooling.\n"
-
+            logging.info(
+                f"INVALID TEST: CloudEOS router {tops.dut_name} does not require cooling.\n"
+            )
         tops.parse_test_steps(self.test_if_system_environment_temp_is_in_spec_on_)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.actual_output == tops.expected_output

@@ -346,6 +346,14 @@ def test_login_duts(loginfo, mocker):
     except ValueError as exception:
         assert str(exception) == "Invalid EOS conn type invalid_connection_type specified"
 
+    # assert value when no role in duts file
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_role.yaml")
+    test_parameters["parameters"]["eos_conn"] = "ssh"
+    actual_output = tests_tools.login_duts(test_parameters, test_duts)
+    dut_info = actual_output[0]
+    assert dut_info["role"] == ""
+
 
 def test_send_cmds_json(loginfo, logdebug, mocker):
     """Validates the functionality of send_cmds method"""

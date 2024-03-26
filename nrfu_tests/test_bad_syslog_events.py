@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -68,9 +68,11 @@ class BadSyslogEventsTests:
             # Skipping, if SysLog is not configured.
             for detail in syslog_output_details.split("\n"):
                 if "Syslog logging: disabled" in detail:
-                    pytest.skip(
-                        f"For {tops.dut_name} SysLog is not configured, hence test skipped."
+                    tops.output_msg = (
+                        f"SysLog is not configured on device {tops.dut_name}, hence test skipped."
                     )
+                    tests_tools.post_process_skip(tops, self.test_bad_syslog_events, self.output)
+                    pytest.skip(tops.output_msg)
 
             """
             TS: Running `show logging last <daysOfLogs> days` command on DUT and verifying

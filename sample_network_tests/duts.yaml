@@ -1,10 +1,10 @@
 # This is a sample duts.yaml file which can be used to run vane.
-# This file has been generated from the Vane Demo Lab Topology.
+# This file has been generated from the Vane Demo Lab Topology (ce tenant).
 # Explore the vane --help command options to view ways to 
 # generate a duts.yaml from customized topologies.
 
 duts:
-- mgmt_ip: 10.255.106.71
+- mgmt_ip: 10.18.130.60
   name: DSR01
   neighbors:
   - neighborDevice: DCBBW1
@@ -23,7 +23,7 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-- mgmt_ip: 10.255.70.133
+- mgmt_ip: 10.18.130.59
   name: DCBBW1
   neighbors:
   - neighborDevice: DSR01
@@ -33,7 +33,7 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-- mgmt_ip: 10.255.81.249
+- mgmt_ip: 10.18.130.58
   name: DCBBW2
   neighbors:
   - neighborDevice: DSR01
@@ -43,7 +43,7 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-- mgmt_ip: 10.255.39.7
+- mgmt_ip: 10.18.130.56
   name: DCBBE1
   neighbors:
   - neighborDevice: DSR01
@@ -53,7 +53,7 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-- mgmt_ip: 10.255.31.184
+- mgmt_ip: 10.18.130.57
   name: DCBBE2
   neighbors:
   - neighborDevice: DSR01
@@ -63,4 +63,3 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-servers: []

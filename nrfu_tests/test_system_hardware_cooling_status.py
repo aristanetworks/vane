@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -55,8 +55,13 @@ class SystemCoolingStatusTests:
             self.output += f"Output of 'show version' command is: \n{version_output}"
 
             # Skipping testcase if device is vEOS.
-            if "vEOS" in version_output.get("modelName"):
-                pytest.skip(f"{tops.dut_name} is vEOS device, hence test is skipped.")
+            model = version_output.get("modelName")
+            if "vEOS" in model:
+                tops.output_msg = f"{tops.dut_name} is {model} device, hence test skipped."
+                tests_tools.post_process_skip(
+                    tops, self.test_system_hardware_cooling_status, self.output
+                )
+                pytest.skip(tops.output_msg)
 
             """
             TS: Running `show system environment cooling` command and verifying

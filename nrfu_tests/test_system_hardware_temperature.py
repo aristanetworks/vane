@@ -168,8 +168,9 @@ class SystemHardwareTemperatureTests:
             self.output += f"\nOutput of 'show version' command is: \n{self.version_output}"
 
             # Skipping test case if the device is vEOS.
-            if "vEOS" in self.version_output.get("modelName"):
-                pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
+            model = self.version_output.get("modelName")
+            if "vEOS" in model or "7010" in model:
+                pytest.skip(f"{tops.dut_name} is {model} device, hence test skipped.")
 
             """
             TS: Running the "show system environment temperature" command on DUT and

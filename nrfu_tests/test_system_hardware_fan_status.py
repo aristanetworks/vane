@@ -59,7 +59,8 @@ class SystemHardwareFanStatusTests:
             )
 
             # Skipping test case if the device is vEOS.
-            if "vEOS" in output.get("modelName"):
+            model = output.get("modelName")
+            if "vEOS" in model:
                 pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
 
             """
@@ -76,7 +77,10 @@ class SystemHardwareFanStatusTests:
             # Checking power supply slot and Fan tray slot details.
             self.power_supply_slots = self.fan_slot_details.get("powerSupplySlots")
             self.fan_tray_slots = self.fan_slot_details.get("fanTraySlots")
-            assert self.power_supply_slots, "Power supply slot details are not found in the output."
+            if "7010" not in model:
+                assert (
+                    self.power_supply_slots
+                ), "Power supply slot details are not found in the output."
 
             assert self.fan_tray_slots, "Fan tray slot details are not found in the output."
 

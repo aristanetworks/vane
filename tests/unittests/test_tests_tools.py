@@ -1,5 +1,4 @@
 """Test class for tests_tools.py"""
-import logging
 import os
 import shutil
 import sys
@@ -60,20 +59,17 @@ def read_yaml(yaml_file):
     Returns:
         yaml_data (dict): YAML data structure
     """
+
     try:
         with open(yaml_file, "r", encoding="utf-8") as input_yaml:
             try:
                 yaml_data = yaml.safe_load(input_yaml)
                 return yaml_data
             except yaml.YAMLError as err:
-                print(">>> ERROR IN YAML FILE")
-                logging.error(f"ERROR IN YAML FILE: {err}")
-                logging.error("EXITING TEST RUNNER")
+                print(f">>> ERROR IN YAML FILE: {err}\n EXITING TEST RUNNER")
                 sys.exit(1)
     except OSError as err:
-        print(f">>> {yaml_file} YAML FILE MISSING")
-        logging.error(f"ERROR YAML FILE: {yaml_file} NOT FOUND. {err}")
-        logging.error("EXITING TEST RUNNER")
+        print(f">>> {yaml_file} YAML FILE MISSING. {err}\n EXITING TEST RUNNER.")
         sys.exit(1)
 
 

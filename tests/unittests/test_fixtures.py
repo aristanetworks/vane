@@ -6,7 +6,6 @@ fixtures.py unit tests
 # pylint: disable=redefined-outer-name
 
 import datetime
-import logging
 import sys
 
 from unittest.mock import call
@@ -47,14 +46,10 @@ def read_yaml(yaml_file):
                 yaml_data = yaml.safe_load(input_yaml)
                 return yaml_data
             except yaml.YAMLError as err:
-                print(">>> ERROR IN YAML FILE")
-                logging.error(f"ERROR IN YAML FILE: {err}")
-                logging.error("EXITING TEST RUNNER")
+                print(f">>> ERROR IN YAML FILE: {err}\n EXITING TEST RUNNER")
                 sys.exit(1)
     except OSError as err:
-        print(f">>> {yaml_file} YAML FILE MISSING")
-        logging.error(f"ERROR YAML FILE: {yaml_file} NOT FOUND. {err}")
-        logging.error("EXITING TEST RUNNER")
+        print(f">>> {yaml_file} YAML FILE MISSING. {err}\n EXITING TEST RUNNER.")
         sys.exit(1)
 
 

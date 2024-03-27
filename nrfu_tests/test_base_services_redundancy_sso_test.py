@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -62,14 +62,21 @@ class RedundantSupervisorCardTests:
 
             except pyeapi.eapilib.CommandError as error:
                 if "Unavailable command" in str(error):
-                    pytest.skip(
-                        f"Skipping the test case as the device {tops.dut_name}, is not a dual"
+                    tops.output_msg = (
+                        f"Skipped the test case as the device {tops.dut_name}, is not a dual"
                         " supervisor device."
                     )
+                    tests_tools.post_process_skip(tops, self.test_redundant_sso_card, self.output)
+                    pytest.skip(tops.output_msg)
 
             # Skipping test case if SSO protocol is not configured on the device.
             if output["peerState"] == "notInserted":
-                pytest.skip(f"Peer supervisor card is not inserted on device {tops.dut_name}")
+                tops.output_msg = (
+                    "Skipped the test case as peer supervisor card is not inserted on device"
+                    f" {tops.dut_name}."
+                )
+                tests_tools.post_process_skip(tops, self.test_redundant_sso_card, self.output)
+                pytest.skip(tops.output_msg)
 
             tops.actual_output["sso_protocol_details"].update(
                 {

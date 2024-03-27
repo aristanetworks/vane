@@ -91,8 +91,8 @@ class TestsClient:
         Args:
             template_definitions (str): template test definition file name
             master_definitions (dict): master schema to used to render template
-            test_dir (str): the directory for which test definitons need to be generated
-            test_definitions (str): name of the test defnition file to be created
+            test_dir (str): the directory for which test definitions need to be generated
+            test_definitions (str): name of the test definition file to be created
         """
 
         # Traverses given test directory

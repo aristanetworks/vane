@@ -73,7 +73,7 @@ class RedundantSupervisorCardTests:
             if output["peerState"] == "notInserted":
                 tops.output_msg = (
                     "Skipped the test case as peer supervisor card is not inserted on device"
-                    f" {tops.dut_name}"
+                    f" {tops.dut_name}."
                 )
                 tests_tools.post_process_skip(tops, self.test_redundant_sso_card, self.output)
                 pytest.skip(tops.output_msg)

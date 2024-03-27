@@ -363,7 +363,7 @@ def test_send_cmds_json(loginfo, logdebug, mocker):
 
     assert show_cmds_output == "output_in_json"
     assert show_cmd_list_output == show_cmds
-    loginfo.assert_called_with("Ran all show commands on dut")
+    loginfo.assert_called_with("Ran all show commands on dut to gather json data")
     logdebug_calls = [
         call("List of show commands in show_cmds with encoding json: ['show version']"),
         call("Ran all show cmds with encoding json: ['show version']"),
@@ -388,7 +388,7 @@ def test_send_cmds_text(loginfo, logdebug, mocker):
 
     assert show_cmds_output == "output_in_text"
     assert show_cmd_list_output == show_cmds
-    loginfo.assert_called_with("Ran all show commands on dut")
+    loginfo.assert_called_with("Ran all show commands on dut to gather text data")
     logdebug_calls = [
         call("List of show commands in show_cmds with encoding text: ['show version']"),
         call("Ran all show cmds with encoding text: ['show version']"),

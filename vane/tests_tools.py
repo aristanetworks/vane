@@ -315,7 +315,7 @@ def send_cmds(show_cmds, conn, encoding):
         elif encoding == "text":
             show_cmd_list = conn.run_commands(show_cmds, encoding="text")
 
-        logging.info("Ran all show commands on dut")
+        logging.info(f"Ran all show commands on dut to gather {encoding} data")
         logging.debug(f"Ran all show cmds with encoding {encoding}: {show_cmds}")
 
     # pylint: disable-next=broad-exception-caught
@@ -436,7 +436,8 @@ def dut_worker(dut, show_cmds, test_parameters):
 
             logging.debug(f"No text output for {show_cmd}")
 
-    logging.info(f"{name} updated with show output {dut}")
+    logging.info(f"{name} is updated with show output.")
+    logging.debug(f"{name} updated with show output {dut}")
 
 
 def return_interfaces(hostname, test_parameters):

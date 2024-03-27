@@ -127,7 +127,9 @@ class EnvironmentTests:
             ) = (
                 self.output
             ) = f"INVALID TEST: CloudEOS router {tops.dut_name} does not require cooling.\n"
-
+            logging.info(
+                f"INVALID TEST: CloudEOS router {tops.dut_name} does not require cooling.\n"
+            )
         tops.parse_test_steps(self.test_if_system_environment_temp_is_in_spec_on_)
         tops.generate_report(tops.dut_name, self.output)
         assert tops.actual_output == tops.expected_output
@@ -271,15 +273,16 @@ class EnvironmentTests:
                 tops.actual_output = str(exception)
 
         else:
-            tops.test_result = True
-            tops.actual_output = "N/A"
-            tops.expected_output = "N/A"
-
             tops.comment = tops.output_msg = self.output = (
                 "INVALID TEST: CloudEOS router "
                 f"{tops.dut_name} does not have "
                 "power-supplies.\n"
             )
+
+            tests_tools.post_process_skip(
+                tops, self.test_if_system_environment_power_are_in_spec_on_, self.output
+            )
+            pytest.skip(tops.output_msg)
 
         tops.parse_test_steps(self.test_if_system_environment_power_are_in_spec_on_)
         tops.test_result = tops.actual_output == tops.expected_output

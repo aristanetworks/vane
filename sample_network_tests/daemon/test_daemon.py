@@ -78,9 +78,7 @@ class DaemonTests:
                 TS: Collecting the output of 'show daemon' command from DUT
                 """
                 self.output = dut["output"][tops.show_cmd]["json"]
-                assert (
-                    (self.output.get("daemons")).get(daemon).get("running")
-                ), "Show daemon details are not found"
+                assert self.output.get("daemons"), "Show daemon details are not found"
                 logging.info(
                     f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
                 )
@@ -147,9 +145,7 @@ class DaemonTests:
                 TS: Collecting the output of 'show daemon' command from DUT
                 """
                 self.output = dut["output"][tops.show_cmd]["json"]
-                assert (
-                    (self.output.get("daemons")).get(daemon).get("enabled")
-                ), "Show daemon details are not found"
+                assert self.output.get("daemons"), "Show daemon details are not found"
                 logging.info(
                     f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"
                 )

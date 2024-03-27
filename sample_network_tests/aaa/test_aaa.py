@@ -113,7 +113,7 @@ class AAATests:
             TS: Running show command 'show aaa counters' on dut again to check for
             counter increments
             """
-            self.output = tops.run_show_cmds(tops.show_cmd, "json")[0]["result"]
+            self.output = tops.run_show_cmds(tops.show_cmd, encoding="json")[0]["result"]
             assert self.output, "AAA Counter details are not collected."
             logging.info(
                 f"On device {tops.dut_name} output of {tops.show_cmd} command is: {self.output}"

@@ -11,8 +11,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_lldp_tx_is_enabled_on_
       test_id: TN11.2
@@ -25,8 +25,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_lldp_system_name_is_correct_on_
       test_id: TN11.3
@@ -39,8 +39,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_lldp_max_frame_size_is_correct_on_
       test_id: TN11.4
@@ -53,8 +53,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_lldp_interface_id_is_correct_on_
       test_id: TN11.5
@@ -67,5 +67,5 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1

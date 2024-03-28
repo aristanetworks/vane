@@ -1,0 +1,182 @@
+[data-md-color-scheme="slate"] {
+  --md-hue: 210;
+}
+
+:root {
+  /* Color schema based on Arista Color Schema */
+
+  /* Primary color shades */
+  --md-primary-fg-color:               #059393;
+  --md-primary-fg-color--light:        #FFFFFF;
+  --md-primary-fg-color--dark:         #059393;
+  --md-primary-bg-color:               #FFFFFF;
+  --md-primary-bg-color--light:        #FFFFFF;
+
+  /* Accent color shades */
+  --md-accent-fg-color:                #059393;
+  --md-accent-bg-color:                #059393;
+  --md-accent-bg-color--light:         #059393;
+
+  /* Link color */
+  --md-typeset-a-color:                #059393;
+  --md-typeset-a-color-fg:             #FFFFFF;
+  --md-typeset-a-color-bg:             #059393;
+
+  /* Code block color shades-org */
+  --md-code-bg-color:                  #E6E6E6;
+  --md-code-border-color:              #0000004f;
+  --block-code-bg-color:               #E6E6E6;
+  --md-code-fg-color:                  ...;
+
+  font-feature-settings: "kern","liga";
+  font-family: var(--md-text-font-family,_),-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing: antialiased;
+
+/* Custom Admonition eos-config */
+  --md-admonition-icon--eos-config: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="m365.3 93.38-74.63-74.64C278.6 6.742 262.3 0 245.4 0H64C28.65 0 0 28.65 0 64l.006 384c0 35.34 28.65 64 64 64H320c35.2 0 64-28.8 64-64V138.6c0-16.9-6.7-33.2-18.7-45.22zM336 448c0 8.836-7.164 16-16 16H64.02c-8.838 0-16-7.164-16-16L48 64.13c0-8.836 7.164-16 16-16h160V128c0 17.67 14.33 32 32 32h79.1v288zM96 280c0 13.3 10.8 24 24 24h144c13.3 0 24-10.7 24-24s-10.7-24-24-24H120c-13.2 0-24 10.8-24 24zm168 72H120c-13.2 0-24 10.8-24 24s10.75 24 24 24h144c13.25 0 24-10.75 24-24s-10.7-24-24-24z"/></svg>')
+
+}
+
+/* Custom Admonition eos-config */
+.md-typeset .admonition.eos-config,
+.md-typeset details.eos-config {
+  border-color: #059393;
+}
+.md-typeset .eos-config > .admonition-title,
+.md-typeset .eos-config > summary {
+  color: #059393;
+  background-color: #ffffff;
+}
+.md-typeset .eos-config > .admonition-title::before,
+.md-typeset .eos-config > summary::before {
+  background-color: #059393;
+  -webkit-mask-image: var(--md-admonition-icon--eos-config);
+          mask-image: var(--md-admonition-icon--eos-config);
+}
+/* Custom Admonition eos-config */
+
+[data-md-color-scheme="slate"] {
+  /* Primary color shades */
+  --md-primary-fg-color:               #059393;
+  --md-primary-fg-color--light:        #FFFFFF;
+  --md-primary-fg-color--dark:         #059393;
+  --md-primary-bg-color:               #FFFFFF;
+  --md-primary-bg-color--light:        #FFFFFF;
+
+  /* Accent color shades */
+  --md-accent-fg-color:                #059393;
+  --md-accent-bg-color:                #059393;
+  --md-accent-bg-color--light:         #059393;
+
+  /* Link color */
+  --md-typeset-a-color:                #059393;
+  --md-typeset-a-color-fg:             #FFFFFF;
+  --md-typeset-a-color-bg:             #059393;
+}
+
+[data-md-color-scheme="default"] {
+  /* Primary color shades */
+  --md-primary-fg-color:               #059393;
+  --md-primary-fg-color--light:        #FFFFFF;
+  --md-primary-fg-color--dark:         #059393;
+  --md-primary-bg-color:               #FFFFFF;
+  --md-primary-bg-color--light:        #FFFFFF;
+
+  /* Accent color shades */
+  --md-accent-fg-color:                #059393;
+  --md-accent-bg-color:                #059393;
+  --md-accent-bg-color--light:         #059393;
+
+  /* Link color */
+  --md-typeset-a-color:                #059393;
+  --md-typeset-a-color-fg:             #FFFFFF;
+  --md-typeset-a-color-bg:             #059393;
+
+}
+
+.md-header__button.md-logo {
+  margin-top: 0;
+  margin-bottom: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 2.4rem;
+  width: 2.4rem;
+}
+
+  .md-typeset h4 h5 h6 {
+      font-size: 1.5rem;
+      margin: 1em 0;
+      letter-spacing: -.01em;
+      line-height: 3em;
+  }
+  .md-typeset a:hover {
+      color: #d30f12;
+  }
+  
+
+  .md-typeset table:not([class]) th {
+    min-width: 5rem;
+    padding: .6rem .8rem;
+    color: var(--md-default-fg-color--lighter);
+    vertical-align: top;
+    background-color: var(--md-accent-bg-color);
+    text-align: left;
+
+  }
+  .md-typeset table:not([class]) td {
+    border-collapse: collapse;
+    vertical-align: center;
+    text-align: left;
+    border-bottom: 1px solid var(--md-default-fg-color--light);
+  }
+  .md-typeset code {
+    padding: 0 .2941176471em;
+    font-size: 80%;
+    word-break: break-word;
+    border-radius: .1rem;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+  }
+
+  .md-typeset .admonition, .md-typeset details {
+    margin: 1.5625em 0;
+    padding: 0 .6rem;
+    overflow: visible;
+    font-size: .64rem;
+    page-break-inside: avoid;
+    border-left: .2rem solid var(--md-accent-bg-color);
+    border-left-color: var(--md-accent-bg-color);
+    border-radius: .1rem;
+    border-width: thin;
+    box-shadow: 0 .2rem .5rem rgba(0,0,0,.05),0 0 .05rem rgba(0,0,0,.1);
+  }
+ 
+
+  .md-typeset__table {
+    min-width: 100%;
+  }
+  .md-typeset table:not([class]) {
+      display: table;
+  }
+
+.mdx-content__footer {
+    margin-top: 20px;
+    text-align: center;
+}
+.mdx-content__footer a {
+    display: inline-block;
+    transition: transform 250ms cubic-bezier(0.1, 0.7, 0.1, 1), color 125ms;
+}
+.mdx-content__footer a:focus, .mdx-content__footer a:hover {
+    transform: scale(1.2);
+}
+
+.md-typeset table:not([class]) th {
+    min-width: 5rem;
+    padding: .6rem .8rem;
+    color: var(--md-primary-fg-color--light);
+}

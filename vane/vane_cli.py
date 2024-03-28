@@ -40,6 +40,7 @@ from datetime import datetime
 from importlib import metadata
 import shutil
 import os
+import sys
 import pytest
 from vane import tests_client
 from vane import report_client
@@ -102,6 +103,12 @@ def parse_cli():
     parser.add_argument(
         "--markers",
         help=("List of supported technology tests. Equivalent to pytest --markers"),
+        action="store_true",
+    )
+
+    parser.add_argument(
+        "--cvp",
+        help=("Initiates a default Vane setup when running on a cvp instance"),
         action="store_true",
     )
 
@@ -259,9 +266,23 @@ def main():
     else:
         if args.nrfu:
             logging.info("Invoking the Nrfu client to run Nrfu tests")
-            nrfu = nrfu_client.NrfuClient()
+            nrfu = nrfu_client.NrfuClient(
+                "nrfu_tests/definitions_nrfu.yaml", "nrfu_tests/duts_nrfu.yaml"
+            )
             vane.config.DEFINITIONS_FILE = nrfu.definitions_file
             vane.config.DUTS_FILE = nrfu.duts_file
+
+        elif args.cvp:
+            if not os.environ.get("VANE_CVP"):
+                print(
+                    "\x1b[31mInvalid usage of flag --cvp since Vane is not "
+                    "running on a cvp instance\x1b[0m"
+                )
+                sys.exit(1)
+            else:
+                nrfu = nrfu_client.NrfuClient("definitions_cvp.yaml", "duts_cvp.yaml")
+                vane.config.DEFINITIONS_FILE = nrfu.definitions_file
+                vane.config.DUTS_FILE = nrfu.duts_file
 
         else:
             if args.definitions_file:

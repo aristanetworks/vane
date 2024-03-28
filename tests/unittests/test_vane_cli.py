@@ -212,6 +212,7 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
             generate_duts_file=None,
             generate_test_steps=None,
             markers=False,
+            cvp=False,
             nrfu=False,
             version=False,
         ),
@@ -251,6 +252,7 @@ def test_main_create_duts_file(loginfo, mocker):
             generate_duts_from_topo=None,
             generate_test_steps=None,
             markers=False,
+            cvp=False,
             nrfu=False,
         ),
     )

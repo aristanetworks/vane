@@ -228,6 +228,24 @@ def download_test_results():
         shutil.make_archive(destination, "zip", source)
 
 
+def remove_empty_logs():
+    """Removing empty log files"""
+
+    logging.info("Remove any empty log files in logs directory: logs")
+
+    # Get the list of files in the logs folder
+    # This folder will always exist as it gets created
+    # in the root logging configuration file
+    files = os.listdir("logs")
+
+    # Iterate over the files and delete each one
+    for file_name in files:
+        if file_name != "vane.log":
+            file_path = os.path.join("logs", file_name)
+            if os.path.isfile(file_path) and os.stat(file_path).st_size == 0:
+                os.remove(file_path)
+
+
 def main():
     """main function"""
     logging.info("Reading in input from command-line")
@@ -275,6 +293,7 @@ def main():
         run_tests(vane.config.DEFINITIONS_FILE, vane.config.DUTS_FILE)
         write_results(vane.config.DEFINITIONS_FILE)
         download_test_results()
+        remove_empty_logs()
 
         logging.info("\n\n!VANE has completed without errors!\n\n")
 

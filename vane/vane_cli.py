@@ -66,7 +66,7 @@ def parse_cli():
     parser.add_argument(
         "--version",
         "--v",  # Alias for version
-        help=("Current Version of Vane"),
+        help="Current Version of Vane",
         action="store_true",
     )
 
@@ -91,13 +91,13 @@ def parse_cli():
 
     parser.add_argument(
         "--markers",
-        help=("List of supported technology tests. Equivalent to pytest --markers"),
+        help="List of supported technology tests. Equivalent to pytest --markers",
         action="store_true",
     )
 
     nrfu_parser.add_argument(
         "--nrfu",
-        help=("Starts NRFU tests and will prompt users for required input."),
+        help="Starts NRFU tests and will prompt users for required input.",
         action="store_true",
     )
 

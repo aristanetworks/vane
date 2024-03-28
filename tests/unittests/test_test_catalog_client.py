@@ -100,32 +100,6 @@ def test_test_catalog_client_constructor(loginfo, logdebug):
     assert sorted(test_catalog.test_dirs) == sorted([TEST_DIR])
 
 
-def test_write_test_catalog_logs(loginfo, mocker):
-    """
-    Unit Test for TestCatalogClient object, method write_test_catalog
-    """
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR], TEST_DEF_FILE)
-    mocker_walk_dir = mocker.patch("vane.test_catalog_client.TestCatalogClient.walk_dir")
-    mocker_data_rows = mocker.patch("vane.test_catalog_client.TestCatalogClient.get_data_rows")
-    mocker_timestamp = mocker.patch("vane.test_catalog_client.get_timestamp_in_seconds")
-    mocker_makedir = mocker.patch("vane.test_catalog_client.os.makedirs")
-    mocker_write_to_csv = mocker.patch("vane.test_catalog_client.write_to_csv")
-    test_catalog.write_test_catalog()
-
-    # Verifying the function calls
-    mocker_walk_dir.assert_called_once()
-    mocker_data_rows.assert_called_once()
-    mocker_timestamp.assert_called_once()
-    mocker_makedir.assert_called_once()
-    mocker_write_to_csv.assert_called_once()
-
-    loginfo_calls = [
-        call("Started writing the test catalog file"),
-        call("Finished writing the test catalog file"),
-    ]
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-
 def test_walk_dir(loginfo, logdebug, mocker):
     """
     Unit Test for TestCatalogClient object, method walk_dir

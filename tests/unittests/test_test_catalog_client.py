@@ -13,6 +13,8 @@ from vane import test_catalog_client
 
 # Global test parameters
 TEST_DIR = "tests/unittests/fixtures/test_catalog_client/pass_dirs/api"
+TEST_DEF_FILE = "test_definition.yaml"
+NON_DEFAULT_TEST_DEF_FILE = "api_test_definition.yaml"
 PARAMETERIZATION_DATA = [
     (
         ["tests/unittests/fixtures/test_catalog_client/pass_dirs/api"],
@@ -46,6 +48,10 @@ PARAMETERIZATION_DATA = [
         "tests/unittests/fixtures/test_catalog_client/test_catalog_multiple_directory.csv",
     ),
     (["tests/unittests/fixtures/test_catalog_client/non_testing_files_having_tests_in_name/"], ""),
+    (
+        ["tests/unittests/fixtures/test_catalog_client/pass_dirs/non_default_test_def"],
+        "tests/unittests/fixtures/test_catalog_client/test_catalog.csv",
+    ),
 ]
 
 
@@ -80,7 +86,7 @@ def test_test_catalog_client_constructor(loginfo, logdebug):
     """
     Unit Test for TestCatalogClient object, method __init__
     """
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
+    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR], TEST_DEF_FILE)
 
     loginfo_calls = [
         call("Creating the test catalog client object"),
@@ -94,14 +100,24 @@ def test_test_catalog_client_constructor(loginfo, logdebug):
     assert sorted(test_catalog.test_dirs) == sorted([TEST_DIR])
 
 
-def test_write_test_catalog(loginfo, mocker):
+def test_write_test_catalog_logs(loginfo, mocker):
     """
     Unit Test for TestCatalogClient object, method write_test_catalog
     """
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
-    mocker_object = mocker.patch("vane.test_catalog_client.TestCatalogClient.walk_dir")
+    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR], TEST_DEF_FILE)
+    mocker_walk_dir = mocker.patch("vane.test_catalog_client.TestCatalogClient.walk_dir")
+    mocker_data_rows = mocker.patch("vane.test_catalog_client.TestCatalogClient.get_data_rows")
+    mocker_timestamp = mocker.patch("vane.test_catalog_client.get_timestamp_in_seconds")
+    mocker_makedir = mocker.patch("vane.test_catalog_client.os.makedirs")
+    mocker_write_to_csv = mocker.patch("vane.test_catalog_client.write_to_csv")
     test_catalog.write_test_catalog()
-    mocker_object.assert_called_once()
+
+    # Verifying the function calls
+    mocker_walk_dir.assert_called_once()
+    mocker_data_rows.assert_called_once()
+    mocker_timestamp.assert_called_once()
+    mocker_makedir.assert_called_once()
+    mocker_write_to_csv.assert_called_once()
 
     loginfo_calls = [
         call("Started writing the test catalog file"),
@@ -124,7 +140,7 @@ def test_walk_dir(loginfo, logdebug, mocker):
     # Patching the parse_test_data function.
     mocker_object = mocker.patch("vane.test_catalog_client.TestCatalogClient.parse_test_data")
 
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
+    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR], TEST_DEF_FILE)
     test_catalog.walk_dir()
 
     # Verifying expected info logs are generated.
@@ -154,7 +170,7 @@ def test_walk_dir_no_test_files_collected(mocker, capsys):
     # Patching the parse_test_data function.
     _ = mocker.patch("vane.test_catalog_client.TestCatalogClient.parse_test_data")
 
-    test_catalog = test_catalog_client.TestCatalogClient([no_test_dir])
+    test_catalog = test_catalog_client.TestCatalogClient([no_test_dir], TEST_DEF_FILE)
 
     # Catching the system exit during the test execution
     with pytest.raises(SystemExit) as exitinfo:
@@ -199,7 +215,7 @@ def test_parse_test_data(loginfo, mocker):
     )
     mocker_object_two = mocker.patch("vane.test_catalog_client.TestCatalogClient.parse_python_file")
 
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
+    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR], TEST_DEF_FILE)
     test_catalog.parse_test_data(test_files)
 
     mocker_object_one.assert_called_once()
@@ -224,7 +240,7 @@ def test_parse_python_file():
     py_file = "tests/unittests/fixtures/test_catalog_client/pass_dirs/api/test_api.py"
     json_file = "tests/unittests/fixtures/test_catalog_client/parsed_python_file_content.json"
 
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
+    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR], TEST_DEF_FILE)
 
     # Reading python file.
     with open(py_file, encoding="utf_8") as python_file:
@@ -241,7 +257,7 @@ def test_parse_python_file():
     assert expected_output == actual_output
 
 
-def test_correlate_test_data(mocker, loginfo):
+def test_correlate_test_data(loginfo):
     """
     Unit Test for TestCatalogClient object, method correlate_test_data
     Fixture or files used:
@@ -249,13 +265,14 @@ def test_correlate_test_data(mocker, loginfo):
     tests/unittests/fixtures/test_catalog_client/parsed_test_def.json
     tests/unittests/fixtures/test_catalog_client/correlated_data.json
     """
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
+    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR], TEST_DEF_FILE)
 
     parsed_py_file = "tests/unittests/fixtures/test_catalog_client/parsed_python_file_content.json"
     parsed_test_def_file = "tests/unittests/fixtures/test_catalog_client/parsed_test_def.json"
     final_data_file = "tests/unittests/fixtures/test_catalog_client/correlated_data.json"
     test_catalog.test_file_data = {}
     test_catalog.test_def_data = {}
+    expected_correlated_data = ""
 
     # Collecting the parsed Python file.
     with open(parsed_py_file, encoding="utf_8") as parsed_python_file:
@@ -267,15 +284,17 @@ def test_correlate_test_data(mocker, loginfo):
 
     # Collecting correlated data.
     with open(final_data_file, encoding="utf_8") as final_data_file:
-        final_data = json.load(final_data_file)
+        expected_correlated_data = json.load(final_data_file)
 
-    write_to_csv = mocker.patch.object(test_catalog, "write_to_csv")
     test_catalog.correlate_test_data()
 
+    actual_correlated_data = test_catalog.test_def_data
     loginfo_call = "Completed data correlation between test definitions and Python file."
     loginfo.assert_any_call(loginfo_call)
 
-    write_to_csv.assert_called_once_with(final_data)
+    assert (
+        expected_correlated_data == actual_correlated_data
+    ), "Expected and actual correlated data is not matched."
 
 
 def test_get_data_rows():
@@ -285,7 +304,7 @@ def test_get_data_rows():
     tests/unittests/fixtures/test_catalog_client/correlated_data.json,
     tests/unittests/fixtures/test_catalog_client/test_catalog.csv
     """
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
+    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR], TEST_DEF_FILE)
     json_file = "tests/unittests/fixtures/test_catalog_client/correlated_data.json"
     csv_file = "tests/unittests/fixtures/test_catalog_client/test_catalog.csv"
 
@@ -304,56 +323,6 @@ def test_get_data_rows():
     assert actual_data_rows == expected_data_rows
 
 
-def test_write_to_csv(loginfo, request, mocker):
-    """
-    Unit Test for TestCatalogClient object, method write_to_csv
-    Fixture or files used:
-    tests/unittests/fixtures/test_catalog_client/correlated_data.json
-    tests/unittests/fixtures/test_catalog_client/test_catalog.csv
-    """
-    json_file = "tests/unittests/fixtures/test_catalog_client/correlated_data.json"
-    data_rows_file = "tests/unittests/fixtures/test_catalog_client/test_catalog.csv"
-    test_catalog = test_catalog_client.TestCatalogClient([TEST_DIR])
-
-    # Collecting the final correlated data.
-    with open(json_file, encoding="utf_8") as json_file_data:
-        data = json.load(json_file_data)
-
-    # Collecting the data rows.
-    with open(data_rows_file, encoding="utf_8", newline="") as act_file:
-        actual_rows = sorted(csv.reader(act_file))
-
-    # Patching the get_data_rows
-    mocker.patch(
-        "vane.test_catalog_client.TestCatalogClient.get_data_rows", return_value=actual_rows[1:]
-    )
-
-    # Patching the file timestamp.
-    date_str = datetime.datetime(2024, 3, 10, 7, 43, 10, 112250)
-    mock_dt = mocker.patch("vane.test_catalog_client.datetime", warps=datetime)
-    mock_dt.now.return_value = date_str
-    file_timestamp = date_str.strftime("%Y%m%d%H%M%S")
-
-    # Writing test catalog in the CSV file.
-    test_catalog.write_to_csv(data)
-    execution_path = request.config.rootpath
-    test_catalog_path = os.path.join(execution_path, "test_catalog")
-
-    # Checking log is generated and the file exists at the specified location.
-    loginfo_call = [
-        call(
-            f"Writing a test catalog file: test_catalog_{file_timestamp}.csv in the"
-            f" {test_catalog_path}"
-        )
-    ]
-    loginfo.assert_has_calls(loginfo_call, any_order=False)
-
-    # Verifying test catalog file is created.
-    test_catalog_file_path = os.path.join(test_catalog_path, f"test_catalog_{file_timestamp}.csv")
-    assert os.path.exists(test_catalog_file_path)
-    file_clean_up(f"test_catalog/test_catalog_{file_timestamp}.csv")
-
-
 @pytest.mark.parametrize(
     "test_directories, expected_output_file",
     PARAMETERIZATION_DATA,
@@ -366,6 +335,7 @@ def test_write_to_csv(loginfo, request, mocker):
         "multiple_test_directories",
         "test_recursive_catalog",
         "no_tests_in_provided_directory",
+        "non_default_test_def",
     ],
 )
 def test_main_test_catalog_functionality(
@@ -387,23 +357,30 @@ def test_main_test_catalog_functionality(
     tests/unittests/fixtures/test_catalog_client/test_suite_name_mismatch.csv,
     tests/unittests/fixtures/test_catalog_client/pass_dirs/extension,
     tests/unittests/fixtures/test_catalog_client/test_catalog_multiple_directory.csv
+    tests/unittests/fixtures/test_catalog_client/pass_dirs/non_default_test_def
     """
     # Patching the file timestamp.
-    date_str = datetime.datetime(2024, 3, 10, 7, 43, 11, 112250)
-    mock_dt = mocker.patch("vane.test_catalog_client.datetime", warps=datetime)
-    mock_dt.now.return_value = date_str
-    test_catalog_obj = test_catalog_client.TestCatalogClient(test_directories)
-    date_str = date_str.strftime("%Y%m%d%H%M%S")
+    test_date = datetime.datetime(2024, 3, 10, 7, 43, 11, 112250)
+    time_in_seconds = test_date.strftime("%Y%m%d%H%M%S")
+    mocker.patch("vane.test_catalog_client.get_timestamp_in_seconds", return_value=time_in_seconds)
+    test_name = request.node.name.split("[")[1].split("]")[0]
+
+    if test_name == "non_default_test_def":
+        test_catalog_obj = test_catalog_client.TestCatalogClient(
+            test_directories, NON_DEFAULT_TEST_DEF_FILE
+        )
+    else:
+        test_catalog_obj = test_catalog_client.TestCatalogClient(test_directories, TEST_DEF_FILE)
 
     actual_rows = "Header and data rows are not collected."
     expected_rows = "Header and data rows should be collected."
 
     # Forming path of the test catalog file.
     test_catalog_path = os.path.join(request.config.rootpath, "test_catalog")
-    test_catalog_file_path = os.path.join(test_catalog_path, f"test_catalog_{date_str}.csv")
+    test_catalog_file_path = os.path.join(test_catalog_path, f"test_catalog_{time_in_seconds}.csv")
 
     # Added condition for parameterized test no_tests_in_provided_directory
-    if request.node.name.split("[")[1].split("]")[0] == "no_tests_in_provided_directory":
+    if test_name == "no_tests_in_provided_directory":
         # Catching the system exit during the test execution
         with pytest.raises(SystemExit) as exitinfo:
             test_catalog_obj.write_test_catalog()
@@ -437,4 +414,4 @@ def test_main_test_catalog_functionality(
             # Removing created CSV file, if not deleted already.
             file_clean_up(test_catalog_file_path)
 
-        assert actual_rows == expected_rows
+        assert actual_rows == expected_rows, "Expected and actual CSV file details are not matched."

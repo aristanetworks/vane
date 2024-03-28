@@ -104,11 +104,20 @@ def parse_cli():
     parser.add_argument(
         "--generate-test-catalog",
         help=(
-            "Generate test catalog for all the tests in"
-            " the test directories mentioned in CLI argument."
+            "Generate test catalog for all the tests in the test directories mentioned in CLI"
+            " argument. Provide one or more directory paths separated by spaces. If using"
+            " non-default test definitions(other than test_definition.yaml file), include the"
+            " --test-definitions-file argument to specify the name of test definitions file."
         ),
         nargs="+",
         metavar="test_directories",
+    )
+
+    parser.add_argument(
+        "--test-definitions-file",
+        help="Specify the name of the test definitions file.",
+        nargs=1,
+        metavar="test_definitions_file",
     )
     args = main_parser.parse_args()
 
@@ -161,7 +170,7 @@ def write_results(definitions_file):
     vane_report_client.write_result_doc()
 
 
-def write_test_catalog(test_dir):
+def write_test_catalog(test_dir, test_def_file):
     """
     Generates a test catalog CSV file containing information about the tests
     found in the specified test directories. The CSV file will be created in the test
@@ -169,9 +178,9 @@ def write_test_catalog(test_dir):
 
     Args:
         test_dir (str): Path and name of the test directory
+        test_def_file (str): Name of the test definitions file.
     """
-
-    vane_test_catalog_client = test_catalog_client.TestCatalogClient(test_dir)
+    vane_test_catalog_client = test_catalog_client.TestCatalogClient(test_dir, test_def_file)
     vane_test_catalog_client.write_test_catalog()
 
 
@@ -255,7 +264,13 @@ def main():
             f"Generating test catalog for test cases within {args.generate_test_catalog} "
             "test directories\n"
         )
-        write_test_catalog(args.generate_test_catalog)
+        # Default test definitions file name.
+        test_def_file = "test_definition.yaml"
+
+        if args.test_definitions_file:
+            test_def_file = args.test_definitions_file[0]
+
+        write_test_catalog(args.generate_test_catalog, test_def_file)
 
     elif args.version:
         print(f"Vane Framework Version: {metadata.version(__package__)}")

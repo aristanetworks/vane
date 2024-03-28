@@ -238,6 +238,7 @@ def test_main_write_test_catalog(loginfo, mocker):
             generate_duts_file=None,
             generate_test_catalog="test_directories",
             markers=False,
+            test_definitions_file="test_definitions_file"
         ),
     )
     vane_cli.main()

@@ -33,12 +33,10 @@
 
 import os
 import re
-import copy
-import csv
 import sys
-from datetime import datetime
 import yaml
 from vane.vane_logging import logging
+from vane.utils import get_timestamp_in_seconds, write_to_csv
 
 
 # pylint: disable=broad-exception-caught
@@ -47,7 +45,7 @@ class TestCatalogClient:
     Creates an instance of a test catalog client.
     """
 
-    def __init__(self, test_dir):
+    def __init__(self, test_dir, test_def_file):
         """
         Initializes the test catalog client
         Args:
@@ -57,6 +55,7 @@ class TestCatalogClient:
         logging.info("Creating the test catalog client object")
         logging.debug(f"Setting the test catalog client object directories to {test_dir}")
         self.test_dirs = test_dir
+        self.test_def_file = test_def_file
         self.test_file_data = {}
         self.test_def_data = {}
 
@@ -66,6 +65,32 @@ class TestCatalogClient:
         """
         logging.info("Started writing the test catalog file")
         self.walk_dir()
+
+        # Collecting the header and data rows
+        folder_name = "test_catalog"
+        header_row = ["Test Suite", "Test Case ID", "Test Case", "Description", "Test Steps"]
+        data_rows = self.get_data_rows(self.test_def_data)
+
+        # No data will be written in the CSV file if data rows are empty.
+        if not data_rows:
+            print(f"\033[91mNo tests found in the directory {self.test_dirs}.\033[0m")
+            sys.exit(0)
+
+        # Inserting the header at first index
+        data_rows.insert(0, header_row)
+
+        # Collecting the current timestamp.
+        file_timestamp = get_timestamp_in_seconds()
+
+        # Creating test catalog directory
+        folder_path = os.path.join(os.getcwd(), folder_name)
+        os.makedirs(folder_path, exist_ok=True)
+
+        # Forming the file path for the test catalog file.
+        file_name = f"test_catalog_{file_timestamp}.csv"
+        file_path = os.path.join(folder_path, file_name)
+
+        write_to_csv(data_rows, file_path)
         logging.info("Finished writing the test catalog file")
 
     def walk_dir(self):
@@ -84,7 +109,7 @@ class TestCatalogClient:
                     if name.startswith("test_")
                     and name.endswith(".py")
                     or name.endswith("_test.py")
-                    or name == "test_definition.yaml"
+                    or name == self.test_def_file
                 )
 
         logging.debug(f"Discovered test files: {test_files} for parsing")
@@ -187,7 +212,8 @@ class TestCatalogClient:
 
             if test_description:
                 # Removing the \n and multiple spaces from the description.
-                test_description = re.sub(r"\n\s+", "", test_description)
+                test_description = re.sub(r"\n\s+", " ", test_description)
+                test_description = test_description.strip()
 
                 # Collecting the test description.
                 if "TD: " in test_description:
@@ -220,9 +246,8 @@ class TestCatalogClient:
         Utility to correlate the test data (data correlated between the test definitions
         and the Python file).
         """
-        final_data = copy.deepcopy(self.test_def_data)
 
-        # Iterating over the data collected from test definitions file.
+        # Iterating over the data collected from the test definitions file.
         for test_suite, test_cases in self.test_def_data.items():
             test_file_info = self.test_file_data.get(test_suite, {})
 
@@ -234,57 +259,11 @@ class TestCatalogClient:
                 test_description = test_file_info.get(test_case, {}).get(
                     "test_description", default_test_description
                 )
-                final_data[test_suite][test_case].update(
+                test_cases[test_case].update(
                     {"test_steps": test_steps, "test_description": test_description}
                 )
 
         logging.info("Completed data correlation between test definitions and Python file.")
-
-        self.write_to_csv(final_data)
-
-    def write_to_csv(self, final_data):
-        """
-        Utility to write collected test catalog data into the CSV file.
-        Args:
-            final_data (dict): Test case dictionary collected from test definitions and
-            Python file.
-        """
-        folder_name = "test_catalog"
-        header = ["Test Suite", "Test Case ID", "Test Case", "Description", "Test Steps"]
-        data_rows = self.get_data_rows(final_data)
-
-        # No data will be written in the CSV file if data rows are empty.
-        if not data_rows:
-            print(f"\033[91mNo tests found in the directory {self.test_dirs}.\033[0m")
-            sys.exit(0)
-
-        # Collecting the current timestamp.
-        file_timestamp = datetime.now()
-        file_timestamp = file_timestamp.strftime("%Y%m%d%H%M%S")
-
-        # Creating test catalog directory
-        folder_path = os.path.join(os.getcwd(), folder_name)
-        os.makedirs(folder_path, exist_ok=True)
-
-        # Forming the file path for test catalog file.
-        file_name = f"test_catalog_{file_timestamp}.csv"
-        file_path = os.path.join(folder_path, file_name)
-
-        logging.info(
-            f"Writing a test catalog file: test_catalog_{file_timestamp}.csv in the {folder_path}"
-        )
-
-        try:
-            # Writing test catalog details in CSV file.
-            with open(file_path, "w", encoding="utf_8", newline="") as file:
-                writer = csv.writer(file, lineterminator="\n")
-                writer.writerow(header)
-                writer.writerows(data_rows)
-        except FileNotFoundError as error_msg:
-            print(
-                f"\033[91mError occurred while writing to test_catalog_{file_timestamp}.csv file:"
-                f" {error_msg}\033[0m"
-            )
 
     def get_data_rows(self, final_data):
         """

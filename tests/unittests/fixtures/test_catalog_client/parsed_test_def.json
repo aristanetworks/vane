@@ -1,0 +1,19 @@
+{
+    "api_tests":{
+       "test_if_management_https_api_server_is_running_on_":{
+          "test_id":"TN2.1"
+       },
+       "test_if_management_https_api_server_port_is_correct_on_":{
+          "test_id":"TN2.2"
+       },
+       "test_if_management_https_api_server_is_enabled_on_":{
+          "test_id":"TN2.3"
+       },
+       "test_if_management_http_api_server_is_running_on_":{
+          "test_id":"TN2.4"
+       },
+       "test_if_management_local_http_api_server_is_running_on_":{
+          "test_id":"TN2.5"
+       }
+    }
+ }

@@ -1,0 +1,16 @@
+- name: https_tests
+  testcases:
+    - name: test_if_management_https_api_server_is_running_on_
+      test_id: TN2.1
+      description: Verify management api https server is running
+      show_cmd: show management api http-commands
+      # If HTTPS API server is running
+      expected_output: 
+        https_server_running: True
+      report_style: modern
+      test_criteria: Verify management api https server is running
+      # Optionally filter duts by criteria: name, role, regex, or names
+      criteria: names
+      filter: 
+        - DLFW3
+        - DLFW4

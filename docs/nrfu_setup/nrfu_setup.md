@@ -324,6 +324,9 @@ in vane, if yes it will further prompt you
 Please specify test case directory <path/to/test case dir> (Use tab for autocompletion):
 ```
 
+!!! tip
+    Look into this [section](../vane_cvp/vane_cvp.md#importing-local-customized-test-directories) to learn how you can import your own customized, nrfu/non-nrfu, test cases in this working environment
+
 !!! success
 
     After which Vane will start executing the test cases on

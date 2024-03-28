@@ -24,6 +24,8 @@
     test_criteria: NTP server should be configured on the device. Primary and secondary
       NTP association should be correct on the device.
     report_style: modern
+    input:
+      single_ntp_check: false # Single NTP server verification, set the value as True when single ntp server verification needed.
     criteria: null
     filter: null
   - name: test_redundant_sso_card
@@ -140,7 +142,7 @@
     criteria: null
     filter: null
   - name: test_bgp_ipv4_peers_state
-    description: Testcases for verification of BGP ipv4 peers are established.
+    description: Testcase for verification of BGP IPv4 peers state.
     test_id: NRFU4.2
     show_cmd: show ip bgp summary vrf all
     expected_output: null

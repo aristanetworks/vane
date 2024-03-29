@@ -126,18 +126,20 @@ a folder called test catalog.
         ![Screenshot](../images/test_catalog_csv.png)
 
 !!! Tip
-  If using non-default test definitions (other than test_definition.yaml file), include the [--test-definitions-file](cli.md#using-the---test-definitions-file-flag) argument to specify the name of test definitions file relevant to the passed in test directory.
+    If using non-default test definitions (file named other than test_definition.yaml file), include the [--test-definitions-file](cli.md#using-the---test-definitions-file-flag) argument to specify the name of test definitions file relevant to the passed in test directories.
+    !!! Warning
+        Vane enforces a common test definitions file name across all test directories. This implies that the --test-definitions-file flag can take in only 1 file name.
 
 ## Using the --test-definitions-file flag
 
-This flag can be used in tandem with the --generate-test-catalog flag wherein you want to provide a custom named test definitions file for your test directory. By default Vane would look for a file named *test_definitions.yaml* to locate the parameters associated with your test cases. You can alter this behaviour if you have your test definition data in a file named otherwise by providing the custom name via this argument.
+This flag can be used in tandem with the --generate-test-catalog flag wherein you want to provide a custom named test definitions file for your test directory. By default Vane would look for a file named *test_definitions.yaml* within your test directory to locate the parameters associated with your test cases. You can alter this behaviour if you have your test definition data in a file named otherwise by providing the custom name via this argument.
 
 ```text
 vane --generate-test-catalog sample_network_tests/memory --test-definitions-file memory_test_definitions.yaml
 ```
 
 !!! warning
-  The argument takes in the name of the test definitions file and NOT the path
+    The argument takes in the name of the test definitions file and NOT the path
 
 ## Using the -- markers flag
 

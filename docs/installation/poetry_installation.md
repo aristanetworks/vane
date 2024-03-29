@@ -83,17 +83,15 @@ In either case, the prompt will change to indicate the virtual
 environment is active by prefixing the project name and python version,
 and Vane can now be executed in the environment.
 
-!!! eos-config "Note"
-    Vane is currently supported in python versions 3.9 and lower
 
 Vane is now ready to be executed and the prompt will look as follows:
 
 ``` text
-(vane-py3.9) vane #
+(vane-env) vane #
 ```
 
 ```text
-(vane-py3.9) vane # vane --help
+(vane-env) vane # vane --help
 ```
 
 ![Screenshot](../images/vane_cli.png)

@@ -5,7 +5,7 @@ different arguments as needed. Using the command **```vane --help```**
 shows the different available arguments that can be used.
 
 ```text
-(vane-py3.9) vane # vane --help
+(vane-env) vane # vane --help
 ```
 
 ![Screenshot](../images/vane_cli.png)

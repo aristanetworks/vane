@@ -6,7 +6,7 @@ Welcome to the installation guide for Vane. Choose the installation method that 
 
 Using Python virtual environments for application installation offers critical advantages in managing project dependencies and maintaining consistency across development workflows. Virtual environments allow for the isolation of project-specific dependencies, preventing conflicts between different projects and ensure that each project has access to the precise versions of libraries it requires.
 
-This is the best option for most users and only requires Python (3.7-3.9 supported) to implement. For those who prefer using Python virtual environments, we have a detailed guide to help you set up your project environment using the traditional Python virtual environment approach.
+This is the best option for most users and only requires Python to implement. For those who prefer using Python virtual environments, we have a detailed guide to help you set up your project environment using the traditional Python virtual environment approach.
 
 [Explore the Python Virtual Environment installation method](python_installation.md)
 

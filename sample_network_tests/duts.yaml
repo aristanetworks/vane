@@ -4,7 +4,7 @@
 # generate a duts.yaml from customized topologies.
 
 duts:
-- mgmt_ip: 10.18.130.60
+- mgmt_ip: 10.18.135.117
   name: DSR01
   neighbors:
   - neighborDevice: DCBBW1
@@ -23,7 +23,7 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-- mgmt_ip: 10.18.130.59
+- mgmt_ip: 10.18.135.121
   name: DCBBW1
   neighbors:
   - neighborDevice: DSR01
@@ -33,7 +33,7 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-- mgmt_ip: 10.18.130.58
+- mgmt_ip: 10.18.135.119
   name: DCBBW2
   neighbors:
   - neighborDevice: DSR01
@@ -43,7 +43,7 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-- mgmt_ip: 10.18.130.56
+- mgmt_ip: 10.18.135.118
   name: DCBBE1
   neighbors:
   - neighborDevice: DSR01
@@ -53,7 +53,7 @@ duts:
   transport: https
   username: cvpadmin
   role: unknown
-- mgmt_ip: 10.18.130.57
+- mgmt_ip: 10.18.135.120
   name: DCBBE2
   neighbors:
   - neighborDevice: DSR01

@@ -196,12 +196,48 @@ def test_download_test_results(loginfo):
         loginfo.assert_called_with("Downloading a zip file of the TEST RESULTS folder")
 
 
+def test_remove_unexecuted_testcase_logs(loginfo):
+    """Validates that log files created for unexecuted test cases get deleted"""
+
+    vane.config.test_parameters = {"parameters": {"json_report": "reports/report"}}
+    json_file = "reports/report.json"
+
+    # Execute this test case only when json report is available as it is required
+    # within the remove_unexecuted_testcase_logs module for validating which logs to delete
+    if os.path.exists(json_file):
+        # Add unexecuted test case log files to logs folder
+        unexecuted_file_log = "logs/no_test_case.log"
+        with open(unexecuted_file_log, "w", encoding="utf-8"):
+            pass
+        log_folder_size = len(
+            [name for name in os.listdir("logs") if os.path.isfile(os.path.join("logs", name))]
+        )
+
+        vane_cli.remove_unexecuted_testcase_logs()
+
+        new_log_folder_size = len(
+            [name for name in os.listdir("logs") if os.path.isfile(os.path.join("logs", name))]
+        )
+
+        # assert the module removed unexecuted_file_log correctly
+        assert new_log_folder_size == log_folder_size - 1
+
+        # assert logs to ensure the method executed without errors
+        loginfo_calls = [
+            call("Removing log files of unexecuted test cases from logs directory: logs"),
+            call("Gathering executed test cases' names from report.json"),
+            call("Deleting unexecuted test case log files"),
+        ]
+        loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+
 def test_main_definitions_and_duts(loginfo, logwarning, mocker):
     """Tests the --definitions-file and --duts-file flag"""
 
     mocker.patch("vane.vane_cli.run_tests")
     mocker.patch("vane.vane_cli.write_results")
     mocker.patch("vane.vane_cli.download_test_results")
+    mocker.patch("vane.vane_cli.remove_unexecuted_testcase_logs")
 
     # mocking parse cli to test --definitions-file and --duts-file flag
     mocker.patch(

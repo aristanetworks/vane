@@ -67,6 +67,7 @@ class NrfuClient:
         # Configure readline to enable arrow key navigation
         readline.parse_and_bind("set editing-mode vi")  # Use 'vi' mode for navigation
 
+        self.ask_report_detail()
         # Getting credentials from user
         self.get_credentials()
 
@@ -88,6 +89,15 @@ class NrfuClient:
 
         # Run Vane with the generated duts and definitions file
         print("\x1b[32mStarting Execution of NRFU tests via Vane\x1b[0m")
+
+    def ask_report_detail(self):
+        """ Ask user if summary or detailed report 
+        Puts the user's choice in self._report_detail_level
+        """
+        self._report_detail_level = True #only summary report
+        user_choice = input("Do you want detailed report?[Default: no] (y/n/yes/no)")
+        if user_choice and user_choice in ['y', 'yes']:
+            self._report_detail_level = False #summary + detailed report
 
     def get_credentials(self):
         """Ask user to enter credentials for EOS/CloudVision
@@ -292,6 +302,7 @@ class NrfuClient:
                 "test_definitions": "test_definition.yaml",
                 "report_summary_style": "modern",
                 "self_contained": True,
+                "generate_only_summary_report": self._report_detail_level,
             }
         }
 

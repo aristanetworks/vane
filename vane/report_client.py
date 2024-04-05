@@ -110,6 +110,7 @@ class ReportClient:
 
         self._reports_dir = self.data_model["parameters"]["report_dir"]
         _results_dir = self.data_model["parameters"]["results_dir"]
+        self._only_summary_report = self.data_model["parameters"]["generate_only_summary_report"]
         self._results_datamodel = None
         self._compile_yaml_data(_results_dir)
         logging.debug(f"Results file data is {self._results_datamodel}")
@@ -226,7 +227,8 @@ class ReportClient:
         self._write_toc_page()
         self._write_summary_report()
         self._write_tests_case_report()
-        self._write_detail_report()
+        if not self._only_summary_report:
+            self._write_detail_report()
 
         _, file_date = return_date()
         reports_dir = self._reports_dir

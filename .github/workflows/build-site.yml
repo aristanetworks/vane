@@ -1,10 +1,11 @@
+# This is deploying the latest commits on develop to develop documentation
 name: Build and Deploy Vane site
 
 on:
   push:
     branches:
       - develop
-
+  workflow_dispatch:
 
 jobs:
   build_and_deploy_job:
@@ -20,6 +21,7 @@ jobs:
           python-version: 3.x
 
       ##### Install required Python Modules and build the website #####
-      - run: pip install -r docs/requirements.txt
-      - run: mkdocs gh-deploy --force
-      
+      - name: 'Build mkdocs content and deploy to gh-pages to develop'
+        run: |
+            pip install -r docs/requirements.txt
+            mike deploy --push develop

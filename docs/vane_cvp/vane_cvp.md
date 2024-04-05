@@ -30,121 +30,80 @@ Before we dive into either of these, let us briefly cover how you can import you
 
 #### Importing local customized test directories
 
-If you are not planning on using custom test cases, you may skip this section and move to either [A. Run Vane the default way](#a-run-vane-the-default-way) or [B. Run Vane using the CVP option](#b-run-vane-using-the-cvp-option).
+If you are not planning on using custom test cases, you may skip this section and move to either [A. Run Vane the default way](#a-run-vane-the-default-way) or [B. Run Vane using the CVP option](#b-run-vane-using-the-cvp-option-recommended-for-new-users).
 
-The *Vane-CVP* extension has a mountpoint that links a directory from the host OS to within the container OS so we can easily add/retrieve files and data from the container for use with Vane. This mountpoint is located at `/cvpi/apps/vane-cvp/vane-data` on the CVP host system, and is mounted as the directory `/vane-data` within the *Vane-CVP* container.
+!!! information "Explaining the mountpoint between CVP host system and Vane-CVP container"
 
-Once the *Vane-CVP* extension has been installed, this mountpoint is automatically established, and any activity within the two endpoints will be visible on both sides of the mount. If the *Vane-CVP* extension is uninstalled or stopped and restarted, the mountpoint is reestablished, and the existing files in the CVP host system's `/cvpi/apps/vane-cvp/vane-data` directory are remounted. No data will be lost by stopping or uninstalling the *Vane-CVP* extension.
+    The *Vane-CVP* extension has a mountpoint that links a directory from the host OS to within the container OS so we can easily add/retrieve files and data from the container for use with Vane. This mountpoint is located at `/cvpi/apps/vane-cvp/vane-data` on the CVP host system, and is mounted as the directory `/vane-data` within the *Vane-CVP* container.
 
-When you first connect to the *Vane-CVP* container after a fresh install, you are placed in the `/vane-data` directory. If you do a directory listing, you will see a pytest.ini file, and two directories containing nrfu test cases and sample network test cases.
+    Once the *Vane-CVP* extension has been installed, this mountpoint is automatically established, and any activity within the two endpoints will be visible on both sides of the mount. If the *Vane-CVP* extension is uninstalled or stopped and restarted, the mountpoint is reestablished, and the existing files in the CVP host system's `/cvpi/apps/vane-cvp/vane-data` directory are remounted. No data will be lost by stopping or uninstalling the *Vane-CVP* extension.
 
-```
-(vane-cvp-shell) jamazan vane-data # pwd
-/vane-data
+    When you first connect to the *Vane-CVP* container after a fresh install, you are placed in the `/vane-data` directory. If you do a directory listing, you will see a pytest.ini file, and two directories containing nrfu test cases and sample network test cases.
 
-(vane-cvp-shell) jamazan vane-data # ls -la
-total 20
-drwxrwxrwx    4 cvp      cvp           4096 Apr  5 15:45 .
-drwxr-xr-x    1 root     root          4096 Apr  5 15:31 ..
-drwxr-xr-x    2 cvp      cvp           4096 Apr  5 15:45 nrfu_tests
--rw-r--r--    1 cvp      cvp           2171 Apr  5 15:45 pytest.ini
-drwxr-xr-x   22 cvp      cvp           4096 Apr  5 15:45 sample_network_tests
-```
+    ![Screenshot](../images/vane-cvp-vane-data-listing.png)
 
-If you log into the CVP host in a second shell window, and change to the `/cvpi/apps/vane-cvp/vane-data` directory and do a directory listing, you will see the same file and directories there.
+    If you log into the CVP host in a second shell window, and change to the `/cvpi/apps/vane-cvp/vane-data` directory and do a directory listing, you will see the same file and directories there.
 
-```
-[root@jamazan ~]# cd /cvpi/apps/vane-cvp/vane-data/
+    ![Screenshot](../images/vane-cvp-root-listing.png)
 
-[root@jamazan vane-data]# pwd
-/cvpi/apps/vane-cvp/vane-data
 
-[root@jamazan vane-data]# ls -la
-total 20
-drwxrwxrwx  4 cvp cvp 4096 Apr  5 15:45 .
-drwxr-xr-x  4 cvp cvp 4096 Apr  5 15:28 ..
-drwxr-xr-x  2 cvp cvp 4096 Apr  5 15:45 nrfu_tests
--rw-r--r--  1 cvp cvp 2171 Apr  5 15:45 pytest.ini
-drwxr-xr-x 22 cvp cvp 4096 Apr  5 15:45 sample_network_tests
-```
+    Now we can upload our own test case files to the CVP host and put them under this directory for Vane to use within the container. In the CVP host system shell, create a new directory to store your custom test cases.
 
-Now we can upload our own test case files to the CVP host and put them under this directory for Vane to use within the container. In the CVP host system shell, create a new directory to store your custom test cases.
+    ```
+    [root@jamazan vane-data]# mkdir my-new-vane-tests
 
-```
-[root@jamazan vane-data]# mkdir my-new-vane-tests
+    [root@jamazan vane-data]# ls -la
+    total 24
+    drwxrwxrwx  5 cvp  cvp  4096 Apr  5 15:47 .
+    drwxr-xr-x  4 cvp  cvp  4096 Apr  5 15:28 ..
+    drwxr-xr-x  2 root root 4096 Apr  5 15:47 my-new-vane-tests
+    drwxr-xr-x  2 cvp  cvp  4096 Apr  5 15:45 nrfu_tests
+    -rw-r--r--  1 cvp  cvp  2171 Apr  5 15:45 pytest.ini
+    drwxr-xr-x 22 cvp  cvp  4096 Apr  5 15:45 sample_network_tests
+    ```
 
-[root@jamazan vane-data]# ls -la
-total 24
-drwxrwxrwx  5 cvp  cvp  4096 Apr  5 15:47 .
-drwxr-xr-x  4 cvp  cvp  4096 Apr  5 15:28 ..
-drwxr-xr-x  2 root root 4096 Apr  5 15:47 my-new-vane-tests
-drwxr-xr-x  2 cvp  cvp  4096 Apr  5 15:45 nrfu_tests
--rw-r--r--  1 cvp  cvp  2171 Apr  5 15:45 pytest.ini
-drwxr-xr-x 22 cvp  cvp  4096 Apr  5 15:45 sample_network_tests
-```
+    And if you check the directory listing from within the container now, you will see the same directory now appears in the container's listing.
 
-And if you check the directory listing from within the container now, you will see the same directory now appears in the container's listing.
+    ```
+    (vane-cvp-shell) jamazan vane-data # ls -la
+    total 24
+    drwxrwxrwx    5 cvp      cvp           4096 Apr  5 15:47 .
+    drwxr-xr-x    1 root     root          4096 Apr  5 15:31 ..
+    drwxr-xr-x    2 root     root          4096 Apr  5 15:47 my-new-vane-tests
+    drwxr-xr-x    2 cvp      cvp           4096 Apr  5 15:45 nrfu_tests
+    -rw-r--r--    1 cvp      cvp           2171 Apr  5 15:45 pytest.ini
+    drwxr-xr-x   22 cvp      cvp           4096 Apr  5 15:45 sample_network_tests
+    ```
 
-```
-(vane-cvp-shell) jamazan vane-data # ls -la
-total 24
-drwxrwxrwx    5 cvp      cvp           4096 Apr  5 15:47 .
-drwxr-xr-x    1 root     root          4096 Apr  5 15:31 ..
-drwxr-xr-x    2 root     root          4096 Apr  5 15:47 my-new-vane-tests
-drwxr-xr-x    2 cvp      cvp           4096 Apr  5 15:45 nrfu_tests
--rw-r--r--    1 cvp      cvp           2171 Apr  5 15:45 pytest.ini
-drwxr-xr-x   22 cvp      cvp           4096 Apr  5 15:45 sample_network_tests
-```
+Now that you understand the above it is easy to add your custom test cases to the Vane container. Simply upload your test cases to the CVP host, placing them in the subdirectory of `/cvpi/apps/vane-cvp/vane-data` that you just created. You can do the upload directly to this location or upload to a temporary location and then move the files to this directory afterwards.
 
-Now it's easy to add your custom test cases to the Vane container. Simply upload your test cases to the CVP host, placing them in the subdirectory of `/cvpi/apps/vane-cvp/vane-data` that you just created. You can do the upload directly to this location or upload to a temporary location and then move the files to this directory afterwards.
+!!! Steps
 
-```
-# In this example we copy the tests directly to the mountpoint directory
-
-    # Copy the tests to the mountpoint location we created
-$ scp my-vane-tests.tgz root@cvp-host:/cvpi/apps/vane-cvp/vane-data/my-new-vane-tests/.
-root@cvp-host's password:
-my-vane-tests.tgz                                                    100%  359MB   1.2MB/s   04:59
-
-    # Log into the CVP host and change to the mountpoint location (not shown)
-
-    # Upackage the test cases
-[root@jamazan my-new-vane-tests]# tar xzf my-vane-tests.tgz
-
-    ----------------------------------------------
-
-# In this example we copy the tests to a temp directory, extract the tests,
-# then move them to the mountpoint directory
-    
-    # Copy the tests to the temp directory
-$ scp my-vane-tests.tgz root@cvp-host:/tmp/.
-root@cvp-host's password:
-my-vane-tests.tgz                                                    100%  359MB   1.2MB/s   04:59
-
-    # Log into the CVP host and change to the /tmp directory (not shown)
-
-    # Unpackage the test cases
-[root@jamazan tmp]# tar xzf my-vane-tests.tgz
-
-    # Move the test case directory to the mountpoint location
-[root@jamazan tmp]# mv my-vane-tests /cvpi/apps/vane-cvp/vane-data/my-new-vane-tests/.
-```
+    1. Copy the tests from local directory to the mountpoint location we created within our cvp host
+    ```
+    scp my-vane-tests.tgz root@cvp-host:/cvpi/apps/vane-cvp/vane-data/my-new-vane-tests/.
+    ```
+    2. Log into the CVP host and change to the mountpoint (/cvpi/apps/vane-cvp/vane-data/my-new-vane-tests/) location (not shown)
+    3. Unpack the test cases
+    ```
+    tar xzf my-vane-tests.tgz
+    ```
 
 Finally, you need to change the ownership of the test cases to the *cvp* user, since that is the
 default user inside CVP containers. Without changing the ownership, Vane will not be able to write
 some logging and reporting data to the directory when it is running the test cases.
 
-```
-[root@jamazan vane-data]# chown -R cvp /cvpi/apps/vane-cvp/vane-data/my-new-vane-tests
+```text
+chown -R cvp /cvpi/apps/vane-cvp/vane-data/my-new-vane-tests
 ```
 
-!!! important
+!!! warning
 
     The *cvp* user ownership must be maintained at all times within the directory structure of the mountpoint. If new files or directories are added at any time, these must also be changed to the ownership of the *cvp* user.
 
 After transferring and unpackaging your tests, the directory inside the *Vane-CVP* container will countain all your test cases.
 
-```
+```text
 (vane-cvp-shell) jamazan vane-data # ls -la my-new-vane-tests/my-vane-tests/
 total 316
 drwxr-xr-x    2 cvp      root          4096 Apr  5 16:46 .
@@ -161,13 +120,15 @@ drwxr-xr-x    3 cvp      root          4096 Apr  5 16:46 ..
 
     Ensure that your test case folder has a conftest.py file for initializing the basic pytest configs for a valid test run. You can copy the conftest.py file from the *nrfu_tests* directory located in the *vane-data* directory into your test case directory. This sample conftest.py file is also available from the Vane GitHub repository [here](https://github.com/aristanetworks/vane/blob/develop/nrfu_tests/conftest.py).
 
-!!! eos-config "Note"
+!!! tip
 
     If desired, the custom test cases can be edited directly on the CVP host by editing the files in the `/cvpi/apps/vane-cvp/vane-data` path. Any edits made from the CVP host system will reflect immediately in the *Vane-CVP* container and will be applied the next time the Vane tests are run.
 
+Now that you have imported your local customized test cases, you can follow either of the approaches listed below!
+
 #### A. Run Vane the default way
 
-This is basically the conventional way of running Vane where you set up your definitions.yaml file and duts.yaml file with the necessary information. [Executing Vane section](../executing_vane/executing_vane.md) covers these steps in detail. Keep in mind to give path to your imported customized test case folder in the test_dirs field within your definitions.yaml file.
+This is basically the conventional way of running Vane where you set up your definitions.yaml file and duts.yaml file with the necessary information. [Executing Vane section](../executing_vane/executing_vane.md) covers these steps in detail. Keep in mind to modify the test_dirs field within your definitions.yaml file to mention the path to your imported customized test case folder.
 
 We recommend using Option B if this is your first time running Vane, since it will initialize the defaults and use your CVP instance to gather duts data for running vane.
 
@@ -197,19 +158,7 @@ After which it will ask you if you want to provide custom test cases (it will de
 
 If you say Yes to the above prompt, it will further ask you for the path to the imported test cases.
 
-``` text
-Do you want to specify a custom test case directory [y|n]:y
-Please specify test case directory <path/to/test case dir> (Use tab for autocompletion):/vane-data/my-new-vane-tests/my-vane-tests
-Starting Execution of tests via Vane
-Starting test with command: pytest -v --self-contained-html --html=reports/report_2404051657.html --json=reports/report.json --junit-xml=reports/report.xml /vane-data/my-new-vane-tests/my-vane-tests
-
-======================================================== test session starts ========================================================
-platform linux -- Python 3.9.19, pytest-7.4.4, pluggy-1.4.0 -- /home/cvp/.cache/pypoetry/virtualenvs/vane-6gE1vKXj-py3.9/bin/python
-
-< ... output removed ... >
-
-============================================ 114 failed, 70 passed, 88 skipped in 52.55s ============================================
-```
+![Screenshot](../images/vane-cvp-output.png)
 
 !!! success
 

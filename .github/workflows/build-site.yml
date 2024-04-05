@@ -24,4 +24,4 @@ jobs:
       - name: 'Build mkdocs content and deploy to gh-pages to develop'
         run: |
             pip install -r docs/requirements.txt
-            mike deploy --push main
+            mike deploy --push develop

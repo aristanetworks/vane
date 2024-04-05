@@ -63,7 +63,7 @@ def test_setup_not_cvp(mocker, capsys):
     captured = capsys.readouterr()
 
     # Assert that the expected content is present in the captured output
-    expected_content = "Starting Execution of NRFU tests via Vane"
+    expected_content = "Starting Execution of tests via Vane"
     assert expected_content in captured.out
 
     client.get_credentials.assert_called_once()
@@ -90,7 +90,7 @@ def test_setup_cvp(mocker, capsys):
     captured = capsys.readouterr()
 
     # Assert that the expected content is present in the captured output
-    expected_content = "Starting Execution of NRFU tests via Vane"
+    expected_content = "Starting Execution of tests via Vane"
     assert expected_content in captured.out
 
     client.get_credentials.assert_called_once()

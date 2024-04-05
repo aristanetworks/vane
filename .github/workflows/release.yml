@@ -22,4 +22,3 @@ jobs:
         run: |
           pip install -r docs/requirements.txt
           mike deploy --update-alias --push  ${{github.ref_name}} stable
-          mike deploy --update-alias --push  ${{github.ref_name}} latest

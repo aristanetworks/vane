@@ -55,6 +55,8 @@ extra:
       link: https://www.arista.com
   version:
     provider: mike
+    default:
+      - stable
 
 extra_css:
   - stylesheets/extra.material.css

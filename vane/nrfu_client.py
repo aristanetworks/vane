@@ -54,7 +54,7 @@ class NrfuClient:
         self.duts_file = "nrfu_tests/duts_nrfu.yaml"
         self.username = ""
         self.password = ""
-        self._report_detail_level = True # only summary report by default
+        self._report_detail_level = True  # only summary report by default
 
         logging.info("Starting the NRFU client")
         self.setup()
@@ -94,13 +94,15 @@ class NrfuClient:
         print("\x1b[32mStarting Execution of NRFU tests via Vane\x1b[0m")
 
     def ask_report_detail(self):
-        """ Ask user if summary or detailed report 
+        """Ask user if summary or detailed report
         Puts the user's choice in self._report_detail_level
         """
-        self._report_detail_level = True # default only summary report
-        user_choice = input("Do you want detailed report?(Press enter for Default: no) [y/yes/n/no]:")
-        if user_choice and user_choice in ['y', 'yes']:
-            self._report_detail_level = False # summary + detailed report
+        self._report_detail_level = True  # default only summary report
+        user_choice = input(
+            "Do you want detailed report?(Press enter for Default: no) [y/yes/n/no]:"
+        )
+        if user_choice and user_choice in ["y", "yes"]:
+            self._report_detail_level = False  # summary + detailed report
 
     def get_credentials(self):
         """Ask user to enter credentials for EOS/CloudVision

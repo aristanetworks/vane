@@ -110,7 +110,7 @@ class ReportClient:
 
         self._reports_dir = self.data_model["parameters"]["report_dir"]
         _results_dir = self.data_model["parameters"]["results_dir"]
-        self._only_summary_report = self.data_model["parameters"]["generate_only_summary_report"]
+        self._only_summary_report = self.data_model["parameters"].get("generate_only_summary_report", True)
         self._results_datamodel = None
         self._compile_yaml_data(_results_dir)
         logging.debug(f"Results file data is {self._results_datamodel}")

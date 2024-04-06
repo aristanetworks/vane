@@ -19,3 +19,4 @@ parameters:
   test_dirs:
   - sample_network_tests/memory
   verbose: true
+  generate_only_summary_report: true

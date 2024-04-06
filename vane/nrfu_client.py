@@ -54,6 +54,7 @@ class NrfuClient:
         self.duts_file = "nrfu_tests/duts_nrfu.yaml"
         self.username = ""
         self.password = ""
+        self._report_detail_level = True # only summary report by default
 
         logging.info("Starting the NRFU client")
         self.setup()
@@ -67,7 +68,6 @@ class NrfuClient:
         # Configure readline to enable arrow key navigation
         readline.parse_and_bind("set editing-mode vi")  # Use 'vi' mode for navigation
 
-        self.ask_report_detail()
         # Getting credentials from user
         self.get_credentials()
 
@@ -80,6 +80,9 @@ class NrfuClient:
             device_data, source = self.cvp_application()
         else:
             device_data, source = self.not_cvp_application()
+
+        # Ask the level of report details
+        self.ask_report_detail()
 
         # Generate duts_nrfu.yaml file from the duts data gathered above
         self.generate_duts_file(device_data, source)
@@ -94,10 +97,10 @@ class NrfuClient:
         """ Ask user if summary or detailed report 
         Puts the user's choice in self._report_detail_level
         """
-        self._report_detail_level = True #only summary report
-        user_choice = input("Do you want detailed report?[Default: no] (y/n/yes/no)")
+        self._report_detail_level = True # default only summary report
+        user_choice = input("Do you want detailed report?(Press enter for Default: no) [y/yes/n/no]:")
         if user_choice and user_choice in ['y', 'yes']:
-            self._report_detail_level = False #summary + detailed report
+            self._report_detail_level = False # summary + detailed report
 
     def get_credentials(self):
         """Ask user to enter credentials for EOS/CloudVision

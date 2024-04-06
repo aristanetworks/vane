@@ -19,3 +19,4 @@ parameters:
   test_dirs:
   - nrfu_tests
   verbose: true
+  generate_only_summary_report: true

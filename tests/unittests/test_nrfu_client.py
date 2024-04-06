@@ -111,6 +111,7 @@ def test_ask_report_detail(mocker):
     for idx, input_item in enumerate(inputs):
         mocker.patch("builtins.input", return_value=input_item)
         client.ask_report_detail()
+        # pylint: disable=W0212
         assert client._report_detail_level == outputs[idx]
 
 

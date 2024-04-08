@@ -97,7 +97,7 @@ class NrfuClient:
         """Ask user if summary or detailed report
         Puts the user's choice in self._report_detail_level
         """
-        self._report_detail_level = True  # default only summary report
+        self._report_detail_level = True  # default set to generate only summary report
         user_choice = input(
             "Do you want detailed report?(Press enter for Default: no) [y/yes/n/no]:"
         )

@@ -99,7 +99,7 @@ class NrfuClient:
         """
         self._report_detail_level = True  # default set to generate only summary report
         user_choice = input(
-            "Do you want detailed report?(Press enter for Default: no) [y/yes/n/no]:"
+            "Do you want detailed report?(Press Enter for the default option: "No") [y/yes/n/no]:"
         )
         if user_choice and user_choice in ["y", "yes"]:
             self._report_detail_level = False  # summary + detailed report

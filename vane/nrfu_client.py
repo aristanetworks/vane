@@ -54,7 +54,7 @@ class NrfuClient:
         self.duts_file = "nrfu_tests/duts_nrfu.yaml"
         self.username = ""
         self.password = ""
-        self._report_detail_level = True  # only summary report by default
+        self._report_detail_level = True  # generate only summary report by default
 
         logging.info("Starting the NRFU client")
         self.setup()

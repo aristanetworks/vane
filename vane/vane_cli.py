@@ -136,7 +136,7 @@ def parse_cli():
     )
     nrfu_command_group.add_argument(
         "--detailed-test-section",
-        help="Enables the detailed test case result sections. Defaults value is True",
+        help="Enables the detailed test case result sections. Default value is True",
         action="store_true",
     )
     nrfu_command_group.add_argument(

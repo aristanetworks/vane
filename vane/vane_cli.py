@@ -142,7 +142,7 @@ def parse_cli():
     nrfu_command_group.add_argument(
         "--only-detailed-test-fails",
         help="Only publish detailed test case failures in the results section."
-        "Defaults value is False",
+        "Default value is False",
         action="store_true",
     )
     nrfu_command_group.add_argument(

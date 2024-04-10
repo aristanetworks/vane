@@ -280,7 +280,7 @@ def login_duts(test_parameters, test_duts):
         login_ptr["mgmt_ip"] = dut["mgmt_ip"]
         login_ptr["username"] = dut["username"]
         login_ptr["password"] = dut["password"]
-        login_ptr["role"] = dut["role"]
+        login_ptr["role"] = dut.get("role", "")
         login_ptr["neighbors"] = dut["neighbors"]
         login_ptr["transport"] = dut["transport"]
         login_ptr["results_dir"] = test_parameters["parameters"]["results_dir"]

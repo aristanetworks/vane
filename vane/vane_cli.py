@@ -52,6 +52,11 @@ from vane import nrfu_client
 
 logging.info("Starting vane.log file")
 
+# global color variables
+YELLOW = "\x1b[33m"
+GREEN = "\x1b[32m"
+DEFAULT = "\x1b[0m"
+
 
 def parse_cli():
     """Parse cli options.
@@ -126,7 +131,10 @@ def setup_vane():
     logging.info("Discovering show commands from definitions")
 
     vane.config.test_defs = tests_tools.return_test_defs(vane.config.test_parameters)
+
     show_cmds = tests_tools.return_show_cmds(vane.config.test_defs)
+
+    print(f"{YELLOW}\nRunning Show Commands on Initialized Duts\n{DEFAULT}")
     vane.config.dut_objs = tests_tools.init_duts(
         show_cmds, vane.config.test_parameters, vane.config.test_duts
     )
@@ -234,6 +242,8 @@ def main():
 
     args = parse_cli()
 
+    print(f"{GREEN}\nStarting Vane{DEFAULT}\n")
+
     if args.markers:
         print(f"{show_markers()}")
 
@@ -273,9 +283,12 @@ def main():
                 vane.config.DUTS_FILE = args.duts_file
 
         run_tests(vane.config.DEFINITIONS_FILE, vane.config.DUTS_FILE)
+
+        print(f"{YELLOW}\nGenerating Reports from the Test Run\n{DEFAULT}")
         write_results(vane.config.DEFINITIONS_FILE)
         download_test_results()
 
+        print(f"{GREEN}\nVANE has completed without errors\n{DEFAULT}")
         logging.info("\n\n!VANE has completed without errors!\n\n")
 
 

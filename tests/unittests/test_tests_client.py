@@ -222,7 +222,7 @@ def test_test_runner(mocker, capsys, loginfo):
 
     captured = capsys.readouterr()
     assert (
-        captured.out == "Starting test with command: pytest \n\n"
+        captured.out == "\x1b[33mStarting Tests with command: pytest \n\x1b[0m\n"
     ), "tests_client.test_runner failed when expected to pass"
 
     # Verify logging message was called

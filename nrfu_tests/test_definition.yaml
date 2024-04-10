@@ -1,384 +1,379 @@
 - name: nrfu_tests
   testcases:
-    - name: test_dns_base_services
-      description: Test case for the verification of DNS resolution functionality.
-      test_id: NRFU1.1
-      show_cmd: show ip name-server
-      expected_output: null # Forming the expected output dynamically in the test case file.
-      test_criteria: Reverse name server lookup should be successful for name servers configured on the device. # Setting test case pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern. If the report type is set as modern then it will update steps, assumptions and external systems in docx report
-      dns_name_server_check: # If you want the test case to fail when a name-server is not configured on the device, change these parameters to True for the IP version you need.
-        ipv4_fail_if_not_configured: True
-        ipv6_fail_if_not_configured: False
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_ntp_clocks
-      description: Test case to verify that 2 NTP clocks(a peer and a candidate) are locked on the device.
-      test_id: NRFU1.2
-      show_cmd: show ntp status
-      expected_output:
-        primary_ntp_association: sys.peer
-        secondary_ntp_association: candidate
-      test_criteria: NTP server should be configured on the device. Primary and secondary NTP association should be correct on the device. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern, If a report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_redundant_sso_card
-      description: Test case for the verification of redundant supervisor card.
-      test_id: NRFU1.3
-      show_cmd: null # Updating show cmd in the test case file itself.
-      expected_output:
-        sso_protocol_details:
-          configured_protocol: sso
-          operational_protocol: sso
-          switch_over_ready: True
-      test_criteria: Redundancy SSO protocol should be configured, operational and ready for switchover. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern. If the report type is set as modern then it will update steps, assumptions and external systems in docx report
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_base_services_tacacs
-      description: Testcase for verification of TACACS servers details.
-      test_id: NRFU1.4
-      show_cmd: show tacacs
-      expected_output: null # Forming expected output in the test case file.
-      test_criteria: TACACS servers should not have errors, timeouts, failures or disconnects. # Setting test case’s pass/fail criteria for reporting.
-      report_style: modern  # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_interfaces_description_status
-      description: Test case for verification of interface description status.
-      test_id: NRFU2.1
-      show_cmds:
-        - show interfaces description
-        - show vlan
-      expected_output: null # Forming expected output dynamically in the test file.
-      test_criteria: Except for the interfaces with description to ignore, all other interfaces' status should be up and should have a description. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
-      input:
-        descriptions_to_ignore: # Interfaces to ignore the following descriptions
-          - unused
-          - available
-          - reserved
-          - test
-          - future
-        fail_on_no_description: True # If this field is set to True, the Test case will fail when the description is not found. Otherwise test case will pass even when interfaces do not have a description.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_interfaces_errdisabled_status
-      description: Test case for verification of interface errdisabled status.
-      test_id: NRFU2.2
-      show_cmd: show interfaces status errdisabled
-      expected_output: null  # Forming the expected output dictionary in test file
-      test_criteria: None of the interface should be in error disabled state. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1  # Device on which tests run
-    - name: test_interface_errors_and_discards
-      description: Testcase for verification of errors/discards on all the interfaces.
-      test_id: NRFU2.3
-      show_cmd: show interfaces
-      expected_output: null # Forming expected output in test case.
-      test_criteria: Errors/discards should not be found on any of the interfaces. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names # Criteria to run the test case.
-      filter:
-        - BLFE1
-    - name: test_interfaces_mlag_status
-      description: Testcase for verification of MLAG functionality.
-      test_id: NRFU2.4
-      show_cmd: show mlag
-      expected_output: null # Forming expected output in test file.
-      test_criteria: MLAG should be configured as active, connected and consistent on the device. # Setting test case’s pass / fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_interfaces_non_arista_optics
-      description: Test case to verify that no non-Arista optics are installed on the device.
-      test_id: NRFU2.5
-      show_cmd: show inventory
-      expected_output: null # Expected output is formed inside the test case
-      test_criteria: Non-Arista optics should not be installed on the device.
-      report_style: modern
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_port_channel_member_interface_details
-      description: Testcases to verify that port channel member interfaces should be collecting and distributing.
-      test_id: NRFU2.6
-      show_cmd: show lacp interface all-ports
-      expected_output: null # Forming expected output dynamically inside the testcase.
-      test_criteria: All the port channel members interfaces should be collecting and distributing. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern, If a report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_misc_show_commands
-      description: Testcase for verification of miscellaneous show commands support.
-      test_id: NRFU3.1
-      show_cmd: null # Forming show command in the test case file.
-      expected_output: null # Forming expected output in the test case file.
-      test_criteria: Show commands should be executed on the device without any error. # Setting test case’s pass/fail criteria for reporting.
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_routing_bgp_evpn_peers_state
-      description: Test case for verification of BGP EVPN functionality.
-      test_id: NRFU4.1
-      show_cmd: null # Forming show command dynamically in the test file
-      expected_output: null # Forming expected output dynamically in the test file
-      test_criteria: All BGP EVPN peers' states should be established. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
-      input:
-        skip_on_command_unavailable: False # Skip the test case if the command is unavailable when set to True, otherwise check with assert messaging
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_bgp_ipv4_peers_state
-      description: Testcase for verification of BGP IPv4 peers state.
-      test_id: NRFU4.2
-      show_cmd: show ip bgp summary vrf all
-      expected_output: null # Forming expected output in test case.
-      test_criteria: All BGP IPv4 peers should be in established state. # Setting test case’s pass / fail criteria for reporting
-      report_style: modern
-      criteria: names # Criteria to run the test case.
-      filter:
-        - BLFE1
-    - name: test_routing_evpn_l2vni_imet
-      description: Test case for verification of L2 VNI VXLAN interface functionality.
-      test_id: NRFU4.3
-      show_cmd: null   # Forming show commands in test file.
-      expected_output: null  # Forming expected output dictionary in test file.
-      test_criteria: Inclusive multicast Ethernet tag (IMET) routes should advertised for all VNI identifiers on device.    # Setting test case’s pass/fail criteria for reporting
-      report_style: modern   # Setting report_style as modern. If report type is set as modern then it will update steps, assumptions, external systems in docx report
-      input:
-        skip_on_command_unavailable_check: False   # If you need to skip the testcase on 'show bgp evpn summary' command unavailable, change this to True
-      criteria: names
-      filter:
-        - BLFE1  # Device on which tests run
-    - name: test_multi_agent_routing_protocol
-      description: Test case for verification of multi-agent routing model functionality.
-      test_id: NRFU4.4
-      show_cmd: show ip route summary
-      expected_output:
-        multi_agent_routing_protocol:
-          configured: true
-          operational: true
-      test_criteria: Multi agent routing model protocol should be configured and operational on the device.   # Setting test case’s pass/fail criteria for reporting
-      report_style: modern  # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1  # Device on which tests run
-    - name: test_acls_api_vrfs_enabled
-      description: Test case to verify that ACL is configured for each VRF on which API is enabled.
-      test_id: NRFU5.1
-      show_cmds:
-        - show management api http-commands
-        - show management api http-commands ip access-list summary
-      expected_output: null # Forming expected output in test case.
-      test_criteria: ACL should be configured on all VRFs on which API is enabled. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern
-      criteria: names # Criteria to run the test case.
-      filter:
-        - BLFE1
-    - name: test_security_rp_enable_password
-      description: Testcase to verify that the enable password is configured.
-      test_id: NRFU5.2
-      show_cmd: show running-config section enable
-      expected_output:
-        enable_password_configured: true
-      test_criteria: Enable password should be configured on device. # Setting test case’s pass / fail criteria for reporting
-      report_style: modern
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_eos_no_config_functionality
-      description: Testcases for verification of security root port "EOS no configurations" functionality.
-      test_id: NRFU5.3
-      show_cmd: show lldp neighbors detail
-      expected_output: null   # Forming expected output dictionary in testcase file
-      test_criteria: Localhost should not be found in the LLDP neighbor information on device.   # Setting test case’s pass/fail criteria for reporting
-      report_style: modern   # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1  # Device on which tests run
-    - name: test_security_rp_l2_vlan_name
-      description: Test cases for verification of configured VLAN naming.
-      test_id: NRFU5.4
-      show_cmd: show vlan
-      expected_output: null # Forming expected output dynamically in Python file
-      test_criteria: All configured VLANs should have a name configured. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_security_rp_login_banner
-      description: Testcase for verification of login banner.
-      test_id: NRFU5.5
-      show_cmd: show banner login
-      expected_output:
-        login_banner_found: True
-      test_criteria: Login banner should be found on the device. # Setting test case’s pass / fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_security_rp_ssh_access_list
-      description: Test case to verify that ACL is configured for each VRF on which SSH is enabled
-      test_id: NRFU5.6
-      show_cmds:
-        - show vrf
-        - show management ssh ip access-list summary
-      expected_output: null # Expected output is formed inside a test case file dynamically.
-      test_criteria: All VRFs that the API is active on should have an ACL to be configured.
-      report_style: modern
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_telnet_is_disabled_for_all_vrfs
-      description: Test case to verify that Telnet is disabled for all the VRFs on the device.
-      test_id: NRFU5.7
-      show_cmd: show vrf
-      expected_output: null # Expected output is set dynamically inside the testsuite file.
-      test_criteria: Telnet should be disabled for all the VRFs on the device. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_security_rp_username_password
-      description: Test case for verification of password configuration for user accounts.
-      test_id: NRFU5.8
-      show_cmd: show running-config all section ^username
-      expected_output: null # Forming expected output dynamically in the test case file.
-      test_criteria: All user accounts should be configured with a password. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_bad_syslog_events
-      description: Testcase for verification of bad syslog event messages.
-      test_id: NRFU6.1
-      show_cmd: null # Forming show command in the test case.
-      expected_output: null # Forming expected output in test case.# Setting test case’s pass / fail criteria for reporting
-      test_criteria: Bad syslog events(specific keywords) should not be found in the collected logs. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
-      days_of_logs: 7 # Number of days used in show logging command.
-      criteria: names # Criteria to run the test case.
-      filter:
-        - BLFE1
-    - name: test_system_hardware_cooling_status
-      test_id: NRFU6.2
-      description: Testcase for the verification of system cooling status.
-      show_cmd: show system environment cooling
-      expected_output:
-        system_cooling_status: coolingOk
-      test_criteria: System cooling status should be 'coolingOk'. # Setting test case’s pass / fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_hardware_core_dump_files
-      description: Test case for verification of core dump files
-      test_id: NRFU6.3
-      show_cmd: show system coredump
-      expected_output:
-        core_dump_files_not_found: True
-      test_criteria: Core dump files should not be found on the device. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_system_cpu_idle_time
-      description: Testcase for verification of system hardware CPU idle time.
-      test_id: NRFU6.4
-      show_cmd: show processes top once
-      expected_output:
-        cpu_idle_time_within_range: true
-      test_criteria: CPU idle time should be within the expected range. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_system_hardware_fan_status
-      description: Testcase for verification of fan status in the system.
-      test_id: NRFU6.5
-      show_cmd: show system environment cooling
-      expected_output: null # Forming expected output in the test case.
-      test_criteria: For all fans, status should be ok and speed should be stable. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_
-      description: null
-      test_id: NRFU6.6
-      show_cmd: null
-      expected_output: null
-      report_style: modern
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_system_free_memory
-      description: Test case for verification of system hardware-free memory utilization.
-      test_id: NRFU6.7
-      show_cmd: null
-      expected_output:
-        memory_utilization_under_range: True
-      test_criteria: Memory utilization percentage of the device should be less than 70%. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_hardware_inventory_status
-      description: Test case for the verification of system hardware inventory on the device.
-      test_id: NRFU6.8
-      show_cmd: show inventory
-      expected_output: null # Expected output is set dynamically inside the test suite file.
-      test_criteria: Power supply, fan tray and other card slots should be installed on the device. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      hardware_inventory_checks: # Change to True or False based on whether you want to fail if a particular module type is missing.
-        fail_on_missing_fan_tray_slots: True
-        fail_on_missing_power_supply_slots: True
-        fail_on_missing_supervisor_card_slots: True
-        fail_on_missing_fabric_card_slots: True
-        fail_on_missing_linecard_card_slots: False
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_system_hardware_power_supply_status
-      description: Test case for the verification of system hardware power supply status.
-      test_id: NRFU6.9
-      show_cmd: show system environment power
-      expected_output: null # Expected output is formed inside a test case file dynamically
-      test_criteria: Status of all power supplies should be 'Ok'. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If the report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_system_hardware_power_supply_voltage_status
-      description: Test case for verification of system power supply voltage sensor status on the device.
-      test_id: NRFU6.10
-      show_cmd: null # Show command is added in the test case file as need to skip test execution devices based on platform
-      expected_output: null # Expected output is formed inside a test case file dynamically.
-      test_criteria: Status of all power supply voltage sensors should be 'Ok'
-      report_style: modern
-      criteria: names
-      filter:
-        - BLFE1
-    - name: test_system_temperature_sensors
-      description: Testcase for verification of system temperature sensors.
-      test_id: NRFU6.11
-      show_cmd: show system environment temperature
-      expected_output: null # Expected output is formed inside a test case file dynamically
-      test_criteria: System temperature should be 'ok'. Hardware status of all sensors should be 'ok' and overheat threshold should not be met. # Setting test case’s pass/fail criteria for reporting
-      report_style: modern # Setting report_style as modern If report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
-      criteria: names
-      filter:
-        - BLFE1
+  - name: test_dns_base_services
+    description: Test case for the verification of DNS resolution functionality.
+    test_id: NRFU1.1
+    show_cmd: show ip name-server
+    expected_output: null
+    test_criteria: Reverse name server lookup should be successful for name servers
+      configured on the device.
+    report_style: modern
+    dns_name_server_check:
+      ipv4_fail_if_not_configured: true
+      ipv6_fail_if_not_configured: false
+    criteria: null
+    filter: null
+  - name: test_ntp_clocks
+    description: Test case to verify that 2 NTP clocks(a peer and a candidate) are
+      locked on the device.
+    test_id: NRFU1.2
+    show_cmd: show ntp status
+    expected_output:
+      primary_ntp_association: sys.peer
+      secondary_ntp_association: candidate
+    test_criteria: NTP server should be configured on the device. Primary and secondary
+      NTP association should be correct on the device.
+    report_style: modern
+    input:
+      single_ntp_check: false # Single NTP server verification, set the value as True when single ntp server verification needed.
+    criteria: null
+    filter: null
+  - name: test_redundant_sso_card
+    description: Test case for the verification of redundant supervisor card.
+    test_id: NRFU1.3
+    show_cmd: null
+    expected_output:
+      sso_protocol_details:
+        configured_protocol: sso
+        operational_protocol: sso
+        switch_over_ready: true
+    test_criteria: Redundancy SSO protocol should be configured, operational and ready
+      for switchover.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_base_services_tacacs
+    description: Testcase for verification of TACACS servers details.
+    test_id: NRFU1.4
+    show_cmd: show tacacs
+    expected_output: null
+    test_criteria: TACACS servers should not have errors, timeouts, failures or disconnects.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_interfaces_description_status
+    description: Test case for verification of interface description status.
+    test_id: NRFU2.1
+    show_cmds:
+    - show interfaces description
+    - show vlan
+    expected_output: null
+    test_criteria: Except for the interfaces with description to ignore, all other
+      interfaces' status should be up and should have a description.
+    report_style: modern
+    input:
+      descriptions_to_ignore:
+      - unused
+      - available
+      - reserved
+      - test
+      - future
+      fail_on_no_description: true
+    criteria: null
+    filter: null
+  - name: test_interfaces_errdisabled_status
+    description: Test case for verification of interface errdisabled status.
+    test_id: NRFU2.2
+    show_cmd: show interfaces status errdisabled
+    expected_output: null
+    test_criteria: None of the interface should be in error disabled state.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_interface_errors_and_discards
+    description: Testcase for verification of errors/discards on all the interfaces.
+    test_id: NRFU2.3
+    show_cmd: show interfaces
+    expected_output: null
+    test_criteria: Errors/discards should not be found on any of the interface.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_interfaces_mlag_status
+    description: Testcase for verification of MLAG functionality.
+    test_id: NRFU2.4
+    show_cmd: show mlag
+    expected_output: null
+    test_criteria: MLAG should be configured as active, connected and consistent on
+      the device.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_interfaces_non_arista_optics
+    description: Test case to verify that Arista supported optics are installed on
+      the device.
+    test_id: NRFU2.5
+    show_cmd: show inventory
+    expected_output: null
+    test_criteria: Non-Arista optics should not be installed on the device.
+    report_style: modern
+    approved_optics: []
+    criteria: null
+    filter: null
+  - name: test_port_channel_member_interface_details
+    description: Testcases to verify that port channel member interfaces should be
+      collecting and distributing.
+    test_id: NRFU2.6
+    show_cmd: show lacp interface all-ports
+    expected_output: null
+    test_criteria: All the port channel members interfaces should be collecting and
+      distributing.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_misc_show_commands
+    description: Testcase for verification of miscellaneous show commands support.
+    test_id: NRFU3.1
+    show_cmd: null
+    expected_output: null
+    test_criteria: Show commands should be executed on the device without any error.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_routing_bgp_evpn_peers_state
+    description: Test case for verification of BGP EVPN functionality.
+    test_id: NRFU4.1
+    show_cmd: null
+    expected_output: null
+    test_criteria: All BGP EVPN peers state should be established.
+    report_style: modern
+    input:
+      skip_on_command_unavailable: false
+    criteria: null
+    filter: null
+  - name: test_bgp_ipv4_peers_state
+    description: Testcase for verification of BGP IPv4 peers state.
+    test_id: NRFU4.2
+    show_cmd: show ip bgp summary vrf all
+    expected_output: null
+    test_criteria: All BGP peers should be in established state.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_routing_evpn_l2vni_imet
+    description: Test case for verification of L2 VNI VXLAN interface functionality.
+    test_id: NRFU4.3
+    show_cmd: null
+    expected_output: null
+    test_criteria: Inclusive multicast Ethernet tag (IMET) routes should advertised
+      for all VNI identifiers on device.
+    report_style: modern
+    input:
+      skip_on_command_unavailable_check: false
+    criteria: null
+    filter: null
+  - name: test_multi_agent_routing_protocol
+    description: Test case for verification of multi-agent routing model functionality.
+    test_id: NRFU4.4
+    show_cmd: show ip route summary
+    expected_output:
+      multi_agent_routing_protocol:
+        configured: true
+        operational: true
+    test_criteria: Multi agent routing model protocol should be configured and operational
+      on the device.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_acls_api_vrfs_enabled
+    description: Test case to verify that ACL is configured for each VRF on which
+      API is enabled.
+    test_id: NRFU5.1
+    show_cmds:
+    - show management api http-commands
+    - show management api http-commands ip access-list summary
+    expected_output: null
+    test_criteria: ACL should be configured on all VRFs on which API is enabled.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_security_rp_enable_password
+    description: Testcase to verify that the enable password is configured.
+    test_id: NRFU5.2
+    show_cmd: show running-config section enable
+    expected_output:
+      enable_password_configured: true
+    test_criteria: Enable password should be configured on device.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_eos_no_config_functionality
+    description: Testcases for verification of security root port "EOS no configurations"
+      functionality.
+    test_id: NRFU5.3
+    show_cmd: show lldp neighbors detail
+    expected_output: null
+    test_criteria: Localhost should not be found in the LLDP neighbor information
+      on device.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_security_rp_l2_vlan_name
+    description: Test cases for verification of configured VLAN naming.
+    test_id: NRFU5.4
+    show_cmd: show vlan
+    expected_output: null
+    test_criteria: All configured VLANs should have a name configured.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_security_rp_login_banner
+    description: Testcase for verification of login banner.
+    test_id: NRFU5.5
+    show_cmd: show banner login
+    expected_output:
+      login_banner_found: true
+    test_criteria: Login banner should be found on the device.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_security_rp_ssh_access_list
+    description: Test case to verify that ACL is configured for each VRF on which
+      SSH is enabled
+    test_id: NRFU5.6
+    show_cmds:
+    - show vrf
+    - show management ssh ip access-list summary
+    expected_output: null
+    test_criteria: All VRFs that the API is active on should have an ACL to be configured.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_telnet_is_disabled_for_all_vrfs
+    description: Test case to verify that Telnet is disabled for all the VRFs on the
+      device.
+    test_id: NRFU5.7
+    show_cmd: show vrf
+    expected_output: null
+    report_style: modern
+    test_criteria: Telnet should be disabled for all the VRFs on the device.
+    criteria: null
+    filter: null
+  - name: test_security_rp_username_password
+    description: Test case for verification of password configuration for user accounts.
+    test_id: NRFU5.8
+    show_cmd: show running-config all section ^username
+    expected_output: null
+    test_criteria: All user accounts should be configured with a password.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_bad_syslog_events
+    description: Testcase for verification bad syslog event messages.
+    test_id: NRFU6.1
+    show_cmd: null
+    expected_output: null
+    test_criteria: Bad syslog events(specific keywords) should not be found in the
+      collected logs.
+    report_style: modern
+    days_of_logs: 7
+    criteria: null
+    filter: null
+  - name: test_system_hardware_cooling_status
+    test_id: NRFU6.2
+    description: Testcase for the verification of system cooling status.
+    show_cmd: show system environment cooling
+    expected_output:
+      system_cooling_status: coolingOk
+    test_criteria: System cooling status should be 'coolingOk'.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_hardware_core_dump_files
+    description: Test case for verification of core dump files
+    test_id: NRFU6.3
+    show_cmd: show system coredump
+    expected_output:
+      core_dump_files_not_found: true
+    test_criteria: Core dump files should not be found on the device.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_system_cpu_idle_time
+    description: Testcase for verification of system hardware CPU idle time.
+    test_id: NRFU6.4
+    show_cmd: show processes top once
+    expected_output:
+      cpu_idle_time_within_range: true
+    test_criteria: CPU idle time should be within the expected range.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_system_hardware_fan_status
+    description: Testcase for verification of fan status in the system.
+    test_id: NRFU6.5
+    show_cmd: show system environment cooling
+    expected_output: null
+    test_criteria: For all fans, status should be ok and speed should be stable.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_system_flash_free_space
+    description: Test case for verification of free space on flash file system
+    test_id: NRFU6.6
+    show_cmd: show file systems
+    expected_output:
+      primary_supervisor_flash_utilization_within_range: true
+      peer_supervisor_flash_utilization_within_range: true
+    test_criteria: Primary and peer supervisor flash file system utilization should
+      be below 70%.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_system_free_memory
+    description: Test case for verification of system hardware-free memory utilization.
+    test_id: NRFU6.7
+    show_cmd: null
+    expected_output:
+      memory_utilization_under_range: true
+    test_criteria: Memory utilization percentage of the device should be less than
+      70%.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_hardware_inventory_status
+    description: Test case for the verification of system hardware inventory on the
+      device.
+    test_id: NRFU6.8
+    show_cmd: show inventory
+    expected_output: null
+    test_criteria: Power supply, fan tray and other card slots should be installed
+      on the device.
+    report_style: modern
+    hardware_inventory_checks:
+      fail_on_missing_fan_tray_slots: true
+      fail_on_missing_power_supply_slots: true
+      fail_on_missing_supervisor_card_slots: true
+      fail_on_missing_fabric_card_slots: true
+      fail_on_missing_linecard_card_slots: false
+    criteria: null
+    filter: null
+  - name: test_system_hardware_power_supply_status
+    description: Test case for the verification of system hardware power supply status.
+    test_id: NRFU6.9
+    show_cmd: show system environment power
+    expected_output: null
+    test_criteria: Status of all power supplies should be 'Ok'.
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_system_hardware_power_supply_voltage_status
+    description: Test case for verification of system power supply voltage sensor
+      status on the device.
+    test_id: NRFU6.10
+    show_cmd: null
+    expected_output: null
+    test_criteria: Status of all power supply voltage sensors should be 'Ok'
+    report_style: modern
+    criteria: null
+    filter: null
+  - name: test_system_temperature_sensors
+    description: Testcase for verification of system temperature sensors.
+    test_id: NRFU6.11
+    show_cmd: show system environment temperature
+    expected_output: null
+    test_criteria: System temperature should be 'ok'. Hardware status of all sensors
+      should be 'ok' and overheat threshold should not be met.
+    report_style: modern
+    criteria: null
+    filter: null

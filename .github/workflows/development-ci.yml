@@ -105,14 +105,83 @@ jobs:
           eval "${{ env.poetry_home }}"
           pylint ${{ env.python }}
 
-  unittest:
-    # Run the Vane unittests
-    # Test coverage is compared with a 90% target goal and the check will fail
-    # if below that point, however the branch is allowed to be merged with
-    # develop regardless of the coverage score and whether the unittest check
-    # passes or fails.
+  pip-install:
+    # Validate that the pip installation of Vane works properly
 
     runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          # architecture: 'x64' # The default
+
+      - name: Display the Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install Vane and dependencies using pip
+        # Install Vane using pip
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Check the vane name reported with python setup.py
+        # `python setup.py --name` should return "vane"
+        run: |
+          vane_name=$(python setup.py --name)
+          if [[ ! "$vane_name" =~ "vane" ]]; then
+            echo "Invalid name reported for Vane application: expected 'vane', received '$vane_name'"
+            exit 1
+          fi
+
+      - name: Check the vane version reported with python setup.py
+        # `python setup.py --version` should return the same version that is in pyproject.toml
+        run: |
+          version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
+          vane_version=$(python setup.py --version)
+          if [[ ! "$vane_version" =~ "$version_str" ]]; then
+            echo "Invalid version reported for Vane application: expected '$version_str', received '$vane_version'"
+            exit 1
+          else
+            echo "Command returned version '$vane_version'"
+          fi
+
+      - name: Check the output of the Vane help command
+        # Check the output of `vane --help`
+        #   Look for substrings of the help text in the output of `vane --help` and report the
+        #   first substring that is not found
+        run: |
+          substrings=("usage: vane" "--version" "--definitions-file" "--duts-file" "--generate-duts-file" "--generate-test-steps" "--markers" "--nrfu")
+          vane_help=$(vane --help)
+          for substr in "${substrings[@]}"; do
+            if [[ ! "$vane_help" =~ "$substr" ]]; then
+              echo "Substring '$substr' missing from `vane --help`"
+              exit 1
+            fi
+          done
+
+      - name: Run the pytest module to verify the vane unitttests load correctly
+        # Running the pytest command below should succeed
+        run: |
+          python -m pytest --junit-xml=junit.xml
+
+  unittest:
+    # Run the Vane unittests
+    #   If the tests pass, coverage will be calculated and reported to the output to be used
+    #   by a later job. If the tests fail, the job will fail, coverage will not be calculated,
+    #   and the coverage job will not run.
+
+    runs-on: ubuntu-latest
+
+    outputs:
+      coverage: ${{ steps.coverage.outputs.coverage }}
 
     steps:
 
@@ -144,17 +213,40 @@ jobs:
       - name: Run the unittests
         # Install vane in "editable/developer" mode, so the executable is using
         # the source files and coverage can monitor the proper directory
-        continue-on-error: true
+        #   If the unit tests fail, we do not continue on to get the coverage
         run: |
           eval "${{ env.poetry_home }}"
           mkdir -p $PWD/tests/unittests/fixtures/reports/results
           pytest --cov-report term-missing --cov=$PWD/vane $PWD/tests/unittests
 
-      - name: Report the coverage
-        # Get the coverage score and return success if the value is >= 90
+      - name: Calculate the coverage
+        # Get the coverage score and send it to the GITHUB_OUTPUT for the next job to use
+        id: coverage
         run: |
           eval "${{ env.poetry_home }}"
           cov_score=$(coverage report | awk '$1 == "TOTAL" {print $NF+0}')
+          echo -e "\n----------------"
+          echo "Coverage is ${cov_score}%"
+          echo -e "----------------\n"
+          echo "coverage=${cov_score}" >> $GITHUB_OUTPUT
+
+  coverage:
+    # Report the unittest coverage
+    # Test coverage is compared with a 90% target goal and the check will fail
+    # if below that point.
+
+    runs-on: ubuntu-latest
+
+    needs: unittest
+
+    steps:
+
+      - name: Report the coverage
+        # Get the coverage score from the previous unit tests and
+        # return success if the value is >= 90
+        run: |
+          eval "${{ env.poetry_home }}"
+          cov_score=${{ needs.unittest.outputs.coverage }}
           echo -e "\n----------------"
           echo "Coverage is ${cov_score}%"
           echo -e "----------------\n"

@@ -1,6 +1,7 @@
 - name: test_ntp.py
   testcases:
     - name: test_if_ntp_is_synchronized_on_
+      test_id: TN14.1
       description: Verify ntp is setup and working correctly
       show_cmd: show ntp status
       expected_output: synchronised
@@ -12,6 +13,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_ntp_associated_with_peers_on_
+      test_id: TN14.2
       description: Verify there are at least expected number of ntp peers
       show_cmd: show ntp associations
       # number of ntp associations
@@ -24,6 +26,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_process_is_running_on_
+      test_id: TN14.3
       description: Verify there are at least expected number of ntp processes running
       show_cmd: show processes
       # processes to check
@@ -38,6 +41,7 @@
         - DSR01
         - DCBBW1
     - name: test_ntp_configuration_on_
+      test_id: TN14.4
       description: Verifies NTP configuration matches the recommended practices 
       show_cmd: show running-config section ntp
       # List of NTP servers
@@ -54,6 +58,7 @@
         - DSR01
         - DCBBW1
     - name: test_if_ntp_servers_are_reachable_on_
+      test_id: TN14.5
       description: Verifies NTP servers are reachable via ping
       show_cmd: null
       # List of NTP servers

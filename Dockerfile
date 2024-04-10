@@ -70,7 +70,7 @@ USER $UNAME
 COPY resources/vane-bashrc /home/${UNAME}/.bashrc
 #RUN sudo chown ${UNAME}:${UNAME} /home/${UNAME}/.bashrc
 
-# Install dependencies required by the repo (as the docker user)
+# Install Vane and its dependencies (as the docker user)
 RUN poetry install
 
 # Start the container running the poetry shell

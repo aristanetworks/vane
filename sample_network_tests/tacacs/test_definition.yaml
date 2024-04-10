@@ -1,6 +1,7 @@
 - name: test_tacacs.py
   testcases:
     - name: test_if_tacacs_is_sending_messages_on_
+      test_id: TN16.1
       description: Verify tacacs messages are sending correctly
       show_cmd: show tacacs
       expected_output: null
@@ -14,6 +15,7 @@
       comment: null
       result: True
     - name: test_if_tacacs_is_receiving_messages_on_
+      test_id: TN16.2
       description: Verify tacacs messages are received correctly
       show_cmd: show tacacs
       expected_output: null

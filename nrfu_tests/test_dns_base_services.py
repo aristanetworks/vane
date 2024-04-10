@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -62,10 +62,12 @@ class DnsBaseServicesTests:
             # Skipping test case if name servers are not configured on the device.
             version_verification = list(test_params.values())
             if not any(version_verification):
-                pytest.skip(
-                    f"Name servers are not configured on {tops.dut_name}, hence skipping the"
+                tops.output_msg = (
+                    f"Name servers are not configured on device {tops.dut_name}, hence skipping the"
                     " test case."
                 )
+                tests_tools.post_process_skip(tops, self.test_dns_base_services, self.output)
+                pytest.skip(tops.output_msg)
 
             try:
                 for ip_version_verification, verification_status in test_params.items():

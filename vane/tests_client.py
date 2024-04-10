@@ -186,6 +186,7 @@ class TestsClient:
             "processes",
             "mark",
             "setup_show",
+            "traceback",
         ]
 
         logging.info("Initialize test parameter values")
@@ -199,6 +200,18 @@ class TestsClient:
         verbose = self.data_model["parameters"]["verbose"]
         logging.info(f"Setting PyTest parameter verbosity (extension: -v) to {verbose}")
         self._set_cmdline_no_input(verbose, "-v")
+
+    def _set_traceback_level(self):
+        """Set python traceback printing level"""
+
+        traceback = self.data_model["parameters"]["traceback"]
+        if traceback:
+            tb_value = "long"
+        else:
+            tb_value = "no"
+
+        logging.info(f"Setting Pytest parameter traceback (extenstion: --tb) to {tb_value}")
+        self.test_parameters.append(f"--tb={tb_value}")
 
     def _set_stdout(self):
         """Set stdout for test run"""
@@ -356,6 +369,7 @@ class TestsClient:
         logging.info("Setting test parameters")
         self._init_parameters()
         self._set_verbosity()
+        self._set_traceback_level()
         self._set_stdout()
         self._set_setup_show()
         self._set_test_cases()

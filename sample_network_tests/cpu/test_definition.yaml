@@ -1,6 +1,7 @@
 - name: test_cpu.py
   testcases:
     - name: test_1_sec_cpu_utlization_on_
+      test_id: TN3.1
       description: Verify 1 second CPU % is under specificied value
       show_cmd: show processes
       # CPU process ceiling
@@ -11,10 +12,11 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_1_min_cpu_utlization_on_
+      test_id: TN3.2
       description: Verify 1 minute CPU % is under specificied value
       show_cmd: show processes
       # CPU process ceiling
@@ -24,11 +26,12 @@
       test_criteria: Verify expected CPU percentage less than actual CPU percentage
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
-      filter: 
-        - DLFW3
-        - DLFW4
+      filter:
+        - DSR01
+        - DCBBW1
 
     - name: test_5_min_cpu_utlization_on_
+      test_id: TN3.3
       description: Verify 5 minute CPU % is under specificied value
       show_cmd: show processes
       # CPU process ceiling
@@ -39,5 +42,5 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter:
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1

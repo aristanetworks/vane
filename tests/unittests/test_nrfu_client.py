@@ -394,10 +394,10 @@ def test_read_device_list_file(mocker, loginfo):
 
     loginfo.assert_called_with("Reading in dut ip data from device list file")
 
-    device_list_file = "tests/unittests/fixtures/device_ip_file_empty_lines"
+    device_list_file = "tests/unittests/fixtures/device_ip_file_empty_lines_and_comments"
     device_data = client.read_device_list_file(device_list_file)
 
-    expected_data = ["10.255.31.184", "10.255.31.185", "10.255.31.186", "10.255.31.187"]
+    expected_data = ["10.255.39.7", "10.255.31.184"]
     assert device_data == expected_data
 
 

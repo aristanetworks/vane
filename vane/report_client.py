@@ -634,7 +634,9 @@ class ReportClient:
                 self._write_text(para, "")
         elif data_format == "test_result":
             logging.debug("Formatting a Test Result")
-            if text:
+            if text == "SKIPPING":
+                self._write_text(para, "SKIPPED", bold=True, color=RGBColor(255, 165, 0))
+            elif text:
                 self._write_text(para, "PASS", bold=True, color=RGBColor(0, 255, 0))
             else:
                 self._write_text(para, "FAIL", bold=True, color=RGBColor(255, 0, 0))
@@ -770,7 +772,10 @@ class ReportClient:
         """
         logging.debug(f"dut data structure set to: {dut}")
         if tbl_header in dut:
-            tbl_value = dut[tbl_header]
+            if tbl_header == "test_result" and dut["skip"]:
+                tbl_value = "SKIPPING"
+            else:
+                tbl_value = dut[tbl_header]
             logging.debug(f"{tbl_header} set to {tbl_value} in dut structure")
         else:
             logging.warning(f"{tbl_header} NOT in dut structure")
@@ -1102,12 +1107,15 @@ class ReportClient:
             report_field (string): Name of report field in dut to write
         """
 
-        if report_field in dut:
-            report_value = dut[report_field]
-            if report_value:
-                self._write_text(para, "PASS", bold=True, color=RGBColor(0, 255, 0))
-            else:
-                self._write_text(para, "FAIL", bold=True, color=RGBColor(255, 0, 0))
+        if dut["skip"]:
+            self._write_text(para, "SKIPPED", bold=True, color=RGBColor(255, 165, 0))
+        else:
+            if report_field in dut:
+                report_value = dut[report_field]
+                if report_value:
+                    self._write_text(para, "PASS", bold=True, color=RGBColor(0, 255, 0))
+                else:
+                    self._write_text(para, "FAIL", bold=True, color=RGBColor(255, 0, 0))
 
     def _write_config_string(self, dut, report_field):
         """Write list of EOS configurations to Word doc with formatting
@@ -1197,10 +1205,9 @@ class ReportClient:
                 for dut in test_case["duts"]:
                     suite_result["total_tests"] += 1
 
-                    if dut["test_result"] and dut["test_result"] == "Skipped":
+                    if dut["skip"]:
                         suite_result["total_skip"] += 1
-                        dut["fail_or_skip_reason"] = dut.get("actual_output", "")
-                    elif dut["test_result"] and dut["test_result"] != "Skipped":
+                    elif dut["test_result"]:
                         suite_result["total_pass"] += 1
                     else:
                         suite_result["total_fail"] += 1
@@ -1239,10 +1246,9 @@ class ReportClient:
                     logging.debug(f"Compiling results for DUT/s {dut_name}")
                     testcase_id = dut["test_id"]
 
-                    if dut["test_result"] and dut["test_result"] == "Skipped":
+                    if dut["skip"]:
                         test_result = "SKIP"
-                        fail_reason = dut.get("actual_output", "")
-                    elif dut["test_result"] and dut["test_result"] != "Skipped":
+                    elif dut["test_result"]:
                         test_result = "PASS"
                     else:
                         test_result = "FAIL"
@@ -1276,9 +1282,8 @@ class ReportClient:
 
         logging.debug(f"Test suite name is {ts_name}")
         ts_name = ts_name.split(".")[0]
-        ts_name = ts_name.split("_")
-        if len(ts_name) > 1:
-            ts_name = ts_name[1].capitalize()
+        # handling the "_" if it exists by replacing it with " "
+        ts_name = ts_name.replace("_", " ")
         logging.debug(f"Formatted test suite name is {ts_name}")
 
         return ts_name

@@ -39,6 +39,7 @@ from contextlib import redirect_stdout
 from datetime import datetime
 from importlib import metadata
 import shutil
+import json
 import os
 import pytest
 from vane import tests_client
@@ -236,6 +237,44 @@ def download_test_results():
         shutil.make_archive(destination, "zip", source)
 
 
+def remove_unexecuted_testcase_logs():
+    """Removing empty log files"""
+
+    logging.info("Removing log files of unexecuted test cases from logs directory: logs")
+
+    logging.info("Gathering executed test cases' names from report.json")
+    executed_test_cases = set()
+    json_report = vane.config.test_parameters["parameters"]["json_report"]
+    json_file = f"{json_report}.json"
+
+    with open(json_file, "r", encoding="utf-8") as file:
+        data = json.load(file)
+    tests = data["report"]["tests"]
+    for test in tests:
+        name = test["name"]
+        test_file_name = name.split("/")[-1].split(".")[0]
+        log_name = test_file_name + ".log"
+        executed_test_cases.add(log_name)
+
+    files = os.listdir("logs")
+
+    # Iterate over the files and delete the ones which do not belong
+    # to executed test cases
+    logging.info("Deleting unexecuted test case log files")
+    for file_name in files:
+        if file_name != "vane.log":
+            file_path = os.path.join("logs", file_name)
+            if os.path.isfile(file_path) and file_name not in executed_test_cases:
+                try:
+                    os.remove(file_path)
+                # pylint: disable-next=broad-exception-caught
+                except Exception as excep:
+                    logging.error(
+                        f"Could not delete file {file_path} while"
+                        f" cleaning out log directory due to {excep}"
+                    )
+
+
 def main():
     """main function"""
     logging.info("Reading in input from command-line")
@@ -287,6 +326,7 @@ def main():
         print(f"{YELLOW}\nGenerating Reports from the Test Run\n{DEFAULT}")
         write_results(vane.config.DEFINITIONS_FILE)
         download_test_results()
+        remove_unexecuted_testcase_logs()
 
         print(f"{GREEN}\nVANE has completed without errors\n{DEFAULT}")
         logging.info("\n\n!VANE has completed without errors!\n\n")

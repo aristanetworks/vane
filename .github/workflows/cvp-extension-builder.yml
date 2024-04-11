@@ -17,6 +17,9 @@ on:
     branches:
       - example-rpm-package-testing-branch
 
+  # Trigger a build manually from the browser interface
+  workflow_dispatch:
+
 # Variables
 env:
   CVP_BUILD_IMAGE: ghcr.io/aristanetworks/vane-cvp-build:latest
@@ -88,8 +91,6 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
       - name: Download the CVP Vane image file artifact we created in the previous job
         uses: actions/download-artifact@v3
@@ -98,10 +99,55 @@ jobs:
 
       - name: Build the CVP rpm package
         run: |
+          ls -la
           make rpm-cvp
 
-      - name: Save the rpm package as an artifact
+      - name: Create a vane-cvp distribution directory based on the version being built
+        run: |
+          #
+          # Get the version string from the pyproject.toml file
+          #
+          version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
+          #
+          # Get a timestamp for the build (no colon in the time - looks like a port number and
+          # causes problems later)
+          #
+          timestamp=$(date +%Y-%m-%d_%H%M)
+          #
+          # If not on the main or develop branch, append a provisional tag to the distribution name
+          #
+          if [[ "${{github.ref}}" =~ "main" || "${{github.ref}}" =~ "develop" ]]; then
+            tag="-${timestamp}"
+          else
+            tag="-${timestamp}-provisional"
+          fi
+          #
+          # Create the distribution directory
+          #
+          dist_name="vane-cvp-${version_str}${tag}"
+          mkdir ${dist_name}
+          #
+          # List the current directory to show the newly created directory
+          #
+          ls -la
+          #
+          # Put the dist_name in the environment as DIST_NAME
+          #
+          echo "DIST_NAME=${dist_name}" >> $GITHUB_ENV
+
+      - name: Copy the installation scripts and the rpm into the distribution directory
+        run: |
+          cp resources/vane-cvp-*.sh ${DIST_NAME}/
+          cp rpms/*.rpm ${DIST_NAME}/
+
+      - name: Archive the distribution directory
+        run: |
+          tar czvf ${DIST_NAME}.tgz ${DIST_NAME}
+
+      - name: Save the rpm package as an artifact in GitHub
+        # 'name' is the artifact name in GitHub
+        # 'path' is the rpm package to be saved
         uses: actions/upload-artifact@v3
         with:
-          name: vane-cvp-rpm
-          path: rpms/
+          name: ${{ env.DIST_NAME }}-rpm
+          path: ${{ env.DIST_NAME }}.tgz

@@ -156,7 +156,7 @@ class DNSTests:
                 TS: Running ping commands on the DUT
                 """
 
-                self.output = tops.run_show_cmds([show_cmd], "text")[0]["result"]["output"]
+                self.output = tops.run_show_cmds([show_cmd], encoding="text")[0]["result"]["output"]
                 assert self.output, "PING Command details are not collected."
                 logging.info(
                     f"On device {tops.dut_name} output of {show_cmd} command is: {self.output}"
@@ -219,7 +219,7 @@ class DNSTests:
             TS: Running show command `show running-config section name-server` on dut
             """
 
-            self.output = tops.run_show_cmds(tops.show_cmd, "text")
+            self.output = tops.run_show_cmds(tops.show_cmd, encoding="text")
             assert self.output, "Running config details are not collected."
             logging.info(
                 f"On device {tops.dut_name} output of show running-config section name-server"

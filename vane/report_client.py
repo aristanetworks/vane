@@ -37,9 +37,11 @@ import os
 import re
 import yaml
 import docx
+from tqdm import tqdm
 from docx.oxml.ns import qn, nsdecls
 from docx.oxml import OxmlElement, parse_xml
 from docx.shared import Inches, Pt, RGBColor
+from docx.table import Table
 from vane.report_templates import REPORT_TEMPLATES
 from vane.tests_tools import yaml_read
 from vane.vane_logging import logging
@@ -50,6 +52,49 @@ TOTAL_TESTS = "Total Tests"
 TOTAL_PASSED = "Total Passed"
 TOTAL_FAILED = "Total Failed"
 TOTAL_SKIPPED = "Total Skipped"
+
+# Define ANSI escape codes for colors
+YELLOW = "\x1b[33m"
+GREEN = "\x1b[32m"
+DEFAULT = "\033[0m"
+
+
+class CachedTable(Table):
+    """Caches Docx table in memory
+    Args:
+        Table(obj): Fully defined table
+    """
+
+    def __init__(self, tbl, parent):
+        """Initialize CachedTable instance
+        Args:
+            tbl(obj), Cached table
+            parent(obj), Parent object
+        """
+
+        super(Table, self).__init__(parent)
+        self._element = self._tbl = tbl
+        self._cached_cells = None
+
+    @property
+    def _cells(self):
+        """Cache table cells"""
+
+        if self._cached_cells is None:
+            # pylint: disable-next=super-with-arguments
+            self._cached_cells = super(CachedTable, self)._cells
+        return self._cached_cells
+
+    @staticmethod
+    def transform(table):
+        """Create cached table
+        Args:
+            Table(obj): Fully defined table
+        """
+
+        # pylint: disable-next=protected-access
+        cached_table = CachedTable(table._tbl, table._parent)
+        return cached_table
 
 
 # pylint: disable=too-few-public-methods
@@ -91,7 +136,13 @@ class ReportClient:
 
         logging.info("Compiling test case results into data model")
         logging.debug(f"yaml directory is {yaml_dir}\n")
-        yaml_files = os.listdir(yaml_dir)
+
+        try:
+            yaml_files = os.listdir(yaml_dir)
+        except FileNotFoundError:
+            logging.error(f"dir not found {yaml_dir}")
+            return
+
         logging.debug(f"yaml input files are {yaml_files}")
 
         for name in yaml_files:
@@ -471,7 +522,10 @@ class ReportClient:
             report_template (dict): Data structure describing reports fields
         """
         columns = len(summary_headers)
-        table = self._document.add_table(rows=1, cols=columns, style="Table Grid")
+        rows = len(testcase_results) + 1
+        table = CachedTable.transform(
+            self._document.add_table(rows=rows, cols=columns, style="Table Grid")
+        )
 
         if testcase_results:
             self._create_header_row(table, summary_headers, report_template)
@@ -518,7 +572,6 @@ class ReportClient:
         """
 
         for row, testcase_result in enumerate(testcase_results):
-            _ = table.add_row().cells
             for column, testcase_data in enumerate(testcase_result):
                 logging.debug(
                     f"Writing test field: {testcase_data}"
@@ -581,7 +634,9 @@ class ReportClient:
                 self._write_text(para, "")
         elif data_format == "test_result":
             logging.debug("Formatting a Test Result")
-            if text:
+            if text == "SKIPPING":
+                self._write_text(para, "SKIPPED", bold=True, color=RGBColor(255, 165, 0))
+            elif text:
                 self._write_text(para, "PASS", bold=True, color=RGBColor(0, 255, 0))
             else:
                 self._write_text(para, "FAIL", bold=True, color=RGBColor(255, 0, 0))
@@ -717,7 +772,10 @@ class ReportClient:
         """
         logging.debug(f"dut data structure set to: {dut}")
         if tbl_header in dut:
-            tbl_value = dut[tbl_header]
+            if tbl_header == "test_result" and dut["skip"]:
+                tbl_value = "SKIPPING"
+            else:
+                tbl_value = dut[tbl_header]
             logging.debug(f"{tbl_header} set to {tbl_value} in dut structure")
         else:
             logging.warning(f"{tbl_header} NOT in dut structure")
@@ -772,21 +830,38 @@ class ReportClient:
 
         test_suites = self._results_datamodel["test_suites"]
 
+        # Calculating total dut sections to be written and using that as the mark for progress
+        total_dut_sections = 0
         for test_suite in test_suites:
-            self._write_detail_major_section(test_suite)
-            minor_section = 1
-
             for test_case in test_suite["test_cases"]:
-                self._write_detail_minor_section(test_case, minor_section)
-                dut_section = 1
-
                 for dut in test_case["duts"]:
-                    self._write_detail_dut_section(dut, minor_section, dut_section)
-                    dut_section += 1
+                    total_dut_sections += 1
 
-                minor_section += 1
+        custom_format = (
+            f"{YELLOW}{{desc}}: {{percentage:.0f}}%| {GREEN}{{bar}}{YELLOW} |"
+            f"elapsed time: {{elapsed}} | remaining time: {{remaining}}{DEFAULT}"
+        )
 
-            self._major_section += 1
+        with tqdm(
+            total=total_dut_sections,
+            desc="Writing detailed report",
+            unit="iteration",
+            bar_format=custom_format,
+        ) as pbar:
+            for test_suite in test_suites:
+                self._write_detail_major_section(test_suite)
+                minor_section = 1
+
+                for test_case in test_suite["test_cases"]:
+                    self._write_detail_minor_section(test_case, minor_section)
+                    dut_section = 1
+
+                    for dut in test_case["duts"]:
+                        self._write_detail_dut_section(dut, minor_section, dut_section)
+                        dut_section += 1
+                        pbar.update(1)
+                    minor_section += 1
+                self._major_section += 1
 
     def _write_detail_major_section(self, test_suite):
         """Write detailed major report section
@@ -1032,12 +1107,15 @@ class ReportClient:
             report_field (string): Name of report field in dut to write
         """
 
-        if report_field in dut:
-            report_value = dut[report_field]
-            if report_value:
-                self._write_text(para, "PASS", bold=True, color=RGBColor(0, 255, 0))
-            else:
-                self._write_text(para, "FAIL", bold=True, color=RGBColor(255, 0, 0))
+        if dut["skip"]:
+            self._write_text(para, "SKIPPED", bold=True, color=RGBColor(255, 165, 0))
+        else:
+            if report_field in dut:
+                report_value = dut[report_field]
+                if report_value:
+                    self._write_text(para, "PASS", bold=True, color=RGBColor(0, 255, 0))
+                else:
+                    self._write_text(para, "FAIL", bold=True, color=RGBColor(255, 0, 0))
 
     def _write_config_string(self, dut, report_field):
         """Write list of EOS configurations to Word doc with formatting
@@ -1127,10 +1205,9 @@ class ReportClient:
                 for dut in test_case["duts"]:
                     suite_result["total_tests"] += 1
 
-                    if dut["test_result"] and dut["test_result"] == "Skipped":
+                    if dut["skip"]:
                         suite_result["total_skip"] += 1
-                        dut["fail_or_skip_reason"] = dut.get("actual_output", "")
-                    elif dut["test_result"] and dut["test_result"] != "Skipped":
+                    elif dut["test_result"]:
                         suite_result["total_pass"] += 1
                     else:
                         suite_result["total_fail"] += 1
@@ -1169,10 +1246,9 @@ class ReportClient:
                     logging.debug(f"Compiling results for DUT/s {dut_name}")
                     testcase_id = dut["test_id"]
 
-                    if dut["test_result"] and dut["test_result"] == "Skipped":
+                    if dut["skip"]:
                         test_result = "SKIP"
-                        fail_reason = dut.get("actual_output", "")
-                    elif dut["test_result"] and dut["test_result"] != "Skipped":
+                    elif dut["test_result"]:
                         test_result = "PASS"
                     else:
                         test_result = "FAIL"
@@ -1206,9 +1282,8 @@ class ReportClient:
 
         logging.debug(f"Test suite name is {ts_name}")
         ts_name = ts_name.split(".")[0]
-        ts_name = ts_name.split("_")
-        if len(ts_name) > 1:
-            ts_name = ts_name[1].capitalize()
+        # handling the "_" if it exists by replacing it with " "
+        ts_name = ts_name.replace("_", " ")
         logging.debug(f"Formatted test suite name is {ts_name}")
 
         return ts_name

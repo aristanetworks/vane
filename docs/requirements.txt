@@ -1,0 +1,6 @@
+mkdocs
+mkdocs-material
+md-toc
+mkdocs-glightbox
+mkdocstrings-python
+pre-commit

@@ -1,8 +1,14 @@
-global_dut_filter: # This stanza is optional. If it is not provided by users then all test cases should be run on each dut.
-  criteria: names
-  filter:
-    - BLFE1
+# global_dut_filter: This stanza is optional. If it is not provided by users then all test cases should be run on each dut.
+  # criteria: names
+  # filter:
+  #   - BLFE1
 testcase_data:
+  NRFU1.1:
+    dns_name_server_check: # If you want the test case to fail when a name-server is not configured on the device, change these parameters to True for the IP version you need.
+      ipv4_fail_if_not_configured: True
+      ipv6_fail_if_not_configured: False
+  NRFU1.2:
+    single_ntp_check: False # Single NTP server verification, set the value as True when single ntp server verification needed.
   NRFU2.1:
     descriptions_to_ignore: # Interfaces to ignore the following descriptions
       - unused
@@ -11,6 +17,8 @@ testcase_data:
       - test
       - future
     fail_on_no_description: True # If this field is set to True, the Test case will fail when the description is not found. Otherwise test case will pass even when interfaces do not have a description.
+  NRFU2.5:
+    approved_optics: [] # List manufactures besides Arista that are approved
   NRFU4.1:
     skip_on_command_unavailable: False # Skip the test case if the command is unavailable when set to True, otherwise check with assert messaging
   NRFU6.8:
@@ -20,3 +28,7 @@ testcase_data:
       fail_on_missing_supervisor_card_slots: True
       fail_on_missing_fabric_card_slots: True
       fail_on_missing_linecard_card_slots: False
+  NRFU6.1:
+    days_of_logs: 7 # Number of days used in show logging command
+  NRFU4.3:
+    skip_on_command_unavailable_check: False  # If you need to skip the testcase on 'show bgp evpn summary' command unavailable, change this to True

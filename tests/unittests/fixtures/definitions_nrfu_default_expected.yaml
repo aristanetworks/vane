@@ -9,6 +9,7 @@ parameters:
   report_summary_style: modern
   results_dir: reports/results
   results_file: result.yml
+  self_contained: true
   setup_show: false
   show_log: show_output.log
   stdout: false

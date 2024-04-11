@@ -30,7 +30,9 @@
 #
 # pylint: disable=too-many-lines
 
-"""Utilities for using PyTest in network testing"""
+"""This module has the TestOps class which provides an array of different
+operations that a test case can perform. It also consists of standalone
+functions which provide utility operations while executing test cases. """
 
 import copy
 import concurrent.futures
@@ -44,7 +46,8 @@ import yaml
 
 from jinja2 import Template
 from pyeapi.eapilib import EapiError
-from vane import config, device_interface
+from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
+from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
 from vane.utils import render_cmds
 
@@ -57,13 +60,13 @@ def filter_duts(duts, criteria="", dut_filter=""):
 
     Args:
         duts (dict): Full global duts dictionary
-        criteria (str, optional): Type of filtering required.  Valid options
-        are: name, role, regex, or names. Defaults to "".
-        dut_filter (str, optional): Filter for DUTs. Defaults to "".
+        criteria (str): Type of filtering required. Valid options
+                        are name, role, regex, or names. Defaults to "".
+        dut_filter (str): Filter for DUTs. Defaults to "".
 
     Returns:
-        subset_duts (list(dict)), dut_names (list(str)): Filtered subset of
-        global dictionary of duts and dut names
+        subset_duts (list(dict)): Filtered subset of global dictionary of duts
+        dut_names (list(str)): Filtered subset of global dictionary of dut names
     """
     logging.info(f"Filter: {dut_filter} by criteria: {criteria}")
 
@@ -156,7 +159,7 @@ def import_yaml(yaml_file):
 
 
 def yaml_read(yaml_file):
-    """Return a yaml data read from the yaml file
+    """Return yaml data read from the yaml file
 
     Args:
         yaml_file (file): Input yaml file to be read
@@ -199,6 +202,15 @@ def init_duts(show_cmds, test_parameters, test_duts):
 
     duts = login_duts(test_parameters, test_duts)
     workers = len(duts)
+
+    if not workers:
+        print(
+            "\x1b[31mNo valid DUTs to run tests on, hence exiting Vane.\n"
+            "If you are running on/via a CVP instance ensure your DUTs are"
+            " not in the undefined container.\n"
+            "Look at the logs for further details. \x1b[0m"
+        )
+        sys.exit(1)
 
     logging.debug(f"Duts login info: {duts} and create {workers} workers")
     logging.debug(f"Passing the following show commands to workers: {show_cmds}")
@@ -268,8 +280,8 @@ def login_duts(test_parameters, test_duts):
         login_ptr["mgmt_ip"] = dut["mgmt_ip"]
         login_ptr["username"] = dut["username"]
         login_ptr["password"] = dut["password"]
-        login_ptr["role"] = dut["role"]
         login_ptr["neighbors"] = dut.get("neighbors", "")
+        login_ptr["role"] = dut.get("role", "")
         login_ptr["transport"] = dut["transport"]
         login_ptr["results_dir"] = test_parameters["parameters"]["results_dir"]
         login_ptr["report_dir"] = test_parameters["parameters"]["report_dir"]
@@ -288,10 +300,11 @@ def send_cmds(show_cmds, conn, encoding):
     Args:
         show_cmds (list): List of pre-processed commands
         conn (obj): connection
-        encoding (string): encoding type of show commands: either json or text
+        encoding (str): encoding type of show commands: either json or text
 
     Returns:
-        show_cmd_list (list): list of show commands
+        show_cmd_list (list): list of show command outputs
+        show_cmds (list): list of show commands
     """
 
     try:
@@ -472,11 +485,11 @@ def get_parameters(tests_parameters, test_suite, test_case=""):
     """Return test parameters for a test case
 
     Args:
-        test_parameters (dict): Abstraction of testing parameters
+        tests_parameters (dict): Abstraction of testing parameters
         test_suite (str): test suite of the test case
 
     Returns:
-        case_parameters: test parameters for a test case
+        case_parameters (list): test parameters for a test case
     """
     if not test_case:
         test_case = inspect.stack()[1][3]
@@ -760,7 +773,7 @@ def return_duts_with_role(role_name):
         role_name (str): Role to match in duts data structure
 
     Returns:
-        list: Hostnames of DUTs with role
+        dev_names (list): Hostnames of DUTs with role
     """
 
     dev_names = []
@@ -831,37 +844,7 @@ def export_text(text_file, text_data, dut_name):
         sys.exit(1)
 
 
-def generate_duts_file(dut, file, username, password):
-    """Util function to take in an individual dut and print
-    its relevant data to a given file.
-
-    Args:
-        dut (dict): device structure
-        file (io): file to write duts data to
-        username, password (str): user credentials
-    """
-    dut_dict = {}
-    try:
-        for data in dut:
-            if dut[data]["node_type"] == "veos":
-                dut_dict = [
-                    {
-                        "mgmt_ip": dut[data]["ip_addr"],
-                        "name": data,
-                        "neighbors": dut[data]["neighbors"],
-                        "password": password,
-                        "transport": "https",
-                        "username": username,
-                        "role": "",
-                    }
-                ]
-        if dut_dict:
-            yaml.dump(dut_dict, file)
-    except yaml.YAMLError as err:
-        print(f"DUTs creation for {file} failed due to exception {err}")
-
-
-def create_duts_file(topology_file, inventory_file):
+def create_duts_file(topology_file, inventory_file, duts_file_name):
     """Automatically generate a DUTs file
 
     Args:
@@ -869,11 +852,10 @@ def create_duts_file(topology_file, inventory_file):
         inventory_file (str): Name and path of inventory file
 
     Returns:
-        dict: duts data structure
+        filename (str): duts file name
     """
     dut_file = {}
     dut_properties = []
-    server_properties = []
     topology_file = import_yaml(topology_file)
     inventory_file = import_yaml(inventory_file)
 
@@ -897,27 +879,13 @@ def create_duts_file(topology_file, inventory_file):
                         "role": topology_details.get("role", "unknown"),
                     }
                 )
-            elif name in inventory_file["all"]["children"]["GENERIC"]["hosts"]:
-                inventory_details = inventory_file["all"]["children"]["GENERIC"]["hosts"][name]
-                server_properties.append(
-                    {
-                        "mgmt_ip": inventory_details["ansible_host"],
-                        "name": name,
-                        "neighbors": topology_details["neighbors"],
-                        "password": inventory_details["ansible_ssh_pass"],
-                        "transport": "https",
-                        "username": inventory_details["ansible_user"],
-                        "role": topology_details.get("role", "unknown"),
-                    }
-                )
             else:
                 continue
-        if dut_properties or server_properties:
-            dut_file.update({"duts": dut_properties, "servers": server_properties})
-            with open(config.DUTS_FILE, "w", encoding="utf-8") as yamlfile:
-                yaml.dump(dut_file, yamlfile, sort_keys=False)
 
-                return config.DUTS_FILE
+        if dut_properties:
+            dut_file.update({"duts": dut_properties})
+            with open(duts_file_name, "w", encoding="utf-8") as yamlfile:
+                yaml.dump(dut_file, yamlfile, sort_keys=False)
 
     # pylint: disable-next=broad-exception-caught
     except Exception as excep:
@@ -926,22 +894,37 @@ def create_duts_file(topology_file, inventory_file):
         print(">>> ERROR While creating duts file")
         sys.exit(1)
 
-    return None
+
+def post_process_skip(tops, steps, output=""):
+    """Post processing for test case that encounters a PyTest Skip
+    Args:
+        tops (obj): Test case object
+        steps (func): Test case
+        output (str): Test case show output
+    """
+
+    tops.skip = True
+    tops.parse_test_steps(steps)
+    tops.generate_report(tops.dut_name, output)
 
 
 # pylint: disable-next=too-many-instance-attributes
 class TestOps:
-    """Common testcase operations and variables"""
+    """The TestOps class introduces the API which lets you execute common testcase operations
+    like running show commands on devices, generating test reports, writing evidence files
+    and generating test steps. These operations get called from within the test case."""
 
     def __init__(self, tests_definitions, test_suite, dut):
-        """Initializes TestOps Object
+        """Initializes the TestOps Object with test specific and dut specific data
 
         Args:
-            tests_definition (str): YAML representation of NRFU tests
+            tests_definitions (str): YAML representation of tests
             test_suite (str): name of test suite
             dut (dict): device under test
         """
         test_case = inspect.stack()[1][3]
+        # Test cases that skip will change skip to True
+        self.skip = False
         self.test_case = test_case
         self.test_parameters = self._get_parameters(tests_definitions, test_suite, self.test_case)
         self.expected_output = self.test_parameters["expected_output"]
@@ -1043,7 +1026,13 @@ class TestOps:
         self._write_evidence(self._show_cmds, self._show_cmd_txts, "Verification")
 
     def _write_evidence(self, cmds, cmds_outputs, file_substring):
-        """Write the cmds and their outputs to the file"""
+        """Write the cmds and their outputs to the file
+
+        Args:
+            cmds (dict): dictionary of dut names and show commands executed on that dut
+            cmds_outputs (dict): dictionary of dut names and outputs of show commands
+            file_substring (str): Type of file
+        """
 
         report_dir = self.report_dir
         test_id = self.test_parameters["test_id"]
@@ -1078,7 +1067,7 @@ class TestOps:
             test_case (str): name of the test case
 
         Returns:
-            case_parameters: test parameters for a test case
+            case_parameters (list): test parameters for a test case
         """
         if not test_case:
             test_case = inspect.stack()[1][3]
@@ -1117,7 +1106,7 @@ class TestOps:
         """Utility to generate report
 
         Args:
-          dut_name: name of the device
+          dut_name (str): name of the device
         """
         logging.debug(f"Output on device {dut_name} after SSH connection is: {output}")
 
@@ -1132,6 +1121,7 @@ class TestOps:
         self.test_parameters["show_cmd_txts"] = self._show_cmd_txts
         self.test_parameters["test_steps"] = self.test_steps
         self.test_parameters["show_cmds"] = self._show_cmds
+        self.test_parameters["skip"] = self.skip
 
         if str(self.show_cmd_txt):
             self.test_parameters["show_cmd"] += ":\n\n" + self.show_cmd_txt
@@ -1174,7 +1164,7 @@ class TestOps:
         """Verify DUT is a VEOS instance
 
         Returns:
-            veos_bool: boolean indicating whether DUT is VEOS instance or not
+            veos_bool (boolean): boolean indicating whether DUT is VEOS instance or not
         """
         show_cmd = "show version"
         veos_bool = False
@@ -1192,11 +1182,12 @@ class TestOps:
         return veos_bool
 
     def parse_test_steps(self, func):
-        """Returns a list of all the test_steps in the given function.
+        """Returns a list of all the test steps in the given function.
         Inspects functions and finds statements with TS: and organizes
         them into a list.
+
         Args:
-            func (obj): function reference with body to inspect for test steps
+          func (obj): function reference with body to inspect for test steps
         """
 
         # Extracting lines from the function
@@ -1213,7 +1204,8 @@ class TestOps:
         comments = pattern.findall(content)
 
         # Format each item in list
-        comments = [x.strip() for x in comments]
+        comments = [re.sub(r"\n\s+", " ", x) for x in comments]
+
         if not comments:
             comments.append("N/a no Test Steps found")
 
@@ -1224,21 +1216,28 @@ class TestOps:
         logging.info(f"These are test steps {self.test_steps}")
 
     def set_evidence_default(self, dut_name):
-        """For initializing evidence values for neighbor duts since
-        init only initializes for primary dut"""
+        """Initializes evidence values for neighbor duts since
+        init only initializes for primary dut
+
+        Args:
+            dut_name (str): Name of the dut
+        """
 
         self._show_cmd_txts.setdefault(dut_name, [])
         self._show_cmds.setdefault(dut_name, [])
         self.show_cmd_txts.setdefault(dut_name, [])
 
     def get_new_conn(self, dut, conn_type, timeout):
-        """get new conn returns a new connection to dut of type 'conn_type'
+        """Returns a new connection to the dut of type 'conn_type'
         with read timeout set to timeout
-        Args: dut: the device to get the connection to
-        conn_type: eapi or ssh
-        timeout: Read time out for the connection
 
-        Returns a new eapi or ssh connection to dut
+        Args:
+            dut (dict): the device to get the connection to
+            conn_type (pyeapi/netmiko conn): eapi or ssh
+            timeout (int): Read time out for the connection
+
+        Returns:
+            conn (pyeapi/netmiko): a new eapi or ssh connection to dut
         """
         device_data = {}
         device_data["transport"] = dut["transport"]
@@ -1265,20 +1264,22 @@ class TestOps:
         raise ValueError(f"conn_type [{conn_type}] not supported")
 
     def run_cfg_cmds(self, cfg_cmds, dut=None, conn_type="eapi", timeout=0, new_conn=False):
-        """run_cfg_cmds is a wrapper which runs the configuration cmds
-        if no dut is passed then cmds are run on TestOps dut object
-        if conn_type is eapi then pyeapi is used to connect to dut
-        if conn_type is ssh then netmiko is used to connect to dut
-        if timeout is non-zero then a new connection is created with new timeout
-        if new_conn is True a new connction to dut is created
+        """A wrapper which runs the configuration cmds
+        if no dut is passed then cmds are run on TestOps dut object,
+        if conn_type is eapi then pyeapi is used to connect to dut,
+        if conn_type is ssh then netmiko is used to connect to dut,
+        if timeout is non-zero then a new connection is created with new timeout,
+        if new_conn is True a new connection to dut is created.
 
-        Args: cfg_cmds: list of configuration cmds to run
-        dut: device on which cfg_cmds have to run
-        conn_type: connection type to dut - either pyeapi or netmiko
-        timeout: read timeout for dut connection
-        new_conn: whether to get a new conn to dut
+        Args:
+          cfg_cmds (list): list of configuration cmds to run
+          dut (dict): device on which cfg_cmds have to run
+          conn_type (pyeapi/netmiko): connection type to dut - either pyeapi or netmiko
+          timeout (int): read timeout for dut connection
+          new_conn (boolean): whether to get a new conn to dut
 
-        Returns: A dict object that includes the response for each command
+        Returns:
+            obj (dict): A dict object that includes the response for each command
         """
 
         return self._run_and_record_cmds(
@@ -1301,28 +1302,30 @@ class TestOps:
         new_conn=False,
         hidden_cmd=False,
     ):
-        """run_show_cmds is a wrapper which runs the 'show_cmds'
+        """A wrapper which runs the 'show_cmds'
         conn_type determines how the cmds are being run
-        if conn_type is eapi then pyeapi is used on specified dut
+        if conn_type is eapi then pyeapi is used on specified dut,
         if conn_type is ssh then netmiko connection in dut object is used
-        if no dut is passed then cmds are run on TestOps dut object
+        if no dut is passed then cmds are run on TestOps dut object.
         It returns the output of these 'show_cmds' in the encoding requested.
         Also it checks show_clock_flag
         to see if 'show_clock' cmd needs to be run. It stores the text output for
         'show_cmds' list in 'show_cmds_txt' list for the specific dut.
         Also 'show_cmds' list is appended to object's 'show_cmds' list.
-        If timeout is non-zero then a new connection is created with new timeout
-        If new_conn is set to True then new connection is created
+        If timeout is non-zero then a new connection is created with new timeout.
+        If new_conn is set to True then new connection is created.
 
-        Args: show_cmds: list of show commands to be run
-        dut: the device to run the show command on
-        encoding: json or text, with json being default
-        conn_type: eapi or ssh, with eapi being default
-        timeout: timeout to be used for connection to DUT
-        new_conn: whether or not to create a new conn to DUT
+        Args:
+          show_cmds (list): list of show commands to be run
+          dut (dict): the device to run the show command on
+          encoding (str): json or text, with json being default
+          conn_type (pyeapi/netmiko): eapi or ssh, with eapi being default
+          timeout (int): timeout to be used for connection to DUT
+          new_conn (boolean): whether or not to create a new conn to DUT
 
-        Returns: A dict object that includes the response for each command along
-        with the encoding
+        Returns:
+            obj (dict): A dict object that includes the response for each command along
+                        with the encoding
         """
 
         return self._run_and_record_cmds(
@@ -1349,17 +1352,19 @@ class TestOps:
     ):
         """_run_and_record_cmds runs both config and show cmds and records the output
         of these commands
-        Args:
-        cmds: list of cfg/show cmds to run
-        conn_type: eapi or ssh
-        timeout: timeout to be used for connection to DUT, if non-zero timeout is specified
-                 then a new connection is created
-        new_conn: whether or not to create a new connection to DUT
-        encoding: json or text, with json being default
-        cmd_type: type of cmd to run - "show" or "cfg" with "show" being default
-        dut: the device to run the cmds on
 
-        Returns: A dict object that includes the response for each command
+        Args:
+            cmds (list): list of cfg/show cmds to run
+            conn_type (pyeapi/netmiko conn): eapi or ssh
+            timeout (int): timeout to be used for connection to DUT, if non-zero timeout is
+                            specified then a new connection is created
+            new_conn (boolean): whether or not to create a new connection to DUT
+            encoding (str): json or text, with json being default
+            cmd_type (str): type of cmd to run - "show" or "cfg" with "show" being default
+            dut (dict): the device to run the cmds on
+
+        Returns:
+            obj (dict): A dict object that includes the response for each command
         """
 
         # if dut is not passed, use this object's dut
@@ -1416,9 +1421,9 @@ class TestOps:
                     run_cmds = render_cmds(dut, cmds)
                 # if encoding is json run the commands, store the results
                 if encoding == "json":
-                    json_results = conn.enable(run_cmds)
+                    json_results = conn.enable(run_cmds, strict=True)
                 # also run the commands in text mode
-                txt_results = conn.enable(run_cmds, encoding="text")
+                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
             else:
                 # run the config cmd
                 txt_results = conn.config(cmds)
@@ -1455,15 +1460,18 @@ class TestOps:
         return txt_results
 
     def transfer_file(self, src_file, dest_file, file_system, operation, dut=None, sftp=False):
-        """
-        transfer_file will transfer filename to/from the the dut depending
+        """Transfers filename to/from the the dut depending
         on the operation mentioned.
 
-        dut: device to/from which file needs to be transferred
-        src_file: full filename of src file
-        dest_file: full filename of dest file
-        operation: 'get' or 'put'
-        sftp: whether to use sftp transport or not
+        Args:
+            dut (dict): device to/from which file needs to be transferred
+            src_file (str): full filename of src file
+            dest_file (str): full filename of dest file
+            operation (str): 'get' or 'put'
+            sftp (boolean): whether to use sftp transport or not
+
+        Returns:
+            result (dict): boolean values for file_exists, file_transferred and file_verified
         """
 
         if dut is None:
@@ -1530,3 +1538,80 @@ class TestOps:
         except OSError:
             pass
         return result
+
+    def setup_and_run_traffic(self, traffic_generator_type, configuration_file):
+        """Module to call respective traffic generator based on the type of
+        traffic generator being used in the test case
+
+        Args:
+            traffic_generator_type (str): type of the traffic generator being used
+            configuration_file (.ixcng file): traffic profile file to pass to the traffic generator
+        """
+
+        if traffic_generator_type == "ixia":
+            self.setup_ixia(configuration_file)
+
+    def setup_ixia(self, ixia_configuration):
+        """Module to authenticate into Ixia Web Api, configure a session
+        with passed in configuration file, generate traffic and return
+        traffic and flow stats to validate test criteria
+
+        Args:
+            ixia_configuration (str): path of ixia config file"""
+
+        ixia_traffic_item_stats = []
+        self.traffic_item_stats = []
+        ixia_flow_stats = []
+        self.flow_stats = []
+        ix_network = None
+        session = None
+
+        try:
+            # Module 1 : Authentication: Connect to the IxNetwork API Server
+
+            session, ix_network = ixia_interface.authenticate()
+
+            # Module 2 : Configuration
+
+            ix_network = ixia_interface.configure(ix_network, ixia_configuration)
+
+            # Module 3 : Generating traffic
+
+            ix_network = ixia_interface.generate_traffic(ix_network)
+
+            # Get the traffic item and flow statistics
+
+            ixia_traffic_item_stats = StatViewAssistant(ix_network, "Traffic Item Statistics")
+
+            ixia_flow_stats = StatViewAssistant(ix_network, "Flow Statistics")
+
+            # Generate a deep copy of traffic and flow stats to store in tops object
+
+            index = 0
+            for traffic_item_stat in ixia_traffic_item_stats.Rows:
+                self.traffic_item_stats.append({})
+                for column, data in zip(traffic_item_stat.Columns, traffic_item_stat.RawData[0]):
+                    self.traffic_item_stats[index].update({column: data})
+                index += 1
+
+            index = 0
+            for flow_stat in ixia_flow_stats.Rows:
+                self.flow_stats.append({})
+                for column, data in zip(flow_stat.Columns, flow_stat.RawData[0]):
+                    self.flow_stats[index].update({column: data})
+                index += 1
+
+        except Exception as exception:  # pylint: disable=W0718
+            logging.error(
+                f"Exception: Setting up of Ixia errored out due"
+                f" to the following reason: {format(exception)}"
+            )
+
+        finally:
+            logging.info("Checking if there is a session to be cleared")
+
+            if (ix_network and session) is not None:
+                ixia_interface.clear_session(ix_network, session)
+
+            else:
+                logging.info("No Session to clear")

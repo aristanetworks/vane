@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -53,8 +53,12 @@ class MlagStatusTests:
             self.output += f"\nOutput of {tops.show_cmd} command is: \n{output}"
 
             # Skipping, if MLAG is not configured.
-            if output["state"] == "disabled":
-                pytest.skip(f"For {tops.dut_name} MLAG is not configured, hence test skipped.")
+            if output.get("state") == "disabled":
+                tops.output_msg = (
+                    f"MLAG is not configured on device {tops.dut_name}, hence skipped test case."
+                )
+                tests_tools.post_process_skip(tops, self.test_interfaces_mlag_status, self.output)
+                pytest.skip(tops.output_msg)
 
             # collecting actual output.
             tops.actual_output["mlag_details"].update(

@@ -1,0 +1,8 @@
+duts:
+- mgmt_ip: 10.255.50.212
+  name: DSR01
+  password: cvp123!
+  transport: https
+  username: cvpadmin
+  role: unknown
+servers: []

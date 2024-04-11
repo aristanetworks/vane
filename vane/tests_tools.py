@@ -280,8 +280,8 @@ def login_duts(test_parameters, test_duts):
         login_ptr["mgmt_ip"] = dut["mgmt_ip"]
         login_ptr["username"] = dut["username"]
         login_ptr["password"] = dut["password"]
+        login_ptr["neighbors"] = dut.get("neighbors", "")
         login_ptr["role"] = dut.get("role", "")
-        login_ptr["neighbors"] = dut["neighbors"]
         login_ptr["transport"] = dut["transport"]
         login_ptr["results_dir"] = test_parameters["parameters"]["results_dir"]
         login_ptr["report_dir"] = test_parameters["parameters"]["report_dir"]
@@ -461,7 +461,7 @@ def return_interfaces(hostname, test_parameters):
         if dut_name == hostname:
             logging.info(f"Discovering interface parameters for: {hostname}")
 
-            neighbors = dut["neighbors"]
+            neighbors = dut.get("neighbors", "")
 
             for neighbor in neighbors:
                 interface = {}

@@ -412,4 +412,8 @@ class TestsClient:
             if file_name != "vane.log":
                 file_path = os.path.join("logs", file_name)
                 if os.path.isfile(file_path):
-                    os.remove(file_path)
+                    try:
+                        os.remove(file_path)
+                    # pylint: disable-next=broad-exception-caught
+                    except Exception as excep:
+                        logging.error(f"Could not delete file due to {excep}")

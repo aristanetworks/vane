@@ -199,7 +199,7 @@ including json, .docx, html. These reports offer detailed information
 on the test cases such as test case procedure, input, expected output,
 pass/fail result, and other relevant observations.
 
-!!! info "Sample Reports"
+??? info "Sample Reports"
     === "Sample .docx Report"
         ![Screenshot](../images/report_one.png)
         ![Screenshot](../images/report_two.png)
@@ -208,3 +208,11 @@ pass/fail result, and other relevant observations.
     === "Sample .html Report (Details shown)"
         ![Screenshot](../images/html_report_details_shown_one.png)
         ![Screenshot](../images/html_report_details_shown_two.png)
+
+!!! tip "Vane Logs"
+    You can also gather more insights into your test execution by accessing the logs folder
+    located in the root of your project directory. This folder would have a vane.log file with overall logs
+    and additionally also have individual test case logs.
+    !!! warning
+        The logs folder gets cleaned at the beginning of each vane run to delete test case logs (plus any additional files
+        you may have created in it) and only maintains the vane.log file.

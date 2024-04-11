@@ -261,7 +261,10 @@ def remove_unexecuted_testcase_logs():
                     os.remove(file_path)
                 # pylint: disable-next=broad-exception-caught
                 except Exception as excep:
-                    logging.error(f"Could not delete file due to {excep}")
+                    logging.error(
+                        f"Could not delete file {file_path} while"
+                        f" cleaning out log directory due to {excep}"
+                    )
 
 
 def main():

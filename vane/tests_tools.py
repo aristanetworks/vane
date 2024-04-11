@@ -269,9 +269,7 @@ def login_duts(test_parameters, test_duts):
         login_ptr["username"] = dut["username"]
         login_ptr["password"] = dut["password"]
         login_ptr["role"] = dut["role"]
-        if "neighbors" not in dut:
-            dut["neighbors"] = ""
-        login_ptr["neighbors"] = dut["neighbors"]
+        login_ptr["neighbors"] = dut.get("neighbors", "")
         login_ptr["transport"] = dut["transport"]
         login_ptr["results_dir"] = test_parameters["parameters"]["results_dir"]
         login_ptr["report_dir"] = test_parameters["parameters"]["report_dir"]

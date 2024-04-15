@@ -44,8 +44,8 @@ import os
 import pytest
 from vane import tests_client
 from vane import report_client
+from vane import test_catalog_client
 from vane import tests_tools
-from vane import test_step_client
 import vane.config
 from vane.vane_logging import logging
 from vane import nrfu_client
@@ -96,16 +96,6 @@ def parse_cli():
     )
 
     parser.add_argument(
-        "--generate-test-steps",
-        help=(
-            "Generate test steps for all the tests in"
-            " the test directory mentioned in the definitions file"
-        ),
-        nargs=1,
-        metavar=("test_dir"),
-    )
-
-    parser.add_argument(
         "--markers",
         help=("List of supported technology tests. Equivalent to pytest --markers"),
         action="store_true",
@@ -117,6 +107,24 @@ def parse_cli():
         action="store_true",
     )
 
+    parser.add_argument(
+        "--generate-test-catalog",
+        help=(
+            "Generate test catalog for all the tests in the test directories mentioned in CLI"
+            " argument. Provide one or more directory paths separated by spaces. If using"
+            " non-default test definitions(other than test_definition.yaml file), include the"
+            " --test-definitions-file argument to specify the name of test definitions file."
+        ),
+        nargs="+",
+        metavar="test_directories",
+    )
+
+    parser.add_argument(
+        "--test-definitions-file",
+        help="Specify the name of the test definitions file.",
+        nargs=1,
+        metavar="test_definitions_file",
+    )
     args = main_parser.parse_args()
 
     return args
@@ -171,13 +179,18 @@ def write_results(definitions_file):
     vane_report_client.write_result_doc()
 
 
-def write_test_steps(test_dir):
-    """Writes the test steps for the given test directory tests
+def write_test_catalog(test_dir, test_def_file):
+    """
+    Generates a test catalog CSV file containing information about the tests
+    found in the specified test directories. The CSV file will be created in the test
+    catalog directory from where the `vane generate-test-catalog` command is triggered.
 
-    Args: test_dir (str): Path and name of test directory"""
-
-    vane_test_step_client = test_step_client.TestStepClient(test_dir)
-    vane_test_step_client.write_test_steps()
+    Args:
+        test_dir (str): Path and name of the test directory
+        test_def_file (str): Name of the test definitions file.
+    """
+    vane_test_catalog_client = test_catalog_client.TestCatalogClient(test_dir, test_def_file)
+    vane_test_catalog_client.write_test_catalog()
 
 
 def show_markers():
@@ -295,12 +308,18 @@ def main():
             args.generate_duts_file[0], args.generate_duts_file[1], args.generate_duts_file[2]
         )
 
-    elif args.generate_test_steps:
+    elif args.generate_test_catalog:
         logging.info(
-            f"Generating test steps for test cases within {args.generate_test_steps} "
-            f"test directory\n"
+            f"Generating test catalog for test cases within {args.generate_test_catalog} "
+            "test directories\n"
         )
-        write_test_steps(args.generate_test_steps)
+        # Default test definitions file name.
+        test_def_file = "test_definition.yaml"
+
+        if args.test_definitions_file:
+            test_def_file = args.test_definitions_file[0]
+
+        write_test_catalog(args.generate_test_catalog, test_def_file)
 
     elif args.version:
         print(f"Vane Framework Version: {metadata.version(__package__)}")

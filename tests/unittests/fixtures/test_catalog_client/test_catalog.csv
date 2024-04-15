@@ -1,0 +1,21 @@
+Test Suite,Test Case ID,Test Case,Description,Test Steps
+api_tests,TN2.1,test_if_management_https_api_server_is_running_on_,Verify management api https server is running,"1. Collecting the output of 'show management api http-commands' command from DUT
+2. Check HTTPS Server running status
+3. Creating test report based on results
+"
+api_tests,TN2.2,test_if_management_https_api_server_port_is_correct_on_,Verify https server is enabled on port 443,"1. Collecting the output of 'show management api http-commands' command from DUT
+2. Check HTTPS Server port
+3. Creating test report based on results
+"
+api_tests,TN2.3,test_if_management_https_api_server_is_enabled_on_,Verify management api https server is enabled,"1. Collecting the output of 'show management api http-commands' command from DUT
+2. Check HTTPS Server is enabled
+3. Creating test report based on results
+"
+api_tests,TN2.4,test_if_management_http_api_server_is_running_on_,Verify management api http server is not running,"1. Collecting the output of 'show management api http-commands' command from DUT
+2. Check HTTP Server running status
+3. Creating test report based on results
+"
+api_tests,TN2.5,test_if_management_local_http_api_server_is_running_on_,Verify management api local httpserver is not running,"1. Collecting the output of 'show management api http-commands' command from DUT
+2. Check Local HTTP Server running status
+3. Creating test report based on results
+"

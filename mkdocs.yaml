@@ -53,9 +53,10 @@ extra:
       link: https://twitter.com/AristaNetworks
     - icon: fontawesome/solid/globe
       link: https://www.arista.com
-  # version:
-  #   provider: mike
-  #   default: stable
+  version:
+    provider: mike
+    default:
+      - stable
 
 extra_css:
   - stylesheets/extra.material.css
@@ -65,6 +66,7 @@ plugins:
   - search:
       lang: en
   - mkdocstrings
+  - mike:
 
 markdown_extensions:
   - admonition

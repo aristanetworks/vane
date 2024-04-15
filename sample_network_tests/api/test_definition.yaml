@@ -12,8 +12,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_management_https_api_server_port_is_correct_on_
       test_id: TN2.2
@@ -27,8 +27,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_management_https_api_server_is_enabled_on_
       test_id: TN2.3
@@ -42,8 +42,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_management_http_api_server_is_running_on_
       test_id: TN2.4
@@ -57,8 +57,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_management_local_http_api_server_is_running_on_
       test_id: TN2.5
@@ -72,5 +72,5 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1

@@ -79,6 +79,7 @@ class UsersTests:
                         f"username configured is "
                         f"{tops.actual_output} which is correct.\n\n"
                     )
+                    logging.info(tops.output_msg)
                 else:
                     tops.output_msg += (
                         f"On router {tops.dut_name} {username} "
@@ -86,6 +87,7 @@ class UsersTests:
                         f"{tops.actual_output}, while the expected username "
                         f"is {tops.expected_output}.\n\n"
                     )
+                    logging.info(tops.output_msg)
             except (AttributeError, LookupError, EapiError) as exp:
                 tops.actual_output = str(exp)
                 logging.error(

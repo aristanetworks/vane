@@ -37,6 +37,7 @@ import os
 import re
 import yaml
 import docx
+from tqdm import tqdm
 from docx.oxml.ns import qn, nsdecls
 from docx.oxml import OxmlElement, parse_xml
 from docx.shared import Inches, Pt, RGBColor
@@ -51,6 +52,11 @@ TOTAL_TESTS = "Total Tests"
 TOTAL_PASSED = "Total Passed"
 TOTAL_FAILED = "Total Failed"
 TOTAL_SKIPPED = "Total Skipped"
+
+# Define ANSI escape codes for colors
+YELLOW = "\x1b[33m"
+GREEN = "\x1b[32m"
+DEFAULT = "\033[0m"
 
 
 class CachedTable(Table):
@@ -134,7 +140,7 @@ class ReportClient:
         try:
             yaml_files = os.listdir(yaml_dir)
         except FileNotFoundError:
-            logging.error(f"dir not found {yaml_dir}")
+            logging.error(f"Dir not found {yaml_dir}")
             return
 
         logging.debug(f"yaml input files are {yaml_files}")
@@ -184,7 +190,7 @@ class ReportClient:
             suite_index = test_suites.index(test_suite)
             logging.debug(f"Test suite {test_suite} exists in results file at index {suite_index}")
         else:
-            logging.info(f"Create test suite {test_suite} in results file")
+            logging.info(f"Creating test suite {test_suite} in results file")
             suite_stub = {"name": test_suite, "test_cases": []}
             self._results_datamodel["test_suites"].append(suite_stub)
             suite_index = len(self._results_datamodel["test_suites"]) - 1
@@ -198,7 +204,7 @@ class ReportClient:
             test_index = test_cases.index(test_case)
             logging.debug(f"Test case {test_case} exists in results file at index {test_index}")
         else:
-            logging.info(f"Create test case {test_case} in results file")
+            logging.info(f"Creating test case {test_case} in results file")
             test_stub = {"name": test_case, "duts": []}
             self._results_datamodel["test_suites"][suite_index]["test_cases"].append(test_stub)
             test_index = len(self._results_datamodel["test_suites"][suite_index]["test_cases"]) - 1
@@ -221,7 +227,7 @@ class ReportClient:
     def write_result_doc(self):
         """Create MSFT docx with results"""
 
-        logging.info("Create MSFT docx with results")
+        logging.info("Creating MSFT docx with results")
         self._write_title_page()
         self._write_toc_page()
         self._write_summary_report()
@@ -355,7 +361,7 @@ class ReportClient:
     def _write_suite_summary_results(self):
         """Write summary test suite result section"""
 
-        logging.info("Create Suite summary results table")
+        logging.info("Creating Suite summary results table")
         self._document.add_heading(f"{self._major_section }.3 Summary Totals for Test Suites", 2)
         suite_results = self._compile_suite_results()
         if not suite_results:
@@ -367,10 +373,6 @@ class ReportClient:
 
         for column, header in enumerate(headers):
             self._write_cell(table, header.upper(), column, 0, "Arial", 9, True, "00FFFF")
-
-        if not suite_results:
-            logging.warning("Skipping the test suite results")
-            return
 
         for row, suite_result in enumerate(suite_results):
             _ = table.add_row().cells
@@ -492,7 +494,8 @@ class ReportClient:
                 logging.debug(f"report_summary_style is correctly set to {report_style}, default")
                 self._default_tc_report()
         else:
-            logging.warning(f"No summary style set in parameters: {self.data_model['parameters']}")
+            logging.warning("No summary style set in parameters.")
+            logging.debug(f"No summary style set in parameters: {self.data_model['parameters']}")
             self._default_tc_report()
 
     def _custom_tc_report(self, report_template):
@@ -797,9 +800,7 @@ class ReportClient:
         hdr_cells[4].text = "DUT/s"
         hdr_cells[5].text = "Result"
         hdr_cells[6].text = "Failure or Skip Reason"
-        if not testcase_results:
-            logging.warning("Skipping the summary testcase report")
-            return
+
         for testcase_result in testcase_results:
             row_cells = table.add_row().cells
             row_cells[0].text = str(test_num)
@@ -824,21 +825,38 @@ class ReportClient:
 
         test_suites = self._results_datamodel["test_suites"]
 
+        # Calculating total dut sections to be written and using that as the mark for progress
+        total_dut_sections = 0
         for test_suite in test_suites:
-            self._write_detail_major_section(test_suite)
-            minor_section = 1
-
             for test_case in test_suite["test_cases"]:
-                self._write_detail_minor_section(test_case, minor_section)
-                dut_section = 1
-
                 for dut in test_case["duts"]:
-                    self._write_detail_dut_section(dut, minor_section, dut_section)
-                    dut_section += 1
+                    total_dut_sections += 1
 
-                minor_section += 1
+        custom_format = (
+            f"{YELLOW}{{desc}}: {{percentage:.0f}}%| {GREEN}{{bar}}{YELLOW} |"
+            f"elapsed time: {{elapsed}} | remaining time: {{remaining}}{DEFAULT}"
+        )
 
-            self._major_section += 1
+        with tqdm(
+            total=total_dut_sections,
+            desc="Writing detailed report",
+            unit="iteration",
+            bar_format=custom_format,
+        ) as pbar:
+            for test_suite in test_suites:
+                self._write_detail_major_section(test_suite)
+                minor_section = 1
+
+                for test_case in test_suite["test_cases"]:
+                    self._write_detail_minor_section(test_case, minor_section)
+                    dut_section = 1
+
+                    for dut in test_case["duts"]:
+                        self._write_detail_dut_section(dut, minor_section, dut_section)
+                        dut_section += 1
+                        pbar.update(1)
+                    minor_section += 1
+                self._major_section += 1
 
     def _write_detail_major_section(self, test_suite):
         """Write detailed major report section
@@ -917,7 +935,7 @@ class ReportClient:
 
         if missing_fields:
             logging.warning(
-                "Required report fields are NOT in test definitions for test case: {tc_name}"
+                f"Required report fields are NOT in test definitions for test case: {tc_name}"
             )
             para = self._document.add_paragraph()
             out_msg = (

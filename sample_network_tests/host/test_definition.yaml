@@ -11,5 +11,5 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1

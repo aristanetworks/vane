@@ -75,6 +75,13 @@ class InterfaceErrorsAndDiscardsTests:
                     input_errors_details = inter_face_counters.get("inputErrorsDetail")
                     output_errors_details = inter_face_counters.get("outputErrorsDetail")
 
+                    # link status change is a special case where tolerance is 100 instead of 0
+                    # to maintain logic, test case will set link status changes to 0 if it is
+                    # <= to 100
+                    link_status_changes = inter_face_counters.get("linkStatusChanges")
+                    if link_status_changes <= 100:
+                        link_status_changes = 0
+
                     # Collecting actual and expected output.
                     self.tops.actual_output.update(
                         {
@@ -98,9 +105,7 @@ class InterfaceErrorsAndDiscardsTests:
                                     "total_in_errors": inter_face_counters.get("totalInErrors"),
                                     "out_discards": inter_face_counters.get("outDiscards"),
                                     "total_out_errors": inter_face_counters.get("totalOutErrors"),
-                                    "link_status_changes": inter_face_counters.get(
-                                        "linkStatusChanges"
-                                    ),
+                                    "link_status_changes": link_status_changes,
                                 },
                             }
                         }

@@ -12,8 +12,8 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_1_min_cpu_utlization_on_
       test_id: TN3.2
@@ -26,9 +26,9 @@
       test_criteria: Verify expected CPU percentage less than actual CPU percentage
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
-      filter: 
-        - DLFW3
-        - DLFW4
+      filter:
+        - DSR01
+        - DCBBW1
 
     - name: test_5_min_cpu_utlization_on_
       test_id: TN3.3
@@ -42,5 +42,5 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter:
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1

@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -57,7 +57,12 @@ class TacacsServersTests:
 
             # Skipping test case if TACACS servers are not configured.
             if not tacacs_servers:
-                pytest.skip(f"TACACS servers are not configured on {tops.dut_name}.")
+                tops.output_msg = (
+                    f"No TACACS servers found on the device {tops.dut_name}. Hence skipped the test"
+                    " case."
+                )
+                tests_tools.post_process_skip(tops, self.test_base_services_tacacs, self.output)
+                pytest.skip(tops.output_msg)
 
             for tacacs_server in tacacs_servers:
                 tacacs_hostname = tacacs_server.get("serverInfo").get("hostname")

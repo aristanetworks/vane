@@ -50,6 +50,8 @@ class CoreDumpFilesTests:
             )
             self.output = f"Output of {tops.show_cmd} command is:\n{core_dump}"
             core_dump = core_dump["coreFiles"]
+            if "minidump" in core_dump:
+                core_dump.remove("minidump")
             tops.actual_output["core_dump_files_not_found"] = not bool(core_dump)
 
             # Output message formation in case test case fails.

@@ -33,6 +33,13 @@ function exit_trap {
   fi
 }
 
+# Set the CONTAINER_CMD to either docker or nerdctl. Use docker if nerdctl is not available.
+# Docker is used on older releases of CVP, nerdctl is used on newer releases.
+CONTAINER_CMD=nerdctl
+if ! command -v ${CONTAINER_CMD} &> /dev/null; then
+  CONTAINER_CMD=docker
+fi
+
 # Keep track of the last executed command
 trap 'last_command=$current_command; current_command=$BASH_COMMAND' DEBUG
 # Handle errors then exit
@@ -52,10 +59,10 @@ result=$($mycommand 2>&1)
 #    still proceed afterwards
 echo -e $divider
 echo -e "Remove the container images\n"
-img_id=`nerdctl images | grep vane-cvp | awk '{print $3}'`
-nerdctl rmi -f vane-cvp
+img_id=`${CONTAINER_CMD} images | grep vane-cvp | awk '{print $3}'`
+${CONTAINER_CMD} rmi -f vane-cvp
 if [ ! -z ${img_id:+x} ]; then
-  nerdctl rmi -f ${img_id}
+  ${CONTAINER_CMD} rmi -f ${img_id}
 fi
 
 # Disable the extension

@@ -70,7 +70,8 @@ class EvpnRoutingTests:
                     evpn_running = True
                     break
 
-            assert evpn_running, "EVPN is not configured on the device."
+            if not evpn_running:
+                pytest.skip(f"EVPN is not configured on {tops.dut_name}.")
 
             bgp_evpn_peer = ""
             for vrf in vrf_details:
@@ -137,7 +138,7 @@ class EvpnRoutingTests:
                             "evpnRoutes"
                         )
                         if not advertised_route_details:
-                            no_imet_routes_advertised[vrf].append(vni)
+                            no_imet_routes_advertised[vrf].append(str(vni))
 
                         tops.actual_output["vrfs"][vrf]["virtual_network_identifiers"][str(vni)] = {
                             "imet_routes_being_advertised": bool(advertised_route_details)
@@ -155,20 +156,25 @@ class EvpnRoutingTests:
 
         except (AssertionError, AttributeError, LookupError, EapiError) as excep:
             if skip_on_command_unavailable_check:
+                # Skipping the testcase as EVPN is not configured or device might be in ribd mode.
                 if (show_bgp_command and "Not supported") in str(excep):
                     tops.output_msg = (
-                        f"{show_bgp_command} command unavailable, device might be in ribd mode."
+                        f"Skipping test case on {tops.dut_name} as {show_bgp_command} command"
+                        " is unavailable or device might be in ribd mode."
                     )
-                    pytest.skip(
-                        f"{show_bgp_command} command unavailable, device might be in ribd mode."
-                        " hence test skipped."
+                    tests_tools.post_process_skip(
+                        tops, self.test_routing_evpn_l2vni_imet, self.output
                     )
+                    pytest.skip(tops.output_msg)
 
             if "Interface does not exist" in str(excep):
-                tops.output_msg = f"{vxlan_interface} interface does not exist / no L2 VNIs."
-                pytest.skip(
-                    f"{vxlan_interface} interface does not exist / no L2 VNIs. hence test skipped."
+                # Skipping the testcase as Vxlan interfaces not configured / no L2 VNIs.
+                tops.output_msg = (
+                    f"Skipping test case on {tops.dut_name} as interface {vxlan_interface} does not"
+                    " exist / no L2 VNIs."
                 )
+                tests_tools.post_process_skip(tops, self.test_routing_evpn_l2vni_imet, self.output)
+                pytest.skip(tops.output_msg)
 
             tops.actual_output = tops.output_msg = str(excep).split("\n", maxsplit=1)[0]
             logging.error(

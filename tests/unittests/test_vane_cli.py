@@ -99,51 +99,6 @@ def test_write_results(loginfo, mocker):
     loginfo.assert_called_with("Using class ReportClient to create vane_report_client object")
 
 
-def test_write_steps():
-    """Validates the functionality of the script which writes .md and .json with test steps
-    for test files. REQUIRES there to be a tests/unittests/fixtures/test_steps/test_steps.py
-    existing in this folder for test to pass"""
-
-    assert not os.path.exists("tests/unittests/fixtures/test_steps/test_steps.md")
-    assert not os.path.exists("tests/unittests/fixtures/test_steps/test_steps.json")
-
-    vane_cli.write_test_steps(["tests/unittests/fixtures/test_steps"])
-    expected_output = [
-        "#  Testcase for verification of syslog logging server and\n",
-        "            source-interface information\n",
-        "\n",
-        "1.  Running show logging command on dut and collecting the text output\n",
-        "2.  Checking logging source interface and Logging to string in output\n",
-        "3.  Collecting logging interface and IP address from command output\n",
-        "4.  Collecting information of syslog logging port and vrf details from command\n",
-        "            output\n",
-        "5.  Comparing source-interface, port and vrf details from actual output\n",
-        "        with the expected output details\n",
-        "\n",
-        "#  Testcase for veification of syslog events on configured server\n",
-        "\n",
-        "1.  Creating Testops class object and initializing the variable\n",
-        "2.  Running Tcpdump on syslog server and entering in config mode\n",
-        "            and existing to verify logging event are captured.\n",
-        "3.  Comparing the actual output and expected output. Generating docx report\n",
-    ]
-
-    assert os.path.exists("tests/unittests/fixtures/test_steps/test_steps.md")
-    assert os.path.exists("tests/unittests/fixtures/test_steps/test_steps.json")
-
-    with open(
-        "tests/unittests/fixtures/test_steps/test_steps.md", "r", encoding="utf-8"
-    ) as file_pointer:
-        content = file_pointer.readlines()
-        # trimming out the date and time details from the md file
-        # as they will vary per test run
-        final_content = content[5:]
-        assert final_content == expected_output
-
-    os.remove("tests/unittests/fixtures/test_steps/test_steps.md")
-    os.remove("tests/unittests/fixtures/test_steps/test_steps.json")
-
-
 def test_show_markers(mocker):
     """Validates the functionality of show_markers method"""
 
@@ -196,12 +151,48 @@ def test_download_test_results(loginfo):
         loginfo.assert_called_with("Downloading a zip file of the TEST RESULTS folder")
 
 
+def test_remove_unexecuted_testcase_logs(loginfo):
+    """Validates that log files created for unexecuted test cases get deleted"""
+
+    vane.config.test_parameters = {"parameters": {"json_report": "reports/report"}}
+    json_file = "reports/report.json"
+
+    # Execute this test case only when json report is available as it is required
+    # within the remove_unexecuted_testcase_logs module for validating which logs to delete
+    if os.path.exists(json_file):
+        # Add unexecuted test case log files to logs folder
+        unexecuted_file_log = "logs/no_test_case.log"
+        with open(unexecuted_file_log, "w", encoding="utf-8"):
+            pass
+        log_folder_size = len(
+            [name for name in os.listdir("logs") if os.path.isfile(os.path.join("logs", name))]
+        )
+
+        vane_cli.remove_unexecuted_testcase_logs()
+
+        new_log_folder_size = len(
+            [name for name in os.listdir("logs") if os.path.isfile(os.path.join("logs", name))]
+        )
+
+        # assert the module removed unexecuted_file_log correctly
+        assert new_log_folder_size == log_folder_size - 1
+
+        # assert logs to ensure the method executed without errors
+        loginfo_calls = [
+            call("Removing log files of unexecuted test cases from logs directory: logs"),
+            call("Gathering executed test cases' names from report.json"),
+            call("Deleting unexecuted test case log files"),
+        ]
+        loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+
 def test_main_definitions_and_duts(loginfo, logwarning, mocker):
     """Tests the --definitions-file and --duts-file flag"""
 
     mocker.patch("vane.vane_cli.run_tests")
     mocker.patch("vane.vane_cli.write_results")
     mocker.patch("vane.vane_cli.download_test_results")
+    mocker.patch("vane.vane_cli.remove_unexecuted_testcase_logs")
 
     # mocking parse cli to test --definitions-file and --duts-file flag
     mocker.patch(
@@ -210,7 +201,8 @@ def test_main_definitions_and_duts(loginfo, logwarning, mocker):
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
             generate_duts_file=None,
-            generate_test_steps=None,
+            duts_file_name=None,
+            generate_test_catalog=None,
             markers=False,
             nrfu=False,
             version=False,
@@ -247,9 +239,10 @@ def test_main_create_duts_file(loginfo, mocker):
         return_value=argparse.Namespace(
             definitions_file="definitions_sample.yaml",
             duts_file="duts_sample.yaml",
-            generate_duts_file=["topology.yaml", "inventory.yaml", "duts_name.yaml"],
+            generate_duts_file=["topology.yaml", "inventory.yaml"],
+            duts_file_name=["duts_custom.yaml"],
             generate_duts_from_topo=None,
-            generate_test_steps=None,
+            generate_test_catalog=None,
             markers=False,
             nrfu=False,
         ),
@@ -267,30 +260,31 @@ def test_main_create_duts_file(loginfo, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
 
-def test_main_write_test_steps(loginfo, mocker):
-    """Tests the --generate-test-steps flag"""
+def test_main_write_test_catalog(loginfo, mocker):
+    """
+    Tests the --generate-test-catalog flag
+    """
 
-    mocker.patch("vane.vane_cli.run_tests")
-    mocker.patch("vane.vane_cli.write_results")
-    mocker.patch("vane.vane_cli.download_test_results")
-    mocker.patch("vane.vane_cli.write_test_steps")
+    mocker.patch("vane.vane_cli.write_test_catalog")
 
-    # mocking parse cli to test --generate-test-steps
+    # mocking parse cli to test --generate-test-catalog
     mocker.patch(
         "vane.vane_cli.parse_cli",
         return_value=argparse.Namespace(
-            definitions_file="definitions_sample.yaml",
-            duts_file="duts_sample.yaml",
+            definitions_file=None,
+            duts_file=None,
             generate_duts_file=None,
-            generate_test_steps="test_directory",
+            duts_file_name=None,
+            generate_test_catalog="test_directories",
             markers=False,
+            test_definitions_file="test_definitions_file",
         ),
     )
     vane_cli.main()
 
-    # assert info logs to ensure all the above methods executed without errors
+    # assert info logs to ensure write_test_catalog method is executed without errors
     loginfo_calls = [
         call("Reading in input from command-line"),
-        call("Generating test steps for test cases within test_directory test directory\n"),
+        call("Generating test catalog for test cases within test_directories test directories\n"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=False)

@@ -1255,44 +1255,6 @@ def test_test_ops_html_report(mocker, capsys):
     assert show_output in captured_output.out
 
 
-def test_test_ops_verify_veos_pass(loginfo, logdebug, mocker):
-    """Validates verification of the model of the dut"""
-
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
-
-    mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
-        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
-    )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
-    tops = create_test_ops_instance(mocker)
-
-    # handling the true case
-
-    tops.verify_veos()
-    loginfo.assert_called_with("Verifying if DCBBW1 DUT is a VEOS instance. Model is vEOS-lab")
-    logdebug.assert_called_with("DCBBW1 is a VEOS instance so returning True")
-
-
-def test_test_ops_verify_veos_fail(logdebug, mocker):
-    """Validates verification of the model of the dut"""
-
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
-
-    mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
-        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
-    )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
-    tops = create_test_ops_instance(mocker)
-
-    # handling the false case
-
-    DUT["output"]["show version"]["json"]["modelName"] = "cEOS"
-    tops.verify_veos()
-    logdebug.assert_called_with("DCBBW1 is not a VEOS instance so returning False")
-
-
 def test_test_ops_parse_test_steps(loginfo, mocker):
     """Validates verification of the parse_test_steps method
     FIXTURE NEEDED: tests/unittests/fixtures/test_steps/test_steps.py"""

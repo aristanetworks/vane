@@ -20,6 +20,12 @@ jobs:
         with:
           python-version: 3.x
 
+      - name: Setup Git config
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+
       ##### Install required Python Modules and build the website #####
       - name: 'Build mkdocs content and deploy to gh-pages to develop'
         run: |

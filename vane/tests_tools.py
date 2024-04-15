@@ -499,8 +499,7 @@ def dut_worker(dut, show_cmds, reachable_duts):
 
             logging.debug(f"Found cmd: {show_cmd} at index {cmd_index} of {show_cmds_txt}")
             logging.debug(
-                f"length of cmds: {len(show_cmds_txt)} vs length of "
-                f"output {len(show_cmd_txt_list)}"
+                f"length of cmds: {len(show_cmds_txt)} vs length of output {len(show_cmd_txt_list)}"
             )
 
             show_output_txt = show_cmd_txt_list[cmd_index]["output"]
@@ -1058,6 +1057,7 @@ class TestOps:
 
         self.show_cmds = {self.dut_name: []}
         self._show_cmds = {self.dut_name: []}
+        self._prompt = {self.dut_name: []}
 
         if self.show_clock_flag:
             self._show_cmds[self.dut_name].append("show clock")
@@ -1073,13 +1073,16 @@ class TestOps:
             if self.show_cmd:
                 self.show_cmds[self.dut_name].append(self.show_cmd)
                 self._show_cmds[self.dut_name].append(self.show_cmd)
+                self._prompt[self.dut_name].append("#")
         except KeyError:
             self.show_cmds[self.dut_name].extend(self.test_parameters["show_cmds"])
             self._show_cmds[self.dut_name].extend(self.test_parameters["show_cmds"])
+            self._prompt[self.dut_name].append("#")
 
         self.show_cmd_txts = {self.dut_name: []}
         self.show_cmd_txt = ""
         self._show_cmd_txts = {self.dut_name: []}
+        self._prompt = {self.dut_name: []}
 
         if len(self._show_cmds[self.dut_name]) > 0 and self.dut:
             self._verify_show_cmd(self._show_cmds[self.dut_name], self.dut)
@@ -1087,8 +1090,10 @@ class TestOps:
                 self.show_cmd_txt = self.dut["output"][self.show_cmd]["text"]
             for show_cmd in self.show_cmds[self.dut_name]:
                 self.show_cmd_txts[self.dut_name].append(self.dut["output"][show_cmd]["text"])
+                self._prompt[self.dut_name].append("#")
             for show_cmd in self._show_cmds[self.dut_name]:
                 self._show_cmd_txts[self.dut_name].append(self.dut["output"][show_cmd]["text"])
+                self._prompt[self.dut_name].append("#")
 
         self.comment = ""
         self.output_msg = ""
@@ -1138,9 +1143,9 @@ class TestOps:
     def _write_text_results(self):
         """Write the text output of show command to a text file"""
 
-        self._write_evidence(self._show_cmds, self._show_cmd_txts, "Verification")
+        self._write_evidence(self._show_cmds, self._show_cmd_txts, "Verification", self._prompt)
 
-    def _write_evidence(self, cmds, cmds_outputs, file_substring):
+    def _write_evidence(self, cmds, cmds_outputs, file_substring, prompt_list=[]):
         """Write the cmds and their outputs to the file
 
         Args:
@@ -1162,8 +1167,10 @@ class TestOps:
             text_data = {}
             index = 1
 
-            for command, text in zip(dut_cmds, cmds_outputs[dut_name]):
-                text_data[str(index) + ". " + dut_name + "# " + command] = "\n\n" + text
+            for command, text, prompt in zip(
+                dut_cmds, cmds_outputs[dut_name], prompt_list[dut_name]
+            ):
+                text_data[str(index) + ". " + dut_name + f"{prompt} " + command] = "\n\n" + text
                 index += 1
 
             if text_data:
@@ -1271,8 +1278,10 @@ class TestOps:
 
         for dut_name, _show_cmds in self._show_cmds.items():
             index = 1
-            for command, text in zip(_show_cmds, self._show_cmd_txts[dut_name]):
-                print(f"{index}. {dut_name}# {command}\n\n{text}")
+            for command, text, prompt in zip(
+                _show_cmds, self._show_cmd_txts[dut_name], self._prompt[dut_name]
+            ):
+                print(f"{index}. {dut_name}{prompt} {command}\n\n{text}")
                 index += 1
 
     def parse_test_steps(self, func):
@@ -1320,6 +1329,7 @@ class TestOps:
         self._show_cmd_txts.setdefault(dut_name, [])
         self._show_cmds.setdefault(dut_name, [])
         self.show_cmd_txts.setdefault(dut_name, [])
+        self._prompt.setdefault(dut_name, [])
 
     def get_ssh_connection(self, dut):
         """Return the ssh connection if it exists otherwise initialise
@@ -1733,7 +1743,7 @@ class TestOps:
 
         except Exception as exception:  # pylint: disable=W0718
             logging.error(
-                f"Exception: Setting up of Ixia errored out due"
+                "Exception: Setting up of Ixia errored out due"
                 f" to the following reason: {format(exception)}"
             )
 
@@ -1745,3 +1755,46 @@ class TestOps:
 
             else:
                 logging.info("No Session to clear")
+
+    def add_cmds_evidence(self, dut_name, cmds, cmds_output, prompt="#"):
+        """
+        Utility API to add command evidence for commands in to the docx and HTML report.
+        Args:
+            dut(str): name of dut to which this evidence is to be added.
+            prompt takes two values(str): <vane_server, or dut_name> and it indicates where the command was run.
+            cmds(list): list of cmds run
+            cmds_output(list): list of outputs of above cmd
+        """
+        prompts = [prompt for _ in cmds]
+
+        # Initializing the evidence for a particular device.
+        self.show_cmd = cmds
+        self.set_evidence_default(dut_name)
+
+        # Line space added after each command output.
+        cmds_output = [f"{cmd}\n" for cmd in cmds_output]
+
+        final_cmd_output = []
+        for cmd, cmd_output in zip(cmds, cmds_output):
+            cmd = cmd.replace("\n", "")
+            # Regex added to remove the initial logging line that paramiko returns.
+            formatted_cmd_output = re.sub(
+                r"(.*[\r\n]+.*Last login:.*)|(.*Last login:.*)", "", cmd_output
+            )
+
+            #  Regex added to remove command printing twice in the report.
+            formatted_cmd_output = re.sub(rf".*{cmd}\r\n", "", formatted_cmd_output)
+
+            #  Regex added to remove the ending device name and its prompt.
+            formatted_cmd_output = re.sub(r".*[#$][\n|\s]*$", "", formatted_cmd_output)
+
+            # Regex added to remove the initial \n getting added in the output.
+            formatted_cmd_output = re.sub(r"\n(?=[^\n])", "", formatted_cmd_output)
+
+            # Appending the cleaned output.
+            final_cmd_output.append(formatted_cmd_output)
+
+        # Updating the commands and command output dictionaries.
+        self._show_cmds[dut_name].extend(cmds)
+        self._show_cmd_txts[dut_name].extend(final_cmd_output)
+        self._prompt[dut_name].extend(prompts)

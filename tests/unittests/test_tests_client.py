@@ -101,14 +101,14 @@ def test_write_test_def_file(loginfo):
     # Set the definitions information to be passed to write_test_def_file
     template_definitions = "test_definition.yaml"
     master_definitions = {}
-    test_dir = "tests/unittests/fixtures"
+    test_dir = "tests/unittests/fixtures/fixture_tacacs"
     test_definitions = "test_definition_regenerated.yaml"  # don't overwrite the file
 
     # Make sure the regenerated file does not exist
     if os.path.exists(test_dir + "/" + test_definitions):
         os.remove(test_dir + "/" + test_definitions)
 
-    # Write test def file
+    # Write test definition file
     client.write_test_def_file(template_definitions, master_definitions, test_dir, test_definitions)
 
     # Verify the definitions file was regenerated
@@ -118,7 +118,13 @@ def test_write_test_def_file(loginfo):
     # pylint: disable=consider-using-with
     unittest.TestCase().assertListEqual(
         list(open(f"{test_dir}/{test_definitions}", mode="r", encoding="utf-8")),
-        list(open("tests/unittests/fixtures/test_definition.yaml", mode="r", encoding="utf-8")),
+        list(
+            open(
+                "tests/unittests/fixtures/fixture_tacacs/test_definition.yaml",
+                mode="r",
+                encoding="utf-8",
+            )
+        ),
     )
 
     # Verify logging message was called

@@ -85,10 +85,9 @@ class MiscShowCommandTests:
                             f" platform:\n{error}\n"
                         )
 
-                        # Updating actual output for a particular command to false when it
-                        # throws exception
+                        # Do NOT Fail test case if command is not supported on hardware
                         tops.actual_output["show_commands"].update(
-                            {command: {"command_executed": False}}
+                            {command: {"command_executed": True}}
                         )
                     else:
                         command_failed_msg += (

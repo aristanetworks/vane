@@ -1,0 +1,3 @@
+Test Suite,Test Case ID,Test Case,Description,Test Steps
+api_tests,TN2.1,test_if_management_https_api_server_is_running,Test description is not collected from the Python file,"1. Test steps are not collected from the Python file
+"

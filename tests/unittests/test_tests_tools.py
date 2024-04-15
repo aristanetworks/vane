@@ -346,6 +346,22 @@ def test_login_duts(loginfo, mocker):
     except ValueError as exception:
         assert str(exception) == "Invalid EOS conn type invalid_connection_type specified"
 
+    # assert value when no neighbors in duts file
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_neighbors.yaml")
+    test_parameters["parameters"]["eos_conn"] = "ssh"
+    actual_output = tests_tools.login_duts(test_parameters, test_duts)
+    dut_info = actual_output[0]
+    assert dut_info["neighbors"] == ""
+
+    # assert value when no role in duts file
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_role.yaml")
+    test_parameters["parameters"]["eos_conn"] = "ssh"
+    actual_output = tests_tools.login_duts(test_parameters, test_duts)
+    dut_info = actual_output[0]
+    assert dut_info["role"] == ""
+
 
 def test_send_cmds_json(loginfo, logdebug, mocker):
     """Validates the functionality of send_cmds method"""
@@ -363,7 +379,7 @@ def test_send_cmds_json(loginfo, logdebug, mocker):
 
     assert show_cmds_output == "output_in_json"
     assert show_cmd_list_output == show_cmds
-    loginfo.assert_called_with("Ran all show commands on dut")
+    loginfo.assert_called_with("Ran all show commands on dut to gather json data")
     logdebug_calls = [
         call("List of show commands in show_cmds with encoding json: ['show version']"),
         call("Ran all show cmds with encoding json: ['show version']"),
@@ -388,7 +404,7 @@ def test_send_cmds_text(loginfo, logdebug, mocker):
 
     assert show_cmds_output == "output_in_text"
     assert show_cmd_list_output == show_cmds
-    loginfo.assert_called_with("Ran all show commands on dut")
+    loginfo.assert_called_with("Ran all show commands on dut to gather text data")
     logdebug_calls = [
         call("List of show commands in show_cmds with encoding text: ['show version']"),
         call("Ran all show cmds with encoding text: ['show version']"),
@@ -509,10 +525,10 @@ def test_dut_worker(logdebug, mocker):
 
 def test_return_interfaces(loginfo, logdebug):
     """Validates if interfaces are being read properly from test parameters
-    FIXTURE NEEDED: fixture_duts.yaml"""
+    FIXTURE NEEDED: fixture_duts.yaml and fixture_duts_no_neighbors.yaml"""
     test_parameters = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
     actual_output = tests_tools.return_interfaces("DSR01", test_parameters)
-    excepted_output = [
+    expected_output = [
         {
             "hostname": "DSR01",
             "interface_name": "Ethernet1",
@@ -542,7 +558,7 @@ def test_return_interfaces(loginfo, logdebug):
             "media_type": "",
         },
     ]
-    assert actual_output == excepted_output
+    assert actual_output == expected_output
     loginfo_calls = [
         call("Parse test_parameters for interface connections and return them to test"),
         call("Discovering interface parameters for: DSR01"),
@@ -583,6 +599,12 @@ def test_return_interfaces(loginfo, logdebug):
         ),
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
+
+    # Test to validate return_interfaces when neighbors field is not present in duts.yaml
+    test_parameters = read_yaml("tests/unittests/fixtures/fixture_duts_no_neighbors.yaml")
+    actual_output = tests_tools.return_interfaces("DSR01", test_parameters)
+    expected_output = []
+    assert actual_output == expected_output
 
 
 def test_get_parameters(loginfo, logdebug):
@@ -1249,11 +1271,10 @@ def test_test_ops_parse_test_steps(loginfo, mocker):
 
     # assert the test steps log call
     loginfo.assert_called_with(
-        "These are test steps "
-        "[' Creating Testops class object and initializing the variable', "
-        "' Running Tcpdump on syslog server and entering in config mode\\n"
-        "             and existing to verify logging event are captured.',"
-        " ' Comparing the actual output and expected output. Generating docx report']"
+        "These are test steps [' Creating Testops class object and initializing the variable ', '"
+        " Running Tcpdump on syslog server and entering in config mode and existing to verify"
+        " logging event are captured. ', ' Comparing the actual output and expected output."
+        " Generating docx report ']"
     )
 
 

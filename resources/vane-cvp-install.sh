@@ -42,6 +42,7 @@ trap exit_trap EXIT
 echo -e $divider
 echo -e "Install the rpm\n"
 rm -f /home/cvp/vane-cvp*.rpm
+rm -f /data/apprpms/vane-cvp*.rpm
 cp ${script_path}/vane-cvp*.rpm /home/cvp/
 cvpi install -f /home/cvp/vane-cvp*.rpm
 rm -f /home/cvp/vane-cvp*.rpm

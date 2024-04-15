@@ -105,6 +105,73 @@ jobs:
           eval "${{ env.poetry_home }}"
           pylint ${{ env.python }}
 
+  pip-install:
+    # Validate that the pip installation of Vane works properly
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Check out the repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Install Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+          # architecture: 'x64' # The default
+
+      - name: Display the Python version
+        run: python -c "import sys; print(sys.version)"
+
+      - name: Install Vane and dependencies using pip
+        # Install Vane using pip
+        run: |
+          python -m pip install --upgrade pip
+          pip install .
+
+      - name: Check the vane name reported with python setup.py
+        # `python setup.py --name` should return "vane"
+        run: |
+          vane_name=$(python setup.py --name)
+          if [[ ! "$vane_name" =~ "vane" ]]; then
+            echo "Invalid name reported for Vane application: expected 'vane', received '$vane_name'"
+            exit 1
+          fi
+
+      - name: Check the vane version reported with python setup.py
+        # `python setup.py --version` should return the same version that is in pyproject.toml
+        run: |
+          version_str=$(grep ^version pyproject.toml | awk -F " " '{print $NF}' | tr -d '"')
+          vane_version=$(python setup.py --version)
+          if [[ ! "$vane_version" =~ "$version_str" ]]; then
+            echo "Invalid version reported for Vane application: expected '$version_str', received '$vane_version'"
+            exit 1
+          else
+            echo "Command returned version '$vane_version'"
+          fi
+
+      - name: Check the output of the Vane help command
+        # Check the output of `vane --help`
+        #   Look for substrings of the help text in the output of `vane --help` and report the
+        #   first substring that is not found
+        run: |
+          substrings=("usage: vane" "--version" "--definitions-file" "--duts-file" "--generate-duts-file" "--generate-test-steps" "--markers" "--nrfu")
+          vane_help=$(vane --help)
+          for substr in "${substrings[@]}"; do
+            if [[ ! "$vane_help" =~ "$substr" ]]; then
+              echo "Substring '$substr' missing from `vane --help`"
+              exit 1
+            fi
+          done
+
+      - name: Run the pytest module to verify the vane unitttests load correctly
+        # Running the pytest command below should succeed
+        run: |
+          python -m pytest --junit-xml=junit.xml
+
   unittest:
     # Run the Vane unittests
     #   If the tests pass, coverage will be calculated and reported to the output to be used

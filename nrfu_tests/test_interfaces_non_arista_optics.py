@@ -30,7 +30,7 @@ class InterfaceOpticsTests:
     @pytest.mark.parametrize("dut", test_duts, ids=test_ids)
     def test_interfaces_non_arista_optics(self, dut, tests_definitions):
         """
-        TD: Test case to verify that no non-Arista optics are installed on the device.
+        TD: Test case to verify that no unapproved optics are installed on the device.
         Args:
             dut(dict): details related to a particular DUT
             tests_definitions(dict): test suite and test case parameters.
@@ -40,9 +40,16 @@ class InterfaceOpticsTests:
         self.output = ""
         tops.actual_output = {"transceiver_slots": {}}
         tops.expected_output = {"transceiver_slots": {}}
+        test_parameters = tops.test_parameters
+
+        # Create approved optics list
+        approved_optics = ["Arista Networks", "Not Present"] + test_parameters["approved_optics"]
+        approved_list = ["Arista Networks"] + test_parameters["approved_optics"]
+        approved_string = ", ".join(approved_list)
+        logging.info(f"Test case will check the following approved optics: {approved_string}")
 
         # Output message if the test result is passed
-        tops.output_msg = "Non-Arista optics are not installed on the device."
+        tops.output_msg = f"Arista approved optics ({approved_string}) are installed on the device."
 
         try:
             """
@@ -66,7 +73,7 @@ class InterfaceOpticsTests:
                 tops.expected_output["transceiver_slots"].update(
                     {transceiver: {"manufacture_name": "Arista Networks"}}
                 )
-                if manufacturer_name in ["Arista Networks", "Not Present"]:
+                if manufacturer_name in approved_optics:
                     tops.expected_output["transceiver_slots"].update(
                         {transceiver: {"manufacture_name": manufacturer_name}}
                     )

@@ -162,7 +162,7 @@ class TestsClient:
 
         joined_params = " ".join(self.test_parameters)
         logging.info(f"Starting Test with parameters: {self.test_parameters}")
-        print(f"Starting test with command: pytest {joined_params}\n")
+        print(f"\x1b[33mStarting Tests with command: pytest {joined_params}\n\x1b[0m")
 
         pytest_result = pytest.main(self.test_parameters)
 
@@ -186,6 +186,7 @@ class TestsClient:
             "processes",
             "mark",
             "setup_show",
+            "traceback",
         ]
 
         logging.info("Initialize test parameter values")
@@ -199,6 +200,18 @@ class TestsClient:
         verbose = self.data_model["parameters"]["verbose"]
         logging.info(f"Setting PyTest parameter verbosity (extension: -v) to {verbose}")
         self._set_cmdline_no_input(verbose, "-v")
+
+    def _set_traceback_level(self):
+        """Set python traceback printing level"""
+
+        traceback = self.data_model["parameters"]["traceback"]
+        if traceback:
+            tb_value = "long"
+        else:
+            tb_value = "no"
+
+        logging.info(f"Setting Pytest parameter traceback (extenstion: --tb) to {tb_value}")
+        self.test_parameters.append(f"--tb={tb_value}")
 
     def _set_stdout(self):
         """Set stdout for test run"""
@@ -257,7 +270,7 @@ class TestsClient:
         if self_contained:
             self.test_parameters.append("--self-contained-html")
         if html_report and html_name not in self.test_parameters:
-            logging.info(f"Set HTML report name to: {html_name}")
+            logging.info(f"Setting HTML report name to: {html_name}")
             self.test_parameters.append(html_name)
         elif not html_report and len(list_out) > 0:
             for list_item in list_out:
@@ -289,7 +302,7 @@ class TestsClient:
         list_out = [x for x in self.test_parameters if ext in x]
 
         if parameter and report not in self.test_parameters:
-            logging.info(f"Set {ext} report name to: {report}")
+            logging.info(f"Setting {ext} report name to: {report}")
             self.test_parameters.append(report)
         elif not parameter and len(list_out) > 0:
             for list_item in list_out:
@@ -356,6 +369,7 @@ class TestsClient:
         logging.info("Setting test parameters")
         self._init_parameters()
         self._set_verbosity()
+        self._set_traceback_level()
         self._set_stdout()
         self._set_setup_show()
         self._set_test_cases()
@@ -382,7 +396,7 @@ class TestsClient:
         for name in results_files:
             if "result-" in name:
                 result_file = f"{results_dir}/{name}"
-                logging.info(f"Remove result file: {result_file}")
+                logging.debug(f"Remove result file: {result_file}")
                 os.remove(result_file)
             else:
                 logging.warning(f"Not removing file: {name}")
@@ -412,4 +426,11 @@ class TestsClient:
             if file_name != "vane.log":
                 file_path = os.path.join("logs", file_name)
                 if os.path.isfile(file_path):
-                    os.remove(file_path)
+                    try:
+                        os.remove(file_path)
+                    # pylint: disable-next=broad-exception-caught
+                    except Exception as excep:
+                        logging.error(
+                            f"Could not delete file {file_path} while"
+                            f" cleaning out log directory due to {excep}"
+                        )

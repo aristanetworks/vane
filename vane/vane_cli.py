@@ -147,17 +147,17 @@ def parse_cli():
     )
     nrfu_command_group.add_argument(
         "–-no-html-report",
-        help="Disables HTML report and prints to reports directory.",
+        help="Disables HTML report.",
         action="store_true",
     )
     nrfu_command_group.add_argument(
         "--no-excel-report",
-        help="Disables Excel report and prints to reports directory. ",
+        help="Disables Excel report. ",
         action="store_true",
     )
     nrfu_command_group.add_argument(
         "--no-doc-report",
-        help="Disables Word Doc report and prints to reports directory.",
+        help="Disables Word Doc report.",
         action="store_true",
     )
     nrfu_command_group.add_argument(
@@ -167,7 +167,7 @@ def parse_cli():
     )
     nrfu_command_group.add_argument(
         "--no-md-report",
-        help="Disables MarkDown report and prints to reports directory.",
+        help="Disables MarkDown report.",
         action="store_true",
     )
 

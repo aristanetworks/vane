@@ -656,6 +656,23 @@ def test_verify_show_cmd_pass(loginfo, logdebug):
     logdebug.assert_called_with("Verified output for show command show clock on Test Dut")
 
 
+def test_verify_show_cmd_list_pass(loginfo, logdebug):
+    """Validates verification of show commands being executed on given dut"""
+    dut = {"output": {"show clock": "", "show version": ""}, "name": "Test Dut"}
+    show_cmds = ["show clock", "show version"]
+    tests_tools.verify_show_cmd(show_cmds, dut)
+
+    loginfo.assert_called_with(
+        "Verifying if show command ['show clock', 'show version']"
+        " was/were successfully executed on Test Dut dut",
+    )
+    logdebug_calls = [
+        call("Verified output for show command show clock on Test Dut"),
+        call("Verified output for show command show version on Test Dut"),
+    ]
+    logdebug.assert_has_calls(logdebug_calls, any_order=False)
+
+
 def test_verify_show_cmd_fail(logcritical):
     """Validates verification of show commands being executed on given dut"""
     dut = {"output": {"show clock": ""}, "name": "Test Dut"}
@@ -667,6 +684,23 @@ def test_verify_show_cmd_fail(logcritical):
     with pytest.raises(AssertionError):
         tests_tools.verify_show_cmd(show_cmd, dut)
     logcritical.assert_called_with("Show command show lldp neighbors not executed on Test Dut")
+
+
+def test_verify_show_cmd_list_fail(loginfo, logdebug, logcritical):
+    """Validates verification of show commands being executed on given dut"""
+    dut = {"output": {"show clock": ""}, "name": "Test Dut"}
+    show_cmds = ["show clock", "show version"]
+
+    with pytest.raises(AssertionError):
+        tests_tools.verify_show_cmd(show_cmds, dut)
+    logcritical.assert_called_with("Show command show version not executed on Test Dut")
+
+    # tests_tools.verify_show_cmd(show_cmds, dut)
+    loginfo.assert_called_with(
+        "Verifying if show command ['show clock', 'show version']"
+        " was/were successfully executed on Test Dut dut",
+    )
+    logdebug.assert_called_with("Verified output for show command show clock on Test Dut")
 
 
 def test_verify_tacacs_exists(loginfo, logdebug):
@@ -991,6 +1025,7 @@ def test_test_ops_constructor(mocker):
     assert not tops.test_result
     assert tops.test_id == tops.test_parameters.get("test_id", None)
 
+
 def test_test_ops_write_results(loginfo, logdebug, mocker):
     "Validates functionality of write_results method"
 
@@ -1051,6 +1086,7 @@ def test_test_ops_write_text_results(mocker):
     }
     dut_name = "DCBBW1"
     mocker_object.assert_called_once_with(text_file, text_data, dut_name)
+
 
 def test_test_ops_generate_report(logdebug, mocker):
     """Validates functionality of generate_report method"""

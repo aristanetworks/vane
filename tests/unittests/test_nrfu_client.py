@@ -107,12 +107,12 @@ def test_ask_report_detail(mocker):
     # inputs that can be provided by user
     inputs = ["", "y", "yes", "n", "no", "garbage"]
     # desired outputs for above inputs
-    outputs = [True, False, False, True, True, True]
+    outputs = [False, True, True, False, False, False]
     for idx, input_item in enumerate(inputs):
         mocker.patch("builtins.input", return_value=input_item)
         client.ask_report_detail()
         # pylint: disable=W0212
-        assert client._report_detail_level == outputs[idx]
+        assert client._detailed_report == outputs[idx]
 
 
 def test_get_credentials(mocker):

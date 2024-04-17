@@ -1,4 +1,5 @@
 parameters:
+  generate_detailed_report: false
   generate_test_definitions: true
   html_report: reports/report
   json_report: reports/report
@@ -19,4 +20,3 @@ parameters:
   test_dirs:
   - sample_network_tests/memory
   verbose: true
-  generate_only_summary_report: true

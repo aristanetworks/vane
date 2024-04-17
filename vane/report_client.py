@@ -110,8 +110,8 @@ class ReportClient:
 
         self._reports_dir = self.data_model["parameters"]["report_dir"]
         _results_dir = self.data_model["parameters"]["results_dir"]
-        self._only_summary_report = self.data_model["parameters"].get(
-            "generate_only_summary_report", True
+        self._need_detailed_report = self.data_model["parameters"].get(
+            "generate_detailed_report", False  # If not specified, generate only summary
         )
         self._results_datamodel = None
         self._compile_yaml_data(_results_dir)
@@ -229,7 +229,7 @@ class ReportClient:
         self._write_toc_page()
         self._write_summary_report()
         self._write_tests_case_report()
-        if not self._only_summary_report:
+        if self._need_detailed_report:
             self._write_detail_report()
 
         _, file_date = return_date()

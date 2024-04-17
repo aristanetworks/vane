@@ -54,7 +54,7 @@ class NrfuClient:
         self.duts_file = "nrfu_tests/duts_nrfu.yaml"
         self.username = ""
         self.password = ""
-        self._report_detail_level = True  # generate only summary report by default
+        self._detailed_report = False  # generate only summary report by default
 
         logging.info("Starting the NRFU client")
         self.setup()
@@ -97,12 +97,14 @@ class NrfuClient:
         """Ask user if summary or detailed report
         Puts the user's choice in self._report_detail_level
         """
-        self._report_detail_level = True  # default set to generate only summary report
+        self._detailed_report = False  # default set to generate only summary report
         user_choice = input(
-            "Do you want detailed report?(Press Enter for the default option: "No") [y/yes/n/no]:"
+            "Do you want detailed report?(Anything other than y/yes defaults to 'no') [y/yes/n/no]:"
         )
         if user_choice and user_choice in ["y", "yes"]:
-            self._report_detail_level = False  # summary + detailed report
+            self._detailed_report = True  # summary + detailed report
+        else:
+            print("You did not input 'y/yes/n/no', defaulting to 'no'.")
 
     def get_credentials(self):
         """Ask user to enter credentials for EOS/CloudVision
@@ -291,6 +293,7 @@ class NrfuClient:
                 "html_report": "reports/report",
                 "json_report": "reports/report",
                 "generate_test_definitions": True,
+                "generate_detailed_report": self._detailed_report,
                 "master_definitions": "nrfu_tests/master_def.yaml",
                 "mark": None,
                 "processes": None,
@@ -307,7 +310,6 @@ class NrfuClient:
                 "test_definitions": "test_definition.yaml",
                 "report_summary_style": "modern",
                 "self_contained": True,
-                "generate_only_summary_report": self._report_detail_level,
             }
         }
 

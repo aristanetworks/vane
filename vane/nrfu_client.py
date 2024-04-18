@@ -54,6 +54,7 @@ class NrfuClient:
         self.duts_file = "nrfu_tests/duts_nrfu.yaml"
         self.username = ""
         self.password = ""
+        self._detailed_report = False  # generate only summary report by default
 
         logging.info("Starting the NRFU client")
         self.setup()
@@ -80,6 +81,9 @@ class NrfuClient:
         else:
             device_data, source = self.not_cvp_application()
 
+        # Ask the level of report details
+        self.ask_report_detail()
+
         # Generate duts_nrfu.yaml file from the duts data gathered above
         self.generate_duts_file(device_data, source)
 
@@ -88,6 +92,19 @@ class NrfuClient:
 
         # Run Vane with the generated duts and definitions file
         print("\x1b[32m\nStarting Execution of NRFU tests via Vane\x1b[0m")
+
+    def ask_report_detail(self):
+        """Ask user if summary or detailed report
+        Puts the user's choice in self._report_detail_level
+        """
+        self._detailed_report = False  # default set to generate only summary report
+        user_choice = input(
+            "Do you want detailed report?(Anything other than y/yes defaults to 'no') [y/yes/n/no]:"
+        )
+        if user_choice and user_choice in ["y", "yes"]:
+            self._detailed_report = True  # summary + detailed report
+        else:
+            print("You did not input 'y/yes/n/no', defaulting to 'no'.")
 
     def get_credentials(self):
         """Ask user to enter credentials for EOS/CloudVision
@@ -276,6 +293,7 @@ class NrfuClient:
                 "html_report": "reports/report",
                 "json_report": "reports/report",
                 "generate_test_definitions": True,
+                "generate_detailed_report": self._detailed_report,
                 "master_definitions": "nrfu_tests/master_def.yaml",
                 "mark": None,
                 "processes": None,

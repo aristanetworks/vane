@@ -1,4 +1,5 @@
 parameters:
+  generate_detailed_report: false
   generate_test_definitions: true
   html_report: reports/report
   json_report: reports/report

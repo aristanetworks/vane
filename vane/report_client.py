@@ -518,21 +518,21 @@ class ReportClient:
             testcase_results (dict): Data structure with test case results
             report_template (dict): Data structure describing reports fields
         """
+
+        if not testcase_results:
+            logging.warning(
+                "Vane ran no test cases against DUTS. Skipping the custom testcase report"
+            )
+            return
+
         columns = len(summary_headers)
         rows = len(testcase_results) + 1
         table = CachedTable.transform(
             self._document.add_table(rows=rows, cols=columns, style="Table Grid")
         )
 
-        if testcase_results:
-            self._create_header_row(table, summary_headers, report_template)
-            self._create_data_row(table, testcase_results, report_template)
-        else:
-            logging.error("Vane ran no test cases against DUTS")
-            print(
-                "Vane ran no test cases against DUTs.  Check your duts.yml file and test case "
-                "filters"
-            )
+        self._create_header_row(table, summary_headers, report_template)
+        self._create_data_row(table, testcase_results, report_template)
 
     def _create_header_row(self, table, summary_headers, report_template):
         """Writes header row within Word doc table

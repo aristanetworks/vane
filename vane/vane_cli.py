@@ -37,20 +37,26 @@ import argparse
 from io import StringIO
 from contextlib import redirect_stdout
 from datetime import datetime
+from importlib import metadata
 import shutil
+import json
 import os
-import yaml
 import pytest
 from vane import tests_client
 from vane import report_client
+from vane import test_catalog_client
 from vane import tests_tools
-from vane import test_step_client
 import vane.config
 from vane.vane_logging import logging
 from vane import nrfu_client
 
 
 logging.info("Starting vane.log file")
+
+# global color variables
+YELLOW = "\x1b[33m"
+GREEN = "\x1b[32m"
+DEFAULT = "\x1b[0m"
 
 
 def parse_cli():
@@ -59,7 +65,16 @@ def parse_cli():
     Returns:
         args (obj): An object containing the CLI arguments.
     """
-    parser = argparse.ArgumentParser(description="Network Certification Tool")
+    main_parser = argparse.ArgumentParser(description="Network Certification Tool")
+    parser = main_parser.add_argument_group("Main Command Options")
+    nrfu_parser = main_parser.add_argument_group("NRFU Command Options")
+
+    parser.add_argument(
+        "--version",
+        "--v",  # Alias for version
+        help=("Current Version of Vane"),
+        action="store_true",
+    )
 
     parser.add_argument(
         "--definitions-file",
@@ -74,33 +89,18 @@ def parse_cli():
     )
 
     parser.add_argument(
-        "--environment",
-        default=vane.config.ENVIRONMENT,
-        help="Specify the test execution environment",
-    )
-
-    parser.add_argument(
         "--generate-duts-file",
         help="Create a duts file from topology and inventory file",
         nargs=2,
-        metavar=("topology_file", "inventory_file"),
+        metavar=("TOPOLOGY_FILE", "INVENTORY_FILE"),
     )
 
     parser.add_argument(
-        "--generate-duts-from-topo",
-        help="Generate a duts file from an ACT topology file.",
+        "--duts-file-name",
+        help="Provide a name for the generated duts file."
+        " Used in conjunction with --generate-duts-file flag",
         nargs=1,
-        metavar=("topology_file"),
-    )
-
-    parser.add_argument(
-        "--generate-test-steps",
-        help=(
-            "Generate test steps for all the tests in"
-            " the test directory mentioned in the definitions file"
-        ),
-        nargs=1,
-        metavar=("test_dir"),
+        metavar=("DUTS_FILE_NAME"),
     )
 
     parser.add_argument(
@@ -109,13 +109,31 @@ def parse_cli():
         action="store_true",
     )
 
-    parser.add_argument(
+    nrfu_parser.add_argument(
         "--nrfu",
         help=("Starts NRFU tests and will prompt users for required input."),
         action="store_true",
     )
 
-    args = parser.parse_args()
+    parser.add_argument(
+        "--generate-test-catalog",
+        help=(
+            "Generate test catalog for all the tests in the test directories mentioned in CLI"
+            " argument. Provide one or more directory paths separated by spaces. If using"
+            " non-default test definitions(other than test_definition.yaml file), include the"
+            " --test-definitions-file argument to specify the name of test definitions file."
+        ),
+        nargs="+",
+        metavar="test_directories",
+    )
+
+    parser.add_argument(
+        "--test-definitions-file",
+        help="Specify the name of the test definitions file.",
+        nargs=1,
+        metavar="test_definitions_file",
+    )
+    args = main_parser.parse_args()
 
     return args
 
@@ -130,7 +148,10 @@ def setup_vane():
     logging.info("Discovering show commands from definitions")
 
     vane.config.test_defs = tests_tools.return_test_defs(vane.config.test_parameters)
+
     show_cmds = tests_tools.return_show_cmds(vane.config.test_defs)
+
+    print(f"{YELLOW}\nRunning Show Commands on Initialized Duts\n{DEFAULT}")
     vane.config.dut_objs = tests_tools.init_duts(
         show_cmds, vane.config.test_parameters, vane.config.test_duts
     )
@@ -166,13 +187,18 @@ def write_results(definitions_file):
     vane_report_client.write_result_doc()
 
 
-def write_test_steps(test_dir):
-    """Writes the test steps for the given test directory tests
+def write_test_catalog(test_dir, test_def_file):
+    """
+    Generates a test catalog CSV file containing information about the tests
+    found in the specified test directories. The CSV file will be created in the test
+    catalog directory from where the `vane generate-test-catalog` command is triggered.
 
-    Args: test_dir (str): Path and name of test directory"""
-
-    vane_test_step_client = test_step_client.TestStepClient(test_dir)
-    vane_test_step_client.write_test_steps()
+    Args:
+        test_dir (str): Path and name of the test directory
+        test_def_file (str): Name of the test definitions file.
+    """
+    vane_test_catalog_client = test_catalog_client.TestCatalogClient(test_dir, test_def_file)
+    vane_test_catalog_client.write_test_catalog()
 
 
 def show_markers():
@@ -215,36 +241,6 @@ def show_markers():
     return marker_list
 
 
-def create_duts_from_topo(topology_file):
-    """
-    Util function responsible for reading in topology file,
-    calling on test tools to create duts file from the data
-    gathered from the topo file.
-
-    Args:
-        topology_file (str): Path and name of topology file
-    """
-    # Open the topology file in read only
-    try:
-        with open(topology_file, "r", encoding="utf-8") as file:
-            topology = yaml.safe_load(file)
-    except FileNotFoundError:
-        print("No valid topology file provided.")
-        return
-
-    # Output data to duts file
-    if topology["nodes"]:
-        username = topology["veos"]["username"]
-        password = topology["veos"]["password"]
-        topo_name = topology_file.split(".yml")[0]
-        output_file = topo_name + "_duts.yaml"
-
-        with open(output_file, "w", encoding="utf-8") as file:
-            file.write("duts: \n")
-            for node in topology["nodes"]:
-                tests_tools.generate_duts_file(node, file, username, password)
-
-
 def download_test_results():
     """
     function responsible for creating a zip of the
@@ -257,8 +253,47 @@ def download_test_results():
 
     source = "reports/TEST RESULTS"
     destination = "reports/TEST RESULTS ARCHIVES/" + dt_string
+
     if os.path.exists(source):
         shutil.make_archive(destination, "zip", source)
+
+
+def remove_unexecuted_testcase_logs():
+    """Removing empty log files"""
+
+    logging.info("Removing log files of unexecuted test cases from logs directory: logs")
+
+    logging.info("Gathering executed test cases' names from report.json")
+    executed_test_cases = set()
+    json_report = vane.config.test_parameters["parameters"]["json_report"]
+    json_file = f"{json_report}.json"
+
+    with open(json_file, "r", encoding="utf-8") as file:
+        data = json.load(file)
+    tests = data["report"]["tests"]
+    for test in tests:
+        name = test["name"]
+        test_file_name = name.split("/")[-1].split(".")[0]
+        log_name = test_file_name + ".log"
+        executed_test_cases.add(log_name)
+
+    files = os.listdir("logs")
+
+    # Iterate over the files and delete the ones which do not belong
+    # to executed test cases
+    logging.info("Deleting unexecuted test case log files")
+    for file_name in files:
+        if file_name != "vane.log":
+            file_path = os.path.join("logs", file_name)
+            if os.path.isfile(file_path) and file_name not in executed_test_cases:
+                try:
+                    os.remove(file_path)
+                # pylint: disable-next=broad-exception-caught
+                except Exception as excep:
+                    logging.error(
+                        f"Could not delete file {file_path} while"
+                        f" cleaning out log directory due to {excep}"
+                    )
 
 
 def main():
@@ -267,15 +302,39 @@ def main():
 
     args = parse_cli()
 
+    print(f"{GREEN}\nStarting Vane{DEFAULT}\n")
+
     if args.markers:
         print(f"{show_markers()}")
 
-    elif args.generate_test_steps:
+    elif args.generate_duts_file:
+        duts_file_name = "duts.yaml"
         logging.info(
-            f"Generating test steps for test cases within {args.generate_test_steps} "
-            f"test directory\n"
+            f"Generating DUTS File from topology: {args.generate_duts_file[0]} and "
+            f"inventory: {args.generate_duts_file[1]} file.\n"
         )
-        write_test_steps(args.generate_test_steps)
+        # If name of duts file to be created is given
+        if args.duts_file_name:
+            duts_file_name = args.duts_file_name[0]
+        tests_tools.create_duts_file(
+            args.generate_duts_file[0], args.generate_duts_file[1], duts_file_name
+        )
+
+    elif args.generate_test_catalog:
+        logging.info(
+            f"Generating test catalog for test cases within {args.generate_test_catalog} "
+            "test directories\n"
+        )
+        # Default test definitions file name.
+        test_def_file = "test_definition.yaml"
+
+        if args.test_definitions_file:
+            test_def_file = args.test_definitions_file[0]
+
+        write_test_catalog(args.generate_test_catalog, test_def_file)
+
+    elif args.version:
+        print(f"Vane Framework Version: {metadata.version(__package__)}")
 
     else:
         if args.nrfu:
@@ -293,28 +352,14 @@ def main():
                 logging.warning(f"Changing DUTS file name to {args.duts_file}")
                 vane.config.DUTS_FILE = args.duts_file
 
-            if args.generate_duts_file:
-                logging.info(
-                    f"Generating DUTS File from topology: {args.generate_duts_file[0]} and "
-                    f"inventory: {args.generate_duts_file[1]} file.\n"
-                )
-                vane.config.DUTS_FILE = tests_tools.create_duts_file(
-                    args.generate_duts_file[0], args.generate_duts_file[1]
-                )
-
-            if args.environment:
-                vane.config.ENVIRONMENT = args.environment
-
-            if args.generate_duts_from_topo:
-                logging.info(
-                    f"Generating DUTS File from topology: {args.generate_duts_from_topo[0]} file.\n"
-                )
-                create_duts_from_topo(args.generate_duts_from_topo[0])
-
         run_tests(vane.config.DEFINITIONS_FILE, vane.config.DUTS_FILE)
+
+        print(f"{YELLOW}\nGenerating Reports from the Test Run\n{DEFAULT}")
         write_results(vane.config.DEFINITIONS_FILE)
         download_test_results()
+        remove_unexecuted_testcase_logs()
 
+        print(f"{GREEN}\nVANE has completed without errors\n{DEFAULT}")
         logging.info("\n\n!VANE has completed without errors!\n\n")
 
 

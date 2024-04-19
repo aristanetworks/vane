@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -55,7 +55,7 @@ class BadSyslogEventsTests:
             TS: Running 'show logging' command on DUT and verifying that the SysLog is configured
             on the device.
             """
-            syslog_output = tops.run_show_cmds(syslog_events_cmd[0])
+            syslog_output = tops.run_show_cmds(syslog_events_cmd[0], encoding="txt")
             logging.info(
                 (
                     f"On device {tops.dut_name}, output of {syslog_events_cmd[0]} command"
@@ -68,15 +68,17 @@ class BadSyslogEventsTests:
             # Skipping, if SysLog is not configured.
             for detail in syslog_output_details.split("\n"):
                 if "Syslog logging: disabled" in detail:
-                    pytest.skip(
-                        f"For {tops.dut_name} SysLog is not configured, hence test skipped."
+                    tops.output_msg = (
+                        f"SysLog is not configured on device {tops.dut_name}, hence test skipped."
                     )
+                    tests_tools.post_process_skip(tops, self.test_bad_syslog_events, self.output)
+                    pytest.skip(tops.output_msg)
 
             """
             TS: Running `show logging last <daysOfLogs> days` command on DUT and verifying
             the keywords in syslog events that are generally considered to be bad.
             """
-            output = tops.run_show_cmds(syslog_events_cmd[1])
+            output = tops.run_show_cmds(syslog_events_cmd[1], encoding="txt")
             logging.info(
                 (
                     f"On device {tops.dut_name}, output of {syslog_events_cmd[1]} command"

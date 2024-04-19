@@ -1,6 +1,7 @@
 - name: test_host.py
   testcases:
     - name: test_if_hostname_is_correcet_on_
+      test_id: TN9.1
       description: Verify hostname is set correctly on device
       # DUT name is taken from the definitions file
       expected_output: null
@@ -10,5 +11,5 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1

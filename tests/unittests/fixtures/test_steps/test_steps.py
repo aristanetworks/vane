@@ -6,7 +6,7 @@ Testcases for verification of syslog functionality
 """
 
 
-from vane.logger import logger
+from vane.vane_logging import logging as logger
 
 TEST_SUITE = "baseline_mgmt_tests"
 

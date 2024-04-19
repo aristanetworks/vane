@@ -1,6 +1,7 @@
 - name: test_api.py
   testcases:
     - name: test_if_management_https_api_server_is_running_on_
+      test_id: TN2.1
       description: Verify management api https server is running
       show_cmd: show management api http-commands
       # If HTTPS API server is running
@@ -11,10 +12,11 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_management_https_api_server_port_is_correct_on_
+      test_id: TN2.2
       description: Verify https server is enabled on port 443
       show_cmd: show management api http-commands
       # HTTPS API server port number
@@ -25,10 +27,11 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_management_https_api_server_is_enabled_on_
+      test_id: TN2.3
       description: Verify management api https server is enabled
       show_cmd: show management api http-commands
       # If HTTPS API server is enabled
@@ -39,10 +42,11 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_management_http_api_server_is_running_on_
+      test_id: TN2.4
       description: Verify management api http server is not running
       show_cmd: show management api http-commands
       # If HTTP API server is running
@@ -53,10 +57,11 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1
 
     - name: test_if_management_local_http_api_server_is_running_on_
+      test_id: TN2.5
       description: Verify management api local httpserver is not running
       show_cmd: show management api http-commands
       # If Local HTTP API server is running
@@ -67,5 +72,5 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter: 
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1

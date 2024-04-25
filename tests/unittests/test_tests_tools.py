@@ -1539,6 +1539,7 @@ def test_test_ops_generate_report(logdebug, mocker):
         "test_suite": "test_memory.py",
         "dut": "DCBBW1",
         "test_result": False,
+        "external_command_outputs": {},
         "output_msg": "",
         "actual_output": "",
         "skip": False,

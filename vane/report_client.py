@@ -1009,6 +1009,8 @@ class ReportClient:
                 self._write_config_string(dut, report_field)
             elif report_format == "config_term":
                 self._write_config_term(dut, report_field)
+            elif report_format == "external_cmd_output":
+                self._write_external_cmd_output(dut)
             elif report_format == "test_result":
                 self._write_test_result(dut, para, report_field)
             else:
@@ -1152,6 +1154,37 @@ class ReportClient:
             index = 0
             for dut_name in show_cmds.keys():
                 for command, text in zip(show_cmds.get(dut_name), show_cmd_txts.get(dut_name)):
+                    if index != 0:
+                        _ = table.add_row().cells
+                    config_output = f"\n{dut_name}# {command}\n\n{text}\n"
+                    self._write_cell(
+                        table,
+                        config_output,
+                        0,
+                        index,
+                        font="Courier New",
+                        font_size=10,
+                        color="0A0A0A",
+                        text_color=RGBColor(0, 255, 0),
+                    )
+                    index = index + 1
+
+            para = self._document.add_paragraph()
+            _ = para.add_run()
+
+    def _write_external_cmd_output(self, dut):
+        """Write external device outputs to Word doc with formatting
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+        """
+        external_cmd_txts = dut.get("external_command_outputs")
+        if external_cmd_txts:
+            table = self._document.add_table(rows=1, cols=1, style="Table Grid")
+
+            index = 0
+            for dut_name, details in external_cmd_txts.items():
+                for command, text in details.items():
                     if index != 0:
                         _ = table.add_row().cells
                     config_output = f"\n{dut_name}# {command}\n\n{text}\n"

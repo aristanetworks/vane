@@ -305,10 +305,10 @@ def login_duts(test_parameters, duts):
       test_duts (dict): Dictionary of duts
 
     Returns:
-      reachable_duts (list): List of dictionaries with connection and name
-                     of DUTs which can be reached
-      unreachable_duts (list): List of dictionaries with connection and name
-                     of DUTs which cannot be reached (due to bad authentication)
+      reachable_duts (list): List of dictionaries representing dut objects
+                    which are reachable
+      unreachable_duts (list): List of dictionaries representing dut objects
+                    which are unreachable (due to bad authentication)
     """
     logging.info("Using eapi/ssh to connect to Arista switches for testing")
 

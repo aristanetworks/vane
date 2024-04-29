@@ -6,6 +6,7 @@ from unittest.mock import call, MagicMock
 from icmplib.exceptions import SocketPermissionError
 from pyeapi.eapilib import ConnectionError  # pylint: disable=W0622
 from netmiko.exceptions import NetmikoAuthenticationException
+import json
 import pytest
 import yaml
 import pyeapi.eapilib
@@ -1584,8 +1585,8 @@ def test_test_ops_html_report(mocker, capsys):
     captured_output = capsys.readouterr()
 
     show_output = (
-        f"SHOW OUTPUT COLLECTED IN TEST CASE:\n===================================\n"
-        f"1. DCBBW1# show version\n\n{OUTPUT}\n2. DCBBW1# show version\n\n{OUTPUT}"
+        "SHOW OUTPUT COLLECTED IN TEST CASE:\n===================================\n"
+        f"1.1 DCBBW1# show version\n\n{OUTPUT}\n1.2. DCBBW1# show version\n\n{OUTPUT}"
     )
 
     # Assert that the expected prints occurred
@@ -2045,3 +2046,61 @@ def test_test_ops_get_eapi_connection(mocker):
     dut["eapi_conn"] = "I have a predefined value"
     conn = tops.get_eapi_connection(dut)
     assert conn == dut["eapi_conn"] == "I have a predefined value"
+
+
+@pytest.mark.parametrize(
+    "device_name",
+    ["DCBBW1", "server1"],
+    ids=[
+        "evidence_for_command_executed_on_eos",
+        "evidence_for_command_executed_on_non_eos",
+    ],
+)
+def test_test_add_cmds_evidence(mocker, capsys, device_name):
+    """
+    Validates the functionality of add command evidence method
+    """
+    expected_evidence = {}
+    evidence_json = "tests/unittests/fixtures/expected_commands_and_evidence.json"
+
+    # creating mocker object
+    mocker.patch("vane.config.test_duts", {"duts": [{"name": "DCBBW1"}]})
+    tops = create_test_ops_instance(mocker)
+
+    output_msg = (
+        "\nOUTPUT MESSAGES:\n================\n\n\n\nEXPECTED"
+        " OUTPUT:\n================\n80\n\n\nACTUAL OUTPUT:\n==============\n''\n\n\n"
+    )
+
+    # Collecting expected commands and their evidence.
+    with open(evidence_json, encoding="utf_8") as evidence_file:
+        expected_evidence = json.load(evidence_file)
+
+    if device_name == "server1":
+        non_eos_output = expected_evidence.get("non_eos_commands", {}).get("ls -l", "")
+        tops.add_cmds_evidence(["ls -l"], [non_eos_output], device_name)
+        show_output = (
+            "SHOW OUTPUT COLLECTED IN TEST CASE:\n===================================\n"
+            f"1.1. DCBBW1# show version\n\n{OUTPUT}\n1.2. DCBBW1# show version\n\n{OUTPUT}\n\n\n"
+            "COMMAND OUTPUT COLLECTED FROM EXTERNAL DEVICES IN TEST CASE:\n"
+            "===========================================================\n"
+            f"1.1. {device_name}# ls -l\n\n{non_eos_output}\n"
+        )
+
+    else:
+        eos_output = expected_evidence.get("eos_commands", {}).get("show ip interface brief", "")
+        tops.add_cmds_evidence(["show ip interface brief"], [eos_output], device_name)
+        show_output = (
+            "SHOW OUTPUT COLLECTED IN TEST CASE:\n===================================\n1.1."
+            f" DCBBW1# show version\n\n{OUTPUT}\n1.2. DCBBW1# show version\n\n{OUTPUT}\n1.3."
+            f" DCBBW1# show ip interface brief\n\n{eos_output}\n"
+        )
+
+    # Writing into HTML report
+    tops._html_report()
+
+    # Capturing the standard output
+    captured_output = capsys.readouterr()
+    show_output = output_msg + show_output
+
+    assert show_output == captured_output.out

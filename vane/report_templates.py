@@ -54,7 +54,7 @@ REPORT_TEMPLATES = {
         },
         "external_command_outputs": {
             "required": False,
-            "format": "external_cmd_output",
+            "format": "nested_dict",
             "default": [],
             "output_name": "external device output",
         },
@@ -139,7 +139,7 @@ REPORT_TEMPLATES = {
         },
         "external_command_outputs": {
             "required": False,
-            "format": "external_cmd_output",
+            "format": "nested_dict",
             "default": [],
             "output_name": "external device output",
         },

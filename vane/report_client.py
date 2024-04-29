@@ -1009,8 +1009,8 @@ class ReportClient:
                 self._write_config_string(dut, report_field)
             elif report_format == "config_term":
                 self._write_config_term(dut, report_field)
-            elif report_format == "external_cmd_output":
-                self._write_external_cmd_output(dut)
+            elif report_format == "nested_dict":
+                self._write_configs_nested_dict(dut)
             elif report_format == "test_result":
                 self._write_test_result(dut, para, report_field)
             else:
@@ -1172,9 +1172,10 @@ class ReportClient:
             para = self._document.add_paragraph()
             _ = para.add_run()
 
-    def _write_external_cmd_output(self, dut):
+    def _write_configs_nested_dict(self, dut):
         """
-        Write external device outputs to word doc with formatting
+        Write external device outputs to word doc with formatting to appear
+        from a xterm
 
         Args:
             dut (dict): Data structure with DUT specific data

@@ -499,7 +499,8 @@ def dut_worker(dut, show_cmds, reachable_duts):
 
             logging.debug(f"Found cmd: {show_cmd} at index {cmd_index} of {show_cmds_txt}")
             logging.debug(
-                f"length of cmds: {len(show_cmds_txt)} vs length of output {len(show_cmd_txt_list)}"
+                f"length of cmds: {len(show_cmds_txt)} vs length of "
+                f"output {len(show_cmd_txt_list)}"
             )
 
             show_output_txt = show_cmd_txt_list[cmd_index]["output"]
@@ -1784,21 +1785,21 @@ class TestOps:
         The user must provide the formatted output to this utility function.
         Args:
             cmds(list): List of commands that are executed on the device.
-            cmds_output(list): Outputs of the above command execution.
+            cmds_output(list): Outputs of the command execution.
             dut(str): Name of the device for which this evidence is to be added.
             The default value is set as an empty string. for commands executed on external
-            devices, this parameter is not required.
-            prompt(str): It indicates where the command was executed other than EOS device.
+            devices, this parameter is optional.
+            prompt(str): It indicates where the command was executed other than the EOS device.
         """
 
         if prompt:
+            # updating external commands and its outputs in the dictionary.
             for cmd, cmd_output in zip(cmds, cmds_output):
                 self.external_cmd_txts.setdefault(prompt, {})
                 self.external_cmd_txts[prompt].update({cmd: cmd_output})
 
         else:
             # Initializing the evidence for a particular device.
-            self.show_cmd = cmds
             self.set_evidence_default(dut)
 
             # Updating the commands and command output dictionaries.

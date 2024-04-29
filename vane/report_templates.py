@@ -54,7 +54,7 @@ REPORT_TEMPLATES = {
         },
         "external_command_outputs": {
             "required": False,
-            "format": "external_cmds",
+            "format": "external_cmd_output",
             "default": [],
             "output_name": "external device output",
         },

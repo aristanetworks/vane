@@ -1173,21 +1173,27 @@ class ReportClient:
             _ = para.add_run()
 
     def _write_external_cmd_output(self, dut):
-        """Write external device outputs to Word doc with formatting
+        """
+        Write external device outputs to word doc with formatting
 
         Args:
             dut (dict): Data structure with DUT specific data
         """
         external_cmd_txts = dut.get("external_command_outputs")
+
+        # If external command outputs are present in updating docx report with the same.
         if external_cmd_txts:
             table = self._document.add_table(rows=1, cols=1, style="Table Grid")
 
             index = 0
+            # Iterating over each item(key-value pair) in external_cmd_txts
             for dut_name, details in external_cmd_txts.items():
                 for command, text in details.items():
                     if index != 0:
                         _ = table.add_row().cells
                     config_output = f"\n{dut_name}# {command}\n\n{text}\n"
+
+                    # Writing the formatted output into a cell in docx report
                     self._write_cell(
                         table,
                         config_output,

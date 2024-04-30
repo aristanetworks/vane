@@ -1,0 +1,32 @@
+# This is deploying the latest commits on develop to develop documentation
+name: Build and Deploy Vane site
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+jobs:
+  build_and_deploy_job:
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Setup Git config
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+
+      ##### Install required Python Modules and build the website #####
+      - name: 'Build mkdocs content and deploy to gh-pages to develop'
+        run: |
+            pip install -r docs/requirements.txt
+            mike deploy --push develop

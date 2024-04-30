@@ -1,5 +1,4 @@
 """Test class for tests_tools.py"""
-import logging
 import os
 import shutil
 import sys
@@ -57,20 +56,17 @@ def read_yaml(yaml_file):
     Returns:
         yaml_data (dict): YAML data structure
     """
+
     try:
         with open(yaml_file, "r", encoding="utf-8") as input_yaml:
             try:
                 yaml_data = yaml.safe_load(input_yaml)
                 return yaml_data
             except yaml.YAMLError as err:
-                print(">>> ERROR IN YAML FILE")
-                logging.error(f"ERROR IN YAML FILE: {err}")
-                logging.error("EXITING TEST RUNNER")
+                print(f">>> ERROR IN YAML FILE: {err}\n EXITING TEST RUNNER")
                 sys.exit(1)
     except OSError as err:
-        print(f">>> {yaml_file} YAML FILE MISSING")
-        logging.error(f"ERROR YAML FILE: {yaml_file} NOT FOUND. {err}")
-        logging.error("EXITING TEST RUNNER")
+        print(f">>> {yaml_file} YAML FILE MISSING. {err}\n EXITING TEST RUNNER.")
         sys.exit(1)
 
 
@@ -388,6 +384,22 @@ def test_login_duts_eapi(loginfo, logdebug, mocker):
     except ValueError as exception:
         assert str(exception) == "Invalid EOS conn type invalid_connection_type specified"
 
+    # assert value when no neighbors in duts file
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_neighbors.yaml")
+    test_parameters["parameters"]["eos_conn"] = "ssh"
+    actual_output = tests_tools.login_duts(test_parameters, test_duts)
+    dut_info = actual_output[0]
+    assert dut_info["neighbors"] == ""
+
+    # assert value when no role in duts file
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_role.yaml")
+    test_parameters["parameters"]["eos_conn"] = "ssh"
+    actual_output = tests_tools.login_duts(test_parameters, test_duts)
+    dut_info = actual_output[0]
+    assert dut_info["role"] == ""
+
 
 def test_login_duts_ssh(loginfo, logdebug, mocker):
     """Validates the functionality of login_duts
@@ -699,7 +711,7 @@ def test_send_cmds_json(loginfo, logdebug, mocker):
 
     assert show_cmds_output == "output_in_json"
     assert show_cmd_list_output == show_cmds
-    loginfo.assert_called_with("Ran all show commands on dut")
+    loginfo.assert_called_with("Ran all show commands on dut to gather json data")
     logdebug_calls = [
         call("List of show commands in show_cmds with encoding json: ['show version']"),
         call("Ran all show cmds with encoding json: ['show version']"),
@@ -724,7 +736,7 @@ def test_send_cmds_text(loginfo, logdebug, mocker):
 
     assert show_cmds_output == "output_in_text"
     assert show_cmd_list_output == show_cmds
-    loginfo.assert_called_with("Ran all show commands on dut")
+    loginfo.assert_called_with("Ran all show commands on dut to gather text data")
     logdebug_calls = [
         call("List of show commands in show_cmds with encoding text: ['show version']"),
         call("Ran all show cmds with encoding text: ['show version']"),
@@ -845,11 +857,11 @@ def test_dut_worker(logdebug, mocker):
 
 def test_return_interfaces(loginfo, logdebug):
     """Validates if interfaces are being read properly from test parameters
-    FIXTURE NEEDED: fixture_duts.yaml"""
+    FIXTURE NEEDED: fixture_duts.yaml and fixture_duts_no_neighbors.yaml"""
     test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
     duts = test_duts["duts"]
     actual_output = tests_tools.return_interfaces("DSR01", duts)
-    excepted_output = [
+    expected_output = [
         {
             "hostname": "DSR01",
             "interface_name": "Ethernet1",
@@ -879,7 +891,7 @@ def test_return_interfaces(loginfo, logdebug):
             "media_type": "",
         },
     ]
-    assert actual_output == excepted_output
+    assert actual_output == expected_output
     loginfo_calls = [
         call("Parse reachable_duts for interface connections and return them to test"),
         call("Discovering interface parameters for: DSR01"),
@@ -920,6 +932,12 @@ def test_return_interfaces(loginfo, logdebug):
         ),
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
+
+    # Test to validate return_interfaces when neighbors field is not present in duts.yaml
+    test_parameters = read_yaml("tests/unittests/fixtures/fixture_duts_no_neighbors.yaml")
+    actual_output = tests_tools.return_interfaces("DSR01", test_parameters)
+    expected_output = []
+    assert actual_output == expected_output
 
 
 def test_get_parameters(loginfo, logdebug):
@@ -1198,40 +1216,12 @@ def test_export_text():
     shutil.rmtree("text", ignore_errors=True)
 
 
-def test_generate_duts_file():
-    """Validates generation of duts file from duts data"""
-    dut_file = "dut_file.yml"
-    dut = {
-        "DSR01": {
-            "ip_addr": "192.168.0.9",
-            "node_type": "veos",
-            "neighbors": [
-                {"neighborDevice": "DCBBW1", "neighborPort": "Ethernet1", "port": "Ethernet1"},
-                {"neighborDevice": "DCBBW2", "neighborPort": "Ethernet1", "port": "Ethernet2"},
-            ],
-        }
-    }
-
-    assert not os.path.exists(dut_file)
-    with open(dut_file, "w", encoding="utf-8") as file:
-        tests_tools.generate_duts_file(dut, file, "username", "password!")
-
-    # check if yaml file got created
-    assert os.path.isfile(dut_file)
-
-    # check if yaml file got written to correctly
-    with open(dut_file, "r", encoding="utf-8") as input_yaml:
-        actual = yaml.safe_load(input_yaml)
-        assert dut["DSR01"]["neighbors"] == actual[0]["neighbors"]
-        assert dut["DSR01"]["ip_addr"] == actual[0]["mgmt_ip"]
-    os.remove(dut_file)
-
-
 def test_create_duts_file():
     """Validates generation of duts file from topology and inventory file
     FIXTURES NEEDED: fixture_topology.yaml, fixture_inventory.yaml"""
     topology_data = "tests/unittests/fixtures/fixture_topology.yaml"
     inventory_data = "tests/unittests/fixtures/fixture_inventory.yaml"
+    duts_file_name = "duts_file_name.yaml"
 
     expected_data = {
         "duts": [
@@ -1247,14 +1237,13 @@ def test_create_duts_file():
                 "role": "unknown",
             }
         ],
-        "servers": [],
     }
 
-    file = tests_tools.create_duts_file(topology_data, inventory_data)
-    assert os.path.isfile(file)
-    with open(file, "r", encoding="utf-8") as input_yaml:
+    tests_tools.create_duts_file(topology_data, inventory_data, duts_file_name)
+    assert os.path.isfile(duts_file_name)
+    with open(duts_file_name, "r", encoding="utf-8") as input_yaml:
         assert expected_data == yaml.safe_load(input_yaml)
-    os.remove(file)
+    os.remove(duts_file_name)
 
 
 # TEST-OPS METHODS
@@ -1599,44 +1588,6 @@ def test_test_ops_html_report(mocker, capsys):
     assert show_output in captured_output.out
 
 
-def test_test_ops_verify_veos_pass(loginfo, logdebug, mocker):
-    """Validates verification of the model of the dut"""
-
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
-
-    mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
-        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
-    )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
-    tops = create_test_ops_instance(mocker)
-
-    # handling the true case
-
-    tops.verify_veos()
-    loginfo.assert_called_with("Verifying if DCBBW1 DUT is a VEOS instance. Model is vEOS-lab")
-    logdebug.assert_called_with("DCBBW1 is a VEOS instance so returning True")
-
-
-def test_test_ops_verify_veos_fail(logdebug, mocker):
-    """Validates verification of the model of the dut"""
-
-    # mocking the call to _verify_show_cmd and _get_parameters in init()
-
-    mocker.patch(
-        "vane.tests_tools.TestOps._get_parameters",
-        return_value=read_yaml("tests/unittests/fixtures/fixture_testops_test_parameters.yaml"),
-    )
-    mocker.patch("vane.tests_tools.TestOps._verify_show_cmd", return_value=True)
-    tops = create_test_ops_instance(mocker)
-
-    # handling the false case
-
-    DUT["output"]["show version"]["json"]["modelName"] = "cEOS"
-    tops.verify_veos()
-    logdebug.assert_called_with("DCBBW1 is not a VEOS instance so returning False")
-
-
 def test_test_ops_parse_test_steps(loginfo, mocker):
     """Validates verification of the parse_test_steps method
     FIXTURE NEEDED: tests/unittests/fixtures/test_steps/test_steps.py"""
@@ -1653,11 +1604,10 @@ def test_test_ops_parse_test_steps(loginfo, mocker):
 
     # assert the test steps log call
     loginfo.assert_called_with(
-        "These are test steps "
-        "[' Creating Testops class object and initializing the variable', "
-        "' Running Tcpdump on syslog server and entering in config mode\\n"
-        "             and existing to verify logging event are captured.',"
-        " ' Comparing the actual output and expected output. Generating docx report']"
+        "These are test steps [' Creating Testops class object and initializing the variable ', '"
+        " Running Tcpdump on syslog server and entering in config mode and existing to verify"
+        " logging event are captured. ', ' Comparing the actual output and expected output."
+        " Generating docx report ']"
     )
 
 

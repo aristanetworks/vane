@@ -14,7 +14,7 @@ TEST_SUITE = "nrfu_tests"
 logging = test_case_logger.setup_logger(__file__)
 
 
-@pytest.mark.nrfu_tests
+@pytest.mark.nrfu_test
 @pytest.mark.security
 class VrfSshAclTests:
     """

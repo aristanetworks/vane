@@ -34,6 +34,12 @@ def loginfo(mocker):
 
 
 @pytest.fixture
+def logdebug(mocker):
+    """Fixture to mock logger debug calls from vane.tests_client"""
+    return mocker.patch("vane.tests_client.logging.debug")
+
+
+@pytest.fixture
 def logwarn(mocker):
     """Fixture to mock logger warning calls from vane.tests_client"""
     return mocker.patch("vane.tests_client.logging.warning")
@@ -95,14 +101,14 @@ def test_write_test_def_file(loginfo):
     # Set the definitions information to be passed to write_test_def_file
     template_definitions = "test_definition.yaml"
     master_definitions = {}
-    test_dir = "tests/unittests/fixtures"
+    test_dir = "tests/unittests/fixtures/fixture_tacacs"
     test_definitions = "test_definition_regenerated.yaml"  # don't overwrite the file
 
     # Make sure the regenerated file does not exist
     if os.path.exists(test_dir + "/" + test_definitions):
         os.remove(test_dir + "/" + test_definitions)
 
-    # Write test def file
+    # Write test definition file
     client.write_test_def_file(template_definitions, master_definitions, test_dir, test_definitions)
 
     # Verify the definitions file was regenerated
@@ -112,7 +118,13 @@ def test_write_test_def_file(loginfo):
     # pylint: disable=consider-using-with
     unittest.TestCase().assertListEqual(
         list(open(f"{test_dir}/{test_definitions}", mode="r", encoding="utf-8")),
-        list(open("tests/unittests/fixtures/test_definition.yaml", mode="r", encoding="utf-8")),
+        list(
+            open(
+                "tests/unittests/fixtures/fixture_tacacs/test_definition.yaml",
+                mode="r",
+                encoding="utf-8",
+            )
+        ),
     )
 
     # Verify logging message was called
@@ -222,7 +234,7 @@ def test_test_runner(mocker, capsys, loginfo):
 
     captured = capsys.readouterr()
     assert (
-        captured.out == "Starting test with command: pytest \n\n"
+        captured.out == "\x1b[33mStarting Tests with command: pytest \n\x1b[0m\n"
     ), "tests_client.test_runner failed when expected to pass"
 
     # Verify logging message was called
@@ -303,10 +315,10 @@ def test__set_test_parameters(loginfo, logwarn, mocker):
         call("Run the following tests: All"),
         call("Running All test cases."),
         call(
-            "Set HTML report name to: --html=tests/unittests/fixtures/reports/"
+            "Setting HTML report name to: --html=tests/unittests/fixtures/reports/"
             "report_2309071824.html"
         ),
-        call("Set --json report name to: --json=tests/unittests/fixtures/reports/report.json"),
+        call("Setting --json report name to: --json=tests/unittests/fixtures/reports/report.json"),
     ]
     loginfo.assert_has_calls(loginfo_calls, any_order=True)
 
@@ -385,7 +397,7 @@ def test__set_test_parameters_unset_cmd_line(loginfo, logwarn):
     logwarn.assert_has_calls(logwarn_calls, any_order=False)
 
 
-def test__remove_result_files(loginfo):
+def test__remove_result_files(logdebug):
     """Validate _remove_result_files removes pre-existing results files"""
 
     # Create a tests_client client
@@ -407,13 +419,15 @@ def test__remove_result_files(loginfo):
     client._remove_result_files()
 
     # Verify the result files were deleted
-    loginfo_calls = []
+    logdebug_calls = []
     for filename in files:
-        loginfo_calls.append(call(f"Remove result file: {result_dir}/{os.path.basename(filename)}"))
+        logdebug_calls.append(
+            call(f"Remove result file: {result_dir}/{os.path.basename(filename)}")
+        )
         assert not os.path.exists(filename)
 
     # Verify the removal messages were logged
-    loginfo.assert_has_calls(loginfo_calls, any_order=True)
+    logdebug.assert_has_calls(logdebug_calls, any_order=True)
 
 
 # pytest.mark.filterwarnings: Ignore the warning we receive from the tempfile library

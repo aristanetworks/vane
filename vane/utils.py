@@ -35,6 +35,7 @@ Collection of misc functions that dont fit anywhere else but are still required.
 import sys
 import collections
 import datetime
+import csv
 from jinja2 import Template
 
 
@@ -144,3 +145,36 @@ def render_cmds(dut, cmds):
         actual_cmds.append(actual_cmd)
 
     return actual_cmds
+
+
+def get_timestamp_in_seconds():
+    """
+    Utility to collect the current time in YYYYMMDDHHMMSS format.
+    Returns:
+      str: Current time stamp in YearMonthDayHourMinuteSeconds
+      format.
+    """
+    # Collecting the current timestamp.
+    current_timestamp = datetime.datetime.now()
+    timestamp_in_seconds = current_timestamp.strftime("%Y%m%d%H%M%S")
+
+    return timestamp_in_seconds
+
+
+def write_to_csv(rows, file_path):
+    """
+    Utility to write data into the CSV file.
+    Args:
+        rows (List): List of rows that need to be added in the CSV file. (headers + data rows)
+        file_path (Str): The full path, including the directory and file name, where the CSV
+        file will be created.
+    """
+
+    try:
+        # Writing data into the CSV file.
+        with open(file_path, "w", encoding="utf_8", newline="") as file:
+            writer = csv.writer(file, lineterminator="\n")
+            writer.writerows(rows)
+
+    except FileNotFoundError as error_msg:
+        print(f"\033[91mError occurred while writing to {file_path}.csv file: {error_msg}\033[0m")

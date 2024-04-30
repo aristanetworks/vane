@@ -46,8 +46,7 @@ import yaml
 from jinja2 import Template
 from icmplib import ping
 from icmplib.exceptions import SocketPermissionError
-from pyeapi.eapilib import EapiError, ConnectionError  # pylint: disable=W0622
-from netmiko.exceptions import NetmikoAuthenticationException
+from pyeapi.eapilib import EapiError
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
@@ -210,9 +209,7 @@ def init_duts(show_cmds, test_parameters, test_duts):
         continue_when_unreachable = False
 
     if not (reachability or continue_when_unreachable):
-        logging.error(
-            f"Error connecting to {unreachable_duts}, not reachable via ping, hence exiting Vane"
-        )
+        logging.error(f"Error connecting to {unreachable_duts}, hence exiting Vane")
         unreachable_ips = [unreachable_dut["mgmt_ip"] for unreachable_dut in unreachable_duts]
         print(
             "\x1b[31mVane encountered an error while attempting to connect to DUT/s with ip's:\n"
@@ -222,16 +219,8 @@ def init_duts(show_cmds, test_parameters, test_duts):
         )
         sys.exit(1)
 
-    reachable_duts, additional_unreachable_duts = login_duts(test_parameters, reachable_duts)
-    unreachable_duts.extend(additional_unreachable_duts)
+    reachable_duts = login_duts(test_parameters, reachable_duts)
     workers = len(reachable_duts)
-
-    if not workers:
-        print(
-            "\x1b[31mNo valid duts to run tests on, hence exiting Vane.\n"
-            "Look at the logs for further details \x1b[0m"
-        )
-        sys.exit(1)
 
     logging.debug(f"Duts login info: {reachable_duts} and create {workers} workers")
     logging.debug(f"Passing the following show commands to workers: {show_cmds}")
@@ -249,9 +238,8 @@ def init_duts(show_cmds, test_parameters, test_duts):
 
     logging.info("Returning duts data structure")
     logging.debug(f"Return duts data structure: {reachable_duts}")
-    logging.debug(f"Return unreachable duts data structure: {unreachable_duts}")
 
-    return reachable_duts, unreachable_duts
+    return reachable_duts
 
 
 def check_duts_reachability(test_duts):
@@ -305,15 +293,12 @@ def login_duts(test_parameters, duts):
       test_duts (dict): Dictionary of duts
 
     Returns:
-      reachable_duts (list): List of dictionaries representing dut objects
-                    which are reachable
-      unreachable_duts (list): List of dictionaries representing dut objects
-                    which are unreachable (due to bad authentication)
+      logins (list): List of dictionaries with connection and name
+                     of DUTs
     """
     logging.info("Using eapi/ssh to connect to Arista switches for testing")
 
-    reachable_duts = []
-    unreachable_duts = []
+    logins = []
 
     network_configs = {}
     if "network_configs" in test_parameters["parameters"]:
@@ -322,9 +307,9 @@ def login_duts(test_parameters, duts):
 
     for dut in duts:
         name = dut["name"]
-        login_index = len(reachable_duts)
-        reachable_duts.append({})
-        login_ptr = reachable_duts[login_index]
+        login_index = len(logins)
+        logins.append({})
+        login_ptr = logins[login_index]
 
         logging.info(f"Connecting to switch: {name}")
 
@@ -334,20 +319,16 @@ def login_duts(test_parameters, duts):
 
         if eos_conn == "eapi":
             pyeapi_conn = device_interface.PyeapiConn()
+            pyeapi_conn.set_up_conn(dut)
             login_ptr["eapi_conn"] = pyeapi_conn
             login_ptr["connection"] = pyeapi_conn
         elif eos_conn == "ssh":
             netmiko_conn = device_interface.NetmikoConn()
+            netmiko_conn.set_up_conn(dut)
             login_ptr["ssh_conn"] = netmiko_conn
             login_ptr["connection"] = netmiko_conn
         else:
             raise ValueError(f"Invalid EOS conn type {eos_conn} specified")
-
-        success = authenticate_and_setup_conn(dut, login_ptr["connection"])
-        if not success:
-            reachable_duts.pop(login_index)
-            unreachable_duts.append(dut)
-            continue
 
         login_ptr["name"] = name
         login_ptr["mgmt_ip"] = dut["mgmt_ip"]
@@ -362,9 +343,9 @@ def login_duts(test_parameters, duts):
         if name in network_configs:
             login_ptr["network_configs"] = network_configs[name]
 
-    logging.info(f"Returning reachable_duts: {reachable_duts}")
+    logging.debug(f"Returning duts logins: {logins}")
 
-    return reachable_duts, unreachable_duts
+    return logins
 
 
 def send_cmds(show_cmds, conn, encoding):
@@ -1012,43 +993,6 @@ def create_duts_file(topology_file, inventory_file):
         sys.exit(1)
 
     return None
-
-
-def authenticate_and_setup_conn(dut, conn_object):
-    """Method to setup and authenticate setting up
-    PyEapi or Netmiko connection based on conn object passed
-
-    Args:
-        dut (dict): device data
-        conn_object (pyeapi/netmiko): type of connection
-    """
-    dut_name = dut["name"]
-    try:
-        conn_object.set_up_conn(dut)
-    except (ConnectionError, NetmikoAuthenticationException) as err:
-        try:
-            continue_when_unreachable = config.test_parameters["parameters"][
-                "continue_when_unreachable"
-            ]
-        except KeyError:
-            continue_when_unreachable = False
-        if not continue_when_unreachable:
-            print(
-                "\x1b[31mExiting Vane.\n"
-                f"Error running all cmds on dut {dut_name} due to failed authentication.\n{err}\n"
-                "\x1b[0m"
-            )
-            logging.error(
-                "Exiting Vane: "
-                f"Error running all cmds on dut {dut_name} due to failed authentication. {err}\n"
-            )
-            sys.exit(1)
-        else:
-            logging.info(f"Authentication to dut {dut_name} failed")
-            return False
-
-    logging.info(f"Authentication to dut {dut_name} is successful")
-    return True
 
 
 # pylint: disable-next=too-many-instance-attributes

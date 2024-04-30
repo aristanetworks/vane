@@ -8,4 +8,3 @@ test_defs = {}
 test_duts = {}
 test_parameters = {}
 dut_objs = []
-unreachable_duts = []

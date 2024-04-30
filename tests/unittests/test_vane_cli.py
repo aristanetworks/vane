@@ -39,7 +39,7 @@ def test_setup_vane(loginfo, mocker):
     mocker_object.side_effect = ["Duts_file", "Test_parameters"]
     mocker.patch("vane.tests_tools.return_test_defs", return_value="Test definitions")
     mocker.patch("vane.tests_tools.return_show_cmds", return_value="show_commands")
-    mocker.patch("vane.tests_tools.init_duts", return_value=([], []))
+    mocker.patch("vane.tests_tools.init_duts", return_value="Dut object")
 
     vane_cli.setup_vane()
 
@@ -47,8 +47,7 @@ def test_setup_vane(loginfo, mocker):
     assert vane.config.test_duts == "Duts_file"
     assert vane.config.test_parameters == "Test_parameters"
     assert vane.config.test_defs == "Test definitions"
-    assert not vane.config.dut_objs
-    assert not vane.config.unreachable_duts
+    assert vane.config.dut_objs == "Dut object"
 
     # assert logs to ensure the method executed without errors
     loginfo_calls = [
@@ -58,13 +57,12 @@ def test_setup_vane(loginfo, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
 
-def test_run_tests(loginfo, mocker, capsys):
+def test_run_tests(loginfo, mocker):
     """Validates functionality of run_tests method"""
 
     # mocking these methods since they have been tested in tests_client tests
     mocker_object = mocker.patch("vane.tests_client.TestsClient")
     mocker.patch("vane.vane_cli.setup_vane")
-    vane.config.unreachable_duts = [{"name": "Dut1"}]
 
     vane_cli.run_tests("path/to/definitions/file", "path/to/duts/file")
 
@@ -78,12 +76,6 @@ def test_run_tests(loginfo, mocker, capsys):
     test_client_instance.generate_test_definitions.assert_called_once()
     test_client_instance.setup_test_runner.assert_called_once()
     test_client_instance.test_runner.assert_called_once()
-
-    captured_output = capsys.readouterr()
-
-    show_output = "\x1b[31mThese DUTS were unreachable for the tests:\n['Dut1']\x1b[0m\n"
-
-    assert show_output in captured_output.out
 
     loginfo.assert_called_with("Using class TestsClient to create vane_tests_client object")
 

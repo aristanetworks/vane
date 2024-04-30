@@ -103,7 +103,7 @@ class NrfuClient:
         )
         if user_choice and user_choice in ["y", "yes"]:
             self._detailed_report = True  # summary + detailed report
-        elif user_choice not in ['n', 'no']:
+        elif user_choice not in ["n", "no"]:
             print("You did not input 'y/yes/n/no', defaulting to 'no'.")
 
     def get_credentials(self):

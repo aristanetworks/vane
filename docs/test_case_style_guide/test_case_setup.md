@@ -606,10 +606,3 @@ the following syntax.
             tops.generate_report(tops.dut_name, self.output)
             assert tops.actual_output == tops.expected_output
     ```
-
-!!! tip
-    Additionally, besides generating test steps from within a test
-    case you can also create .md and .json version of the test steps
-    independently (without having to run a test case). We've outlined how you
-    could achieve that using the --generate-test-steps flag in the
-    [Vane CLI section](../api_cli/cli.md#using-the----generate-test-steps-flag).

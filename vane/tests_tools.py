@@ -306,7 +306,7 @@ def login_duts(test_parameters, duts):
 
     Args:
       test_parameters (dict): Abstraction of testing parameters
-      test_duts (dict): Dictionary of duts
+      duts (dict): Dictionary of duts
 
     Returns:
       reachable_duts (list): List of dictionaries representing dut objects

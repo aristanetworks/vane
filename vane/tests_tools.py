@@ -1762,13 +1762,14 @@ class TestOps:
         API to update non-netmiko and non-pyeapi command execution outputs in the
         the docx and html report.
         The user must provide the formatted output to this utility function.
+
         Args:
-            cmds(list): List of commands that are executed on the device.
-            cmds_output(list): Outputs of the command execution.
-            dut(str): Name of the device for which this evidence is to be added.
+            cmds (list): List of commands that are executed on the device.
+            cmds_output (list): Outputs of the command execution.
+            dut (str): Name of the device for which this evidence is to be added.
             The default value is set as an empty string. for commands executed on external
             devices, this parameter is optional.
-            prompt(str): It indicates where the command was executed other than the EOS device.
+            prompt (str): It indicates where the command was executed other than the EOS device.
         """
 
         if prompt:

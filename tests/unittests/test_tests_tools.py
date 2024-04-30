@@ -5,6 +5,8 @@ import shutil
 import sys
 from unittest.mock import call, MagicMock
 from icmplib.exceptions import SocketPermissionError
+from pyeapi.eapilib import ConnectionError  # pylint: disable=W0622
+from netmiko.exceptions import NetmikoAuthenticationException
 import pytest
 import yaml
 import pyeapi.eapilib
@@ -44,12 +46,6 @@ def logdebug(mocker):
 def logcritical(mocker):
     """Fixture to mock logger critical calls from vane.tests_tools"""
     return mocker.patch("vane.vane_logging.logging.critical")
-
-
-@pytest.fixture
-def logerror(mocker):
-    """Fixture to mock logger critical calls from vane.tests_tools"""
-    return mocker.patch("vane.vane_logging.logging.error")
 
 
 def read_yaml(yaml_file):
@@ -250,12 +246,16 @@ def test_init_duts_reachable(loginfo, logdebug, mocker):
     test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
     test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
 
-    mocker.patch("vane.tests_tools.login_duts", return_value="DUTS")
+    mocker.patch("vane.tests_tools.login_duts", return_value=([test_duts["duts"][0]], []))
     mocker.patch("vane.tests_tools.dut_worker")
-    mocker.patch("vane.tests_tools.check_duts_reachability", return_value=(True, [], []))
-    actual_output = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
+    mocker.patch(
+        "vane.tests_tools.check_duts_reachability", return_value=(True, [test_duts["duts"][0]], [])
+    )
 
-    assert actual_output == "DUTS"
+    reachable_duts, unreachable_duts = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
+
+    assert reachable_duts == [test_duts["duts"][0]]
+    assert not unreachable_duts
 
     loginfo_calls = [
         call(
@@ -269,10 +269,11 @@ def test_init_duts_reachable(loginfo, logdebug, mocker):
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
     logdebug_calls = [
-        call("Duts login info: DUTS and create 4 workers"),
+        call(f"Duts login info: {reachable_duts} and create 1 workers"),
         call("Passing the following show commands to workers: ['show version', 'show clock']"),
         call("Future object generated successfully"),
-        call("Return duts data structure: DUTS"),
+        call(f"Return duts data structure: {reachable_duts}"),
+        call(f"Return unreachable duts data structure: {unreachable_duts}"),
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
@@ -284,13 +285,17 @@ def test_init_duts_unreachable_and_not_continue(loginfo, logdebug, logerr, mocke
     test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
     test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
 
-    mocker.patch("vane.tests_tools.login_duts", return_value="DUTS")
+    mocker.patch("vane.tests_tools.login_duts", return_value=([test_duts["duts"][0]], []))
     mocker.patch("vane.tests_tools.dut_worker")
-    mocker.patch("vane.tests_tools.check_duts_reachability", return_value=(False, [], []))
+    mocker.patch(
+        "vane.tests_tools.check_duts_reachability",
+        return_value=(False, [test_duts["duts"][0]], [test_duts["duts"][1]]),
+    )
     sys_exit_mocked = mocker.patch("sys.exit")
-    actual_output = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
+    reachable_duts, unreachable_duts = tests_tools.init_duts(show_cmds, test_parameters, test_duts)
 
-    assert actual_output == "DUTS"
+    assert reachable_duts == [test_duts["duts"][0]]
+    assert unreachable_duts == [test_duts["duts"][1]]
 
     loginfo_calls = [
         call(
@@ -304,18 +309,21 @@ def test_init_duts_unreachable_and_not_continue(loginfo, logdebug, logerr, mocke
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
     logdebug_calls = [
-        call("Duts login info: DUTS and create 4 workers"),
+        call(f"Duts login info: {reachable_duts} and create 1 workers"),
         call("Passing the following show commands to workers: ['show version', 'show clock']"),
         call("Future object generated successfully"),
-        call("Return duts data structure: DUTS"),
+        call(f"Return duts data structure: {reachable_duts}"),
+        call(f"Return unreachable duts data structure: {unreachable_duts}"),
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
     sys_exit_mocked.assert_called_with(1)
-    logerr.assert_called_with("Error connecting to [], hence exiting Vane")
+    logerr.assert_called_with(
+        f"Error connecting to {unreachable_duts}, not reachable via ping, hence exiting Vane"
+    )
 
 
-def test_login_duts_eapi(loginfo, mocker):
+def test_login_duts_eapi(loginfo, logdebug, mocker):
     """Validates the functionality of login_duts
     FIXTURE NEEDED: fixture_definitions.yaml, fixture_duts.yaml"""
 
@@ -333,16 +341,15 @@ def test_login_duts_eapi(loginfo, mocker):
     mocker_object = mocker.patch("vane.device_interface.PyeapiConn")
     pyeapi_instance = mocker_object.return_value
 
-    actual_output = tests_tools.login_duts(test_parameters, duts)
+    mocker_authentication_object = mocker.patch("vane.tests_tools.authenticate_and_setup_conn")
+    mocker_authentication_object.side_effect = [True, True]
 
-    # assert calls PyeapiConn were made correctly
-
-    assert pyeapi_instance.set_up_conn.call_count == 2
+    reachable_duts, _ = tests_tools.login_duts(test_parameters, duts)
 
     # assert values when pyeapi connection
 
     for index in range(0, 2):
-        dut_info = actual_output[index]
+        dut_info = reachable_duts[index]
         assert dut_info["eapi_conn"] == pyeapi_instance
         assert dut_info["connection"] == pyeapi_instance
         assert dut_info["name"] == test_duts["duts"][index]["name"]
@@ -360,21 +367,29 @@ def test_login_duts_eapi(loginfo, mocker):
         call("Using eapi/ssh to connect to Arista switches for testing"),
         call("Connecting to switch: DSR01"),
         call("Connecting to switch: DCBBW1"),
+        call(f"Returning reachable_duts: {reachable_duts}"),
     ]
 
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+    logdebug_calls = [
+        call(f"Connecting to switch: DSR01 using parameters: {duts[0]}"),
+        call(f"Connecting to switch: DCBBW1 using parameters: {duts[1]}"),
+    ]
+
+    logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
     # assert values when neither pyeapi nor ssh connection
 
     test_parameters["parameters"]["eos_conn"] = "invalid_connection_type"
 
     try:
-        actual_output = tests_tools.login_duts(test_parameters, duts)
+        reachable_duts, _ = tests_tools.login_duts(test_parameters, duts)
     except ValueError as exception:
         assert str(exception) == "Invalid EOS conn type invalid_connection_type specified"
 
 
-def test_login_duts_ssh(loginfo, mocker):
+def test_login_duts_ssh(loginfo, logdebug, mocker):
     """Validates the functionality of login_duts
     FIXTURE NEEDED: fixture_definitions.yaml, fixture_duts.yaml"""
 
@@ -393,36 +408,44 @@ def test_login_duts_ssh(loginfo, mocker):
     mocker_object = mocker.patch("vane.device_interface.NetmikoConn")
     netmiko_instance = mocker_object.return_value
 
-    actual_output = tests_tools.login_duts(test_parameters, duts)
+    mocker_authentication_object = mocker.patch("vane.tests_tools.authenticate_and_setup_conn")
+    mocker_authentication_object.side_effect = [True, False]
 
-    # assert called to NetmikoConn were made correctly
-
-    assert netmiko_instance.set_up_conn.call_count == 2
+    reachable_duts, unreachable_duts = tests_tools.login_duts(test_parameters, duts)
 
     # assert values when netmiko connection
 
-    for index in range(0, 2):
-        dut_info = actual_output[index]
-        assert dut_info["ssh_conn"] == netmiko_instance
-        assert dut_info["connection"] == netmiko_instance
-        assert dut_info["name"] == test_duts["duts"][index]["name"]
-        assert dut_info["mgmt_ip"] == test_duts["duts"][index]["mgmt_ip"]
-        assert dut_info["username"] == test_duts["duts"][index]["username"]
-        assert dut_info["role"] == test_duts["duts"][index]["role"]
-        assert dut_info["neighbors"] == test_duts["duts"][index]["neighbors"]
-        assert dut_info["results_dir"] == test_parameters["parameters"]["results_dir"]
-        assert dut_info["report_dir"] == test_parameters["parameters"]["report_dir"]
-        assert dut_info["network_configs"] == "network_configs"
+    dut_info = reachable_duts[0]
+    assert dut_info["ssh_conn"] == netmiko_instance
+    assert dut_info["connection"] == netmiko_instance
+    assert dut_info["name"] == test_duts["duts"][0]["name"]
+    assert dut_info["mgmt_ip"] == test_duts["duts"][0]["mgmt_ip"]
+    assert dut_info["username"] == test_duts["duts"][0]["username"]
+    assert dut_info["role"] == test_duts["duts"][0]["role"]
+    assert dut_info["neighbors"] == test_duts["duts"][0]["neighbors"]
+    assert dut_info["results_dir"] == test_parameters["parameters"]["results_dir"]
+    assert dut_info["report_dir"] == test_parameters["parameters"]["report_dir"]
+    assert dut_info["network_configs"] == "network_configs"
 
+    assert len(reachable_duts) == 1
+    assert unreachable_duts[0] == duts[1]
     # assert logs
 
     loginfo_calls = [
         call("Using eapi/ssh to connect to Arista switches for testing"),
         call("Connecting to switch: DSR01"),
         call("Connecting to switch: DCBBW1"),
+        call(f"Returning reachable_duts: {reachable_duts}"),
     ]
 
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+    logdebug_calls = [
+        call(f"Connecting to switch: DSR01 using parameters: {duts[0]}"),
+        call(f"Connecting to switch: DCBBW1 using parameters: {duts[1]}"),
+    ]
+
+    logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
 
 def test_check_duts_reachability_when_unreachable(mocker, loginfo):
@@ -466,6 +489,127 @@ def test_check_duts_reachability_when_unreachable(mocker, loginfo):
     loginfo_calls = [call("Checking connectivity of duts"), call("Failed to connect to DCBBW2")]
 
     loginfo.assert_has_calls(loginfo_calls, any_order=False)
+
+
+def test_authenticate_and_setup_conn_netmiko_valid(mocker, loginfo):
+    """Validate the functionality of authenticate_and_setup_conn
+    method when valid netmiko connection is setup"""
+
+    mocker_object = mocker.patch("vane.device_interface.NetmikoConn")
+    netmiko_instance = mocker_object.return_value
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+    dut = test_duts["duts"][0]
+
+    success = tests_tools.authenticate_and_setup_conn(dut, netmiko_instance)
+
+    # assert called to NetmikoConn were made correctly
+    assert netmiko_instance.set_up_conn.call_count == 1
+
+    name = dut["name"]
+    loginfo.assert_called_with(f"Authentication to dut {name} is successful")
+
+    assert success
+
+
+def test_authenticate_and_setup_conn_netmiko_invalid(mocker, logerr, capsys):
+    """Validate the functionality of authenticate_and_setup_conn
+    method when netmiko connection with invalid credentials is tried
+    and Vane should exit out immediately"""
+
+    mocker_object = mocker.patch("vane.device_interface.NetmikoConn")
+    netmiko_instance = mocker_object.return_value
+    sys_exit_mocked = mocker.patch("sys.exit")
+
+    # Create a MagicMock for the set_up_conn method
+    mocked_set_up_conn = mocker.patch.object(netmiko_instance, "set_up_conn")
+
+    # Configure the MagicMock to raise an exception when called
+    mocked_set_up_conn.side_effect = NetmikoAuthenticationException("Incorrect credentials")
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+    dut = test_duts["duts"][0]
+
+    vane.config.test_parameters = {"parameters": {"continue_when_unreachable": False}}
+
+    tests_tools.authenticate_and_setup_conn(dut, netmiko_instance)
+
+    # assert calls NetmikoConn were made correctly
+
+    assert netmiko_instance.set_up_conn.call_count == 1
+
+    name = dut["name"]
+    logerr.assert_called_with(
+        f"Exiting Vane: Error running all cmds on dut {name} due to failed authentication."
+        " Incorrect credentials\n"
+    )
+
+    captured_output = capsys.readouterr()
+
+    output = (
+        "\x1b[31mExiting Vane.\n"
+        f"Error running all cmds on dut {name} due to failed authentication."
+        "\nIncorrect credentials\n"
+        "\x1b[0m"
+    )
+
+    # Assert that the expected prints occurred
+    assert output in captured_output.out
+
+    sys_exit_mocked.assert_called_with(1)
+
+
+def test_authenticate_and_setup_conn_pyeapi_valid(mocker, loginfo):
+    """Validate the functionality of authenticate_and_setup_conn
+    method when pyeapi connection with invalid credentials is tried"""
+
+    mocker_object = mocker.patch("vane.device_interface.PyeapiConn")
+    pyeapi_instance = mocker_object.return_value
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+    dut = test_duts["duts"][0]
+
+    success = tests_tools.authenticate_and_setup_conn(dut, pyeapi_instance)
+
+    # assert calls PyeapiConn were made correctly
+
+    assert pyeapi_instance.set_up_conn.call_count == 1
+
+    name = dut["name"]
+    loginfo.assert_called_with(f"Authentication to dut {name} is successful")
+
+    assert success
+
+
+def test_authenticate_and_setup_conn_pyeapi_invalid(mocker, loginfo):
+    """Validate the functionality of authenticate_and_setup_conn
+    method when pyeapi connection with invalid credentials is tried
+    and Vane should still continue"""
+
+    mocker_object = mocker.patch("vane.device_interface.PyeapiConn")
+    pyeapi_instance = mocker_object.return_value
+
+    # Create a MagicMock for the set_up_conn method
+    mocked_set_up_conn = mocker.patch.object(pyeapi_instance, "set_up_conn")
+
+    # Configure the MagicMock to raise an exception when called
+    mocked_set_up_conn.side_effect = ConnectionError("pyeapi", "Incorrect Credentials")
+
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts.yaml")
+    dut = test_duts["duts"][0]
+
+    vane.config.test_parameters = {"parameters": {"continue_when_unreachable": True}}
+
+    success = tests_tools.authenticate_and_setup_conn(dut, pyeapi_instance)
+
+    # assert calls NetmikoConn were made correctly
+
+    assert pyeapi_instance.set_up_conn.call_count == 1
+
+    name = dut["name"]
+    loginfo.assert_called_with(f"Authentication to dut {name} failed")
+
+    assert not success
 
 
 def test_check_duts_reachability_when_reachable(mocker, loginfo):
@@ -589,7 +733,7 @@ def test_send_cmds_text(loginfo, logdebug, mocker):
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
 
-def test_send_cmds_exception(logdebug, logerror, mocker):
+def test_send_cmds_exception(logdebug, logerr, mocker):
     """Validates the functionality of send_cmds method"""
 
     # mocking call to run commands method on connection object
@@ -613,7 +757,7 @@ def test_send_cmds_exception(logdebug, logerror, mocker):
     ]
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
-    logerror.assert_called_with("Error running all cmds: show version is erring")
+    logerr.assert_called_with("Error running all cmds: show version is erring")
 
 
 error = ["show lldp neighbors has an error in it", "show lldp neighbors status has an error in it"]

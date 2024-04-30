@@ -1766,9 +1766,9 @@ class TestOps:
         Args:
             cmds (list): List of commands that are executed on the device.
             cmds_output (list): Outputs of the command execution.
-            dut (str): Name of the device for which this evidence is to be added.
-            The default value is set as an empty string. for commands executed on external
-            devices, this parameter is optional.
+            dut (str): Name of the device for which evidence needs to be added.
+                       default value of this parameter is set as an empty string.
+                       For commands executed on external devices, this parameter is optional.
             prompt (str): It indicates where the command was executed other than the EOS device.
         """
 

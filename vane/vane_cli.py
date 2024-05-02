@@ -177,7 +177,11 @@ def run_tests(definitions_file, duts_file):
         unreachable_names = [
             unreachable_dut["name"] for unreachable_dut in vane.config.unreachable_duts
         ]
-        print("\x1b[31mThese DUTS were unreachable for the tests:\n" f"{unreachable_names}\x1b[0m")
+        print(
+            "\x1b[31mThese DUTS were unreachable for the tests:\n"
+            f"{unreachable_names}\n"
+            "Kindly check the ip address or credentials provided for the duts.\x1b[0m"
+        )
 
 
 def write_results(definitions_file):

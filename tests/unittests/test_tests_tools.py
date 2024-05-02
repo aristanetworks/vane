@@ -466,49 +466,6 @@ def test_login_duts_ssh(loginfo, logdebug, mocker):
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
 
-def test_check_duts_reachability_when_unreachable(mocker, loginfo):
-    """Validates the functionality of check_duts_reachability method
-    when a dut is unreachable"""
-
-    mocker_object1 = MagicMock()
-    mocker_object2 = MagicMock()
-
-    mocker_object = mocker.patch("vane.tests_tools.ping")
-    mocker_object.side_effect = [mocker_object1, mocker_object2]
-
-    mocker_object1.is_alive = True
-    mocker_object2.is_alive = False
-
-    test_duts = {
-        "duts": [
-            {
-                "mgmt_ip": "10.255.70.132",
-                "name": "DCBBW1",
-                "password": "cvp123!",
-                "transport": "https",
-                "username": "cvpadmin",
-                "role": "unknown",
-            },
-            {
-                "mgmt_ip": "10.255.70.133",
-                "name": "DCBBW2",
-                "password": "cvp123!",
-                "transport": "https",
-                "username": "cvpadmin",
-                "role": "unknown",
-            },
-        ]
-    }
-
-    reachability, reachable_duts, unreachable_duts = tests_tools.check_duts_reachability(test_duts)
-    assert not reachability
-    assert reachable_duts[0] == test_duts["duts"][0]
-    assert unreachable_duts[0] == test_duts["duts"][1]
-    loginfo_calls = [call("Checking connectivity of duts"), call("Failed to connect to DCBBW2")]
-
-    loginfo.assert_has_calls(loginfo_calls, any_order=False)
-
-
 def test_authenticate_and_setup_conn_netmiko_valid(mocker, loginfo):
     """Validate the functionality of authenticate_and_setup_conn
     method when valid netmiko connection is setup"""
@@ -628,6 +585,49 @@ def test_authenticate_and_setup_conn_pyeapi_invalid(mocker, loginfo):
     loginfo.assert_called_with(f"Authentication to dut {name} failed")
 
     assert not success
+
+
+def test_check_duts_reachability_when_unreachable(mocker, loginfo):
+    """Validates the functionality of check_duts_reachability method
+    when a dut is unreachable"""
+
+    mocker_object1 = MagicMock()
+    mocker_object2 = MagicMock()
+
+    mocker_object = mocker.patch("vane.tests_tools.ping")
+    mocker_object.side_effect = [mocker_object1, mocker_object2]
+
+    mocker_object1.is_alive = True
+    mocker_object2.is_alive = False
+
+    test_duts = {
+        "duts": [
+            {
+                "mgmt_ip": "10.255.70.132",
+                "name": "DCBBW1",
+                "password": "cvp123!",
+                "transport": "https",
+                "username": "cvpadmin",
+                "role": "unknown",
+            },
+            {
+                "mgmt_ip": "10.255.70.133",
+                "name": "DCBBW2",
+                "password": "cvp123!",
+                "transport": "https",
+                "username": "cvpadmin",
+                "role": "unknown",
+            },
+        ]
+    }
+
+    reachability, reachable_duts, unreachable_duts = tests_tools.check_duts_reachability(test_duts)
+    assert not reachability
+    assert reachable_duts[0] == test_duts["duts"][0]
+    assert unreachable_duts[0] == test_duts["duts"][1]
+    loginfo_calls = [call("Checking connectivity of duts"), call("Failed to connect to DCBBW2")]
+
+    loginfo.assert_has_calls(loginfo_calls, any_order=False)
 
 
 def test_check_duts_reachability_when_reachable(mocker, loginfo):

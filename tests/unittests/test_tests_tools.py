@@ -189,10 +189,6 @@ def test_parametrize_duts(loginfo, logdebug):
     assert expected_dut_parameters == actual_dut_parameters
 
 
-# def test_setup_import_yaml():
-#     pass
-
-
 @pytest.mark.parametrize(
     "input_file_data, expected_yaml",
     [
@@ -384,20 +380,30 @@ def test_login_duts_eapi(loginfo, logdebug, mocker):
     except ValueError as exception:
         assert str(exception) == "Invalid EOS conn type invalid_connection_type specified"
 
-    # assert value when no neighbors in duts file
 
-    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_neighbors.yaml")
+def test_login_duts_no_neighbor_no_role_info(mocker):
+    """Validates the functionality of login_duts when neighbors and
+    role info is missing"""
+    test_parameters = read_yaml("tests/unittests/fixtures/fixture_definitions.yaml")
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_neighbors_no_role.yaml")
+    duts = test_duts["duts"]
     test_parameters["parameters"]["eos_conn"] = "ssh"
-    actual_output = tests_tools.login_duts(test_parameters, test_duts)
-    dut_info = actual_output[0]
+
+    mocker.patch(
+        "vane.tests_tools.import_yaml",
+        return_value={"DSR01": "network_configs", "DCBBW1": "network_configs"},
+    )
+
+    mocker.patch("vane.device_interface.NetmikoConn")
+
+    mocker.patch("vane.tests_tools.authenticate_and_setup_conn", return_value=True)
+
+    reachable_duts, _ = tests_tools.login_duts(test_parameters, duts)
+    dut_info = reachable_duts[0]
+
+    # assert value when no neighbors and no role is present in duts file
+
     assert dut_info["neighbors"] == ""
-
-    # assert value when no role in duts file
-
-    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_role.yaml")
-    test_parameters["parameters"]["eos_conn"] = "ssh"
-    actual_output = tests_tools.login_duts(test_parameters, test_duts)
-    dut_info = actual_output[0]
     assert dut_info["role"] == ""
 
 
@@ -934,8 +940,9 @@ def test_return_interfaces(loginfo, logdebug):
     logdebug.assert_has_calls(logdebug_calls, any_order=False)
 
     # Test to validate return_interfaces when neighbors field is not present in duts.yaml
-    test_parameters = read_yaml("tests/unittests/fixtures/fixture_duts_no_neighbors.yaml")
-    actual_output = tests_tools.return_interfaces("DSR01", test_parameters)
+    test_duts = read_yaml("tests/unittests/fixtures/fixture_duts_no_neighbors_no_role.yaml")
+    duts = test_duts["duts"]
+    actual_output = tests_tools.return_interfaces("DSR01", duts)
     expected_output = []
     assert actual_output == expected_output
 

@@ -275,7 +275,6 @@ def perform_teardown(duts, checkpoint, setup_config):
         )
 
 
-@pytest.fixture(autouse=True, scope="class")
 def setup_testsuite(request, duts):
     """Setup the duts using the test suite(class) setup file"""
 
@@ -297,7 +296,6 @@ def setup_testsuite(request, duts):
     perform_teardown(duts, checkpoint, setup_config)
 
 
-@pytest.fixture(autouse=True, scope="function")
 def setup_testcase(request, duts):
     """Setup the duts using the test case(function) setup file"""
 

@@ -1,0 +1,62 @@
+anta.tests.connectivity:
+- VerifyLLDPNeighbors:
+    neighbors:
+    - neighbor_device: DC1-LEAF2A
+      neighbor_port: Ethernet5
+      port: Ethernet1
+    result_overwrite:
+      custom_field: 'Local: Ethernet1 - Remote: DC1-LEAF2A Ethernet5'
+- VerifyLLDPNeighbors:
+    neighbors:
+    - neighbor_device: DC1-LEAF2B
+      neighbor_port: Ethernet5
+      port: Ethernet2
+    result_overwrite:
+      custom_field: 'Local: Ethernet2 - Remote: DC1-LEAF2B Ethernet5'
+anta.tests.hardware:
+- VerifyEnvironmentPower:
+    result_overwrite:
+      custom_field: 'Accepted States: ''ok'''
+    states:
+    - ok
+- VerifyEnvironmentCooling:
+    result_overwrite:
+      custom_field: 'Accepted States: ''ok'''
+    states:
+    - ok
+- VerifyTemperature: null
+- VerifyTransceiversManufacturers:
+    manufacturers:
+    - Arista Networks
+    - Arastra, Inc.
+    - Not Present
+    result_overwrite:
+      custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+        ''Not Present'''
+anta.tests.interfaces:
+- VerifyInterfacesStatus:
+    interfaces:
+    - name: Ethernet1
+      status: up
+    result_overwrite:
+      custom_field: Interface Ethernet1 - DC1-LEAF2A_Ethernet5 = 'up'
+- VerifyInterfacesStatus:
+    interfaces:
+    - name: Ethernet2
+      status: up
+    result_overwrite:
+      custom_field: Interface Ethernet2 - DC1-LEAF2B_Ethernet5 = 'up'
+- VerifyInterfacesStatus:
+    interfaces:
+    - name: Ethernet5
+      status: up
+    result_overwrite:
+      custom_field: Interface Ethernet5 - server02_Eth0 = 'up'
+- VerifyInterfacesStatus:
+    interfaces:
+    - name: Port-Channel1
+      status: up
+    result_overwrite:
+      custom_field: Interface Port-Channel1 - DC1_LEAF2_Po5 = 'up'
+anta.tests.system:
+- VerifyNTP: null

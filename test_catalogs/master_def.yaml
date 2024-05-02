@@ -1,0 +1,2137 @@
+testcase_data:
+  VerifyBGPSpecificPeers:
+    criteria: name
+    filter:
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-LEAF1A:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.1
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE1 (IP: 192.168.255.1)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.2
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE2 (IP: 192.168.255.2)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 10.255.251.1
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1B (IP: 10.255.251.1)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.0
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE1 (IP: 172.31.255.0)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.2
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE2 (IP: 172.31.255.2)'
+      DC1-LEAF1B:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.1
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE1 (IP: 192.168.255.1)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.2
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE2 (IP: 192.168.255.2)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 10.255.251.0
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1A (IP: 10.255.251.0)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.4
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE1 (IP: 172.31.255.4)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.6
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE2 (IP: 172.31.255.6)'
+      DC1-LEAF2A:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.1
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE1 (IP: 192.168.255.1)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.2
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE2 (IP: 192.168.255.2)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 10.255.251.5
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2B (IP: 10.255.251.5)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.8
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE1 (IP: 172.31.255.8)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.10
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE2 (IP: 172.31.255.10)'
+      DC1-LEAF2B:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.1
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE1 (IP: 192.168.255.1)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.2
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE2 (IP: 192.168.255.2)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 10.255.251.4
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2A (IP: 10.255.251.4)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.12
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE1 (IP: 172.31.255.12)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.14
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE2 (IP: 172.31.255.14)'
+      DC1-SPINE1:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.3
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF1A (IP: 192.168.255.3)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.4
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF1B (IP: 192.168.255.4)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.5
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF2A (IP: 192.168.255.5)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.6
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF2B (IP: 192.168.255.6)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.1
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1A (IP: 172.31.255.1)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.5
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1B (IP: 172.31.255.5)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.9
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2A (IP: 172.31.255.9)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.13
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2B (IP: 172.31.255.13)'
+      DC1-SPINE2:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.3
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF1A (IP: 192.168.255.3)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.4
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF1B (IP: 192.168.255.4)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.5
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF2A (IP: 192.168.255.5)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.6
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF2B (IP: 192.168.255.6)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.3
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1A (IP: 172.31.255.3)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.7
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1B (IP: 172.31.255.7)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.11
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2A (IP: 172.31.255.11)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.15
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2B (IP: 172.31.255.15)'
+  VerifyEnvironmentCooling:
+    criteria: name
+    filter:
+      DC1-L2LEAF1A: DC1-L2LEAF1A
+      DC1-L2LEAF2A: DC1-L2LEAF2A
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-L2LEAF1A:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-L2LEAF2A:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-LEAF1A:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-LEAF1B:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-LEAF2A:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-LEAF2B:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-SPINE1:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-SPINE2:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+  VerifyEnvironmentPower:
+    criteria: name
+    filter:
+      DC1-L2LEAF1A: DC1-L2LEAF1A
+      DC1-L2LEAF2A: DC1-L2LEAF2A
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-L2LEAF1A:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-L2LEAF2A:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-LEAF1A:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-LEAF1B:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-LEAF2A:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-LEAF2B:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-SPINE1:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+      DC1-SPINE2:
+      - result_overwrite:
+          custom_field: 'Accepted States: ''ok'''
+        states:
+        - ok
+  VerifyInterfacesStatus:
+    criteria: name
+    filter:
+      DC1-L2LEAF1A: DC1-L2LEAF1A
+      DC1-L2LEAF2A: DC1-L2LEAF2A
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-L2LEAF1A:
+      - interfaces:
+        - name: Ethernet1
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet1 - DC1-LEAF1A_Ethernet5 = 'up'
+      - interfaces:
+        - name: Ethernet2
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet2 - DC1-LEAF1B_Ethernet5 = 'up'
+      - interfaces:
+        - name: Ethernet5
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet5 - server01_Eth0 = 'up'
+      - interfaces:
+        - name: Port-Channel1
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel1 - DC1_LEAF1_Po5 = 'up'
+      DC1-L2LEAF2A:
+      - interfaces:
+        - name: Ethernet1
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet1 - DC1-LEAF2A_Ethernet5 = 'up'
+      - interfaces:
+        - name: Ethernet2
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet2 - DC1-LEAF2B_Ethernet5 = 'up'
+      - interfaces:
+        - name: Ethernet5
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet5 - server02_Eth0 = 'up'
+      - interfaces:
+        - name: Port-Channel1
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel1 - DC1_LEAF2_Po5 = 'up'
+      DC1-LEAF1A:
+      - interfaces:
+        - name: Ethernet3
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet3 - MLAG_PEER_DC1-LEAF1B_Ethernet3 = 'up'
+      - interfaces:
+        - name: Ethernet4
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet4 - MLAG_PEER_DC1-LEAF1B_Ethernet4 = 'up'
+      - interfaces:
+        - name: Ethernet1
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet1 - P2P_LINK_TO_DC1-SPINE1_Ethernet1 = 'up'
+      - interfaces:
+        - name: Ethernet2
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet2 - P2P_LINK_TO_DC1-SPINE2_Ethernet1 = 'up'
+      - interfaces:
+        - name: Ethernet5
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet5 - DC1-L2LEAF1A_Ethernet1 = 'up'
+      - interfaces:
+        - name: Port-Channel3
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel3 - MLAG_PEER_DC1-LEAF1B_Po3 = 'up'
+      - interfaces:
+        - name: Port-Channel5
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel5 - DC1-L2LEAF1A_Po1 = 'up'
+      - interfaces:
+        - name: Vlan4093
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan4093 - MLAG_PEER_L3_PEERING = 'up'
+      - interfaces:
+        - name: Vlan4094
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan4094 - MLAG_PEER = 'up'
+      - interfaces:
+        - name: Vlan130
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan130 - Tenant_A_APP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan131
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan131 - Tenant_A_APP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3011
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3011 - MLAG_PEER_L3_iBGP: vrf Tenant_A_APP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan140
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan140 - Tenant_A_DB_BZone_1 = 'up'
+      - interfaces:
+        - name: Vlan141
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan141 - Tenant_A_DB_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3012
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3012 - MLAG_PEER_L3_iBGP: vrf Tenant_A_DB_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan110
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan110 - Tenant_A_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan111
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan111 - Tenant_A_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan112
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan112 - Tenant_A_OP_Zone_3 = 'up'
+      - interfaces:
+        - name: Vlan3009
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3009 - MLAG_PEER_L3_iBGP: vrf Tenant_A_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan150
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan150 - Tenant_A_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3013
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3013 - MLAG_PEER_L3_iBGP: vrf Tenant_A_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan120
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan120 - Tenant_A_WEB_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan121
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan121 - Tenant_A_WEBZone_2 = 'up'
+      - interfaces:
+        - name: Vlan3010
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3010 - MLAG_PEER_L3_iBGP: vrf Tenant_A_WEB_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan210
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan210 - Tenant_B_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan211
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan211 - Tenant_B_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3019
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3019 - MLAG_PEER_L3_iBGP: vrf Tenant_B_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan250
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan250 - Tenant_B_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3020
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3020 - MLAG_PEER_L3_iBGP: vrf Tenant_B_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan310
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan310 - Tenant_C_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan311
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan311 - Tenant_C_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3029
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3029 - MLAG_PEER_L3_iBGP: vrf Tenant_C_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan350
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan350 - Tenant_C_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3030
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3030 - MLAG_PEER_L3_iBGP: vrf Tenant_C_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Loopback0
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback0 - EVPN_Overlay_Peering = 'up'
+      - interfaces:
+        - name: Loopback1
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback1 - VTEP_VXLAN_Tunnel_Source = 'up'
+      - interfaces:
+        - name: Loopback100
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback100 - Tenant_A_OP_Zone_VTEP_DIAGNOSTICS
+            = 'up'
+      - interfaces:
+        - name: Vxlan1
+          status: up
+        result_overwrite:
+          custom_field: Interface Vxlan1 = 'up'
+      DC1-LEAF1B:
+      - interfaces:
+        - name: Ethernet3
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet3 - MLAG_PEER_DC1-LEAF1A_Ethernet3 = 'up'
+      - interfaces:
+        - name: Ethernet4
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet4 - MLAG_PEER_DC1-LEAF1A_Ethernet4 = 'up'
+      - interfaces:
+        - name: Ethernet1
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet1 - P2P_LINK_TO_DC1-SPINE1_Ethernet2 = 'up'
+      - interfaces:
+        - name: Ethernet2
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet2 - P2P_LINK_TO_DC1-SPINE2_Ethernet2 = 'up'
+      - interfaces:
+        - name: Ethernet5
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet5 - DC1-L2LEAF1A_Ethernet2 = 'up'
+      - interfaces:
+        - name: Port-Channel3
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel3 - MLAG_PEER_DC1-LEAF1A_Po3 = 'up'
+      - interfaces:
+        - name: Port-Channel5
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel5 - DC1-L2LEAF1A_Po1 = 'up'
+      - interfaces:
+        - name: Vlan4093
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan4093 - MLAG_PEER_L3_PEERING = 'up'
+      - interfaces:
+        - name: Vlan4094
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan4094 - MLAG_PEER = 'up'
+      - interfaces:
+        - name: Vlan130
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan130 - Tenant_A_APP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan131
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan131 - Tenant_A_APP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3011
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3011 - MLAG_PEER_L3_iBGP: vrf Tenant_A_APP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan140
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan140 - Tenant_A_DB_BZone_1 = 'up'
+      - interfaces:
+        - name: Vlan141
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan141 - Tenant_A_DB_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3012
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3012 - MLAG_PEER_L3_iBGP: vrf Tenant_A_DB_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan110
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan110 - Tenant_A_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan111
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan111 - Tenant_A_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan112
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan112 - Tenant_A_OP_Zone_3 = 'up'
+      - interfaces:
+        - name: Vlan3009
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3009 - MLAG_PEER_L3_iBGP: vrf Tenant_A_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan150
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan150 - Tenant_A_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3013
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3013 - MLAG_PEER_L3_iBGP: vrf Tenant_A_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan120
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan120 - Tenant_A_WEB_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan121
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan121 - Tenant_A_WEBZone_2 = 'up'
+      - interfaces:
+        - name: Vlan3010
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3010 - MLAG_PEER_L3_iBGP: vrf Tenant_A_WEB_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan210
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan210 - Tenant_B_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan211
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan211 - Tenant_B_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3019
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3019 - MLAG_PEER_L3_iBGP: vrf Tenant_B_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan250
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan250 - Tenant_B_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3020
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3020 - MLAG_PEER_L3_iBGP: vrf Tenant_B_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan310
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan310 - Tenant_C_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan311
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan311 - Tenant_C_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3029
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3029 - MLAG_PEER_L3_iBGP: vrf Tenant_C_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan350
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan350 - Tenant_C_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3030
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3030 - MLAG_PEER_L3_iBGP: vrf Tenant_C_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Loopback0
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback0 - EVPN_Overlay_Peering = 'up'
+      - interfaces:
+        - name: Loopback1
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback1 - VTEP_VXLAN_Tunnel_Source = 'up'
+      - interfaces:
+        - name: Loopback100
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback100 - Tenant_A_OP_Zone_VTEP_DIAGNOSTICS
+            = 'up'
+      - interfaces:
+        - name: Vxlan1
+          status: up
+        result_overwrite:
+          custom_field: Interface Vxlan1 = 'up'
+      DC1-LEAF2A:
+      - interfaces:
+        - name: Ethernet3
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet3 - MLAG_PEER_DC1-LEAF2B_Ethernet3 = 'up'
+      - interfaces:
+        - name: Ethernet4
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet4 - MLAG_PEER_DC1-LEAF2B_Ethernet4 = 'up'
+      - interfaces:
+        - name: Ethernet1
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet1 - P2P_LINK_TO_DC1-SPINE1_Ethernet3 = 'up'
+      - interfaces:
+        - name: Ethernet2
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet2 - P2P_LINK_TO_DC1-SPINE2_Ethernet3 = 'up'
+      - interfaces:
+        - name: Ethernet5
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet5 - DC1-L2LEAF2A_Ethernet1 = 'up'
+      - interfaces:
+        - name: Port-Channel3
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel3 - MLAG_PEER_DC1-LEAF2B_Po3 = 'up'
+      - interfaces:
+        - name: Port-Channel5
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel5 - DC1-L2LEAF2A_Po1 = 'up'
+      - interfaces:
+        - name: Vlan4093
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan4093 - MLAG_PEER_L3_PEERING = 'up'
+      - interfaces:
+        - name: Vlan4094
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan4094 - MLAG_PEER = 'up'
+      - interfaces:
+        - name: Vlan130
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan130 - Tenant_A_APP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan131
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan131 - Tenant_A_APP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3011
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3011 - MLAG_PEER_L3_iBGP: vrf Tenant_A_APP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan140
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan140 - Tenant_A_DB_BZone_1 = 'up'
+      - interfaces:
+        - name: Vlan141
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan141 - Tenant_A_DB_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3012
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3012 - MLAG_PEER_L3_iBGP: vrf Tenant_A_DB_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan110
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan110 - Tenant_A_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan111
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan111 - Tenant_A_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan112
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan112 - Tenant_A_OP_Zone_3 = 'up'
+      - interfaces:
+        - name: Vlan3009
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3009 - MLAG_PEER_L3_iBGP: vrf Tenant_A_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan150
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan150 - Tenant_A_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3013
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3013 - MLAG_PEER_L3_iBGP: vrf Tenant_A_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan120
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan120 - Tenant_A_WEB_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan121
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan121 - Tenant_A_WEBZone_2 = 'up'
+      - interfaces:
+        - name: Vlan3010
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3010 - MLAG_PEER_L3_iBGP: vrf Tenant_A_WEB_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan210
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan210 - Tenant_B_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan211
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan211 - Tenant_B_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3019
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3019 - MLAG_PEER_L3_iBGP: vrf Tenant_B_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan250
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan250 - Tenant_B_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3020
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3020 - MLAG_PEER_L3_iBGP: vrf Tenant_B_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan310
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan310 - Tenant_C_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan311
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan311 - Tenant_C_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3029
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3029 - MLAG_PEER_L3_iBGP: vrf Tenant_C_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan350
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan350 - Tenant_C_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3030
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3030 - MLAG_PEER_L3_iBGP: vrf Tenant_C_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Loopback0
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback0 - EVPN_Overlay_Peering = 'up'
+      - interfaces:
+        - name: Loopback1
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback1 - VTEP_VXLAN_Tunnel_Source = 'up'
+      - interfaces:
+        - name: Loopback100
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback100 - Tenant_A_OP_Zone_VTEP_DIAGNOSTICS
+            = 'up'
+      - interfaces:
+        - name: Vxlan1
+          status: up
+        result_overwrite:
+          custom_field: Interface Vxlan1 = 'up'
+      DC1-LEAF2B:
+      - interfaces:
+        - name: Ethernet3
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet3 - MLAG_PEER_DC1-LEAF2A_Ethernet3 = 'up'
+      - interfaces:
+        - name: Ethernet4
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet4 - MLAG_PEER_DC1-LEAF2A_Ethernet4 = 'up'
+      - interfaces:
+        - name: Ethernet1
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet1 - P2P_LINK_TO_DC1-SPINE1_Ethernet4 = 'up'
+      - interfaces:
+        - name: Ethernet2
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet2 - P2P_LINK_TO_DC1-SPINE2_Ethernet4 = 'up'
+      - interfaces:
+        - name: Ethernet5
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet5 - DC1-L2LEAF2A_Ethernet2 = 'up'
+      - interfaces:
+        - name: Port-Channel3
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel3 - MLAG_PEER_DC1-LEAF2A_Po3 = 'up'
+      - interfaces:
+        - name: Port-Channel5
+          status: up
+        result_overwrite:
+          custom_field: Interface Port-Channel5 - DC1-L2LEAF2A_Po1 = 'up'
+      - interfaces:
+        - name: Vlan4093
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan4093 - MLAG_PEER_L3_PEERING = 'up'
+      - interfaces:
+        - name: Vlan4094
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan4094 - MLAG_PEER = 'up'
+      - interfaces:
+        - name: Vlan130
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan130 - Tenant_A_APP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan131
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan131 - Tenant_A_APP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3011
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3011 - MLAG_PEER_L3_iBGP: vrf Tenant_A_APP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan140
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan140 - Tenant_A_DB_BZone_1 = 'up'
+      - interfaces:
+        - name: Vlan141
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan141 - Tenant_A_DB_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3012
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3012 - MLAG_PEER_L3_iBGP: vrf Tenant_A_DB_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan110
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan110 - Tenant_A_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan111
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan111 - Tenant_A_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan112
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan112 - Tenant_A_OP_Zone_3 = 'up'
+      - interfaces:
+        - name: Vlan3009
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3009 - MLAG_PEER_L3_iBGP: vrf Tenant_A_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan150
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan150 - Tenant_A_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3013
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3013 - MLAG_PEER_L3_iBGP: vrf Tenant_A_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan120
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan120 - Tenant_A_WEB_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan121
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan121 - Tenant_A_WEBZone_2 = 'up'
+      - interfaces:
+        - name: Vlan3010
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3010 - MLAG_PEER_L3_iBGP: vrf Tenant_A_WEB_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan210
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan210 - Tenant_B_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan211
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan211 - Tenant_B_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3019
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3019 - MLAG_PEER_L3_iBGP: vrf Tenant_B_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan250
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan250 - Tenant_B_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3020
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3020 - MLAG_PEER_L3_iBGP: vrf Tenant_B_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan310
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan310 - Tenant_C_OP_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan311
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan311 - Tenant_C_OP_Zone_2 = 'up'
+      - interfaces:
+        - name: Vlan3029
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3029 - MLAG_PEER_L3_iBGP: vrf Tenant_C_OP_Zone
+            = ''up'''
+      - interfaces:
+        - name: Vlan350
+          status: up
+        result_overwrite:
+          custom_field: Interface Vlan350 - Tenant_C_WAN_Zone_1 = 'up'
+      - interfaces:
+        - name: Vlan3030
+          status: up
+        result_overwrite:
+          custom_field: 'Interface Vlan3030 - MLAG_PEER_L3_iBGP: vrf Tenant_C_WAN_Zone
+            = ''up'''
+      - interfaces:
+        - name: Loopback0
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback0 - EVPN_Overlay_Peering = 'up'
+      - interfaces:
+        - name: Loopback1
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback1 - VTEP_VXLAN_Tunnel_Source = 'up'
+      - interfaces:
+        - name: Loopback100
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback100 - Tenant_A_OP_Zone_VTEP_DIAGNOSTICS
+            = 'up'
+      - interfaces:
+        - name: Vxlan1
+          status: up
+        result_overwrite:
+          custom_field: Interface Vxlan1 = 'up'
+      DC1-SPINE1:
+      - interfaces:
+        - name: Ethernet1
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet1 - P2P_LINK_TO_DC1-LEAF1A_Ethernet1 = 'up'
+      - interfaces:
+        - name: Ethernet2
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet2 - P2P_LINK_TO_DC1-LEAF1B_Ethernet1 = 'up'
+      - interfaces:
+        - name: Ethernet3
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet3 - P2P_LINK_TO_DC1-LEAF2A_Ethernet1 = 'up'
+      - interfaces:
+        - name: Ethernet4
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet4 - P2P_LINK_TO_DC1-LEAF2B_Ethernet1 = 'up'
+      - interfaces:
+        - name: Loopback0
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback0 - EVPN_Overlay_Peering = 'up'
+      DC1-SPINE2:
+      - interfaces:
+        - name: Ethernet1
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet1 - P2P_LINK_TO_DC1-LEAF1A_Ethernet2 = 'up'
+      - interfaces:
+        - name: Ethernet2
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet2 - P2P_LINK_TO_DC1-LEAF1B_Ethernet2 = 'up'
+      - interfaces:
+        - name: Ethernet3
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet3 - P2P_LINK_TO_DC1-LEAF2A_Ethernet2 = 'up'
+      - interfaces:
+        - name: Ethernet4
+          status: up
+        result_overwrite:
+          custom_field: Interface Ethernet4 - P2P_LINK_TO_DC1-LEAF2B_Ethernet2 = 'up'
+      - interfaces:
+        - name: Loopback0
+          status: up
+        result_overwrite:
+          custom_field: Interface Loopback0 - EVPN_Overlay_Peering = 'up'
+  VerifyLLDPNeighbors:
+    criteria: name
+    filter:
+      DC1-L2LEAF1A: DC1-L2LEAF1A
+      DC1-L2LEAF2A: DC1-L2LEAF2A
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-L2LEAF1A:
+      - neighbors:
+        - neighbor_device: DC1-LEAF1A
+          neighbor_port: Ethernet5
+          port: Ethernet1
+        result_overwrite:
+          custom_field: 'Local: Ethernet1 - Remote: DC1-LEAF1A Ethernet5'
+      - neighbors:
+        - neighbor_device: DC1-LEAF1B
+          neighbor_port: Ethernet5
+          port: Ethernet2
+        result_overwrite:
+          custom_field: 'Local: Ethernet2 - Remote: DC1-LEAF1B Ethernet5'
+      DC1-L2LEAF2A:
+      - neighbors:
+        - neighbor_device: DC1-LEAF2A
+          neighbor_port: Ethernet5
+          port: Ethernet1
+        result_overwrite:
+          custom_field: 'Local: Ethernet1 - Remote: DC1-LEAF2A Ethernet5'
+      - neighbors:
+        - neighbor_device: DC1-LEAF2B
+          neighbor_port: Ethernet5
+          port: Ethernet2
+        result_overwrite:
+          custom_field: 'Local: Ethernet2 - Remote: DC1-LEAF2B Ethernet5'
+      DC1-LEAF1A:
+      - neighbors:
+        - neighbor_device: DC1-LEAF1B
+          neighbor_port: Ethernet3
+          port: Ethernet3
+        result_overwrite:
+          custom_field: 'Local: Ethernet3 - Remote: DC1-LEAF1B Ethernet3'
+      - neighbors:
+        - neighbor_device: DC1-LEAF1B
+          neighbor_port: Ethernet4
+          port: Ethernet4
+        result_overwrite:
+          custom_field: 'Local: Ethernet4 - Remote: DC1-LEAF1B Ethernet4'
+      - neighbors:
+        - neighbor_device: DC1-SPINE1
+          neighbor_port: Ethernet1
+          port: Ethernet1
+        result_overwrite:
+          custom_field: 'Local: Ethernet1 - Remote: DC1-SPINE1 Ethernet1'
+      - neighbors:
+        - neighbor_device: DC1-SPINE2
+          neighbor_port: Ethernet1
+          port: Ethernet2
+        result_overwrite:
+          custom_field: 'Local: Ethernet2 - Remote: DC1-SPINE2 Ethernet1'
+      - neighbors:
+        - neighbor_device: DC1-L2LEAF1A
+          neighbor_port: Ethernet1
+          port: Ethernet5
+        result_overwrite:
+          custom_field: 'Local: Ethernet5 - Remote: DC1-L2LEAF1A Ethernet1'
+      DC1-LEAF1B:
+      - neighbors:
+        - neighbor_device: DC1-LEAF1A
+          neighbor_port: Ethernet3
+          port: Ethernet3
+        result_overwrite:
+          custom_field: 'Local: Ethernet3 - Remote: DC1-LEAF1A Ethernet3'
+      - neighbors:
+        - neighbor_device: DC1-LEAF1A
+          neighbor_port: Ethernet4
+          port: Ethernet4
+        result_overwrite:
+          custom_field: 'Local: Ethernet4 - Remote: DC1-LEAF1A Ethernet4'
+      - neighbors:
+        - neighbor_device: DC1-SPINE1
+          neighbor_port: Ethernet2
+          port: Ethernet1
+        result_overwrite:
+          custom_field: 'Local: Ethernet1 - Remote: DC1-SPINE1 Ethernet2'
+      - neighbors:
+        - neighbor_device: DC1-SPINE2
+          neighbor_port: Ethernet2
+          port: Ethernet2
+        result_overwrite:
+          custom_field: 'Local: Ethernet2 - Remote: DC1-SPINE2 Ethernet2'
+      - neighbors:
+        - neighbor_device: DC1-L2LEAF1A
+          neighbor_port: Ethernet2
+          port: Ethernet5
+        result_overwrite:
+          custom_field: 'Local: Ethernet5 - Remote: DC1-L2LEAF1A Ethernet2'
+      DC1-LEAF2A:
+      - neighbors:
+        - neighbor_device: DC1-LEAF2B
+          neighbor_port: Ethernet3
+          port: Ethernet3
+        result_overwrite:
+          custom_field: 'Local: Ethernet3 - Remote: DC1-LEAF2B Ethernet3'
+      - neighbors:
+        - neighbor_device: DC1-LEAF2B
+          neighbor_port: Ethernet4
+          port: Ethernet4
+        result_overwrite:
+          custom_field: 'Local: Ethernet4 - Remote: DC1-LEAF2B Ethernet4'
+      - neighbors:
+        - neighbor_device: DC1-SPINE1
+          neighbor_port: Ethernet3
+          port: Ethernet1
+        result_overwrite:
+          custom_field: 'Local: Ethernet1 - Remote: DC1-SPINE1 Ethernet3'
+      - neighbors:
+        - neighbor_device: DC1-SPINE2
+          neighbor_port: Ethernet3
+          port: Ethernet2
+        result_overwrite:
+          custom_field: 'Local: Ethernet2 - Remote: DC1-SPINE2 Ethernet3'
+      - neighbors:
+        - neighbor_device: DC1-L2LEAF2A
+          neighbor_port: Ethernet1
+          port: Ethernet5
+        result_overwrite:
+          custom_field: 'Local: Ethernet5 - Remote: DC1-L2LEAF2A Ethernet1'
+      DC1-LEAF2B:
+      - neighbors:
+        - neighbor_device: DC1-LEAF2A
+          neighbor_port: Ethernet3
+          port: Ethernet3
+        result_overwrite:
+          custom_field: 'Local: Ethernet3 - Remote: DC1-LEAF2A Ethernet3'
+      - neighbors:
+        - neighbor_device: DC1-LEAF2A
+          neighbor_port: Ethernet4
+          port: Ethernet4
+        result_overwrite:
+          custom_field: 'Local: Ethernet4 - Remote: DC1-LEAF2A Ethernet4'
+      - neighbors:
+        - neighbor_device: DC1-SPINE1
+          neighbor_port: Ethernet4
+          port: Ethernet1
+        result_overwrite:
+          custom_field: 'Local: Ethernet1 - Remote: DC1-SPINE1 Ethernet4'
+      - neighbors:
+        - neighbor_device: DC1-SPINE2
+          neighbor_port: Ethernet4
+          port: Ethernet2
+        result_overwrite:
+          custom_field: 'Local: Ethernet2 - Remote: DC1-SPINE2 Ethernet4'
+      - neighbors:
+        - neighbor_device: DC1-L2LEAF2A
+          neighbor_port: Ethernet2
+          port: Ethernet5
+        result_overwrite:
+          custom_field: 'Local: Ethernet5 - Remote: DC1-L2LEAF2A Ethernet2'
+      DC1-SPINE1:
+      - neighbors:
+        - neighbor_device: DC1-LEAF1A
+          neighbor_port: Ethernet1
+          port: Ethernet1
+        result_overwrite:
+          custom_field: 'Local: Ethernet1 - Remote: DC1-LEAF1A Ethernet1'
+      - neighbors:
+        - neighbor_device: DC1-LEAF1B
+          neighbor_port: Ethernet1
+          port: Ethernet2
+        result_overwrite:
+          custom_field: 'Local: Ethernet2 - Remote: DC1-LEAF1B Ethernet1'
+      - neighbors:
+        - neighbor_device: DC1-LEAF2A
+          neighbor_port: Ethernet1
+          port: Ethernet3
+        result_overwrite:
+          custom_field: 'Local: Ethernet3 - Remote: DC1-LEAF2A Ethernet1'
+      - neighbors:
+        - neighbor_device: DC1-LEAF2B
+          neighbor_port: Ethernet1
+          port: Ethernet4
+        result_overwrite:
+          custom_field: 'Local: Ethernet4 - Remote: DC1-LEAF2B Ethernet1'
+      DC1-SPINE2:
+      - neighbors:
+        - neighbor_device: DC1-LEAF1A
+          neighbor_port: Ethernet2
+          port: Ethernet1
+        result_overwrite:
+          custom_field: 'Local: Ethernet1 - Remote: DC1-LEAF1A Ethernet2'
+      - neighbors:
+        - neighbor_device: DC1-LEAF1B
+          neighbor_port: Ethernet2
+          port: Ethernet2
+        result_overwrite:
+          custom_field: 'Local: Ethernet2 - Remote: DC1-LEAF1B Ethernet2'
+      - neighbors:
+        - neighbor_device: DC1-LEAF2A
+          neighbor_port: Ethernet2
+          port: Ethernet3
+        result_overwrite:
+          custom_field: 'Local: Ethernet3 - Remote: DC1-LEAF2A Ethernet2'
+      - neighbors:
+        - neighbor_device: DC1-LEAF2B
+          neighbor_port: Ethernet2
+          port: Ethernet4
+        result_overwrite:
+          custom_field: 'Local: Ethernet4 - Remote: DC1-LEAF2B Ethernet2'
+  VerifyMlagStatus:
+    criteria: name
+    filter:
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+    inputs:
+      DC1-LEAF1A:
+      - null
+      DC1-LEAF1B:
+      - null
+      DC1-LEAF2A:
+      - null
+      DC1-LEAF2B:
+      - null
+  VerifyNTP:
+    criteria: name
+    filter:
+      DC1-L2LEAF1A: DC1-L2LEAF1A
+      DC1-L2LEAF2A: DC1-L2LEAF2A
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-L2LEAF1A:
+      - null
+      DC1-L2LEAF2A:
+      - null
+      DC1-LEAF1A:
+      - null
+      DC1-LEAF1B:
+      - null
+      DC1-LEAF2A:
+      - null
+      DC1-LEAF2B:
+      - null
+      DC1-SPINE1:
+      - null
+      DC1-SPINE2:
+      - null
+  VerifyReachability:
+    criteria: name
+    filter:
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-LEAF1A:
+      - hosts:
+        - destination: 172.31.255.0
+          repeat: 1
+          source: 172.31.255.1
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.1) - Destination:
+            DC1-SPINE1 Ethernet1 (IP: 172.31.255.0)'
+      - hosts:
+        - destination: 172.31.255.2
+          repeat: 1
+          source: 172.31.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.3) - Destination:
+            DC1-SPINE2 Ethernet1 (IP: 172.31.255.2)'
+      - hosts:
+        - destination: 192.168.255.1
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-SPINE1
+            Loopback0 (IP: 192.168.255.1)'
+      - hosts:
+        - destination: 192.168.255.2
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-SPINE2
+            Loopback0 (IP: 192.168.255.2)'
+      - hosts:
+        - destination: 192.168.255.3
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-LEAF1A
+            Loopback0 (IP: 192.168.255.3)'
+      - hosts:
+        - destination: 192.168.255.4
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-LEAF1B
+            Loopback0 (IP: 192.168.255.4)'
+      - hosts:
+        - destination: 192.168.255.5
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-LEAF2A
+            Loopback0 (IP: 192.168.255.5)'
+      - hosts:
+        - destination: 192.168.255.6
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-LEAF2B
+            Loopback0 (IP: 192.168.255.6)'
+      DC1-LEAF1B:
+      - hosts:
+        - destination: 172.31.255.4
+          repeat: 1
+          source: 172.31.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.5) - Destination:
+            DC1-SPINE1 Ethernet2 (IP: 172.31.255.4)'
+      - hosts:
+        - destination: 172.31.255.6
+          repeat: 1
+          source: 172.31.255.7
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.7) - Destination:
+            DC1-SPINE2 Ethernet2 (IP: 172.31.255.6)'
+      - hosts:
+        - destination: 192.168.255.1
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-SPINE1
+            Loopback0 (IP: 192.168.255.1)'
+      - hosts:
+        - destination: 192.168.255.2
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-SPINE2
+            Loopback0 (IP: 192.168.255.2)'
+      - hosts:
+        - destination: 192.168.255.3
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-LEAF1A
+            Loopback0 (IP: 192.168.255.3)'
+      - hosts:
+        - destination: 192.168.255.4
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-LEAF1B
+            Loopback0 (IP: 192.168.255.4)'
+      - hosts:
+        - destination: 192.168.255.5
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-LEAF2A
+            Loopback0 (IP: 192.168.255.5)'
+      - hosts:
+        - destination: 192.168.255.6
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-LEAF2B
+            Loopback0 (IP: 192.168.255.6)'
+      DC1-LEAF2A:
+      - hosts:
+        - destination: 172.31.255.8
+          repeat: 1
+          source: 172.31.255.9
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.9) - Destination:
+            DC1-SPINE1 Ethernet3 (IP: 172.31.255.8)'
+      - hosts:
+        - destination: 172.31.255.10
+          repeat: 1
+          source: 172.31.255.11
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.11) - Destination:
+            DC1-SPINE2 Ethernet3 (IP: 172.31.255.10)'
+      - hosts:
+        - destination: 192.168.255.1
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-SPINE1
+            Loopback0 (IP: 192.168.255.1)'
+      - hosts:
+        - destination: 192.168.255.2
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-SPINE2
+            Loopback0 (IP: 192.168.255.2)'
+      - hosts:
+        - destination: 192.168.255.3
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-LEAF1A
+            Loopback0 (IP: 192.168.255.3)'
+      - hosts:
+        - destination: 192.168.255.4
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-LEAF1B
+            Loopback0 (IP: 192.168.255.4)'
+      - hosts:
+        - destination: 192.168.255.5
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-LEAF2A
+            Loopback0 (IP: 192.168.255.5)'
+      - hosts:
+        - destination: 192.168.255.6
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-LEAF2B
+            Loopback0 (IP: 192.168.255.6)'
+      DC1-LEAF2B:
+      - hosts:
+        - destination: 172.31.255.12
+          repeat: 1
+          source: 172.31.255.13
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.13) - Destination:
+            DC1-SPINE1 Ethernet4 (IP: 172.31.255.12)'
+      - hosts:
+        - destination: 172.31.255.14
+          repeat: 1
+          source: 172.31.255.15
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.15) - Destination:
+            DC1-SPINE2 Ethernet4 (IP: 172.31.255.14)'
+      - hosts:
+        - destination: 192.168.255.1
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-SPINE1
+            Loopback0 (IP: 192.168.255.1)'
+      - hosts:
+        - destination: 192.168.255.2
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-SPINE2
+            Loopback0 (IP: 192.168.255.2)'
+      - hosts:
+        - destination: 192.168.255.3
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-LEAF1A
+            Loopback0 (IP: 192.168.255.3)'
+      - hosts:
+        - destination: 192.168.255.4
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-LEAF1B
+            Loopback0 (IP: 192.168.255.4)'
+      - hosts:
+        - destination: 192.168.255.5
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-LEAF2A
+            Loopback0 (IP: 192.168.255.5)'
+      - hosts:
+        - destination: 192.168.255.6
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-LEAF2B
+            Loopback0 (IP: 192.168.255.6)'
+      DC1-SPINE1:
+      - hosts:
+        - destination: 172.31.255.1
+          repeat: 1
+          source: 172.31.255.0
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.0) - Destination:
+            DC1-LEAF1A Ethernet1 (IP: 172.31.255.1)'
+      - hosts:
+        - destination: 172.31.255.5
+          repeat: 1
+          source: 172.31.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.4) - Destination:
+            DC1-LEAF1B Ethernet1 (IP: 172.31.255.5)'
+      - hosts:
+        - destination: 172.31.255.9
+          repeat: 1
+          source: 172.31.255.8
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet3 (IP: 172.31.255.8) - Destination:
+            DC1-LEAF2A Ethernet1 (IP: 172.31.255.9)'
+      - hosts:
+        - destination: 172.31.255.13
+          repeat: 1
+          source: 172.31.255.12
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet4 (IP: 172.31.255.12) - Destination:
+            DC1-LEAF2B Ethernet1 (IP: 172.31.255.13)'
+      DC1-SPINE2:
+      - hosts:
+        - destination: 172.31.255.3
+          repeat: 1
+          source: 172.31.255.2
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.2) - Destination:
+            DC1-LEAF1A Ethernet2 (IP: 172.31.255.3)'
+      - hosts:
+        - destination: 172.31.255.7
+          repeat: 1
+          source: 172.31.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.6) - Destination:
+            DC1-LEAF1B Ethernet2 (IP: 172.31.255.7)'
+      - hosts:
+        - destination: 172.31.255.11
+          repeat: 1
+          source: 172.31.255.10
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet3 (IP: 172.31.255.10) - Destination:
+            DC1-LEAF2A Ethernet2 (IP: 172.31.255.11)'
+      - hosts:
+        - destination: 172.31.255.15
+          repeat: 1
+          source: 172.31.255.14
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet4 (IP: 172.31.255.14) - Destination:
+            DC1-LEAF2B Ethernet2 (IP: 172.31.255.15)'
+  VerifyRoutingProtocolModel:
+    criteria: name
+    filter:
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-LEAF1A:
+      - model: multi-agent
+        result_overwrite:
+          custom_field: 'Routing protocol model: multi-agent'
+      DC1-LEAF1B:
+      - model: multi-agent
+        result_overwrite:
+          custom_field: 'Routing protocol model: multi-agent'
+      DC1-LEAF2A:
+      - model: multi-agent
+        result_overwrite:
+          custom_field: 'Routing protocol model: multi-agent'
+      DC1-LEAF2B:
+      - model: multi-agent
+        result_overwrite:
+          custom_field: 'Routing protocol model: multi-agent'
+      DC1-SPINE1:
+      - model: multi-agent
+        result_overwrite:
+          custom_field: 'Routing protocol model: multi-agent'
+      DC1-SPINE2:
+      - model: multi-agent
+        result_overwrite:
+          custom_field: 'Routing protocol model: multi-agent'
+  VerifyRoutingTableEntry:
+    criteria: name
+    filter:
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+    inputs:
+      DC1-LEAF1A:
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.1 - Peer: DC1-SPINE1'
+        routes:
+        - 192.168.255.1
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.2 - Peer: DC1-SPINE2'
+        routes:
+        - 192.168.255.2
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.255.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.4 - Peer: DC1-LEAF1B'
+        routes:
+        - 192.168.255.4
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.255.5
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.6 - Peer: DC1-LEAF2B'
+        routes:
+        - 192.168.255.6
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.254.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.254.5
+      DC1-LEAF1B:
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.1 - Peer: DC1-SPINE1'
+        routes:
+        - 192.168.255.1
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.2 - Peer: DC1-SPINE2'
+        routes:
+        - 192.168.255.2
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.255.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.4 - Peer: DC1-LEAF1B'
+        routes:
+        - 192.168.255.4
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.255.5
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.6 - Peer: DC1-LEAF2B'
+        routes:
+        - 192.168.255.6
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.254.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.254.5
+      DC1-LEAF2A:
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.1 - Peer: DC1-SPINE1'
+        routes:
+        - 192.168.255.1
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.2 - Peer: DC1-SPINE2'
+        routes:
+        - 192.168.255.2
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.255.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.4 - Peer: DC1-LEAF1B'
+        routes:
+        - 192.168.255.4
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.255.5
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.6 - Peer: DC1-LEAF2B'
+        routes:
+        - 192.168.255.6
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.254.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.254.5
+      DC1-LEAF2B:
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.1 - Peer: DC1-SPINE1'
+        routes:
+        - 192.168.255.1
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.2 - Peer: DC1-SPINE2'
+        routes:
+        - 192.168.255.2
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.255.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.4 - Peer: DC1-LEAF1B'
+        routes:
+        - 192.168.255.4
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.255.5
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.6 - Peer: DC1-LEAF2B'
+        routes:
+        - 192.168.255.6
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.254.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.254.5
+  VerifyTemperature:
+    criteria: name
+    filter:
+      DC1-L2LEAF1A: DC1-L2LEAF1A
+      DC1-L2LEAF2A: DC1-L2LEAF2A
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-L2LEAF1A:
+      - null
+      DC1-L2LEAF2A:
+      - null
+      DC1-LEAF1A:
+      - null
+      DC1-LEAF1B:
+      - null
+      DC1-LEAF2A:
+      - null
+      DC1-LEAF2B:
+      - null
+      DC1-SPINE1:
+      - null
+      DC1-SPINE2:
+      - null
+  VerifyTransceiversManufacturers:
+    criteria: name
+    filter:
+      DC1-L2LEAF1A: DC1-L2LEAF1A
+      DC1-L2LEAF2A: DC1-L2LEAF2A
+      DC1-LEAF1A: DC1-LEAF1A
+      DC1-LEAF1B: DC1-LEAF1B
+      DC1-LEAF2A: DC1-LEAF2A
+      DC1-LEAF2B: DC1-LEAF2B
+      DC1-SPINE1: DC1-SPINE1
+      DC1-SPINE2: DC1-SPINE2
+    inputs:
+      DC1-L2LEAF1A:
+      - manufacturers:
+        - Arista Networks
+        - Arastra, Inc.
+        - Not Present
+        result_overwrite:
+          custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+            ''Not Present'''
+      DC1-L2LEAF2A:
+      - manufacturers:
+        - Arista Networks
+        - Arastra, Inc.
+        - Not Present
+        result_overwrite:
+          custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+            ''Not Present'''
+      DC1-LEAF1A:
+      - manufacturers:
+        - Arista Networks
+        - Arastra, Inc.
+        - Not Present
+        result_overwrite:
+          custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+            ''Not Present'''
+      DC1-LEAF1B:
+      - manufacturers:
+        - Arista Networks
+        - Arastra, Inc.
+        - Not Present
+        result_overwrite:
+          custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+            ''Not Present'''
+      DC1-LEAF2A:
+      - manufacturers:
+        - Arista Networks
+        - Arastra, Inc.
+        - Not Present
+        result_overwrite:
+          custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+            ''Not Present'''
+      DC1-LEAF2B:
+      - manufacturers:
+        - Arista Networks
+        - Arastra, Inc.
+        - Not Present
+        result_overwrite:
+          custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+            ''Not Present'''
+      DC1-SPINE1:
+      - manufacturers:
+        - Arista Networks
+        - Arastra, Inc.
+        - Not Present
+        result_overwrite:
+          custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+            ''Not Present'''
+      DC1-SPINE2:
+      - manufacturers:
+        - Arista Networks
+        - Arastra, Inc.
+        - Not Present
+        result_overwrite:
+          custom_field: 'Accepted Manufacturers: ''Arista Networks'', ''Arastra, Inc.'',
+            ''Not Present'''

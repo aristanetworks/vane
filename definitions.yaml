@@ -1,0 +1,28 @@
+parameters:
+  traceback: true
+  eos_conn: eapi
+  excel_report: null
+  html_report: reports/report
+  json_report: reports/report
+  mark: 
+  processes: null
+  report_dir: reports
+  results_file: result.yml
+  results_dir: reports/results
+  setup_show: false
+  show_log: show_output.log
+  stdout: false
+  test_cases: test_lldp_neighbors
+  test_dirs: 
+  - new_tests
+  report_test_steps: true
+  generate_test_definitions: true
+  master_definitions: new_tests/master_def.yaml
+  template_definitions: test_definition.yaml.j2
+  test_definitions: test_definition.yaml
+  verbose: true
+  spreadsheet: tests/fixtures/spreadsheets/PS-LLD-Questionnaire-Template.xlsx
+  xcel_definitions: tests/fixtures/spreadsheets/xcel_definitions.yaml
+  xcel_schema: tests/fixtures/spreadsheets/xcel_schema.yaml
+  self_contained: true 
+  report_summary_style: modern

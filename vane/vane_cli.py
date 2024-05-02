@@ -156,6 +156,8 @@ def setup_vane():
         show_cmds, vane.config.test_parameters, vane.config.test_duts
     )
 
+    tests_tools.parametrize_all_duts()
+
     logging.debug(f"Return to test suites: \nduts: {vane.config.dut_objs}")
 
 

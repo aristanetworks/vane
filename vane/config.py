@@ -7,3 +7,4 @@ test_defs = {}
 test_duts = {}
 test_parameters = {}
 dut_objs = []
+dut_parameters = {}

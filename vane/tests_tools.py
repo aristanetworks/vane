@@ -89,6 +89,16 @@ def filter_duts(duts, criteria="", dut_filter=""):
     return subset_duts, dut_names
 
 
+def is_test_data_present(test_name):
+    if config.dut_parameters.get(test_name, None):
+        return True
+    return False
+
+def get_duts_n_ids(test_name):
+    if not config.dut_parameters.get(test_name, None):
+        return [], []
+    return config.dut_parameters[test_name]["duts"], config.dut_parameters[test_name]["ids"] 
+
 def parametrize_duts(test_fname, test_defs, dut_objs):
     """Use a filter to create input variables for PyTest parametrize
 
@@ -111,7 +121,7 @@ def parametrize_duts(test_fname, test_defs, dut_objs):
 
     logging.info("Unpack testcases by defining dut and criteria")
 
-    dut_parameters = {}
+    dut_parameters = config.dut_parameters
 
     for testcase in testcases:
         if "name" in testcase:
@@ -134,6 +144,29 @@ def parametrize_duts(test_fname, test_defs, dut_objs):
 
     return dut_parameters
 
+def parametrize_all_duts():
+    dut_parameters = config.dut_parameters
+    for defs in config.test_defs["test_suites"]:
+        testcases = defs["testcases"]
+
+        for testcase in testcases:
+            if "name" in testcase:
+                testname = testcase["name"]
+                criteria = ""
+                dut_filter = ""
+
+                if "criteria" in testcase:
+                    criteria = testcase["criteria"]
+                if "filter" in testcase:
+                    dut_filter = testcase["filter"]
+
+                duts, ids = filter_duts(config.dut_objs, criteria, dut_filter)
+
+                logging.info(f"Creating dut parameters.  {testname} \nDuts: {duts} \nIds: {ids}")
+
+                dut_parameters[testname] = {}
+                dut_parameters[testname]["duts"] = duts
+                dut_parameters[testname]["ids"] = ids
 
 def import_yaml(yaml_file):
     """Import YAML file as python data structure

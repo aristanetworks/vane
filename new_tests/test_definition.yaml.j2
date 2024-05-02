@@ -1,0 +1,157 @@
+- name: new_tests
+  testcases:
+    {% if "VerifyNTP" in testcase_data %}
+    {% set test_data = testcase_data["VerifyNTP"] %}
+    - name: test_ntp_functionality
+      test_id: TN_1.1
+      description: Test case for verification of NTP functionality.
+      show_cmd: show ntp status
+      expected_output: null # Forming expected output dynamically in python file.
+      test_criteria: Primary, secondary and tertiary NTP server information should be correct, primary NTP server status should be synchronized and all NTP servers should be reachable from the device. # Setting test case’s pass/fail criteria for reporting
+      report_style: modern # Setting report_style as modern, If a report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      inputs: {{ test_data.inputs }}
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyReloadCause" in testcase_data %}
+    {% set test_data = testcase_data["VerifyReloadCause"] %}
+    - name: test_reload_cause
+      test_id: TN_1.2
+      description: Test case for verification of reload cause
+      show_cmd: show reload cause
+      expected_output: null # Forming expected output dynamically in python file.
+      test_criteria: Pass if there are NO reload causes or if the last reload was caused by the user or after an FPGA upgrade.  The test will fail if the last reload was NOT caused by the user or after an FPGA upgrade. The test will report an error if the reload cause is NOT available.
+      report_style: modern # Setting report_style as modern, If a report type is set to modern, then it will update steps, assumptions, and external systems in the docx report.
+      inputs: {{ test_data.inputs }}
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyAPIHttpsSSL" in testcase_data %}
+    {% set test_data = testcase_data["VerifyAPIHttpsSSL"] %}
+    - name: test_api_https_ssl
+      description: Testcase to verify eAPI HTTPS server SSL profile is configured and valid.
+      test_id: TN_1.3
+      show_cmd: show management api http-commands
+      test_criteria: Pass if the eAPI HTTPS server SSL profile is configured and valid, Fail if the eAPI HTTPS server SSL profile is NOT configured, misconfigured or invalid
+      inputs: {{ test_data.inputs }}
+      expected_output: null # Forming expected output dynamically in python file.
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyRoutingTableEntry" in testcase_data %}
+    {% set test_data = testcase_data["VerifyRoutingTableEntry"] %}
+    - name: test_routing_table_entry
+      description: Verifies that the provided routes are present in the routing table of a specified VRF
+      test_id: TN_1.4
+      show_cmds: 
+      {% set show_cmds = dict() %}
+      {% for  _, inputs in test_data["inputs"].items() %}
+      {% for input in inputs %}
+        {% if "vrf" in input %}
+          {% set vrf = input["vrf"] %}
+        {% else %}
+          {% set vrf = "default" %}
+        {% endif %}
+        {% set show_cmd = "show ip route vrf "+ vrf + " " + input["routes"][0] %}
+        {% if show_cmd not in show_cmds %}
+          {% set _dummy = show_cmds.update({show_cmd: 1}) %}
+        {% endif %}
+      {% endfor %}
+      {% endfor %}
+      {% for show_cmd,_ in show_cmds.items() %}
+      - {{ show_cmd }}
+      {% endfor %}
+      test_criteria: pass if the provided routes are present in the routing table, fail if one or many provided routes are missing from the routing table.
+      expected_output: null # Forming expected output dynamically in python file.
+      inputs: {{ test_data.inputs }}
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyBGPPeersHealth" in testcase_data %}
+    {% set test_data = testcase_data["VerifyBGPPeersHealth"] %}
+    - name: test_bgp_specific_peers
+      description: Verifies health of specific bgp peers
+      test_criteria: Pass - If the BGP session is established and all messages queues are empty for each given peer. Fail - If the BGP session has issues or is not configured, or if BGP is not configured for an expected VRF or address family
+      test_id: TN_1.5
+      show_cmd: null
+      expected_output: null # Forming expected output dynamically in python file.
+      inputs: {{ test_data.inputs }}
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyRoutingProtocolModel" in testcase_data %}
+    {% set test_data = testcase_data["VerifyRoutingProtocolModel"] %}
+    - name: test_routing_protocol_model
+      description: Verifies the configured routing protocol model is the one we expect.
+      test_criteria: The test will pass if the configured routing protocol model is the one we expect. The test will fail if the configured routing protocol model is not the one we expect.
+      test_id: TN_1.6
+      show_cmd: show ip route summary
+      expected_output: null # Forming expected output dynamically in python file.
+      inputs: {{ test_data.inputs }}
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyMlagStatus" in testcase_data %}
+    {% set test_data = testcase_data["VerifyMlagStatus"] %}
+    - name: test_mlag_status
+      description: Verifies the health status of the MLAG configuration
+      test_criteria: Success if the test will pass if the MLAG state is 'active', negotiation status is 'connected', peer-link status and local interface status are 'up'. Fail if the test will fail if the MLAG state is not 'active', negotiation status is not 'connected', peer-link status or local interface status are not 'up'. Skip if the test will be skipped if MLAG is 'disabled'.
+      test_id: TN_1.7
+      show_cmd: show mlag
+      expected_output: null # Forming expected output dynamically in python file.
+      inputs: {{ test_data.inputs }}
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyInterfacesStatus" in testcase_data %}
+    {% set test_data = testcase_data["VerifyInterfacesStatus"] %}
+    - name: test_interfaces_status
+      description: Verifies if the provided list of interfaces are all in the expected state.
+      test_criteria: If line protocol status is provided, prioritize checking against both status and line protocol status. If line protocol status is not provided and interface status is 'up', expect both status and line protocol to be 'up'. If interface status is not 'up', check only the interface status without considering line protocol status
+      test_id: TN_1.8
+      show_cmd: show interfaces description
+      inputs: {{ test_data.inputs }}
+      expected_output: null
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyLLDPNeighbors" in testcase_data %}
+    {% set test_data = testcase_data["VerifyLLDPNeighbors"] %}
+    - name: test_lldp_neighbors
+      description: Verifies LLDP neighbors
+      test_criteria: The test will pass if each of the provided LLDP neighbors is present and connected to the specified port and device. The test will fail if any of the following conditions are met - The provided LLDP neighbor is not found.  - The system name or port of the LLDP neighbor does not match the provided information.
+      test_id: TN_1.9
+      show_cmd: show lldp neighbors
+      inputs: {{ test_data.inputs }}
+      expected_output: null
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+     

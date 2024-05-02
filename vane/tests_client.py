@@ -164,7 +164,10 @@ class TestsClient:
         logging.info(f"Starting Test with parameters: {self.test_parameters}")
         print(f"\x1b[33mStarting Tests with command: pytest {joined_params}\n\x1b[0m")
 
+        import time
+        start_time = time.time()
         pytest_result = pytest.main(self.test_parameters)
+        print(f"pytest time ---------------- {time.time()-start_time}")
 
         if pytest_result == ExitCode.NO_TESTS_COLLECTED:
             print(f"No tests collected with pytest command: pytest {joined_params}")
@@ -187,12 +190,21 @@ class TestsClient:
             "mark",
             "setup_show",
             "traceback",
+            "collect_only",
         ]
 
         logging.info("Initialize test parameter values")
         for parameter_key in parameter_keys:
             if parameter_key not in self.data_model["parameters"]:
                 self.data_model["parameters"][parameter_key] = None
+
+    def _set_collect_only(self):
+        """ Only collect tests dont run them """
+
+        collect_only = self.data_model["parameters"].get("collect_only", True)
+        self.test_parameters.append(f"--profile")
+        #self.test_parameters.append(f"--collect-only")
+        self.test_parameters.append(f"-vv")
 
     def _set_verbosity(self):
         """Set verbosity for test run"""
@@ -370,6 +382,7 @@ class TestsClient:
         self._init_parameters()
         self._set_verbosity()
         self._set_traceback_level()
+        self._set_collect_only()
         self._set_stdout()
         self._set_setup_show()
         self._set_test_cases()

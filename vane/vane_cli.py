@@ -152,7 +152,7 @@ def setup_vane():
     show_cmds = tests_tools.return_show_cmds(vane.config.test_defs)
 
     print(f"{YELLOW}\nRunning Show Commands on Initialized Duts\n{DEFAULT}")
-    vane.config.dut_objs = tests_tools.init_duts(
+    vane.config.dut_objs, vane.config.unreachable_duts = tests_tools.init_duts(
         show_cmds, vane.config.test_parameters, vane.config.test_duts
     )
 
@@ -173,6 +173,15 @@ def run_tests(definitions_file, duts_file):
     vane_tests_client.setup_test_runner()
     setup_vane()
     vane_tests_client.test_runner()
+    if vane.config.unreachable_duts:
+        unreachable_names = [
+            unreachable_dut["name"] for unreachable_dut in vane.config.unreachable_duts
+        ]
+        print(
+            "\x1b[31mThese DUTS were unreachable for the tests:\n"
+            f"{unreachable_names}\n"
+            "Kindly check the ip address or credentials provided for the duts.\x1b[0m"
+        )
 
 
 def write_results(definitions_file):

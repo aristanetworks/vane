@@ -81,7 +81,8 @@ def test_run_tests(loginfo, mocker, capsys):
 
     captured_output = capsys.readouterr()
 
-    show_output = "\x1b[31mThese DUTS were unreachable for the tests:\n['Dut1']\x1b[0m\n"
+    show_output = """\x1b[31mThese DUTS were unreachable for the tests:\n['Dut1']\n"""
+    """Kindly check the ip address or credentials provided for the duts.\x1b[0m\n"""
 
     assert show_output in captured_output.out
 

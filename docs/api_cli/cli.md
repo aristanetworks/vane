@@ -14,11 +14,12 @@ this section
 ## Using the -- generate-duts-file flag
 
 This flag can be used to generate the duts file with a given name
-(via the third argument) for a given inventory and topology file
-of a deployed network.
+(via the --duts-file-name flag) for a given inventory and topology file
+of a deployed network. If the --duts-file-name flag is not used, Vane defaults
+to using duts.yaml for the filename
 
 ``` text
-vane –-generate-duts-file topology.yaml inventory.yaml duts_file
+vane –-generate-duts-file topology.yaml inventory.yaml
 ```
 
 **topology.yaml** : this file represents the topology of the lab
@@ -104,8 +105,20 @@ all:
     to generate a duts file which Vane will run against.
 
     ``` text
-    vane –-generate-duts-file topology.yaml inventory.yaml duts_file
+    vane –-generate-duts-file topology.yaml inventory.yaml
     ```
+
+### Using the -- duts-file-name flag
+
+As mentioned above this flag is supposed to be used in tandem with the --generate-duts-file
+flag in order to provide a name for the generated duts file
+
+```text
+vane –-generate-duts-file topology.yaml inventory.yaml --duts-file-name generated_duts.yaml
+```
+
+This would generate a duts file by the name of generated_duts.yaml reflecting the provided
+topology and inventory files.
 
 ## Using the -- generate-test-catalog flag
 

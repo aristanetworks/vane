@@ -201,37 +201,143 @@
     expected_output: null
     inputs:
       DC1-LEAF1A:
-      - model: multi-agent
-        result_overwrite:
-          custom_field: 'Routing protocol model: multi-agent'
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.1 - Peer: DC1-SPINE1'
+        routes:
+        - 192.168.255.1
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.2 - Peer: DC1-SPINE2'
+        routes:
+        - 192.168.255.2
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.255.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.4 - Peer: DC1-LEAF1B'
+        routes:
+        - 192.168.255.4
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.255.5
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.6 - Peer: DC1-LEAF2B'
+        routes:
+        - 192.168.255.6
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.254.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.254.5
       DC1-LEAF1B:
-      - model: multi-agent
-        result_overwrite:
-          custom_field: 'Routing protocol model: multi-agent'
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.1 - Peer: DC1-SPINE1'
+        routes:
+        - 192.168.255.1
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.2 - Peer: DC1-SPINE2'
+        routes:
+        - 192.168.255.2
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.255.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.4 - Peer: DC1-LEAF1B'
+        routes:
+        - 192.168.255.4
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.255.5
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.6 - Peer: DC1-LEAF2B'
+        routes:
+        - 192.168.255.6
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.254.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.254.5
       DC1-LEAF2A:
-      - model: multi-agent
-        result_overwrite:
-          custom_field: 'Routing protocol model: multi-agent'
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.1 - Peer: DC1-SPINE1'
+        routes:
+        - 192.168.255.1
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.2 - Peer: DC1-SPINE2'
+        routes:
+        - 192.168.255.2
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.255.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.4 - Peer: DC1-LEAF1B'
+        routes:
+        - 192.168.255.4
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.255.5
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.6 - Peer: DC1-LEAF2B'
+        routes:
+        - 192.168.255.6
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.254.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.254.5
       DC1-LEAF2B:
-      - model: multi-agent
-        result_overwrite:
-          custom_field: 'Routing protocol model: multi-agent'
-      DC1-SPINE1:
-      - model: multi-agent
-        result_overwrite:
-          custom_field: 'Routing protocol model: multi-agent'
-      DC1-SPINE2:
-      - model: multi-agent
-        result_overwrite:
-          custom_field: 'Routing protocol model: multi-agent'
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.1 - Peer: DC1-SPINE1'
+        routes:
+        - 192.168.255.1
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.2 - Peer: DC1-SPINE2'
+        routes:
+        - 192.168.255.2
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.255.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.4 - Peer: DC1-LEAF1B'
+        routes:
+        - 192.168.255.4
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.255.5
+      - result_overwrite:
+          custom_field: 'Route: 192.168.255.6 - Peer: DC1-LEAF2B'
+        routes:
+        - 192.168.255.6
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.3 - Peer: DC1-LEAF1A'
+        routes:
+        - 192.168.254.3
+      - result_overwrite:
+          custom_field: 'Route: 192.168.254.5 - Peer: DC1-LEAF2A'
+        routes:
+        - 192.168.254.5
     criteria: names
     filter:
     - DC1-LEAF1A
     - DC1-LEAF1B
     - DC1-LEAF2A
     - DC1-LEAF2B
-    - DC1-SPINE1
-    - DC1-SPINE2
   - name: test_mlag_status
     description: Verifies the health status of the MLAG configuration
     test_criteria: Success if the test will pass if the MLAG state is 'active', negotiation
@@ -1391,6 +1497,650 @@
     filter:
     - DC1-L2LEAF1A
     - DC1-L2LEAF2A
+    - DC1-LEAF1A
+    - DC1-LEAF1B
+    - DC1-LEAF2A
+    - DC1-LEAF2B
+    - DC1-SPINE1
+    - DC1-SPINE2
+  - name: test_reachability
+    description: Verifies the network reachability to one or many destination IP(s).
+    test_criteria: The test will pass if the IPs are reachable, otherwise it will
+      fail
+    test_id: TN_1.10
+    inputs:
+      DC1-LEAF1A:
+      - hosts:
+        - destination: 172.31.255.0
+          repeat: 1
+          source: 172.31.255.1
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.1) - Destination:
+            DC1-SPINE1 Ethernet1 (IP: 172.31.255.0)'
+      - hosts:
+        - destination: 172.31.255.2
+          repeat: 1
+          source: 172.31.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.3) - Destination:
+            DC1-SPINE2 Ethernet1 (IP: 172.31.255.2)'
+      - hosts:
+        - destination: 192.168.255.1
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-SPINE1
+            Loopback0 (IP: 192.168.255.1)'
+      - hosts:
+        - destination: 192.168.255.2
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-SPINE2
+            Loopback0 (IP: 192.168.255.2)'
+      - hosts:
+        - destination: 192.168.255.3
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-LEAF1A
+            Loopback0 (IP: 192.168.255.3)'
+      - hosts:
+        - destination: 192.168.255.4
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-LEAF1B
+            Loopback0 (IP: 192.168.255.4)'
+      - hosts:
+        - destination: 192.168.255.5
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-LEAF2A
+            Loopback0 (IP: 192.168.255.5)'
+      - hosts:
+        - destination: 192.168.255.6
+          repeat: 1
+          source: 192.168.255.3
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.3) - Destination: DC1-LEAF2B
+            Loopback0 (IP: 192.168.255.6)'
+      DC1-LEAF1B:
+      - hosts:
+        - destination: 172.31.255.4
+          repeat: 1
+          source: 172.31.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.5) - Destination:
+            DC1-SPINE1 Ethernet2 (IP: 172.31.255.4)'
+      - hosts:
+        - destination: 172.31.255.6
+          repeat: 1
+          source: 172.31.255.7
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.7) - Destination:
+            DC1-SPINE2 Ethernet2 (IP: 172.31.255.6)'
+      - hosts:
+        - destination: 192.168.255.1
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-SPINE1
+            Loopback0 (IP: 192.168.255.1)'
+      - hosts:
+        - destination: 192.168.255.2
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-SPINE2
+            Loopback0 (IP: 192.168.255.2)'
+      - hosts:
+        - destination: 192.168.255.3
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-LEAF1A
+            Loopback0 (IP: 192.168.255.3)'
+      - hosts:
+        - destination: 192.168.255.4
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-LEAF1B
+            Loopback0 (IP: 192.168.255.4)'
+      - hosts:
+        - destination: 192.168.255.5
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-LEAF2A
+            Loopback0 (IP: 192.168.255.5)'
+      - hosts:
+        - destination: 192.168.255.6
+          repeat: 1
+          source: 192.168.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.4) - Destination: DC1-LEAF2B
+            Loopback0 (IP: 192.168.255.6)'
+      DC1-LEAF2A:
+      - hosts:
+        - destination: 172.31.255.8
+          repeat: 1
+          source: 172.31.255.9
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.9) - Destination:
+            DC1-SPINE1 Ethernet3 (IP: 172.31.255.8)'
+      - hosts:
+        - destination: 172.31.255.10
+          repeat: 1
+          source: 172.31.255.11
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.11) - Destination:
+            DC1-SPINE2 Ethernet3 (IP: 172.31.255.10)'
+      - hosts:
+        - destination: 192.168.255.1
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-SPINE1
+            Loopback0 (IP: 192.168.255.1)'
+      - hosts:
+        - destination: 192.168.255.2
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-SPINE2
+            Loopback0 (IP: 192.168.255.2)'
+      - hosts:
+        - destination: 192.168.255.3
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-LEAF1A
+            Loopback0 (IP: 192.168.255.3)'
+      - hosts:
+        - destination: 192.168.255.4
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-LEAF1B
+            Loopback0 (IP: 192.168.255.4)'
+      - hosts:
+        - destination: 192.168.255.5
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-LEAF2A
+            Loopback0 (IP: 192.168.255.5)'
+      - hosts:
+        - destination: 192.168.255.6
+          repeat: 1
+          source: 192.168.255.5
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.5) - Destination: DC1-LEAF2B
+            Loopback0 (IP: 192.168.255.6)'
+      DC1-LEAF2B:
+      - hosts:
+        - destination: 172.31.255.12
+          repeat: 1
+          source: 172.31.255.13
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.13) - Destination:
+            DC1-SPINE1 Ethernet4 (IP: 172.31.255.12)'
+      - hosts:
+        - destination: 172.31.255.14
+          repeat: 1
+          source: 172.31.255.15
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.15) - Destination:
+            DC1-SPINE2 Ethernet4 (IP: 172.31.255.14)'
+      - hosts:
+        - destination: 192.168.255.1
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-SPINE1
+            Loopback0 (IP: 192.168.255.1)'
+      - hosts:
+        - destination: 192.168.255.2
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-SPINE2
+            Loopback0 (IP: 192.168.255.2)'
+      - hosts:
+        - destination: 192.168.255.3
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-LEAF1A
+            Loopback0 (IP: 192.168.255.3)'
+      - hosts:
+        - destination: 192.168.255.4
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-LEAF1B
+            Loopback0 (IP: 192.168.255.4)'
+      - hosts:
+        - destination: 192.168.255.5
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-LEAF2A
+            Loopback0 (IP: 192.168.255.5)'
+      - hosts:
+        - destination: 192.168.255.6
+          repeat: 1
+          source: 192.168.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: Loopback0 (IP: 192.168.255.6) - Destination: DC1-LEAF2B
+            Loopback0 (IP: 192.168.255.6)'
+      DC1-SPINE1:
+      - hosts:
+        - destination: 172.31.255.1
+          repeat: 1
+          source: 172.31.255.0
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.0) - Destination:
+            DC1-LEAF1A Ethernet1 (IP: 172.31.255.1)'
+      - hosts:
+        - destination: 172.31.255.5
+          repeat: 1
+          source: 172.31.255.4
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.4) - Destination:
+            DC1-LEAF1B Ethernet1 (IP: 172.31.255.5)'
+      - hosts:
+        - destination: 172.31.255.9
+          repeat: 1
+          source: 172.31.255.8
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet3 (IP: 172.31.255.8) - Destination:
+            DC1-LEAF2A Ethernet1 (IP: 172.31.255.9)'
+      - hosts:
+        - destination: 172.31.255.13
+          repeat: 1
+          source: 172.31.255.12
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet4 (IP: 172.31.255.12) - Destination:
+            DC1-LEAF2B Ethernet1 (IP: 172.31.255.13)'
+      DC1-SPINE2:
+      - hosts:
+        - destination: 172.31.255.3
+          repeat: 1
+          source: 172.31.255.2
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet1 (IP: 172.31.255.2) - Destination:
+            DC1-LEAF1A Ethernet2 (IP: 172.31.255.3)'
+      - hosts:
+        - destination: 172.31.255.7
+          repeat: 1
+          source: 172.31.255.6
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet2 (IP: 172.31.255.6) - Destination:
+            DC1-LEAF1B Ethernet2 (IP: 172.31.255.7)'
+      - hosts:
+        - destination: 172.31.255.11
+          repeat: 1
+          source: 172.31.255.10
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet3 (IP: 172.31.255.10) - Destination:
+            DC1-LEAF2A Ethernet2 (IP: 172.31.255.11)'
+      - hosts:
+        - destination: 172.31.255.15
+          repeat: 1
+          source: 172.31.255.14
+          vrf: default
+        result_overwrite:
+          custom_field: 'Source: P2P Interface Ethernet4 (IP: 172.31.255.14) - Destination:
+            DC1-LEAF2B Ethernet2 (IP: 172.31.255.15)'
+    show_cmds:
+    - ping vrf default ip 172.31.255.0 source 172.31.255.1 repeat 1
+    - ping vrf default ip 172.31.255.2 source 172.31.255.3 repeat 1
+    - ping vrf default ip 192.168.255.1 source 192.168.255.3 repeat 1
+    - ping vrf default ip 192.168.255.2 source 192.168.255.3 repeat 1
+    - ping vrf default ip 192.168.255.3 source 192.168.255.3 repeat 1
+    - ping vrf default ip 192.168.255.4 source 192.168.255.3 repeat 1
+    - ping vrf default ip 192.168.255.5 source 192.168.255.3 repeat 1
+    - ping vrf default ip 192.168.255.6 source 192.168.255.3 repeat 1
+    - ping vrf default ip 172.31.255.4 source 172.31.255.5 repeat 1
+    - ping vrf default ip 172.31.255.6 source 172.31.255.7 repeat 1
+    - ping vrf default ip 192.168.255.1 source 192.168.255.4 repeat 1
+    - ping vrf default ip 192.168.255.2 source 192.168.255.4 repeat 1
+    - ping vrf default ip 192.168.255.3 source 192.168.255.4 repeat 1
+    - ping vrf default ip 192.168.255.4 source 192.168.255.4 repeat 1
+    - ping vrf default ip 192.168.255.5 source 192.168.255.4 repeat 1
+    - ping vrf default ip 192.168.255.6 source 192.168.255.4 repeat 1
+    - ping vrf default ip 172.31.255.8 source 172.31.255.9 repeat 1
+    - ping vrf default ip 172.31.255.10 source 172.31.255.11 repeat 1
+    - ping vrf default ip 192.168.255.1 source 192.168.255.5 repeat 1
+    - ping vrf default ip 192.168.255.2 source 192.168.255.5 repeat 1
+    - ping vrf default ip 192.168.255.3 source 192.168.255.5 repeat 1
+    - ping vrf default ip 192.168.255.4 source 192.168.255.5 repeat 1
+    - ping vrf default ip 192.168.255.5 source 192.168.255.5 repeat 1
+    - ping vrf default ip 192.168.255.6 source 192.168.255.5 repeat 1
+    - ping vrf default ip 172.31.255.12 source 172.31.255.13 repeat 1
+    - ping vrf default ip 172.31.255.14 source 172.31.255.15 repeat 1
+    - ping vrf default ip 192.168.255.1 source 192.168.255.6 repeat 1
+    - ping vrf default ip 192.168.255.2 source 192.168.255.6 repeat 1
+    - ping vrf default ip 192.168.255.3 source 192.168.255.6 repeat 1
+    - ping vrf default ip 192.168.255.4 source 192.168.255.6 repeat 1
+    - ping vrf default ip 192.168.255.5 source 192.168.255.6 repeat 1
+    - ping vrf default ip 192.168.255.6 source 192.168.255.6 repeat 1
+    - ping vrf default ip 172.31.255.1 source 172.31.255.0 repeat 1
+    - ping vrf default ip 172.31.255.5 source 172.31.255.4 repeat 1
+    - ping vrf default ip 172.31.255.9 source 172.31.255.8 repeat 1
+    - ping vrf default ip 172.31.255.13 source 172.31.255.12 repeat 1
+    - ping vrf default ip 172.31.255.3 source 172.31.255.2 repeat 1
+    - ping vrf default ip 172.31.255.7 source 172.31.255.6 repeat 1
+    - ping vrf default ip 172.31.255.11 source 172.31.255.10 repeat 1
+    - ping vrf default ip 172.31.255.15 source 172.31.255.14 repeat 1
+    expected_output: null
+    criteria: names
+    filter:
+    - DC1-LEAF1A
+    - DC1-LEAF1B
+    - DC1-LEAF2A
+    - DC1-LEAF2B
+    - DC1-SPINE1
+    - DC1-SPINE2
+  - name: test_bgp_specific_peers
+    description: Verifies the health of specific BGP peers
+    test_criteria: The test will pass if the BGP session is established and all messages
+      queues are empty for each given peer. The test will fail if the BGP session
+      has issues or is not configured, or if BGP is not configured for an expected
+      VRF or address family.
+    test_id: TN_1.11
+    inputs:
+      DC1-LEAF1A:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.1
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE1 (IP: 192.168.255.1)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.2
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE2 (IP: 192.168.255.2)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 10.255.251.1
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1B (IP: 10.255.251.1)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.0
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE1 (IP: 172.31.255.0)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.2
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE2 (IP: 172.31.255.2)'
+      DC1-LEAF1B:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.1
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE1 (IP: 192.168.255.1)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.2
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE2 (IP: 192.168.255.2)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 10.255.251.0
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1A (IP: 10.255.251.0)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.4
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE1 (IP: 172.31.255.4)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.6
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE2 (IP: 172.31.255.6)'
+      DC1-LEAF2A:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.1
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE1 (IP: 192.168.255.1)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.2
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE2 (IP: 192.168.255.2)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 10.255.251.5
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2B (IP: 10.255.251.5)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.8
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE1 (IP: 172.31.255.8)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.10
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE2 (IP: 172.31.255.10)'
+      DC1-LEAF2B:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.1
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE1 (IP: 192.168.255.1)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.2
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-SPINE2 (IP: 192.168.255.2)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 10.255.251.4
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2A (IP: 10.255.251.4)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.12
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE1 (IP: 172.31.255.12)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.14
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-SPINE2 (IP: 172.31.255.14)'
+      DC1-SPINE1:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.3
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF1A (IP: 192.168.255.3)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.4
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF1B (IP: 192.168.255.4)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.5
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF2A (IP: 192.168.255.5)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.6
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF2B (IP: 192.168.255.6)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.1
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1A (IP: 172.31.255.1)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.5
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1B (IP: 172.31.255.5)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.9
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2A (IP: 172.31.255.9)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.13
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2B (IP: 172.31.255.13)'
+      DC1-SPINE2:
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.3
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF1A (IP: 192.168.255.3)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.4
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF1B (IP: 192.168.255.4)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.5
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF2A (IP: 192.168.255.5)'
+      - address_families:
+        - afi: evpn
+          peers:
+          - 192.168.255.6
+        result_overwrite:
+          custom_field: 'BGP EVPN Peer: DC1-LEAF2B (IP: 192.168.255.6)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.3
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1A (IP: 172.31.255.3)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.7
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF1B (IP: 172.31.255.7)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.11
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2A (IP: 172.31.255.11)'
+      - address_families:
+        - afi: ipv4
+          peers:
+          - 172.31.255.15
+          safi: unicast
+        result_overwrite:
+          custom_field: 'BGP IPv4 Unicast Peer: DC1-LEAF2B (IP: 172.31.255.15)'
+    show_cmds:
+    - show bgp evpn summary
+    - show bgp ipv4 unicast summary vrf default
+    expected_output: null
+    criteria: names
+    filter:
     - DC1-LEAF1A
     - DC1-LEAF1B
     - DC1-LEAF2A

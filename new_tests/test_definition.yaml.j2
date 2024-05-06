@@ -52,7 +52,7 @@
     - name: test_routing_table_entry
       description: Verifies that the provided routes are present in the routing table of a specified VRF
       test_id: TN_1.4
-      show_cmds: 
+      show_cmds:
       {% set show_cmds = dict() %}
       {% for  _, inputs in test_data["inputs"].items() %}
       {% for input in inputs %}
@@ -79,23 +79,6 @@
         - {{ device_name }}
       {% endfor %}
     {% endif %}
-    {% if "VerifyBGPPeersHealth" in testcase_data %}
-    {% set test_data = testcase_data["VerifyBGPPeersHealth"] %}
-    - name: test_bgp_specific_peers
-      description: Verifies health of specific bgp peers
-      test_criteria: Pass - If the BGP session is established and all messages queues are empty for each given peer. Fail - If the BGP session has issues or is not configured, or if BGP is not configured for an expected VRF or address family
-      test_id: TN_1.5
-      show_cmd: null
-      expected_output: null # Forming expected output dynamically in python file.
-      inputs: {{ test_data.inputs }}
-      criteria: {{ test_data.criteria }}
-      filter: 
-      {% for device_name, _ in  test_data["filter"].items() %}
-        - {{ device_name }}
-      {% endfor %}
-    {% endif %}
-    {% if "VerifyRoutingProtocolModel" in testcase_data %}
-    {% set test_data = testcase_data["VerifyRoutingProtocolModel"] %}
     - name: test_routing_protocol_model
       description: Verifies the configured routing protocol model is the one we expect.
       test_criteria: The test will pass if the configured routing protocol model is the one we expect. The test will fail if the configured routing protocol model is not the one we expect.
@@ -108,7 +91,6 @@
       {% for device_name, _ in  test_data["filter"].items() %}
         - {{ device_name }}
       {% endfor %}
-    {% endif %}
     {% if "VerifyMlagStatus" in testcase_data %}
     {% set test_data = testcase_data["VerifyMlagStatus"] %}
     - name: test_mlag_status
@@ -154,4 +136,68 @@
         - {{ device_name }}
       {% endfor %}
     {% endif %}
-     
+    {% if "VerifyReachability" in testcase_data %}
+    {% set test_data = testcase_data["VerifyReachability"] %}
+    - name: test_reachability
+      description: Verifies the network reachability to one or many destination IP(s).
+      test_criteria: The test will pass if the IPs are reachable, otherwise it will fail
+      test_id: TN_1.10
+      inputs: {{ test_data.inputs }}
+      show_cmds:
+      {% set show_cmds = dict() %}
+      {% for  _, inputs in test_data["inputs"].items() %}
+      {% for input in inputs %}
+        {% set host = input["hosts"][0] %}
+        {% set show_cmd = "ping vrf "+host['vrf']+" ip "+host['destination']+" source "+host['source']+" repeat "+host['repeat']|string %} 
+        {% if show_cmd not in show_cmds %}
+          {% set _dummy = show_cmds.update({show_cmd: 1}) %}
+        {% endif %}
+      {% endfor %}
+      {% endfor %}
+      {% for show_cmd,_ in show_cmds.items() %}
+      - {{ show_cmd }}
+      {% endfor %}
+      expected_output: null
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}
+    {% if "VerifyBGPSpecificPeers" in testcase_data %}
+    {% set test_data = testcase_data["VerifyBGPSpecificPeers"] %}
+    - name: test_bgp_specific_peers
+      description: Verifies the health of specific BGP peers
+      test_criteria: The test will pass if the BGP session is established and all messages queues are empty for each given peer. The test will fail if the BGP session has issues or is not configured, or if BGP is not configured for an expected VRF or address family.
+      test_id: TN_1.11
+      inputs: {{ test_data.inputs }}
+      show_cmds:
+      {% set show_cmds = dict() %}
+      {% for  _dummy, inputs in test_data["inputs"].items() %}
+      {% for input in inputs %}
+        {% set af = input["address_families"][0] %}
+        {% set afi = af["afi"] %}
+        {% set safi = af.get("safi", "") %}
+        {% set vrf = af.get("vrf", "default") %}
+        {% if afi in ["ipv4", "ipv6"] and safi != "sr-te" %}
+        {% set show_cmd = "show bgp "+afi+" "+safi+" summary vrf "+vrf %}
+        {% elif afi in ["ipv4", "ipv6"] and safi == "srt-te" %}
+        {% set show_cmd = "show bgp "+safi+" "+afi+" summary vrf "+vrf %}
+        {% elif afi not in ["ipv4", "ipv6"] %}
+        {% set show_cmd = "show bgp "+afi+" summary" %}
+        {% endif %}
+        {% if show_cmd not in show_cmds %}
+          {% set _dummy = show_cmds.update({show_cmd: 1}) %}
+        {% endif %}
+      {% endfor %}
+      {% endfor %}
+      {% for show_cmd,_ in show_cmds.items() %}
+      - {{ show_cmd }}
+      {% endfor %}
+      expected_output: null
+      criteria: {{ test_data.criteria }}
+      filter: 
+      {% for device_name, _ in  test_data["filter"].items() %}
+        - {{ device_name }}
+      {% endfor %}
+    {% endif %}

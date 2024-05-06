@@ -12,7 +12,7 @@ parameters:
   setup_show: false
   show_log: show_output.log
   stdout: false
-  test_cases: test_lldp_neighbors
+  test_cases: All
   test_dirs: 
   - new_tests
   report_test_steps: true
@@ -26,3 +26,5 @@ parameters:
   xcel_schema: tests/fixtures/spreadsheets/xcel_schema.yaml
   self_contained: true 
   report_summary_style: modern
+  generate_detailed_report: false
+  traceback: false

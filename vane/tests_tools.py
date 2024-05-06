@@ -835,7 +835,7 @@ def export_yaml(yaml_file, yaml_data):
             try:
                 logging.debug(f"Output the following yaml: {yaml_data}")
 
-                yaml.dump(yaml_data, yaml_out, default_flow_style=False)
+                yaml.safe_dump(yaml_data, yaml_out, default_flow_style=False)
             except yaml.YAMLError as err:
                 print(">>> ERROR IN YAML FILE")
                 logging.error(f"ERROR IN YAML FILE: {err}")

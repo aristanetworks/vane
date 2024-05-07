@@ -2,11 +2,11 @@
 import os
 import shutil
 import sys
+import json
 from unittest.mock import call, MagicMock
 from icmplib.exceptions import SocketPermissionError
 from pyeapi.eapilib import ConnectionError  # pylint: disable=W0622
 from netmiko.exceptions import NetmikoAuthenticationException
-import json
 import pytest
 import yaml
 import pyeapi.eapilib
@@ -1586,7 +1586,7 @@ def test_test_ops_html_report(mocker, capsys):
 
     show_output = (
         "SHOW OUTPUT COLLECTED IN TEST CASE:\n===================================\n"
-        f"1.1 DCBBW1# show version\n\n{OUTPUT}\n1.2. DCBBW1# show version\n\n{OUTPUT}"
+        f"1.1. DCBBW1# show version\n\n{OUTPUT}\n1.2. DCBBW1# show version\n\n{OUTPUT}"
     )
 
     # Assert that the expected prints occurred

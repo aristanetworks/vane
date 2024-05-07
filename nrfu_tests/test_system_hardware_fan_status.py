@@ -60,7 +60,7 @@ class SystemHardwareFanStatusTests:
 
             # Skipping test case if the device is vEOS.
             model = output.get("modelName")
-            if "vEOS" in model:
+            if "vEOS" in model or "CCS-710P-12" in model:
                 tops.output_msg = f"{tops.dut_name} is {model} device, hence test skipped."
                 tests_tools.post_process_skip(
                     tops, self.test_system_hardware_fan_status, self.output

@@ -71,7 +71,7 @@ class HardwareInventoryTests:
                     f"Skipped the test case as the device {tops.dut_name}, is either a vEOS"
                     " or CCS-710 model."
                 )
-                tests_tools.post_process_skip(tops, self.test_redundant_sso_card, self.output)
+                tests_tools.post_process_skip(tops, self.test_hardware_inventory_status, self.output)
                 pytest.skip(tops.output_msg)
 
             """

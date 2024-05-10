@@ -46,10 +46,8 @@ import yaml
 
 
 from jinja2 import Template
-from icmplib import ping
-from icmplib.exceptions import SocketPermissionError
 from pyeapi.eapilib import EapiError, ConnectionError  # pylint: disable=W0622
-from netmiko.exceptions import NetmikoAuthenticationException
+from netmiko.exceptions import NetmikoAuthenticationException, NetmikoTimeoutException
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
 from vane.vane_logging import logging
@@ -204,28 +202,7 @@ def init_duts(show_cmds, test_parameters, test_duts):
         "data, hostname, and connection."
     )
 
-    reachability, reachable_duts, unreachable_duts = check_duts_reachability(test_duts)
-
-    try:
-        continue_when_unreachable = test_parameters["parameters"]["continue_when_unreachable"]
-    except KeyError:
-        continue_when_unreachable = False
-
-    if not (reachability or continue_when_unreachable):
-        logging.error(
-            f"Error connecting to {unreachable_duts}, not reachable via ping, hence exiting Vane"
-        )
-        unreachable_ips = [unreachable_dut["mgmt_ip"] for unreachable_dut in unreachable_duts]
-        print(
-            "\x1b[31mVane encountered an error while attempting to connect to DUT/s with ip's:\n"
-            f"{unreachable_ips}\n"
-            "For detailed information, please refer to the logs.\nDue to this issue, "
-            "Vane is exiting. \x1b[0m"
-        )
-        sys.exit(1)
-
-    reachable_duts, additional_unreachable_duts = login_duts(test_parameters, reachable_duts)
-    unreachable_duts.extend(additional_unreachable_duts)
+    reachable_duts, unreachable_duts = login_duts(test_parameters, test_duts["duts"])
     workers = len(reachable_duts)
 
     if not workers:
@@ -256,49 +233,6 @@ def init_duts(show_cmds, test_parameters, test_duts):
     logging.debug(f"Return unreachable duts data structure: {unreachable_duts}")
 
     return reachable_duts, unreachable_duts
-
-
-def check_duts_reachability(test_duts):
-    """Check if duts are reachable
-
-    Args:
-        test_duts (dict): Dictionary of duts
-
-    Returns:
-        reachability (boolean): result of if duts are reachable
-        reachable_duts (dict): reachable duts
-        unreachable_duts (dict): unreachable duts
-    """
-
-    logging.info("Checking connectivity of duts")
-    reachable_duts = []
-    unreachable_duts = []
-    ret = False
-    for dut in test_duts["duts"]:
-        # check for reachability
-        ip_address = dut["mgmt_ip"]
-        try:
-            host = ping(ip_address, count=3, interval=1, timeout=3, privileged=False)
-            ret = host.is_alive
-        except SocketPermissionError as e:
-            logging.error(
-                f"Entered the exception due to permission issues: {e}\n"
-                "Trying the ping utility via os.system instead"
-            )
-            host = os.system(f"ping -c 1 -W 3 {ip_address} > {os.devnull}")
-            ret = host == 0
-
-        if ret:
-            reachable_duts.append(dut)
-        else:
-            name = dut["name"]
-            logging.info(f"Failed to connect to {name}")
-            unreachable_duts.append(dut)
-
-    if len(test_duts["duts"]) == len(reachable_duts):
-        return True, reachable_duts, unreachable_duts
-
-    return False, reachable_duts, unreachable_duts
 
 
 def login_duts(test_parameters, duts):
@@ -997,7 +931,7 @@ def authenticate_and_setup_conn(dut, conn_object):
     dut_name = dut["name"]
     try:
         conn_object.set_up_conn(dut)
-    except (ConnectionError, NetmikoAuthenticationException) as err:
+    except (ConnectionError, NetmikoAuthenticationException, NetmikoTimeoutException) as err:
         try:
             continue_when_unreachable = config.test_parameters["parameters"][
                 "continue_when_unreachable"
@@ -1007,19 +941,20 @@ def authenticate_and_setup_conn(dut, conn_object):
         if not continue_when_unreachable:
             print(
                 "\x1b[31mExiting Vane.\n"
-                f"Error running all cmds on dut {dut_name} due to failed authentication.\n{err}\n"
-                "\x1b[0m"
+                f"Error running all cmds on dut {dut_name} due to failed authentication"
+                f" or incorrect ip.\n{err}\n\x1b[0m"
             )
             logging.error(
                 "Exiting Vane: "
-                f"Error running all cmds on dut {dut_name} due to failed authentication. {err}\n"
+                f"Error running all cmds on dut {dut_name} due to failed authentication"
+                f" or incorrect ip. {err}\n"
             )
             sys.exit(1)
         else:
-            logging.info(f"Authentication to dut {dut_name} failed")
+            logging.error(f"Connection to dut {dut_name} failed")
             return False
 
-    logging.info(f"Authentication to dut {dut_name} is successful")
+    logging.info(f"Connection to dut {dut_name} is successful")
     return True
 
 

@@ -13,9 +13,9 @@
       test_criteria: Verify a list of daemons are running on DUT
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
-      filter: 
-        - DLFW3
-        - DLFW4
+      filter:
+        - DSR01
+        - DCBBW1
 
     - name: test_if_daemons_are_enabled_on_
       test_id: TN4.2
@@ -31,5 +31,5 @@
       # Optionally filter duts by criteria: name, role, regex, or names
       criteria: names
       filter:
-        - DLFW3
-        - DLFW4
+        - DSR01
+        - DCBBW1

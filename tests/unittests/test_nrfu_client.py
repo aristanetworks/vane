@@ -55,6 +55,7 @@ def test_setup_not_cvp(mocker, capsys):
     mocker.patch("vane.nrfu_client.NrfuClient.not_cvp_application", return_value=([], "cvp"))
     mocker.patch("vane.nrfu_client.NrfuClient.generate_duts_file")
     mocker.patch("vane.nrfu_client.NrfuClient.generate_definitions_file")
+    mocker.patch("vane.nrfu_client.NrfuClient.ask_report_detail")
 
     # Create an instance of the NrfuClient class
     client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
@@ -82,6 +83,7 @@ def test_setup_cvp(mocker, capsys):
     mocker.patch("vane.nrfu_client.NrfuClient.cvp_application", return_value=([], "noncvp"))
     mocker.patch("vane.nrfu_client.NrfuClient.generate_duts_file")
     mocker.patch("vane.nrfu_client.NrfuClient.generate_definitions_file")
+    mocker.patch("vane.nrfu_client.NrfuClient.ask_report_detail")
 
     # Create an instance of the NrfuClient class
     client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
@@ -98,6 +100,22 @@ def test_setup_cvp(mocker, capsys):
     client.cvp_application.assert_called_once()
     client.generate_duts_file.assert_called_once()
     client.generate_definitions_file.assert_called_once()
+
+
+def test_ask_report_detail(mocker):
+    """Testing the functionality to ask report details"""
+
+    mocker.patch("vane.nrfu_client.NrfuClient.setup")
+    client = nrfu_client.NrfuClient()
+    # inputs that can be provided by user
+    inputs = ["", "y", "yes", "n", "no", "garbage"]
+    # desired outputs for above inputs
+    outputs = [False, True, True, False, False, False]
+    for idx, input_item in enumerate(inputs):
+        mocker.patch("builtins.input", return_value=input_item)
+        client.ask_report_detail()
+        # pylint: disable=W0212
+        assert client._detailed_report == outputs[idx]
 
 
 def test_get_credentials(mocker):

@@ -36,6 +36,7 @@
 
 import os
 import json
+import ssl
 import pyeapi
 import netmiko
 import paramiko
@@ -134,6 +135,14 @@ class PyeapiConn(DeviceConn):
 
     def set_up_conn(self, device_data):
         """connects to device using pyeapi"""
+
+        # Create SSL Context
+        ctx = ssl.create_default_context()
+        # Using the EOS default ciphers
+        ctx.set_ciphers("AES256-SHA:DHE-RSA-AES256-SHA:AES128-SHA:DHE-RSA-AES128-SHA")
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+
         # pylint: disable=attribute-defined-outside-init
         self._connection = pyeapi.connect(
             transport=device_data["transport"],
@@ -142,9 +151,14 @@ class PyeapiConn(DeviceConn):
             password=device_data["password"],
             timeout=device_data.get("timeout", 60),
             return_node=True,
+            context=ctx,
         )
+
         if device_data.get("enable_pwd", ""):
             self._connection.enable_authentication(device_data["enable_pwd"])
+
+        # Add logic to authenticate connection
+        self.run_commands(["echo authenticating connection"])
 
     def run_commands(self, cmds, encoding="json", send_enable=True, **kwargs):
         """wrapper around pyeapi run_commands func"""

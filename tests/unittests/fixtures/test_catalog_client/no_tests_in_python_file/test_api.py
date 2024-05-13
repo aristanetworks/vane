@@ -29,17 +29,6 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
+""" Tests to validate base feature status."""
 
-"""TD: Verify hostname set on device is correct"""
-
-"""
-TS: Collecting the output of 'show hostname' command from DUT
-"""
-
-"""
-TS: Verify LLDP system name
-"""
-
-"""
-TS: Creating test report based on results
-"""
+TEST_SUITE = "api_tests"

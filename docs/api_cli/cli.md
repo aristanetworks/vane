@@ -14,11 +14,12 @@ this section
 ## Using the -- generate-duts-file flag
 
 This flag can be used to generate the duts file with a given name
-(via the third argument) for a given inventory and topology file
-of a deployed network.
+(via the --duts-file-name flag) for a given inventory and topology file
+of a deployed network. If the --duts-file-name flag is not used, Vane defaults
+to using duts.yaml for the filename
 
 ``` text
-vane –-generate-duts-file topology.yaml inventory.yaml duts_file
+vane –-generate-duts-file topology.yaml inventory.yaml
 ```
 
 **topology.yaml** : this file represents the topology of the lab
@@ -104,13 +105,25 @@ all:
     to generate a duts file which Vane will run against.
 
     ``` text
-    vane –-generate-duts-file topology.yaml inventory.yaml duts_file
+    vane –-generate-duts-file topology.yaml inventory.yaml
     ```
+
+### Using the -- duts-file-name flag
+
+As mentioned above this flag is supposed to be used in tandem with the --generate-duts-file
+flag in order to provide a name for the generated duts file
+
+```text
+vane –-generate-duts-file topology.yaml inventory.yaml --duts-file-name generated_duts.yaml
+```
+
+This would generate a duts file by the name of generated_duts.yaml reflecting the provided
+topology and inventory files.
 
 ## Using the -- generate-test-catalog flag
 
 This flag can be used to generate a test catalog csv file for test directory/s passed
-as the argument
+as the argument.
 
 ``` text
 vane --generate-test-catalog path/to/test/case/directory
@@ -124,6 +137,22 @@ a folder called test catalog.
 !!! info "Test Catalog"
     === "Sample .csv file"
         ![Screenshot](../images/test_catalog_csv.png)
+
+!!! Tip
+    If using non-default test definitions (file named other than test_definition.yaml file), include the [--test-definitions-file](cli.md#using-the---test-definitions-file-flag) argument to specify the name of test definitions file relevant to the passed in test directories.
+    !!! Warning
+        Vane enforces a common test definitions file name across all test directories. This implies that the --test-definitions-file flag can take in only 1 file name.
+
+## Using the --test-definitions-file flag
+
+This flag can be used in tandem with the --generate-test-catalog flag wherein you want to provide a custom named test definitions file for your test directory. By default Vane would look for a file named *test_definitions.yaml* within your test directory to locate the parameters associated with your test cases. You can alter this behaviour if you have your test definition data in a file named otherwise by providing the custom name via this argument.
+
+```text
+vane --generate-test-catalog sample_network_tests/memory --test-definitions-file memory_test_definitions.yaml
+```
+
+!!! warning
+    The argument takes in the name of the test definitions file and NOT the path
 
 ## Using the -- markers flag
 

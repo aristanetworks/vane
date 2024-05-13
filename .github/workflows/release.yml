@@ -1,0 +1,28 @@
+name: "Tag & Release management"
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  release-doc:
+    runs-on: ubuntu-latest
+    name: "Publish documentation for release ${{github.ref_name}}"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Setup Git config
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+    
+      - name: 'Build mkdocs content to site folder'
+        run: |
+          pip install -r docs/requirements.txt
+          mike deploy --update-alias --push  ${{github.ref_name}} stable

@@ -16,7 +16,7 @@ git clone https://github.com/aristanetworks/vane.git
 
 ``` text
 cd vane
-python3.9 -m venv venv
+python3 -m venv venv
 ```
 
 ## Activate the Virtual Environment

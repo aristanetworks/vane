@@ -128,12 +128,14 @@ class TacacsTests:
                 )
 
         else:
-            tops.actual_output = "N/A"
-            tops.expected_output = "N/A"
-            tops.test_result = True
             self.output = (
                 tops.output_msg
             ) = tops.comment = f"\nRouter {tops.dut_name} does not have TACACS servers configured"
+            logging.info(f"\nRouter {tops.dut_name} does not have TACACS servers configured")
+            tests_tools.post_process_skip(
+                tops, self.test_if_tacacs_is_sending_messages_on_, self.output
+            )
+            pytest.skip(tops.output_msg)
 
         tops.parse_test_steps(self.test_if_tacacs_is_sending_messages_on_)
         tops.generate_report(tops.dut_name, self.output)
@@ -208,12 +210,13 @@ class TacacsTests:
                     f" is {str(exception)}"
                 )
         else:
-            tops.actual_output = "N/A"
-            tops.expected_output = "N/A"
-            tops.test_result = True
             self.output = (
                 tops.output_msg
             ) = tops.comment = f"\nRouter {tops.dut_name} does not have TACACS servers configured"
-
+            logging.info(f"\nRouter {tops.dut_name} does not have TACACS servers configured")
+            tests_tools.post_process_skip(
+                tops, self.test_if_tacacs_is_receiving_messages_on_, self.output
+            )
+            pytest.skip(tops.output_msg)
         tops.parse_test_steps(self.test_if_tacacs_is_receiving_messages_on_)
         tops.generate_report(tops.dut_name, self.output)

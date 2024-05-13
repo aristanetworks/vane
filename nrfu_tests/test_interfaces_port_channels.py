@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """ Testcases for the verification of port channel members interfaces details """
@@ -50,7 +50,14 @@ class PortChannelMemberInterfacesTests:
 
             # Skipping testcase if port channel details are not found on DUT.
             if not output.get("portChannels"):
-                pytest.skip("Port-Channels are not found hence skipped the testcase.")
+                tops.output_msg = (
+                    f"Port channels are not configured on device {tops.dut_name}, hence skipped the"
+                    " test case."
+                )
+                tests_tools.post_process_skip(
+                    tops, self.test_port_channel_member_interface_details, self.output
+                )
+                pytest.skip(tops.output_msg)
 
             expected_partner_port_state = {
                 "partner_port_state": {"collecting": True, "distributing": True}

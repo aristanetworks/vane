@@ -1,4 +1,4 @@
-# Copyright (c) 2023 Arista Networks, Inc.  All rights reserved.
+# Copyright (c) 2024 Arista Networks, Inc.  All rights reserved.
 # Arista Networks, Inc. Confidential and Proprietary.
 
 """
@@ -56,8 +56,13 @@ class PowerSupplyVoltageTests:
             self.output += f"\nOutput of {tops.show_cmd} command is:\n{version_output}\n"
 
             # Skipping test case if the device is vEOS.
-            if "vEOS" in version_output.get("modelName"):
-                pytest.skip(f"{tops.dut_name} is vEOS device, hence test skipped.")
+            model = version_output.get("modelName")
+            if "vEOS" in model or "CCS-710" in model:
+                tops.output_msg = f"{tops.dut_name} is {model} device, hence test skipped."
+                tests_tools.post_process_skip(
+                    tops, self.test_system_hardware_power_supply_voltage_status, self.output
+                )
+                pytest.skip(tops.output_msg)
 
             """
             TS: Running `show system environment power voltage` command on the device and

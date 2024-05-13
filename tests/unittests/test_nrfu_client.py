@@ -8,6 +8,9 @@ from tests.unittests.test_tests_tools import read_yaml
 # Disable redefined-outer-name for using log fixture functions
 # pylint: disable=redefined-outer-name,no-member
 
+DEFINITIONS_FILE = "nrfu_tests/definitions_nrfu.yaml"
+DUTS_FILE = "nrfu_tests/duts_nrfu.yaml"
+
 
 @pytest.fixture
 def loginfo(mocker):
@@ -31,7 +34,7 @@ def test_nrfu_constructor(mocker, loginfo):
     """Test to see if setup function gets called correctly in init"""
     mocker_object = mocker.patch("vane.nrfu_client.NrfuClient.setup")
 
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     assert client.definitions_file == "nrfu_tests/definitions_nrfu.yaml"
     assert client.duts_file == "nrfu_tests/duts_nrfu.yaml"
@@ -55,13 +58,13 @@ def test_setup_not_cvp(mocker, capsys):
     mocker.patch("vane.nrfu_client.NrfuClient.ask_report_detail")
 
     # Create an instance of the NrfuClient class
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     # Capture the printed output
     captured = capsys.readouterr()
 
     # Assert that the expected content is present in the captured output
-    expected_content = "Starting Execution of NRFU tests via Vane"
+    expected_content = "Starting Execution of tests via Vane"
     assert expected_content in captured.out
 
     client.get_credentials.assert_called_once()
@@ -83,13 +86,13 @@ def test_setup_cvp(mocker, capsys):
     mocker.patch("vane.nrfu_client.NrfuClient.ask_report_detail")
 
     # Create an instance of the NrfuClient class
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     # Capture the printed output
     captured = capsys.readouterr()
 
     # Assert that the expected content is present in the captured output
-    expected_content = "Starting Execution of NRFU tests via Vane"
+    expected_content = "Starting Execution of tests via Vane"
     assert expected_content in captured.out
 
     client.get_credentials.assert_called_once()
@@ -103,7 +106,7 @@ def test_ask_report_detail(mocker):
     """Testing the functionality to ask report details"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
     # inputs that can be provided by user
     inputs = ["", "y", "yes", "n", "no", "garbage"]
     # desired outputs for above inputs
@@ -122,7 +125,7 @@ def test_get_credentials(mocker):
     mocker.patch("builtins.input", return_value="cvpadmin")
     mocker.patch("getpass.getpass", return_value="cvp123!")
 
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
     client.get_credentials()
 
     assert client.username == "cvpadmin"
@@ -134,7 +137,7 @@ def test_determine_if_cvp_application(mocker, loginfo):
     as a CVP application"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     mocker.patch("vane.nrfu_client.os.environ.get", return_value=False)
     cvp = client.determine_if_cvp_application()
@@ -160,7 +163,7 @@ def test_cvp_application(mocker, loginfo, capsys):
     when Vane is running as CVP container"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     mocker_object = mocker.patch(
         "vane.nrfu_client.NrfuClient.get_duts_data", return_value=["hostname", "ipaddress"]
@@ -189,7 +192,7 @@ def test_not_cvp_application_local_cvp(mocker):
     to CVP locally"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     mocker_object = mocker.patch("builtins.input")
     mocker_object.side_effect = [
@@ -216,7 +219,7 @@ def test_not_cvp_application_device_file(mocker):
     from device ip file"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     expected_data = ["10.255.31.184", "10.255.31.185", "10.255.31.186", "10.255.31.187"]
     mocker.patch("builtins.input", return_value="no")
@@ -242,7 +245,7 @@ def test_not_cvp_application_invalid_choice(mocker):
     """Testing functionality which handles user choice of y/yes/n/no"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     mocker_object = mocker.patch("builtins.input")
     mocker_object.side_effect = [
@@ -271,7 +274,7 @@ def test_not_cvp_application_invalid_file(mocker):
     from device ip file"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     expected_data = ["10.255.31.184", "10.255.31.185", "10.255.31.186", "10.255.31.187"]
     mocker.patch("builtins.input", return_value="no")
@@ -378,7 +381,7 @@ def test_get_duts_data(mocker, loginfo):
         },
     ]
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     mocker_object_client = mocker.patch("vane.nrfu_client.CvpClient")
     mocker_object_api = mocker.patch("vane.nrfu_client.CvpApi")
@@ -402,7 +405,7 @@ def test_read_device_list_file(mocker, loginfo):
     given file"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     device_list_file = "tests/unittests/fixtures/device_ip_file"
     device_data = client.read_device_list_file(device_list_file)
@@ -423,7 +426,7 @@ def test_generate_duts_file_cvp(mocker, loginfo):
     """Testing the functionality that generates duts_nrfu file from cvp data"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     client.duts_file = "tests/unittests/fixtures/duts_nrfu.yaml"
     client.generate_duts_file(
@@ -451,7 +454,7 @@ def test_generate_duts_file_non_cvp(mocker, loginfo):
     """Testing the functionality that generates duts_nrfu file from non-cvp data"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     client.duts_file = "tests/unittests/fixtures/duts_nrfu.yaml"
     client.generate_duts_file(["10.88.160.154", "10.88.160.164", "10.88.160.174"], "non-cvp")
@@ -472,7 +475,7 @@ def test_generate_definitions_file_default(mocker, loginfo):
     """Testing functionality which generates default definitions_nrfu file"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     mocker.patch("builtins.input", return_value="no")
 
@@ -496,7 +499,7 @@ def test_generate_definitions_file_custom(mocker, loginfo):
     """Testing functionality which generates custom definitions_nrfu file"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     mocker.patch("builtins.input", return_value="yes")
     mocker.patch("vane.nrfu_client.prompt", return_value="sample_network_tests/memory")
@@ -522,7 +525,7 @@ def test_generate_definitions_file_invalid_custom(mocker, loginfo):
     with user entering invalid directories first"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     mocker.patch("builtins.input", return_value="yes")
     mocker_object = mocker.patch("vane.nrfu_client.prompt")
@@ -553,7 +556,7 @@ def test_is_valid_text_file(mocker):
     """Testing the functionality which verifies the validity of a file"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
 
     valid_file = "tests/unittests/fixtures/valid_text_file"
     validity = client.is_valid_text_file(valid_file)

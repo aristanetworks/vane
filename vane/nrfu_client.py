@@ -46,12 +46,12 @@ from vane.tests_tools import export_yaml
 class NrfuClient:
     """Creates an instance of the NRFU Client."""
 
-    def __init__(self):
+    def __init__(self, definitions_file, duts_file):
         """NrfuClient initialisation"""
 
         # initialise default values
-        self.definitions_file = "nrfu_tests/definitions_nrfu.yaml"
-        self.duts_file = "nrfu_tests/duts_nrfu.yaml"
+        self.definitions_file = definitions_file
+        self.duts_file = duts_file
         self.username = ""
         self.password = ""
         self._detailed_report = False  # generate only summary report by default
@@ -91,7 +91,7 @@ class NrfuClient:
         self.generate_definitions_file()
 
         # Run Vane with the generated duts and definitions file
-        print("\x1b[32m\nStarting Execution of NRFU tests via Vane\x1b[0m")
+        print("\x1b[32mStarting Execution of tests via Vane\x1b[0m")
 
     def ask_report_detail(self):
         """Ask user if summary or detailed report

@@ -106,7 +106,7 @@ def test_ask_report_detail(mocker):
     """Testing the functionality to ask report details"""
 
     mocker.patch("vane.nrfu_client.NrfuClient.setup")
-    client = nrfu_client.NrfuClient()
+    client = nrfu_client.NrfuClient(DEFINITIONS_FILE, DUTS_FILE)
     # inputs that can be provided by user
     inputs = ["", "y", "yes", "n", "no", "garbage"]
     # desired outputs for above inputs

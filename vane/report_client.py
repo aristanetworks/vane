@@ -1009,6 +1009,8 @@ class ReportClient:
                 self._write_config_string(dut, report_field)
             elif report_format == "config_term":
                 self._write_config_term(dut, report_field)
+            elif report_format == "nested_dict":
+                self._write_configs_nested_dict(dut)
             elif report_format == "test_result":
                 self._write_test_result(dut, para, report_field)
             else:
@@ -1155,6 +1157,44 @@ class ReportClient:
                     if index != 0:
                         _ = table.add_row().cells
                     config_output = f"\n{dut_name}# {command}\n\n{text}\n"
+                    self._write_cell(
+                        table,
+                        config_output,
+                        0,
+                        index,
+                        font="Courier New",
+                        font_size=10,
+                        color="0A0A0A",
+                        text_color=RGBColor(0, 255, 0),
+                    )
+                    index = index + 1
+
+            para = self._document.add_paragraph()
+            _ = para.add_run()
+
+    def _write_configs_nested_dict(self, dut):
+        """
+        Write external device outputs from console to a word doc,
+        with formatting maintained to match the console.
+
+        Args:
+            dut (dict): Data structure with DUT specific data
+        """
+        external_cmd_txts = dut.get("external_command_outputs")
+
+        # If external command outputs are present then update docx report with the same.
+        if external_cmd_txts:
+            table = self._document.add_table(rows=1, cols=1, style="Table Grid")
+
+            index = 0
+            # Iterating over each item(key-value pair) in external_cmd_txts
+            for dut_name, details in external_cmd_txts.items():
+                for command, output in details.items():
+                    if index != 0:
+                        _ = table.add_row().cells
+                    config_output = f"\n{dut_name}# {command}\n\n{output}\n"
+
+                    # Writing the formatted output into a cell in docx report
                     self._write_cell(
                         table,
                         config_output,

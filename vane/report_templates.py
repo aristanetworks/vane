@@ -52,6 +52,12 @@ REPORT_TEMPLATES = {
             "default": [],
             "output_name": "dut output",
         },
+        "external_command_outputs": {
+            "required": False,
+            "format": "nested_dict",
+            "default": [],
+            "output_name": "external device output",
+        },
         "expected_output": {
             "required": True,
             "format": "dict_string",
@@ -130,6 +136,12 @@ REPORT_TEMPLATES = {
             "format": "config_term",
             "default": [],
             "output_name": "dut output",
+        },
+        "external_command_outputs": {
+            "required": False,
+            "format": "nested_dict",
+            "default": [],
+            "output_name": "external device output",
         },
         "test_criteria": {
             "required": True,

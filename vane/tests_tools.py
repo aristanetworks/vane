@@ -1080,6 +1080,7 @@ class TestOps:
         self.show_cmd_txts = {self.dut_name: []}
         self.show_cmd_txt = ""
         self._show_cmd_txts = {self.dut_name: []}
+        self.external_cmd_txts = {}
 
         if len(self._show_cmds[self.dut_name]) > 0 and self.dut:
             self._verify_show_cmd(self._show_cmds[self.dut_name], self.dut)
@@ -1237,6 +1238,7 @@ class TestOps:
         self.test_parameters["test_steps"] = self.test_steps
         self.test_parameters["show_cmds"] = self._show_cmds
         self.test_parameters["skip"] = self.skip
+        self.test_parameters["external_command_outputs"] = self.external_cmd_txts
 
         if str(self.show_cmd_txt):
             self.test_parameters["show_cmd"] += ":\n\n" + self.show_cmd_txt
@@ -1269,11 +1271,21 @@ class TestOps:
         print("\n\nSHOW OUTPUT COLLECTED IN TEST CASE:")
         print("===================================")
 
-        for dut_name, _show_cmds in self._show_cmds.items():
-            index = 1
-            for command, text in zip(_show_cmds, self._show_cmd_txts[dut_name]):
-                print(f"{index}. {dut_name}# {command}\n\n{text}")
-                index += 1
+        for dut_index, (dut_name, _show_cmds) in enumerate(self._show_cmds.items(), start=1):
+            for cmd_index, (command, text) in enumerate(
+                zip(_show_cmds, self._show_cmd_txts[dut_name]), start=1
+            ):
+                print(f"{dut_index}.{cmd_index}. {dut_name}# {command}\n\n{text}")
+
+        if self.external_cmd_txts:
+            print("\n\nCOMMAND OUTPUT COLLECTED FROM EXTERNAL DEVICES IN TEST CASE:")
+            print("===========================================================")
+
+            for dut_index, (dut_name, output_details) in enumerate(
+                self.external_cmd_txts.items(), start=1
+            ):
+                for cmd_index, (cmd, output) in enumerate(output_details.items(), start=1):
+                    print(f"{dut_index}.{cmd_index}. {dut_name}# {cmd}\n\n{output}")
 
     def parse_test_steps(self, func):
         """Returns a list of all the test steps in the given function.
@@ -1745,3 +1757,38 @@ class TestOps:
 
             else:
                 logging.info("No Session to clear")
+
+    def add_cmds_evidence(self, cmds, cmds_output, device_name):
+        """
+        API to update non-netmiko and non-pyeapi command execution outputs in the
+        the docx and html report.
+        The user must provide output in the desired format to this utility function.
+        The function does not handle the formatting of the output.
+
+        Args:
+            cmds (list): List of commands that are executed on the device.
+            cmds_output (list): List of command outputs corresponding to cmds.
+            device_name (str): Name of the device on which the commands were executed.
+        """
+
+        # Checking whether the provided device is EOS device.
+        duts = config.test_duts
+        external_device = True
+        for device_details in duts["duts"]:
+            if device_details.get("name") == device_name:
+                external_device = False
+                break
+
+        if external_device:
+            # updating external commands and its outputs in the dictionary.
+            for cmd, cmd_output in zip(cmds, cmds_output):
+                self.external_cmd_txts.setdefault(device_name, {})
+                self.external_cmd_txts[device_name].update({cmd: cmd_output})
+
+        else:
+            # Initializing the evidence for a particular device.
+            self.set_evidence_default(device_name)
+
+            # Updating the commands and command output dictionaries.
+            self._show_cmds[device_name].extend(cmds)
+            self._show_cmd_txts[device_name].extend(cmds_output)

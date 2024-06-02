@@ -177,8 +177,9 @@ class SystemHardwareTemperatureTests:
                 pytest.skip(tops.output_msg)
 
             """
-            TS: Running the "show system environment temperature" command on DUT and verifying the
-            system status and temperature sensors details are present in the output.
+            TS: Running the "show system environment temperature" command on DUT and
+            Verifying the system status, power supply sensors and temperature sensors details
+            are present in the output.
             """
             output = dut["output"][tops.show_cmd]["json"]
             logging.info(

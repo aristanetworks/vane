@@ -1219,8 +1219,7 @@ class TestOps:
         return case_parameters[0]
 
     def generate_report(self, dut_name, output=""):
-        """
-        Utility to generate an HTML/DOCX report
+        """Utility to generate report
         Args:
           dut_name (str): name of the device
           output(str): Output of commands ran during the test execution.

@@ -1218,11 +1218,13 @@ class TestOps:
 
         return case_parameters[0]
 
-    def generate_report(self, dut_name, output):
-        """Utility to generate report
-
+    def generate_report(self, dut_name, output=""):
+        """
+        Utility to generate an HTML/DOCX report
         Args:
           dut_name (str): name of the device
+          output(str): Output of commands ran during the test execution.
+
         """
         logging.debug(f"Output on device {dut_name} after SSH connection is: {output}")
 

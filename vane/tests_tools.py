@@ -1223,7 +1223,7 @@ class TestOps:
 
         Args:
           dut_name (str): name of the device
-          output(str): Output of commands executed on a device.Default value is
+          output (str): Output of commands executed on a device.Default value is
                        an empty string.
         """
         logging.debug(f"Output on device {dut_name} after SSH connection is: {output}")

@@ -1561,27 +1561,36 @@ class TestOps:
                 run_cmds = cmds
                 if hidden_cmd:
                     run_cmds = render_cmds(dut, cmds)
+
+                # run the commands in text mode first, to catch the evidence in case of
+                # command error.
+                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
+
                 # if encoding is json run the commands, store the results
                 if encoding == "json":
                     json_results = conn.enable(run_cmds, strict=True)
-                # also run the commands in text mode
-                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
             else:
                 # run the config cmd
                 txt_results = conn.config(cmds)
         except BaseException as e:  # pylint: disable=broad-except
             logging.error(f"Following cmds {cmds} generated exception {str(e)}")
+
             # add the cmds to _show_cmds cmds list
             # add the exception result for all the cmds in cmds list
-            for cmd in cmds:
+            for index, cmd in enumerate(cmds, start=1):
                 self._show_cmds[dut_name].append(cmd)
                 if hidden_cmd:
                     self._show_cmd_txts[dut_name].append(f"{cmd} failed")
                     msg = f"{cmd} failed to run. See logs for more details"
                     raise EapiError(message=msg) from e
                 if not hidden_cmd:
-                    self._show_cmd_txts[dut_name].append(str(e))
-                    raise e
+                    output = e.output[index].get("output")
+                    self._show_cmd_txts[dut_name].append(output)
+                    error_msg = e.output[index].get("errors")
+                    # To handle the command error occurred in one of the command from command list
+                    if error_msg:
+                        msg = f"{cmd} failed to run. Error: {output}"
+                        raise EapiError(message=msg) from e
 
         # add the cmds to _show_cmds list
         for cmd in cmds:

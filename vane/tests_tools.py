@@ -1584,13 +1584,18 @@ class TestOps:
                     msg = f"{cmd} failed to run. See logs for more details"
                     raise EapiError(message=msg) from e
                 if not hidden_cmd:
-                    output = e.output[index].get("output")
-                    self._show_cmd_txts[dut_name].append(output)
-                    error_msg = e.output[index].get("errors")
-                    # To handle the command error occurred in one of the command from command list
-                    if error_msg:
-                        msg = f"{cmd} failed to run. Error: {output}"
-                        raise EapiError(message=msg) from e
+                    if e.output:  # pylint: disable=no-member
+                        output = e.output[index].get("output")  # pylint: disable=no-member
+                        self._show_cmd_txts[dut_name].append(output)
+                        error_msg = e.output[index].get("errors")  # pylint: disable=no-member
+                        # To handle the command error occurred in one of the command from
+                        # command list
+                        if error_msg:
+                            msg = f"{cmd} failed to run. Error: {output}"
+                            raise EapiError(message=msg) from e
+                    else:
+                        self._show_cmd_txts[dut_name].append(str(e))
+                        raise e
 
         # add the cmds to _show_cmds list
         for cmd in cmds:

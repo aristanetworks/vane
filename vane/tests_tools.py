@@ -1271,6 +1271,14 @@ class TestOps:
         print("\n\nSHOW OUTPUT COLLECTED IN TEST CASE:")
         print("===================================")
 
+        text_outputs = {}
+        for device, cmd_output in self._show_cmd_txts.items():
+            text_outputs[device] = []
+            for text_output in cmd_output:
+                output = "".join(char for char in text_output if valid_xml_char_ordinal(char))
+                text_outputs[device].append(output)
+        self._show_cmd_txts = text_outputs
+
         for dut_index, (dut_name, _show_cmds) in enumerate(self._show_cmds.items(), start=1):
             for cmd_index, (command, text) in enumerate(
                 zip(_show_cmds, self._show_cmd_txts[dut_name]), start=1
@@ -1792,3 +1800,20 @@ class TestOps:
             # Updating the commands and command output dictionaries.
             self._show_cmds[device_name].extend(cmds)
             self._show_cmd_txts[device_name].extend(cmds_output)
+
+
+def valid_xml_char_ordinal(char):
+    """
+    Utility to filter the string as per XML standard
+    Args:
+        char(ste): characters to filter out
+    Return:
+        str: Filtered string
+    """
+    codepoint = ord(char)
+    return (
+        0x20 <= codepoint <= 0xD7FF
+        or codepoint in (0x9, 0xA, 0xD)
+        or 0xE000 <= codepoint <= 0xFFFD
+        or 0x10000 <= codepoint <= 0x10FFFF
+    )

@@ -41,7 +41,6 @@ import pyeapi
 import netmiko
 import paramiko
 from netmiko.ssh_autodetect import SSHDetect
-from netmiko import Netmiko, file_transfer
 from vane.utils import make_iterable
 
 
@@ -218,7 +217,7 @@ class NetmikoConn(DeviceConn):
             guesser = SSHDetect(**remote_device)
             remote_device["device_type"] = guesser.autodetect()
         # pylint: disable=attribute-defined-outside-init
-        self._connection = Netmiko(**remote_device)
+        self._connection = netmiko.Netmiko(**remote_device)
 
     def get_cmds(self, cmds):
         """get_cmds: converts cmds to json cmds
@@ -242,12 +241,7 @@ class NetmikoConn(DeviceConn):
         cmds_op = []
 
         for i, cmd in enumerate(cmds):
-            try:
-                output = self._connection.send_command(cmd)
-            except netmiko.exceptions.NetmikoTimeoutException:
-                # try resetting connection and see if it works
-                self.set_up_conn(self.name)
-                output = self._connection.send_command(cmd)
+            output = self._connection.send_command(cmd)
 
             if output not in error_responses:
                 if encoding == "json":
@@ -268,12 +262,7 @@ class NetmikoConn(DeviceConn):
         """send_str_cmds: sends one command to device conn"""
 
         cmds_op = []
-        try:
-            output = self._connection.send_command(cmds)
-        except netmiko.exceptions.NetmikoTimeoutException:
-            # try resetting connection and see if it works
-            self.set_up_conn(self.name)
-            output = self._connection.send_command(cmds)
+        output = self._connection.send_command(cmds)
 
         if output not in error_responses:
             if encoding == "json":
@@ -342,7 +331,7 @@ class NetmikoConn(DeviceConn):
         """
         commands = make_iterable(commands)
 
-        if "configure" in commands:
+        if "configure terminal" in commands or "conf t" in commands:
             raise TypeError("config mode commands not supported")
 
         results = []
@@ -394,7 +383,7 @@ class NetmikoConn(DeviceConn):
             self._connection.remote_conn = paramiko.SFTPClient.from_transport(transport)
 
         self._connection.enable()
-        transfer = file_transfer(
+        transfer = netmiko.file_transfer(
             self._connection,
             source_file=src_file,
             dest_file=dest_file,

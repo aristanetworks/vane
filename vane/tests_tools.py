@@ -1578,6 +1578,7 @@ class TestOps:
             # add the cmds to _show_cmds cmds list
             # add the exception result for all the cmds in cmds list
             for index, cmd in enumerate(cmds, start=1):
+                # skipping 1st command as it always be an enable one.
                 self._show_cmds[dut_name].append(cmd)
                 if hidden_cmd:
                     self._show_cmd_txts[dut_name].append(f"{cmd} failed")
@@ -1588,12 +1589,12 @@ class TestOps:
                         output = e.output[index].get("output")  # pylint: disable=no-member
                         self._show_cmd_txts[dut_name].append(output)
                         error_msg = e.output[index].get("errors")  # pylint: disable=no-member
-                        # To handle the command error occurred in one of the command from
-                        # command list
+                        # handled the command error occurred in one of the command from command list
                         if error_msg:
                             msg = f"{cmd} failed to run. Error: {output}"
                             raise EapiError(message=msg) from e
                     else:
+                        # handled the scenario when output error message in exception not received
                         self._show_cmd_txts[dut_name].append(str(e))
                         raise e
 

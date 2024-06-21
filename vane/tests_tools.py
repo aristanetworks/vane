@@ -499,8 +499,7 @@ def dut_worker(dut, show_cmds, reachable_duts):
 
             logging.debug(f"Found cmd: {show_cmd} at index {cmd_index} of {show_cmds_txt}")
             logging.debug(
-                f"length of cmds: {len(show_cmds_txt)} vs length of "
-                f"output {len(show_cmd_txt_list)}"
+                f"length of cmds: {len(show_cmds_txt)} vs length of output {len(show_cmd_txt_list)}"
             )
 
             show_output_txt = show_cmd_txt_list[cmd_index]["output"]
@@ -1597,8 +1596,9 @@ class TestOps:
                         # Handled the command error occurred in one of the command
                         # from the command list.
                         if error_msg:
-                            msg = f"'{cmd}' command failed to run. " \
-                                  f"Error:{output.replace('%', '',1)}"
+                            msg = (
+                                f"'{cmd}' command failed to run. Error:{output.replace('%', '',1)}"
+                            )
                             raise EapiError(message=msg) from e
                     else:
                         # Handled the scenario when an output error message in
@@ -1768,7 +1768,7 @@ class TestOps:
 
         except Exception as exception:  # pylint: disable=W0718
             logging.error(
-                f"Exception: Setting up of Ixia errored out due"
+                "Exception: Setting up of Ixia errored out due"
                 f" to the following reason: {format(exception)}"
             )
 

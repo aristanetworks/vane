@@ -1423,7 +1423,6 @@ class TestOps:
         Returns:
             obj (dict): A dict object that includes the response for each command
         """
-
         return self._run_and_record_cmds(
             encoding="text",
             cmd_type="cfg",
@@ -1509,6 +1508,7 @@ class TestOps:
             obj (dict): A dict object that includes the response for each command
         """
 
+        # pylint: disable=no-member
         # if dut is not passed, use this object's dut
         if dut is None:
             dut = self.dut
@@ -1576,25 +1576,33 @@ class TestOps:
             logging.error(f"Following cmds {cmds} generated exception {str(e)}")
 
             # add the cmds to _show_cmds cmds list
-            # add the exception result for all the cmds in cmds list
+            # add the exception result for all the cmds in the commands list.
+            # Skipped 1st command as it always an enable command and its output is
+            # an empty dictionary.
             for index, cmd in enumerate(cmds, start=1):
-                # skipping 1st command as it always be an enable one.
                 self._show_cmds[dut_name].append(cmd)
                 if hidden_cmd:
                     self._show_cmd_txts[dut_name].append(f"{cmd} failed")
                     msg = f"{cmd} failed to run. See logs for more details"
                     raise EapiError(message=msg) from e
+                error_output = None
+                if hasattr(e, "output"):
+                    error_output = e.output
                 if not hidden_cmd:
-                    if e.output:  # pylint: disable=no-member
-                        output = e.output[index].get("output")  # pylint: disable=no-member
+                    # Collect output from the exception message.
+                    if error_output and cmd_type != "cfg":
+                        output = error_output[index].get("output")
                         self._show_cmd_txts[dut_name].append(output)
-                        error_msg = e.output[index].get("errors")  # pylint: disable=no-member
-                        # handled the command error occurred in one of the command from command list
+                        error_msg = error_output[index].get("errors")
+                        # Handled the command error occurred in one of the command
+                        # from the command list.
                         if error_msg:
-                            msg = f"{cmd} failed to run. Error: {output}"
+                            msg = f"'{cmd}' command failed to run. " \
+                                  f"Error:{output.replace('%', '',1)}"
                             raise EapiError(message=msg) from e
                     else:
-                        # handled the scenario when output error message in exception not received
+                        # Handled the scenario when an output error message in
+                        # exception not received
                         self._show_cmd_txts[dut_name].append(str(e))
                         raise e
 

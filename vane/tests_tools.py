@@ -499,7 +499,8 @@ def dut_worker(dut, show_cmds, reachable_duts):
 
             logging.debug(f"Found cmd: {show_cmd} at index {cmd_index} of {show_cmds_txt}")
             logging.debug(
-                f"length of cmds: {len(show_cmds_txt)} vs length of output {len(show_cmd_txt_list)}"
+                f"length of cmds: {len(show_cmds_txt)} vs length of "
+                f"output {len(show_cmd_txt_list)}"
             )
 
             show_output_txt = show_cmd_txt_list[cmd_index]["output"]
@@ -1422,6 +1423,7 @@ class TestOps:
         Returns:
             obj (dict): A dict object that includes the response for each command
         """
+
         return self._run_and_record_cmds(
             encoding="text",
             cmd_type="cfg",
@@ -1573,7 +1575,6 @@ class TestOps:
                 txt_results = conn.config(cmds)
         except BaseException as e:  # pylint: disable=broad-except
             logging.error(f"Following cmds {cmds} generated exception {str(e)}")
-
             # add the cmds to _show_cmds cmds list
             # add the exception result for all the cmds in the commands list.
             # Skipped 1st command as it always an enable command and its output is
@@ -1597,7 +1598,8 @@ class TestOps:
                         # from the command list.
                         if error_msg:
                             msg = (
-                                f"'{cmd}' command failed to run. Error:{output.replace('%', '',1)}"
+                                f"Failed to execute the command '{cmd}'."
+                                f" Error: {output.replace('%', '',1)}"
                             )
                             raise EapiError(message=msg) from e
                     else:
@@ -1768,7 +1770,7 @@ class TestOps:
 
         except Exception as exception:  # pylint: disable=W0718
             logging.error(
-                "Exception: Setting up of Ixia errored out due"
+                f"Exception: Setting up of Ixia errored out due"
                 f" to the following reason: {format(exception)}"
             )
 

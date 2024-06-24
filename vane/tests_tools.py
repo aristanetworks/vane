@@ -1085,25 +1085,13 @@ class TestOps:
         if len(self._show_cmds[self.dut_name]) > 0 and self.dut:
             self._verify_show_cmd(self._show_cmds[self.dut_name], self.dut)
             if self.show_cmd:
-                text_output = self.dut["output"][self.show_cmd]["text"]
-                # Added check to validate the xml characters from the command output.
-                formatted_output = "".join(
-                    char for char in text_output if valid_xml_char_ordinal(char)
-                )
+                formatted_output = self.get_cmd_output_from_device_details(self.show_cmd)
                 self.show_cmd_txt = formatted_output
             for show_cmd in self.show_cmds[self.dut_name]:
-                text_output = self.dut["output"][show_cmd]["text"]
-                # Added check to validate the xml characters from the command output.
-                formatted_output = "".join(
-                    char for char in text_output if valid_xml_char_ordinal(char)
-                )
+                formatted_output = self.get_cmd_output_from_device_details(show_cmd)
                 self.show_cmd_txts[self.dut_name].append(formatted_output)
             for show_cmd in self._show_cmds[self.dut_name]:
-                text_output = self.dut["output"][show_cmd]["text"]
-                # Added check to validate the xml characters from the command output.
-                formatted_output = "".join(
-                    char for char in text_output if valid_xml_char_ordinal(char)
-                )
+                formatted_output = self.get_cmd_output_from_device_details(show_cmd)
                 self._show_cmd_txts[self.dut_name].append(formatted_output)
 
         self.comment = ""
@@ -1808,19 +1796,34 @@ class TestOps:
             self._show_cmds[device_name].extend(cmds)
             self._show_cmd_txts[device_name].extend(cmds_output)
 
+    def valid_xml_char_ordinal(self, char):
+        """
+        Utility to filter the string as per XML standard
+        Args:
+            char(ste): characters to filter out
+        Return:
+            str: Filtered string
+        """
 
-def valid_xml_char_ordinal(char):
-    """
-    Utility to filter the string as per XML standard
-    Args:
-        char(ste): characters to filter out
-    Return:
-        str: Filtered string
-    """
-    codepoint = ord(char)
-    return (
-        0x20 <= codepoint <= 0xD7FF
-        or codepoint in (0x9, 0xA, 0xD)
-        or 0xE000 <= codepoint <= 0xFFFD
-        or 0x10000 <= codepoint <= 0x10FFFF
-    )
+        codepoint = ord(char)
+        return (
+            0x20 <= codepoint <= 0xD7FF
+            or codepoint in (0x9, 0xA, 0xD)
+            or 0xE000 <= codepoint <= 0xFFFD
+            or 0x10000 <= codepoint <= 0x10FFFF
+        )
+
+    def get_cmd_output_from_device_details(self, command):
+        """
+        Utility to get the command output of the command mentioned in arguments.
+        Args:
+            command(str): Command to collect the output from device output details.
+        Return:
+            str: Filtered output string
+        """
+
+        output = self.dut["output"][command]["text"]
+        # Added check to validate the xml characters from the command output.
+        formatted_output = "".join(char for char in output if self.valid_xml_char_ordinal(char))
+
+        return formatted_output

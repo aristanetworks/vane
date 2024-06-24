@@ -1085,11 +1085,26 @@ class TestOps:
         if len(self._show_cmds[self.dut_name]) > 0 and self.dut:
             self._verify_show_cmd(self._show_cmds[self.dut_name], self.dut)
             if self.show_cmd:
-                self.show_cmd_txt = self.dut["output"][self.show_cmd]["text"]
+                text_output = self.dut["output"][self.show_cmd]["text"]
+                # Added check to validate the xml characters from the command output.
+                formatted_output = "".join(
+                    char for char in text_output if valid_xml_char_ordinal(char)
+                )
+                self.show_cmd_txt = formatted_output
             for show_cmd in self.show_cmds[self.dut_name]:
-                self.show_cmd_txts[self.dut_name].append(self.dut["output"][show_cmd]["text"])
+                text_output = self.dut["output"][show_cmd]["text"]
+                # Added check to validate the xml characters from the command output.
+                formatted_output = "".join(
+                    char for char in text_output if valid_xml_char_ordinal(char)
+                )
+                self.show_cmd_txts[self.dut_name].append(formatted_output)
             for show_cmd in self._show_cmds[self.dut_name]:
-                self._show_cmd_txts[self.dut_name].append(self.dut["output"][show_cmd]["text"])
+                text_output = self.dut["output"][show_cmd]["text"]
+                # Added check to validate the xml characters from the command output.
+                formatted_output = "".join(
+                    char for char in text_output if valid_xml_char_ordinal(char)
+                )
+                self._show_cmd_txts[self.dut_name].append(formatted_output)
 
         self.comment = ""
         self.output_msg = ""
@@ -1270,14 +1285,6 @@ class TestOps:
 
         print("\n\nSHOW OUTPUT COLLECTED IN TEST CASE:")
         print("===================================")
-
-        text_outputs = {}
-        for device, cmd_output in self._show_cmd_txts.items():
-            text_outputs[device] = []
-            for text_output in cmd_output:
-                output = "".join(char for char in text_output if valid_xml_char_ordinal(char))
-                text_outputs[device].append(output)
-        self._show_cmd_txts = text_outputs
 
         for dut_index, (dut_name, _show_cmds) in enumerate(self._show_cmds.items(), start=1):
             for cmd_index, (command, text) in enumerate(

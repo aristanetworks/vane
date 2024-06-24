@@ -1815,7 +1815,7 @@ class TestOps:
 
     def get_cmd_output_from_device_details(self, command):
         """
-        Utility to get the command output of the command mentioned in arguments.
+        Utility to get the output of the command mentioned in arguments.
         Args:
             command(str): Command to collect the output from device output details.
         Return:

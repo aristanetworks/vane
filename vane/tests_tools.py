@@ -48,7 +48,7 @@ import yaml
 from jinja2 import Template
 from icmplib import ping
 from icmplib.exceptions import SocketPermissionError
-from pyeapi.eapilib import EapiError, ConnectionError  # pylint: disable=W0622
+from pyeapi.eapilib import EapiError, ConnectionError, CommandError  # pylint: disable=W0622
 from netmiko.exceptions import NetmikoAuthenticationException
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
@@ -1601,6 +1601,8 @@ class TestOps:
                                 f"Failed to execute the command '{cmd}'."
                                 f" Error: {output.replace('%', '',1)}"
                             )
+                            if hasattr(e, "command_error"):
+                                raise CommandError(code=e.error_code, message=msg) from e
                             raise EapiError(message=msg) from e
                     else:
                         # Handled the scenario when an output error message in

@@ -1642,16 +1642,16 @@ def test_test_ops_run_show_cmds_json(mocker):
         [
             {
                 "command": "show interfaces status",
-                "result": {"output": {"interfaceStatuses": "Management1"}},
-                "encoding": "json",
-            }
+                "result": {"output": "TEXT_INTERFACE_STATUS_result"},
+                "encoding": "text",
+            },
         ],
         [
             {
                 "command": "show interfaces status",
-                "result": {"output": "TEXT_INTERFACE_STATUS_result"},
-                "encoding": "text",
-            },
+                "result": {"output": {"interfaceStatuses": "Management1"}},
+                "encoding": "json",
+            }
         ],
     ]
 

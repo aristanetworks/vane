@@ -48,7 +48,7 @@ import yaml
 from jinja2 import Template
 from icmplib import ping
 from icmplib.exceptions import SocketPermissionError
-from pyeapi.eapilib import EapiError, ConnectionError  # pylint: disable=W0622
+from pyeapi.eapilib import EapiError, ConnectionError, CommandError  # pylint: disable=W0622
 from netmiko.exceptions import NetmikoAuthenticationException
 from ixnetwork_restpy.assistants.statistics.statviewassistant import StatViewAssistant
 from vane import config, device_interface, ixia_interface
@@ -1511,6 +1511,7 @@ class TestOps:
             obj (dict): A dict object that includes the response for each command
         """
 
+        # pylint: disable=no-member
         # if dut is not passed, use this object's dut
         if dut is None:
             dut = self.dut
@@ -1563,27 +1564,53 @@ class TestOps:
                 run_cmds = cmds
                 if hidden_cmd:
                     run_cmds = render_cmds(dut, cmds)
+
+                # run the commands in text mode first, to catch the evidence in case of
+                # command error.
+                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
+
                 # if encoding is json run the commands, store the results
                 if encoding == "json":
                     json_results = conn.enable(run_cmds, strict=True)
-                # also run the commands in text mode
-                txt_results = conn.enable(run_cmds, strict=True, encoding="text")
             else:
                 # run the config cmd
                 txt_results = conn.config(cmds)
         except BaseException as e:  # pylint: disable=broad-except
             logging.error(f"Following cmds {cmds} generated exception {str(e)}")
             # add the cmds to _show_cmds cmds list
-            # add the exception result for all the cmds in cmds list
-            for cmd in cmds:
+            # add the exception result for all the cmds in the commands list.
+            # Skipped 1st command as it always an enable command and its output is
+            # an empty dictionary.
+            for index, cmd in enumerate(cmds, start=1):
                 self._show_cmds[dut_name].append(cmd)
                 if hidden_cmd:
                     self._show_cmd_txts[dut_name].append(f"{cmd} failed")
                     msg = f"{cmd} failed to run. See logs for more details"
                     raise EapiError(message=msg) from e
+                error_output = None
+                if hasattr(e, "output"):
+                    error_output = e.output
                 if not hidden_cmd:
-                    self._show_cmd_txts[dut_name].append(str(e))
-                    raise e
+                    # Collect output from the exception message.
+                    if error_output and cmd_type != "cfg":
+                        output = error_output[index].get("output")
+                        self._show_cmd_txts[dut_name].append(output)
+                        error_msg = error_output[index].get("errors")
+                        # Handled the command error occurred in one of the command
+                        # from the command list.
+                        if error_msg:
+                            msg = (
+                                f"Failed to execute the command '{cmd}'."
+                                f" Error: {output.replace('%', '',1)}"
+                            )
+                            if hasattr(e, "command_error"):
+                                raise CommandError(code=e.error_code, message=msg) from e
+                            raise EapiError(message=msg) from e
+                    else:
+                        # Handled the scenario when an output error message in
+                        # exception not received
+                        self._show_cmd_txts[dut_name].append(str(e))
+                        raise e
 
         # add the cmds to _show_cmds list
         for cmd in cmds:

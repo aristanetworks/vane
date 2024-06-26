@@ -1,2 +1,0 @@
-Test Suite,Test Case ID,Test Case,Description,Test Steps
-api_tests,TN2.1,test_if_management_https_api_server_is_running_on_,Verify management api https server is running,

@@ -1,3 +1,0 @@
-BL1: |
-  interface ethernet1
-  no shutdown

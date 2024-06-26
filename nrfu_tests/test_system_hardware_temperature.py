@@ -169,7 +169,7 @@ class SystemHardwareTemperatureTests:
 
             # Skipping test case if the device is vEOS.
             model = self.version_output.get("modelName")
-            if "vEOS" in model or "7010" in model:
+            if "vEOS" in model:
                 tops.output_msg = f"{tops.dut_name} is {model} device, hence test skipped."
                 tests_tools.post_process_skip(
                     tops, self.test_system_temperature_sensors, self.output
@@ -188,9 +188,6 @@ class SystemHardwareTemperatureTests:
             self.output += f"\n\nOutput of {tops.show_cmd} command is: \n{output}"
             power_supplies_sensors = output.get("powerSupplySlots")
             temperature_sensors = output.get("tempSensors")
-            assert (
-                power_supplies_sensors
-            ), "Power supplies sensor details are not found on the device."
             assert temperature_sensors, "Temperature sensors detail are not found on the device."
 
             tops.expected_output.update({"system_status": "temperatureOk"})
@@ -202,32 +199,38 @@ class SystemHardwareTemperatureTests:
 
             # Checking for hardware status, current and threshold temperature details
             # for power supply sensors
-            for sensor in power_supplies_sensors:
-                tops.expected_output["power_supplies_sensors"][
-                    f"power_supplies_slot_{sensor['relPos']}"
-                ] = {}
-                tops.actual_output["power_supplies_sensors"][
-                    f"power_supplies_slot_{sensor['relPos']}"
-                ] = {}
-                current_threshold_temp_detail["power_supplies_sensors"][
-                    f"power_supplies_slot_{sensor['relPos']}"
-                ] = {}
+            if "7010" not in model and "710P" not in model:
+                # Verifying power supply sensors are present in the output.
+                assert (
+                    power_supplies_sensors
+                ), "Power supplies sensor details are not found on the device."
 
-                for sensor_detail in sensor["tempSensors"]:
-                    name = sensor_detail["name"]
+                for sensor in power_supplies_sensors:
                     tops.expected_output["power_supplies_sensors"][
                         f"power_supplies_slot_{sensor['relPos']}"
-                    ].update({name: {"hardware_status": "ok", "overheat_threshold_met": False}})
-                    actual_sensor_detail, temperature_details = self.get_sensor_detail(
-                        sensor_detail, temp_sensor=True
-                    )
-
+                    ] = {}
                     tops.actual_output["power_supplies_sensors"][
                         f"power_supplies_slot_{sensor['relPos']}"
-                    ].update({name: actual_sensor_detail})
+                    ] = {}
                     current_threshold_temp_detail["power_supplies_sensors"][
                         f"power_supplies_slot_{sensor['relPos']}"
-                    ][name] = temperature_details
+                    ] = {}
+
+                    for sensor_detail in sensor["tempSensors"]:
+                        name = sensor_detail["name"]
+                        tops.expected_output["power_supplies_sensors"][
+                            f"power_supplies_slot_{sensor['relPos']}"
+                        ].update({name: {"hardware_status": "ok", "overheat_threshold_met": False}})
+                        actual_sensor_detail, temperature_details = self.get_sensor_detail(
+                            sensor_detail, temp_sensor=True
+                        )
+
+                        tops.actual_output["power_supplies_sensors"][
+                            f"power_supplies_slot_{sensor['relPos']}"
+                        ].update({name: actual_sensor_detail})
+                        current_threshold_temp_detail["power_supplies_sensors"][
+                            f"power_supplies_slot_{sensor['relPos']}"
+                        ][name] = temperature_details
 
             # Checking for current and threshold temperature details
             # for temperature sensors
